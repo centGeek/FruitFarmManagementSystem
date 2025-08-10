@@ -1,0 +1,6 @@
+package fruit.farm.management.exception;
+
+public class NotFoundException extends RuntimeException {
+    public NotFoundException(String formatted) {
+    }
+}

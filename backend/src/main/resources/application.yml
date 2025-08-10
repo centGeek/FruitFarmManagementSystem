@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: fruit-farm-management
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://my-auth-server.com
