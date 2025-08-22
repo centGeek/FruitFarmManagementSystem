@@ -1,8 +1,7 @@
-package fruit.farm.management.config;
+package fruit.farm.management.security;
 
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.UserEntity;
-import fruit.farm.management.exception.NotFoundException;
 import fruit.farm.management.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-@RequiredArgsConstructor
 @Service
-public class OrchardDetailsService implements UserDetailsService {
+@RequiredArgsConstructor
+public class UserSecurityConfig implements UserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -26,18 +24,18 @@ public class OrchardDetailsService implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<UserEntity> user = userRepository.findByEmail(email);
+
         if (user.isEmpty()) {
-            throw new NotFoundException("User with email [%s] and given password doesn't exist".formatted(email));
+            throw new UsernameNotFoundException("User with email " + email + " not found");
         }
-        List<SimpleGrantedAuthority> authorities = getUserAuthority(Set.of(user.get().getRole()));
-        return buildUserForAuthentication(user.get(), authorities);
+
+        SimpleGrantedAuthority authorities = getUserAuthority(user.get().getRole());
+
+        return buildUserForAuthentication(user.get(), List.of(authorities));
     }
 
-    private List<SimpleGrantedAuthority> getUserAuthority(Set<RoleEntity> userRoles) {
-        return userRoles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
-                .distinct()
-                .toList();
+    private SimpleGrantedAuthority getUserAuthority(RoleEntity roleEntity) {
+        return new SimpleGrantedAuthority(roleEntity.getRoleName());
     }
 
     private UserDetails buildUserForAuthentication(

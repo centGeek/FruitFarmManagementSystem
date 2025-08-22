@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
 
     @Query("""
-            select usr from user_entity usr where usr.email =:email
+            select usr from user_profile usr where usr.email =:email
              """)
     Optional<UserEntity> findByEmail(@Param("email") String email);
 

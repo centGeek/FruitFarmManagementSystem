@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "user_entity")
+@Entity(name = "user_profile")
 @Getter
 @Setter
 public class UserEntity {

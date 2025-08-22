@@ -1,5 +1,5 @@
-create table role
+CREATE TABLE role
 (
-    role_id   serial primary key,
-    role_name varchar(255) not null
+    role_id serial PRIMARY KEY,
+    role_name varchar(64) NOT NULL UNIQUE
 );

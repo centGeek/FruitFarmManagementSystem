@@ -26,8 +26,6 @@ public class UserRepository {
         return users;
     }
 
-
-
     public Optional<UserEntity> findByEmail(String email) {
         return userJpaRepository.findByEmail(email);
     }
