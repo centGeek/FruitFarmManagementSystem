@@ -6,6 +6,7 @@ create table user_profile
     nickname     varchar(64)  not null,
     phone_number varchar(64)  not null,
     email        varchar(255) not null,
+    creation_date   date      not null,
     password     varchar(255) not null,
     role_id      int          not null,
     is_active    boolean      not null,

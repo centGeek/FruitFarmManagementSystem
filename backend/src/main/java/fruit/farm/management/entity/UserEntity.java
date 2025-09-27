@@ -3,6 +3,8 @@ package fruit.farm.management.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "user_profile")
@@ -31,6 +33,9 @@ public class UserEntity {
     @Column(name = "email", unique = true)
     private String email;
 
+    @Column(name = "creation_date")
+    private LocalDate creationDate;
+
     @Column(name = "password")
     private String password;
 
@@ -45,13 +50,14 @@ public class UserEntity {
     @JoinColumn(name = "gardener_id")
     private UserEntity gardener;
 
-    public UserEntity(String name, String surname, String nickname, String phoneNumber, String email, String password,
-                      RoleEntity role, boolean isActive, UserEntity gardener) {
+    public UserEntity(String name, String surname, String nickname, String phoneNumber, String email, LocalDate creationDate,
+                      String password, RoleEntity role, boolean isActive, UserEntity gardener) {
         this.name = name;
         this.surname = surname;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.email = email;
+        this.creationDate = creationDate;
         this.password = password;
         this.role = role;
         this.isActive = isActive;

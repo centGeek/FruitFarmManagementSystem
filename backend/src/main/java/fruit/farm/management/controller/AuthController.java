@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -95,6 +96,7 @@ public class AuthController {
                     request.getNickname() != null ? request.getNickname().trim() : null,
                     request.getPhoneNumber() != null ? request.getPhoneNumber().trim() : null,
                     request.getEmail().toLowerCase().trim(),
+                    LocalDate.now(),
                     passwordEncoder.encode(request.getPassword()),
                     defaultRole,
                     true,

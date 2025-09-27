@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -25,7 +27,8 @@ public class UserDTO {
     @Email(message = "Email musi być poprawny")
     private String email;
 
-    @NotBlank(message = "Email jest wymagany")
+    private LocalDate creationDate;
+
     @Email(message = "Email musi być poprawny")
     private String nickname;
 

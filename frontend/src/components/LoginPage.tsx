@@ -176,7 +176,7 @@ export default function LoginPage() {
         setError(data.message || 'Błąd logowania Google');
       }
     } catch (err) {
-      setError('Nie można połączyć się z serwerem');
+      setError('Podano błędne dane logowania.');
     } finally {
       setIsLoading(false);
     }

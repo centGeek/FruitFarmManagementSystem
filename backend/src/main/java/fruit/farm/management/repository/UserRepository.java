@@ -26,6 +26,10 @@ public class UserRepository {
         return users;
     }
 
+    public void delete(UserEntity userEntity){
+        userJpaRepository.delete(userEntity);
+    }
+
     public List<UserEntity> getAllUsersByRoleName(String roleName) {
         return userJpaRepository.getAllUsersByRoleName(roleName);
     }

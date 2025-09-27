@@ -14,8 +14,6 @@ const getAuthHeaders = () => {
     };
 };
 
-// --- Komponenty Podstawowe ---
-
 const Alert = ({ type, message, onClose }) => {
     if (!message) return null;
     const colors = useMemo(() => ({
@@ -125,6 +123,7 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
         nickname: employee?.nickname || '',
         phoneNumber: employee?.phoneNumber || '',
         email: employee?.email || '',
+        date: employee?.creationDate || '', 
         password: '',
         confirmPassword: '',
         active: employee?.active ?? true
@@ -378,6 +377,7 @@ const EmployeeCard = ({ employee, onEdit, onArchive, onRestore }) => {
                 {[
                     { icon: '✉️', label: 'Email', value: employee.email, truncate: true },
                     { icon: '📞', label: 'Telefon', value: employee.phoneNumber },
+                    { icon: '📅', label: 'Data utworzenia', value: employee.creationDate ? new Date(employee.creationDate).toLocaleDateString('pl-PL') : null },
                     { icon: '🆔', label: 'ID', value: `#${employee.id}` }
                 ].map((item, index) => item.value && (
                     <div key={index} className="flex items-center space-x-3 text-gray-600">
