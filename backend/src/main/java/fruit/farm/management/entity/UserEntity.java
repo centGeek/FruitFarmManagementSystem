@@ -1,16 +1,14 @@
 package fruit.farm.management.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "user_profile")
 @Getter
 @Setter
+@ToString
 public class UserEntity {
 
     @Id
@@ -42,7 +40,13 @@ public class UserEntity {
 
     @Column(name = "is_active")
     private boolean isActive;
-    public UserEntity(String name, String surname, String nickname, String phoneNumber, String email, String password, RoleEntity role, boolean isActive) {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gardener_id")
+    private UserEntity gardener;
+
+    public UserEntity(String name, String surname, String nickname, String phoneNumber, String email, String password,
+                      RoleEntity role, boolean isActive, UserEntity gardener) {
         this.name = name;
         this.surname = surname;
         this.nickname = nickname;
@@ -51,5 +55,6 @@ public class UserEntity {
         this.password = password;
         this.role = role;
         this.isActive = isActive;
+        this.gardener = gardener;
     }
 }

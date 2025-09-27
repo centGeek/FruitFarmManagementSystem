@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode
-@Entity
-@Table(name = "role")
+@Entity(name = "role")
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +18,8 @@ public class RoleEntity {
     @Column(name = "role_name")
     private String roleName;
 
-    public RoleEntity(String roleName) {
+    public RoleEntity(long id, String roleName) {
+        this.id = id;
         this.roleName = roleName;
     }
 }

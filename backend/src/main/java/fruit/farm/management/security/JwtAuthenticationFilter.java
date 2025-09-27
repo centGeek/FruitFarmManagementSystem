@@ -1,63 +1,79 @@
+// ===== 1. JWT AUTHORIZATION FILTER =====
+
 package fruit.farm.management.security;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter implements WebFilter {
+@Slf4j
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String token = getJwtFromRequest(exchange.getRequest());
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-        if (token == null) {
-            return chain.filter(exchange);
-        }
+        String token = extractTokenFromRequest(request);
 
-        try {
-            if (jwtService.validateToken(token)) {
-                String email = jwtService.getEmailFromToken(token);
-                List<SimpleGrantedAuthority> authorities = jwtService.getRolesFromToken(token).stream()
-                        .map(role -> role.startsWith("ROLE_") ? new SimpleGrantedAuthority(role)
-                                : new SimpleGrantedAuthority("ROLE_" + role))
-                        .collect(Collectors.toList());
+        if (token != null) {
+            try {
+                if (jwtService.validateToken(token)) {
+                    String email = jwtService.getEmailFromToken(token);
+                    List<String> roles = jwtService.getRolesFromToken(token);
 
-                var auth = new UsernamePasswordAuthenticationToken(email, null, authorities);
-                return chain.filter(exchange)
-                        .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
+                    log.debug("Valid token for user: {}, roles: {}", email, roles);
+
+                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
+
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(email, null, authorities);
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    log.debug("Authentication set successfully for user: {}", email);
+                } else {
+                    log.warn("Invalid JWT token");
+                }
+            } catch (Exception e) {
+                log.error("Error processing JWT token: {}", e.getMessage());
+                SecurityContextHolder.clearContext();
             }
-        } catch (Exception e) {
-            log.warn("Invalid JWT token: {}", e.getMessage());
-            return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token"));
         }
 
-        return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token"));
+        filterChain.doFilter(request, response);
     }
 
-    private String getJwtFromRequest(ServerHttpRequest request) {
-        String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // Nie filtruj endpointów autoryzacyjnych
+        return path.startsWith("/api/auth/");
     }
 }

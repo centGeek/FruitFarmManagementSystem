@@ -1,2 +1,2 @@
 INSERT INTO role (role_name)
-VALUES ('Admin'), ('Gardener');
+VALUES ('Admin'), ('Gardener'), ('Employee');

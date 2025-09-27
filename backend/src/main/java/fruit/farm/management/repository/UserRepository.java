@@ -26,6 +26,31 @@ public class UserRepository {
         return users;
     }
 
+    public List<UserEntity> getAllUsersByRoleName(String roleName) {
+        return userJpaRepository.getAllUsersByRoleName(roleName);
+    }
+
+    public List<UserEntity> getAllEmployees(long gardenerId) {
+        System.out.println("Gardener ID" + gardenerId);
+        return userJpaRepository.getAllEmployees(gardenerId);
+    }
+
+    public List<UserEntity> getAllArchivedEmployees(long gardenerId) {
+        return userJpaRepository.getAllArchivedEmployees(gardenerId);
+    }
+
+    public List<UserEntity> getAllActiveEmployees(long gardenerId) {
+        return userJpaRepository.getAllActiveEmployees(gardenerId);
+    }
+
+    public List<UserEntity> getAllUsers() {
+        return userJpaRepository.getAll();
+    }
+
+    public UserEntity save(UserEntity userEntity){
+        return userJpaRepository.save(userEntity);
+    }
+
     public Optional<UserEntity> findByEmail(String email) {
         return userJpaRepository.findByEmail(email);
     }

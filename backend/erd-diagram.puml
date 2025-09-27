@@ -1,0 +1,54 @@
+@startuml
+
+class UserEntity {
+    -Long id
+    -String name
+    -String surname
+    -String nickname
+    -String phoneNumber
+    -String email
+    -String password
+    -boolean active
+}
+
+class RoleEntity {
+    -Long id
+    -String roleName
+    -String description
+}
+
+class ProductEntity {
+    -Long id
+    -String name
+    -ProductType type
+    -LocalDate purchaseDate
+    -Double price
+    -int userId
+}
+
+class WeatherAlert {
+    -Long id
+    -String title
+    -String description
+    -LocalDateTime alertDate
+    -boolean read
+    -String location
+}
+
+enum ProductType {
+    TRACTOR
+    SPRAYING
+    FUEL
+    FRUIT_TREES
+    ELECTRICITY
+    WATER
+    OTHER
+}
+
+
+UserEntity --> RoleEntity : "many-to-one"
+UserEntity "1" --> "*" ProductEntity : "owns"
+UserEntity "1" --> "*" WeatherAlert : "receives"
+ProductEntity --> ProductType : "enum"
+
+@enduml

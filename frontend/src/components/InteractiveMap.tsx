@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Download, Upload, Trash2, Square, Edit3, X } from 'lucide-react';
+import { Download, Upload, Trash2, Square, Edit3, X, RotateCw, Move } from 'lucide-react';
 
 // Fix dla ikon Leaflet w Vite
 delete L.Icon.Default.prototype._getIconUrl;
@@ -12,12 +12,64 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Funkcja do tworzenia obróconych prostokątów
+const createRotatedRectangle = (center, width, height, rotation = 0) => {
+  const toRad = Math.PI / 180;
+  const cos = Math.cos(rotation * toRad);
+  const sin = Math.sin(rotation * toRad);
+  
+  // Wierzchołki prostokąta względem centrum (w metrach)
+  const corners = [
+    [-width/2, -height/2],
+    [width/2, -height/2],
+    [width/2, height/2],
+    [-width/2, height/2]
+  ];
+  
+  // Obrót i konwersja na współrzędne geograficzne
+  const rotatedCorners = corners.map(([x, y]) => {
+    const rotX = x * cos - y * sin;
+    const rotY = x * sin + y * cos;
+    
+    // Konwersja z metrów na stopnie (przybliżenie)
+    const deltaLat = rotY / 111320; // 1 stopień = ~111320m
+    const deltaLng = rotX / (111320 * Math.cos(center[0] * toRad));
+    
+    return [center[0] + deltaLat, center[1] + deltaLng];
+  });
+  
+  return rotatedCorners;
+};
+
+// Funkcja do obliczania obszaru wielokąta (formuła Shoelace)
+const calculatePolygonArea = (corners) => {
+  let area = 0;
+  const n = corners.length;
+  
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    area += corners[i][0] * corners[j][1];
+    area -= corners[j][0] * corners[i][1];
+  }
+  
+  area = Math.abs(area) / 2;
+  
+  // Konwersja ze stopni^2 na hektary
+  const areaKm2 = area * 111.32 * 111.32;
+  const areaHa = areaKm2 * 100;
+  
+  return areaHa;
+};
+
 const InteractiveMap = ({ rectangles, onRectanglesChange, onSectorsChange }) => {
   const mapRef = useRef(null);
   const drawnItemsRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [startPoint, setStartPoint] = useState(null);
-  const [tempRect, setTempRect] = useState(null);
+  const [drawingMode, setDrawingMode] = useState('none'); // 'rectangle', 'rotated', 'none'
+  const [drawingStep, setDrawingStep] = useState(0); // 0: start, 1: second point, 2: rotation
+  const [drawingPoints, setDrawingPoints] = useState([]);
+  const [tempPolygon, setTempPolygon] = useState(null);
+  const [selectedRectangle, setSelectedRectangle] = useState(null);
+  const [dragMode, setDragMode] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -37,90 +89,200 @@ const InteractiveMap = ({ rectangles, onRectanglesChange, onSectorsChange }) => 
 
     // Dodaj zapisane prostokąty
     rectangles.forEach((rect, index) => {
-      const bounds = L.latLngBounds(rect.bounds[0], rect.bounds[1]);
-      const rectangle = L.rectangle(bounds, {
-        color: '#3388ff',
-        weight: 2,
-        fillColor: '#3388ff',
-        fillOpacity: 0.2
-      });
+      let polygon;
       
-      rectangle.bindPopup(`
+      if (rect.corners) {
+        // Obrócony prostokąt
+        polygon = L.polygon(rect.corners, {
+          color: selectedRectangle === index ? '#ff0000' : '#3388ff',
+          weight: selectedRectangle === index ? 3 : 2,
+          fillColor: '#3388ff',
+          fillOpacity: 0.2
+        });
+      } else {
+        // Zwykły prostokąt (kompatybilność wsteczna)
+        const bounds = L.latLngBounds(rect.bounds[0], rect.bounds[1]);
+        polygon = L.rectangle(bounds, {
+          color: selectedRectangle === index ? '#ff0000' : '#3388ff',
+          weight: selectedRectangle === index ? 3 : 2,
+          fillColor: '#3388ff',
+          fillOpacity: 0.2
+        });
+      }
+      
+      polygon.bindPopup(`
         <div style="font-weight: bold; margin-bottom: 5px;">${rect.name}</div>
         <div>Uprawa: ${rect.cropType || 'Nie określono'}</div>
         <div>Powierzchnia: ${rect.area} ha</div>
+        ${rect.rotation ? `<div>Obrót: ${rect.rotation}°</div>` : ''}
+        <div style="margin-top: 8px;">
+          <button onclick="window.editRectangle(${index})" style="background: #3388ff; color: white; border: none; padding: 4px 8px; border-radius: 3px; margin-right: 4px; cursor: pointer;">Edytuj</button>
+          <button onclick="window.deleteRectangle(${index})" style="background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Usuń</button>
+        </div>
       `);
 
-      drawnItems.addLayer(rectangle);
+      polygon.on('click', () => {
+        setSelectedRectangle(selectedRectangle === index ? null : index);
+      });
+
+      drawnItems.addLayer(polygon);
+
+      // Dodaj punkt centralny dla obróconych prostokątów
+      if (rect.corners && rect.center) {
+        const centerMarker = L.circleMarker(rect.center, {
+          radius: 4,
+          color: '#ff7800',
+          weight: 2,
+          fillColor: '#ff7800',
+          fillOpacity: 0.8
+        });
+        drawnItems.addLayer(centerMarker);
+      }
     });
 
-    // Dodaj tymczasowy prostokąt podczas rysowania
-    if (tempRect) {
-      const rectangle = L.rectangle(tempRect, {
+    // Dodaj tymczasowy wielokąt podczas rysowania
+    if (tempPolygon) {
+      const polygon = L.polygon(tempPolygon, {
         color: '#ff7800',
         weight: 2,
         fillColor: '#ff7800',
         fillOpacity: 0.3,
         dashArray: '5, 5'
       });
-      drawnItems.addLayer(rectangle);
+      drawnItems.addLayer(polygon);
     }
 
-  }, [rectangles, tempRect]);
+    // Funkcje globalne dla popup'ów
+    window.editRectangle = (index) => {
+      setSelectedRectangle(index);
+    };
+
+    window.deleteRectangle = (index) => {
+      if (window.confirm('Czy na pewno chcesz usunąć ten sektor?')) {
+        const updatedRectangles = rectangles.filter((_, i) => i !== index);
+        onRectanglesChange(updatedRectangles);
+        onSectorsChange(updatedRectangles);
+        setSelectedRectangle(null);
+      }
+    };
+
+  }, [rectangles, tempPolygon, selectedRectangle]);
 
   useEffect(() => {
     if (!mapRef.current) return;
     const map = mapRef.current;
 
     const handleMapClick = (e) => {
-      if (!isDrawing) return;
+      if (drawingMode === 'none') return;
 
-      if (!startPoint) {
-        // Pierwszy klik - ustaw punkt startowy
-        setStartPoint([e.latlng.lat, e.latlng.lng]);
-      } else {
-        // Drugi klik - zakończ rysowanie
-        const endPoint = [e.latlng.lat, e.latlng.lng];
-        
-        const bounds = [
-          [Math.min(startPoint[0], endPoint[0]), Math.min(startPoint[1], endPoint[1])],
-          [Math.max(startPoint[0], endPoint[0]), Math.max(startPoint[1], endPoint[1])]
-        ];
+      const clickPoint = [e.latlng.lat, e.latlng.lng];
 
-        const newRect = {
-          id: Date.now(),
-          name: `Sektor ${rectangles.length + 1}`,
-          bounds: bounds,
-          cropType: '',
-          area: calculateArea(bounds),
-          workers: [],
-          notes: ''
-        };
+      if (drawingMode === 'rectangle') {
+        // Zwykły prostokąt - 2 punkty
+        if (drawingStep === 0) {
+          setDrawingPoints([clickPoint]);
+          setDrawingStep(1);
+        } else if (drawingStep === 1) {
+          const bounds = [
+            [Math.min(drawingPoints[0][0], clickPoint[0]), Math.min(drawingPoints[0][1], clickPoint[1])],
+            [Math.max(drawingPoints[0][0], clickPoint[0]), Math.max(drawingPoints[0][1], clickPoint[1])]
+          ];
 
-        const updatedRectangles = [...rectangles, newRect];
-        onRectanglesChange(updatedRectangles);
-        onSectorsChange(updatedRectangles);
+          const newRect = {
+            id: Date.now(),
+            name: `Sektor ${rectangles.length + 1}`,
+            bounds: bounds,
+            cropType: '',
+            area: calculateRectangleArea(bounds),
+            workers: [],
+            notes: ''
+          };
 
-        // Reset stanu rysowania
-        setIsDrawing(false);
-        setStartPoint(null);
-        setTempRect(null);
+          finishDrawing(newRect);
+        }
+      } else if (drawingMode === 'rotated') {
+        // Obrócony prostokąt - 3 punkty
+        if (drawingStep === 0) {
+          setDrawingPoints([clickPoint]);
+          setDrawingStep(1);
+        } else if (drawingStep === 1) {
+          setDrawingPoints([...drawingPoints, clickPoint]);
+          setDrawingStep(2);
+        } else if (drawingStep === 2) {
+          const [p1, p2] = drawingPoints;
+          const p3 = clickPoint;
+
+          // Oblicz centrum, szerokość, wysokość i obrót
+          const center = [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2];
+          const width = calculateDistance(p1, p2);
+          
+          // Wysokość to odległość od p3 do linii p1-p2
+          const height = calculatePointToLineDistance(p3, p1, p2);
+          
+          // Obrót względem osi poziomej
+          const rotation = Math.atan2(p2[0] - p1[0], p2[1] - p1[1]) * 180 / Math.PI;
+
+          const corners = createRotatedRectangle(center, width, height, rotation);
+          const area = calculatePolygonArea(corners);
+
+          const newRect = {
+            id: Date.now(),
+            name: `Sektor ${rectangles.length + 1}`,
+            center: center,
+            corners: corners,
+            width: width,
+            height: height,
+            rotation: Math.round(rotation),
+            cropType: '',
+            area: area.toFixed(2),
+            workers: [],
+            notes: ''
+          };
+
+          finishDrawing(newRect);
+        }
       }
     };
 
     const handleMouseMove = (e) => {
-      if (!isDrawing || !startPoint) return;
+      if (drawingMode === 'none') return;
 
       const currentPoint = [e.latlng.lat, e.latlng.lng];
-      const bounds = [
-        [Math.min(startPoint[0], currentPoint[0]), Math.min(startPoint[1], currentPoint[1])],
-        [Math.max(startPoint[0], currentPoint[0]), Math.max(startPoint[1], currentPoint[1])]
-      ];
 
-      setTempRect(bounds);
+      if (drawingMode === 'rectangle' && drawingStep === 1) {
+        // Podgląd zwykłego prostokąta
+        const bounds = [
+          [Math.min(drawingPoints[0][0], currentPoint[0]), Math.min(drawingPoints[0][1], currentPoint[1])],
+          [Math.max(drawingPoints[0][0], currentPoint[0]), Math.max(drawingPoints[0][1], currentPoint[1])]
+        ];
+        const corners = [
+          [bounds[0][0], bounds[0][1]],
+          [bounds[0][0], bounds[1][1]],
+          [bounds[1][0], bounds[1][1]],
+          [bounds[1][0], bounds[0][1]]
+        ];
+        setTempPolygon(corners);
+      } else if (drawingMode === 'rotated') {
+        if (drawingStep === 1) {
+          // Podgląd linii bazowej
+          setTempPolygon([drawingPoints[0], currentPoint]);
+        } else if (drawingStep === 2) {
+          // Podgląd obróconenego prostokąta
+          const [p1, p2] = drawingPoints;
+          const p3 = currentPoint;
+          
+          const center = [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2];
+          const width = calculateDistance(p1, p2);
+          const height = calculatePointToLineDistance(p3, p1, p2);
+          const rotation = Math.atan2(p2[0] - p1[0], p2[1] - p1[1]) * 180 / Math.PI;
+
+          const corners = createRotatedRectangle(center, width, height, rotation);
+          setTempPolygon(corners);
+        }
+      }
     };
 
-    if (isDrawing) {
+    if (drawingMode !== 'none') {
       map.on('click', handleMapClick);
       map.on('mousemove', handleMouseMove);
       map.getContainer().style.cursor = 'crosshair';
@@ -132,9 +294,52 @@ const InteractiveMap = ({ rectangles, onRectanglesChange, onSectorsChange }) => 
       map.off('click', handleMapClick);
       map.off('mousemove', handleMouseMove);
     };
-  }, [isDrawing, startPoint, rectangles, onRectanglesChange, onSectorsChange]);
+  }, [drawingMode, drawingStep, drawingPoints, rectangles]);
 
-  const calculateArea = (bounds) => {
+  const calculateDistance = (p1, p2) => {
+    const lat1 = p1[0] * Math.PI / 180;
+    const lat2 = p2[0] * Math.PI / 180;
+    const deltaLat = (p2[0] - p1[0]) * Math.PI / 180;
+    const deltaLng = (p2[1] - p1[1]) * Math.PI / 180;
+
+    const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return 6371000 * c; // w metrach
+  };
+
+  const calculatePointToLineDistance = (point, lineStart, lineEnd) => {
+    // Uproszczona wersja - używamy odległości prostopadłej w przybliżeniu kartezjańskim
+    const A = lineEnd[0] - lineStart[0];
+    const B = lineEnd[1] - lineStart[1];
+    const C = lineStart[0] - point[0];
+    const D = lineStart[1] - point[1];
+
+    const dot = A * C + B * D;
+    const lenSq = A * A + B * B;
+    
+    if (lenSq === 0) return calculateDistance(point, lineStart);
+
+    const param = -dot / lenSq;
+    let closestPoint;
+
+    if (param < 0) {
+      closestPoint = lineStart;
+    } else if (param > 1) {
+      closestPoint = lineEnd;
+    } else {
+      closestPoint = [
+        lineStart[0] + param * A,
+        lineStart[1] + param * B
+      ];
+    }
+
+    return calculateDistance(point, closestPoint);
+  };
+
+  const calculateRectangleArea = (bounds) => {
     const latDiff = Math.abs(bounds[1][0] - bounds[0][0]);
     const lngDiff = Math.abs(bounds[1][1] - bounds[0][1]);
     const areaKm2 = latDiff * lngDiff * 111.32 * 111.32;
@@ -142,16 +347,37 @@ const InteractiveMap = ({ rectangles, onRectanglesChange, onSectorsChange }) => 
     return areaHa.toFixed(2);
   };
 
-  const startDrawing = () => {
-    setIsDrawing(true);
-    setStartPoint(null);
-    setTempRect(null);
+  const startDrawing = (mode) => {
+    setDrawingMode(mode);
+    setDrawingStep(0);
+    setDrawingPoints([]);
+    setTempPolygon(null);
   };
 
   const cancelDrawing = () => {
-    setIsDrawing(false);
-    setStartPoint(null);
-    setTempRect(null);
+    setDrawingMode('none');
+    setDrawingStep(0);
+    setDrawingPoints([]);
+    setTempPolygon(null);
+  };
+
+  const finishDrawing = (newRect) => {
+    const updatedRectangles = [...rectangles, newRect];
+    onRectanglesChange(updatedRectangles);
+    onSectorsChange(updatedRectangles);
+    cancelDrawing();
+  };
+
+  const getDrawingInstructions = () => {
+    if (drawingMode === 'rectangle') {
+      if (drawingStep === 0) return '🎯 Kliknij pierwszy róg prostokąta';
+      if (drawingStep === 1) return '🎯 Kliknij przeciwny róg prostokąta';
+    } else if (drawingMode === 'rotated') {
+      if (drawingStep === 0) return '🎯 Kliknij pierwszy punkt (zostanie STAŁY)';
+      if (drawingStep === 1) return '🎯 Kliknij drugi punkt (pierwsza strona)';
+      if (drawingStep === 2) return '🎯 Kliknij gdzie prostokąt ma się rozszerzyć (tylko od drugiego punktu)';
+    }
+    return '';
   };
 
   return (
@@ -160,13 +386,11 @@ const InteractiveMap = ({ rectangles, onRectanglesChange, onSectorsChange }) => 
       <div className="mb-4 p-4 bg-blue-50 rounded-lg">
         <h3 className="font-semibold text-blue-800 mb-2">Jak rysować sektory:</h3>
         <div className="text-sm text-blue-700 space-y-1">
-          <div>1. Kliknij przycisk "Rysuj prostokąt" poniżej</div>
-          <div>2. Kliknij pierwszy punkt na mapie (róg prostokąta)</div>
-          <div>3. Kliknij drugi punkt na mapie (przeciwny róg)</div>
-          <div>4. Prostokąt zostanie automatycznie utworzony</div>
-          {isDrawing && (
+          <div><strong>Zwykły prostokąt:</strong> 2 kliknięcia - przeciwne rogi</div>
+          <div><strong>Obrócony prostokąt:</strong> 3 kliknięcia - długość, szerokość, orientacja</div>
+          {drawingMode !== 'none' && (
             <div className="text-orange-700 font-medium mt-2">
-              {!startPoint ? '🎯 Kliknij pierwszy punkt na mapie' : '🎯 Kliknij drugi punkt na mapie'}
+              {getDrawingInstructions()}
             </div>
           )}
         </div>
@@ -186,15 +410,25 @@ const InteractiveMap = ({ rectangles, onRectanglesChange, onSectorsChange }) => 
 
       {/* Kontrolki w lewym dolnym rogu */}
       <div className="absolute bottom-4 left-4 flex flex-col gap-2 z-[1000]">
-        {!isDrawing ? (
-          <button
-            onClick={startDrawing}
-            className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
-            title="Rysuj prostokąt"
-          >
-            <Square size={20} />
-            <span className="text-sm font-medium">Rysuj prostokąt</span>
-          </button>
+        {drawingMode === 'none' ? (
+          <>
+            <button
+              onClick={() => startDrawing('rectangle')}
+              className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+              title="Rysuj zwykły prostokąt"
+            >
+              <Square size={20} />
+              <span className="text-sm font-medium">Zwykły prostokąt</span>
+            </button>
+            <button
+              onClick={() => startDrawing('rotated')}
+              className="bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+              title="Rysuj obrócony prostokąt"
+            >
+              <RotateCw size={20} />
+              <span className="text-sm font-medium">Obrócony prostokąt</span>
+            </button>
+          </>
         ) : (
           <button
             onClick={cancelDrawing}
@@ -209,7 +443,7 @@ const InteractiveMap = ({ rectangles, onRectanglesChange, onSectorsChange }) => 
         {rectangles.length > 0 && (
           <div className="bg-white p-2 rounded-lg shadow-lg text-xs">
             <div className="font-semibold text-gray-700">Sektorów: {rectangles.length}</div>
-            <div className="text-gray-500">Kliknij prostokąt na mapie aby zobaczyć szczegóły</div>
+            <div className="text-gray-500">Kliknij sektor na mapie aby zobaczyć szczegóły</div>
           </div>
         )}
       </div>
@@ -234,7 +468,7 @@ const OrchardMapSystem = () => {
       rectangles,
       sectors,
       exportDate: new Date().toISOString(),
-      version: "1.0",
+      version: "2.0", // Zwiększona wersja dla obróconych prostokątów
       totalArea: sectors.reduce((sum, sector) => sum + parseFloat(sector.area || 0), 0).toFixed(2)
     };
     
@@ -306,11 +540,11 @@ const OrchardMapSystem = () => {
           System Zarządzania Gospodarstwem Sadowniczym
         </h1>
         <p className="text-gray-600 mb-4">
-          Mapowanie i zarządzanie sektorami upraw
+          Mapowanie i zarządzanie sektorami upraw z możliwością obrotu
         </p>
         
         {/* Statystyki */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="text-2xl font-bold text-blue-600">{sectors.length}</div>
             <div className="text-blue-800">Zdefiniowane sektory</div>
@@ -324,6 +558,12 @@ const OrchardMapSystem = () => {
               {sectors.filter(s => s.cropType).length}
             </div>
             <div className="text-purple-800">Sektory z przypisaną uprawą</div>
+          </div>
+          <div className="bg-orange-50 p-4 rounded-lg">
+            <div className="text-2xl font-bold text-orange-600">
+              {sectors.filter(s => s.rotation).length}
+            </div>
+            <div className="text-orange-800">Sektory obrócone</div>
           </div>
         </div>
       </div>
@@ -377,7 +617,15 @@ const OrchardMapSystem = () => {
             {sectors.map((sector, index) => (
               <div key={sector.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800">{sector.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    {sector.name}
+                    {sector.rotation && (
+                      <span className="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded">
+                        <RotateCw size={12} className="inline mr-1" />
+                        {sector.rotation}°
+                      </span>
+                    )}
+                  </h3>
                   <button
                     onClick={() => deleteSector(index)}
                     className="text-red-500 hover:text-red-700 p-1"
@@ -432,11 +680,22 @@ const OrchardMapSystem = () => {
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Współrzędne
+                      Geometria
                     </label>
-                    <div className="text-xs text-gray-500 p-2 bg-gray-50 border border-gray-300 rounded font-mono">
-                      SW: {sector.bounds[0][0].toFixed(4)}, {sector.bounds[0][1].toFixed(4)}<br/>
-                      NE: {sector.bounds[1][0].toFixed(4)}, {sector.bounds[1][1].toFixed(4)}
+                    <div className="text-xs text-gray-500 p-2 bg-gray-50 border border-gray-300 rounded">
+                      {sector.corners ? (
+                        <div>
+                          <div className="font-medium">Obrócony prostokąt</div>
+                          {sector.width && <div>Wymiary: {Math.round(sector.width)}m × {Math.round(sector.height)}m</div>}
+                          <div>4 punkty: ({sector.corners.length} wierzchołki)</div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-medium">Zwykły prostokąt</div>
+                          <div>SW: {sector.bounds[0][0].toFixed(4)}, {sector.bounds[0][1].toFixed(4)}</div>
+                          <div>NE: {sector.bounds[1][0].toFixed(4)}, {sector.bounds[1][1].toFixed(4)}</div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -461,11 +720,18 @@ const OrchardMapSystem = () => {
 
       {sectors.length === 0 && (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <Square size={48} className="mx-auto text-gray-400 mb-4" />
+          <div className="flex justify-center gap-4 mb-4">
+            <Square size={48} className="text-gray-400" />
+            <RotateCw size={48} className="text-gray-400" />
+          </div>
           <p className="text-xl text-gray-500 mb-2">Nie zdefiniowano jeszcze żadnych sektorów</p>
           <p className="text-gray-400">
-            Użyj przycisku "Rysuj prostokąt" na mapie, aby oznaczyć obszary upraw
+            Użyj przycisków na mapie, aby oznaczyć obszary upraw
           </p>
+          <div className="mt-4 text-sm text-gray-500 space-y-1">
+            <div>• <strong>Zwykły prostokąt:</strong> dla obszarów wyrównanych z mapą</div>
+            <div>• <strong>Obrócony prostokąt:</strong> dla obszarów pod kątem</div>
+          </div>
         </div>
       )}
     </div>

@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode
-@Entity
-@Table(name = "purchase")
+@Entity(name = "purchase_entity")
 public class PurchaseEntity {
 
     @Id
