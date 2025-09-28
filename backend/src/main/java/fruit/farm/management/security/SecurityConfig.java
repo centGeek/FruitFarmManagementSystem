@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/debug/**").permitAll()
                         .requestMatchers("/api/users/**").hasAnyAuthority("Gardener")
+                        .requestMatchers("/api/expenses/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

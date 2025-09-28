@@ -1,16 +1,39 @@
-//package fruit.farm.management.entity;
-//
-//import jakarta.persistence.*;
-//
-//import java.util.List;
-//
-//@Entity
-//public class SectorEntity {
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "sector_id")
-//    private long sectorId;
-//
-//    private List<LocationEntity>
-//}
+package fruit.farm.management.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class SectorEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "sector_id")
+    private long sectorId;
+
+    @Enumerated(EnumType.STRING)
+    private PlantType plantType;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "created_at")
+    private LocalDate createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    private LocationEntity locationEntity;
+
+    @OneToMany(mappedBy = "sector", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<CoordinateEntity> coordinates;
+}

@@ -461,7 +461,6 @@ const EmptyState = ({ searchTerm, employeesCount, showArchived, onAddClick }) =>
     );
 };
 
-// --- Główny Komponent ---
 
 export default function EmployeeManagement() {
     const [employees, setEmployees] = useState([]);

@@ -1,4 +1,4 @@
-package fruit.farm.management.security.dto;
+package fruit.farm.management.dto;
 
 import fruit.farm.management.entity.UserEntity;
 import jakarta.validation.constraints.Email;

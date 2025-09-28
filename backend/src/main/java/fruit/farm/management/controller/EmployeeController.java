@@ -3,7 +3,7 @@ package fruit.farm.management.controller;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.UserRepository;
-import fruit.farm.management.security.dto.UserDTO;
+import fruit.farm.management.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -89,7 +89,7 @@ public class EmployeeController {
             Optional<UserEntity> existingUser = userRepository.findByEmail(userRequest.getEmail());
             if (existingUser.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Map.of("error", "User with this email already exists"));
+                        .body(Map.of("error", "Użytkownik z tym adresem email już istnieje"));
             }
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -152,7 +152,6 @@ public class EmployeeController {
             log.info("Nickname: {}", userRequest.getNickname());
             log.info("IsActive: {}", userRequest.isActive());
 
-            // Aktualizuj pola użytkownika
             if (userRequest.getName() != null) {
                 existingUser.setName(userRequest.getName());
             }

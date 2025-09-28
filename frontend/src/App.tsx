@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar"
 import HomePage from './components/HomePage'
 import InteractiveMap from './components/InteractiveMap'
 import EmployeeManagement from './components/EmployeeManagement'
+import ExpenseManagement from './components/ExpenseManagement'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -197,7 +198,7 @@ function App() {
           path="/expenses"
           element={
             <ProtectedRoute allowedRoles={["Gardener"]}>
-              <div>Expenses Page</div>
+              <ExpenseManagement />
             </ProtectedRoute>
           }
         />

@@ -3,7 +3,7 @@ package fruit.farm.management.mapper;
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.RoleType;
 import fruit.farm.management.entity.UserEntity;
-import fruit.farm.management.security.dto.UserDTO;
+import fruit.farm.management.dto.UserDTO;
 
 import java.time.LocalDate;
 

@@ -1,11 +1,10 @@
 package fruit.farm.management.entity;
 
 public enum ProductType {
-    TRACTOR,
-    HARVEST_MACHINE,
-    PLOW,
-    HAND_TOOLS,
+    MACHINE,
+    GAS,
 
+    SUPPLIES,
     SPRAYING,
     PESTICIDES,
     HERBICIDES,

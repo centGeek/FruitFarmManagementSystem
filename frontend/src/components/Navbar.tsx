@@ -10,6 +10,7 @@ function GardenerNavbar({ onLogout }) {
     { name: "Ewidencja pracy", path: "/management" },
     { name: "Wydatki", path: "/expenses" },
     { name: "Przychody", path: "/profits" },
+    { name: "Notyfikacje pogodowe", path: "/weather" },
   ];
 
   const handleLogoClick = () => {
@@ -25,7 +26,7 @@ function GardenerNavbar({ onLogout }) {
               className="text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200"
               onClick={handleLogoClick}
             >
-              🌱 Gardener Panel
+              🌱 Panel Sadownika
             </div>
             <div className="flex space-x-2">
               {tabs.map((tab) => (

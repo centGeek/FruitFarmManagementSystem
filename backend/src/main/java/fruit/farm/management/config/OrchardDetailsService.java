@@ -2,7 +2,6 @@ package fruit.farm.management.config;
 
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.UserEntity;
-import fruit.farm.management.exception.NotFoundException;
 import fruit.farm.management.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
