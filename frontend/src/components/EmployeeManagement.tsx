@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 
-const BACKEND_URL = "http://localhost:8091";
-
-const getAuthToken = () => {
-    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-};
-
-const getAuthHeaders = () => {
-    const token = getAuthToken();
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
-    };
-};
 
 const Alert = ({ type, message, onClose }) => {
     if (!message) return null;
@@ -448,15 +436,6 @@ const EmptyState = ({ searchTerm, employeesCount, showArchived, onAddClick }) =>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
             <p className="text-gray-500 mb-6 max-w-md mx-auto">{message}</p>
-            {employeesCount === 0 && (
-                <button
-                    onClick={onAddClick}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-medium transition-colors shadow-md flex items-center justify-center mx-auto"
-                >
-                    <span className="inline mr-2 text-xl">+</span>
-                    Dodaj pierwszego użytkownika
-                </button>
-            )}
         </div>
     );
 };
@@ -736,7 +715,7 @@ export default function EmployeeManagement() {
                 <Modal
                     isOpen={isModalOpen}
                     onClose={closeModal}
-                    title={selectedEmployee ? 'Edytuj Użytkownika 📝' : 'Dodaj Nowego Pracownika ✨'}
+                    title={'Dodaj Nowego Pracownika ✨'}
                 >
                     <EmployeeForm
                         employee={selectedEmployee}

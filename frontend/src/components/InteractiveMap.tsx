@@ -3,6 +3,8 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Trash2, Layers, X, Search, MapPin, Loader, Check, AlertCircle, Edit3 } from 'lucide-react';
+import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
+
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -12,14 +14,12 @@ L.Icon.Default.mergeOptions({
 });
 
 const CROP_TYPES = [
-  { value: 'jabłonie', label: '🍎 Jabłonie' },
-  { value: 'grusze', label: '🍐 Grusze' },
-  { value: 'śliwy', label: '🟣 Śliwy' },
-  { value: 'wiśnie', label: '🍒 Wiśnie' },
-  { value: 'brzoskwinie', label: '🍑 Brzoskwinie' },
-  { value: 'czereśnie', label: '🍒 Czereśnie' },
-  { value: 'morele', label: '🟠 Morele' },
-  { value: 'inne', label: '🌳 Inne' }
+  { value: 'APPLE', label: '🍎 Jabłonie' },
+  { value: 'PEAR', label: '🍐 Grusze' },
+  { value: 'PLUM', label: '🟣 Śliwy' },
+  { value: 'CHERRY', label: '🍒 Wiśnie' },
+  { value: 'SWEET_CHERRY', label: '🍒 Czereśnie' },
+  { value: 'RASPBERRY', label: '🍓 Maliny' }
 ];
 
 const sortPointsClockwise = (points) => {
@@ -201,7 +201,6 @@ const LocationSearch = ({ map }) => {
   );
 };
 
-// Modal potwierdzenia sektora z formularzem edycji
 const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdit }) => {
   const [editedSector, setEditedSector] = useState({
     id: null,
@@ -211,7 +210,6 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Aktualizacja stanu gdy sectorData się zmienia
   useEffect(() => {
     if (sectorData && isOpen) {
       setEditedSector({
@@ -266,7 +264,6 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[2000] p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -285,9 +282,7 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
             </button>
           </div>
 
-          {/* Formularz edycji */}
           <div className="space-y-6 mb-6">
-            {/* Podstawowe dane do edycji */}
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
               <h4 className="font-semibold text-blue-900 mb-4">Dane sektora</h4>
               
@@ -328,7 +323,6 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
               </div>
             </div>
 
-            {/* Podgląd wybranej uprawy */}
             {editedSector.cropType && (
               <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                 <h4 className="font-semibold text-green-800 mb-2">Wybrana uprawa</h4>
@@ -348,7 +342,6 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
               </div>
             )}
 
-            {/* Informacje o geometrii */}
             <div className="bg-gray-50 rounded-lg p-4">
               <h4 className="font-semibold text-gray-800 mb-3">Parametry geometryczne</h4>
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -363,7 +356,6 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
               </div>
             </div>
 
-            {/* Współrzędne GPS - collapsed */}
             <details className="bg-gray-50 rounded-lg border">
               <summary className="p-4 cursor-pointer font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
                 Współrzędne GPS (kliknij aby rozwinąć)
@@ -380,7 +372,6 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
               </div>
             </details>
 
-            {/* Ostrzeżenie */}
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
               <div className="flex gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
@@ -392,7 +383,6 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
             </div>
           </div>
 
-          {/* Przyciski akcji */}
           <div className="flex gap-3">
             <button
               onClick={onEdit}
@@ -416,7 +406,6 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
             </button>
           </div>
 
-          {/* Status info */}
           <div className="mt-4 p-3 bg-gray-100 rounded-lg">
             <div className="flex items-center justify-between text-xs text-gray-600">
               <span>Status:</span>
@@ -481,62 +470,65 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
       cropType: ''
     };
 
-    // Pokazujemy modal z formularzem
     setConfirmationModal({
       isOpen: true,
       sectorData: newSector
     });
-
-    // Nie anulujemy rysowania od razu
   };
 
-  const handleSectorConfirm = async (editedSectorData) => {
+    const handleSectorConfirm = async (editedSectorData) => {
     try {
+      const coordinatesDTO = editedSectorData.corners.map(corner => ({
+        latitude: corner[0],
+        longitude: corner[1]
+      }));
       const backendData = {
         description: editedSectorData.name,
         plantType: editedSectorData.cropType || null,
-        coordinates: editedSectorData.corners
+        coordinates: coordinatesDTO
       };
-
-      const response = await fetch('/api/sectors', {
+      console.log('Wysyłanie danych do backendu:', backendData);
+      const response = await fetch(`${BACKEND_URL}/api/sectors`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(backendData)
       });
-
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
-
-      const result = await response.json();
+      let result = null;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const text = await response.text();
+        if (text && text.trim().length > 0) {
+          try {
+            result = JSON.parse(text);
+          } catch (e) {
+            console.warn('Nie udało się sparsować odpowiedzi JSON:', e);
+          }
+        }
+      }
       console.log('Sektor wysłany do backendu:', result);
-      
       const finalSector = { ...editedSectorData };
-      if (result.id) {
+      if (result && result.id) {
         finalSector.backendId = result.id;
       }
-
       onSectorsChange([...sectors, finalSector]);
       alert('Sektor został pomyślnie dodany i zsynchronizowany z serwerem!');
     } catch (error) {
       console.error('Błąd podczas wysyłania sektora do backendu:', error);
-      
       if (window.confirm('Nie udało się wysłać danych sektora do serwera. Czy chcesz zapisać sektor tylko lokalnie?')) {
         onSectorsChange([...sectors, editedSectorData]);
       }
     }
-
     setConfirmationModal({ isOpen: false, sectorData: null });
-    // Anuluj tryb rysowania po potwierdzeniu
     cancelDrawing();
   };
 
   const handleSectorEdit = () => {
     setConfirmationModal({ isOpen: false, sectorData: null });
     
-    // Wracamy do trybu rysowania
     setDrawingMode('polygon');
     setDrawingPoints([]);
     if (tempLayer && mapInstance) {
@@ -564,12 +556,13 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     if (window.confirm('Czy na pewno chcesz usunąć ten sektor?')) {
       if (sectors[index].backendId) {
         try {
-          const response = await fetch(`/api/sectors/${sectors[index].backendId}`, {
+          const response = await fetch(`${BACKEND_URL}/api/sectors/${sectors[index].backendId}`, {
             method: 'DELETE'
           });
 
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
           }
 
           console.log('Sektor usunięty z backendu');
@@ -598,7 +591,6 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     const drawnItems = drawnItemsRef.current;
     drawnItems.clearLayers();
 
-    // Rysowanie sektorów
     sectors.forEach((sector, index) => {
       if (!sector.corners) return;
 
@@ -628,7 +620,6 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     window.editSector = (index) => setSelectedSector(index);
     window.deleteSector = deleteSector;
 
-    // Rysowanie tymczasowej warstwy
     if (drawingMode === 'polygon' && drawingPoints.length >= 1) {
       if (tempLayer) drawnItems.removeLayer(tempLayer);
 
@@ -757,22 +748,27 @@ const SectorsList = ({ sectors, onSectorsChange }) => {
     
     if (field === 'cropType' && sectors[index].backendId) {
       try {
+        const coordinatesDTO = updatedSectors[index].corners.map(corner => ({
+          latitude: corner[0],
+          longitude: corner[1]
+        }));
+
         const sectorData = {
+          id: sectors[index].backendId,
           description: updatedSectors[index].name,
-          plantType: value,
-          coordinates: updatedSectors[index].corners
+          plantType: value || null,
+          coordinates: coordinatesDTO
         };
 
-        const response = await fetch(`/api/sectors`, {
+        const response = await fetch(`${BACKEND_URL}/api/sectors${sectors[index].backendId}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: getAuthHeaders(),
           body: JSON.stringify(sectorData)
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
 
         console.log('Sektor zaktualizowany w backendzie');
@@ -788,12 +784,13 @@ const SectorsList = ({ sectors, onSectorsChange }) => {
     if (window.confirm('Czy na pewno chcesz usunąć ten sektor?')) {
       if (sectors[index].backendId) {
         try {
-          const response = await fetch(`/api/sectors`, {
+          const response = await fetch(`${BACKEND_URL}/api/sectors${sectors[index].backendId}`, {
             method: 'DELETE'
           });
 
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
           }
 
           console.log('Sektor usunięty z backendu');
@@ -837,14 +834,6 @@ const SectorsList = ({ sectors, onSectorsChange }) => {
         {sectors.map((sector, index) => (
           <div key={sector.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {sector.name}
-                {sector.backendId && (
-                  <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                    Synchronizowane
-                  </span>
-                )}
-              </h3>
               <button
                 onClick={() => deleteSector(index)}
                 className="text-red-500 hover:text-red-700 p-1"
@@ -899,7 +888,6 @@ const SectorsList = ({ sectors, onSectorsChange }) => {
   );
 };
 
-// Main component
 const OrchardMapSystem = () => {
   const [sectors, setSectors] = useState([]);
 
@@ -913,7 +901,6 @@ const OrchardMapSystem = () => {
           Mapowanie i zarządzanie sektorami upraw z integracją backend
         </p>
         
-        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="text-2xl font-bold text-blue-600">{sectors.length}</div>
@@ -934,7 +921,6 @@ const OrchardMapSystem = () => {
         </div>
       </div>
 
-      {/* Map loaded */}
       <div className="mb-6 rounded-lg overflow-hidden shadow-lg">
         <InteractiveMap 
           sectors={sectors}

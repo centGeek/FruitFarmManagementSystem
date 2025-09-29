@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.List;
 
-@Entity
+@Entity(name = "sector_entity")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -30,10 +30,10 @@ public class SectorEntity {
     @Column(name = "created_at")
     private LocalDate createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id")
-    private LocationEntity locationEntity;
-
     @OneToMany(mappedBy = "sector", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CoordinateEntity> coordinates;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserEntity userEntity;
 }

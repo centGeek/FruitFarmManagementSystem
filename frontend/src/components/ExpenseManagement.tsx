@@ -1,19 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 
-// --- Globalne Stałe i Funkcje Pomocnicze (Zaimportowane z Twojego pliku) ---
-const BACKEND_URL = "http://localhost:8091";
 
-const getAuthToken = () => {
-    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-};
-
-const getAuthHeaders = () => {
-    const token = getAuthToken();
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
-    };
-};
 
 const EXPENSE_TYPES = [
     { value: 'MACHINE', label: 'Maszyny / Sprzęt 🚜' },

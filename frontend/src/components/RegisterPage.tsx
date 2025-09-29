@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, User, Lock, Apple, Leaf, BarChart3, Users, MapPin, Bell, Phone, UserCheck } from 'lucide-react';
+import { BACKEND_URL} from "../utils/apiConfigs";
 
-const BACKEND_URL = "http://localhost:8091";
 
 // Alert Component
 const Alert = ({ type, message }) => {

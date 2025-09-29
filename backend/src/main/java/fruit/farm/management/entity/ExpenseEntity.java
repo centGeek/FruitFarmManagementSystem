@@ -35,10 +35,6 @@ public class ExpenseEntity {
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "sector_id")
-//    private SectorEntity sectorEntity;
-
     public ExpenseEntity(ProductType productType, BigDecimal expenseCost, String description, UserEntity userEntity, boolean isPaid) {
         this.productType = productType;
         this.expenseCost = expenseCost;

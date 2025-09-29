@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, User, Lock, Apple, Leaf, BarChart3, Users, MapPin, Bell } from 'lucide-react';
+import { BACKEND_URL} from "../utils/apiConfigs";
 
 const GOOGLE_CLIENT_ID = "756765730426-ph1sg4bqiaajlb3b77olcrv6043rb2u0.apps.googleusercontent.com";
-const BACKEND_URL = "http://localhost:8091";
 
-// Alert Component
 const Alert = ({ type, message }) => {
   if (!message) return null;
   const colors = {
@@ -21,7 +20,6 @@ const Alert = ({ type, message }) => {
   );
 };
 
-// TextInput Component
 const TextInput = ({ id, name, value, onChange, placeholder, icon: Icon, type = "text", disabled }) => (
   <div>
     <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{placeholder}</label>
@@ -43,7 +41,6 @@ const TextInput = ({ id, name, value, onChange, placeholder, icon: Icon, type = 
   </div>
 );
 
-// PasswordInput Component
 const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disabled }) => (
   <div>
     <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">Hasło</label>
@@ -73,7 +70,6 @@ const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disable
   </div>
 );
 
-// Helper function for handling successful login
 const handleLoginSuccess = (token, email, loginMethod, rememberMe) => {
   // Store token
   if (rememberMe) {

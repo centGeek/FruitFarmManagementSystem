@@ -27,4 +27,10 @@ public class CoordinateEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sector_id")
     private SectorEntity sector;
+
+    public CoordinateEntity(Double latitude, Double longitude, SectorEntity sector) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.sector = sector;
+    }
 }
