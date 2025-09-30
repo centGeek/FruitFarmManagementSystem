@@ -1,11 +1,13 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.SectorDTO;
+import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.service.SectorService;
+import fruit.farm.management.service.UserService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,19 +16,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/sectors")
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Slf4j
 public class SectorController {
 
-    @Autowired
     private SectorService sectorService;
+
+    private UserService userService;
 
     @PostMapping
     public ResponseEntity<SectorDTO> createSector(@Valid @RequestBody SectorDTO sectorDTO) {
 
         try {
             sectorDTO.setId(System.currentTimeMillis());
-            SectorDTO sector = sectorService.createSector(sectorDTO);
+            SectorDTO sector = sectorService.createSector(sectorDTO, userService.getLoggedInUserId());
             log.info("Sector created with ID: {} and description: {}", sector.getId(), sector.getDescription());
             return ResponseEntity.status(HttpStatus.CREATED).body(sectorDTO);
 
@@ -45,14 +48,20 @@ public class SectorController {
         sectorDTO.setId(id);
         sectorService.updateSector(sectorDTO);
 
-        try {
-            log.info("Sector updated (mock): {}", sectorDTO);
-            return ResponseEntity.ok(sectorDTO);
+        return ResponseEntity.ok(sectorDTO);
+    }
 
+    @GetMapping()
+    public ResponseEntity<List<SectorDTO>> getAllSectorsByUserI() {
+        List<SectorDTO> sectorDTOS;
+        try {
+            Long currentUserId = userService.getLoggedInUserId().getId();
+            sectorDTOS = sectorService.getAllSectorsByUserId(currentUserId);
         } catch (Exception e) {
-            log.error("Error updating sector", e);
+            log.error("Error getting all sectors", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+        return ResponseEntity.ok(sectorDTOS);
     }
 
 //    @DeleteMapping("/{id}")
@@ -84,15 +93,4 @@ public class SectorController {
 //            return ResponseEntity.notFound().build();
 //        }
 //    }
-
-    @GetMapping
-    public ResponseEntity<List<SectorDTO>> getAllSectors() {
-
-        try {
-            return ResponseEntity.ok(sectorService.getAllSectors());
-        } catch (Exception e) {
-            log.error("Error getting all sectors", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
 }

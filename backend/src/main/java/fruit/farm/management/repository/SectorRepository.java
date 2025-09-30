@@ -30,4 +30,8 @@ public class SectorRepository {
     public List<SectorEntity> findAll() {
         return sectorJpaRepository.findAll();
     }
+
+    public List<SectorEntity> findAllByUserId(long userId) {
+        return sectorJpaRepository.findAllByUserId(userId);
+    }
 }

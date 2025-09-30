@@ -1,9 +1,11 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.CoordinateDTO;
 import fruit.farm.management.dto.SectorDTO;
+import fruit.farm.management.dto.UserDTO;
 import fruit.farm.management.entity.SectorEntity;
+import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.CoordinateMapper;
+import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.SectorRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +21,14 @@ public class SectorService {
         this.sectorRepository = sectorRepository;
     }
 
-    public SectorDTO createSector(SectorDTO sectorDTO) {
+    public SectorDTO createSector(SectorDTO sectorDTO, UserEntity userEntity) {
 
         SectorEntity sector = new SectorEntity();
         sector.setDescription(sectorDTO.getDescription());
         sector.setPlantType(sectorDTO.getPlantType());
         sector.setCreatedAt(LocalDate.now());
+        sector.setUserEntity(userEntity);
+        sector.setCoordinates(CoordinateMapper.mapToEntities(sectorDTO.getCoordinates(), sector));
 
         SectorEntity savedSector = sectorRepository.save(sector);
 
@@ -49,8 +53,8 @@ public class SectorService {
         return convertToDTO(sector);
     }
 
-    public List<SectorDTO> getAllSectors() {
-        return sectorRepository.findAll().stream()
+    public List<SectorDTO> getAllSectorsByUserId(long userId) {
+        return sectorRepository.findAllByUserId(userId).stream()
                 .map(this::convertToDTO)
                 .toList();
     }
@@ -59,6 +63,7 @@ public class SectorService {
         SectorDTO dto = new SectorDTO();
         dto.setId(sector.getSectorId());
         dto.setDescription(sector.getDescription());
+        dto.setCoordinates(CoordinateMapper.mapFromEntities(sector.getCoordinates(), sector));
         dto.setPlantType(sector.getPlantType());
         dto.setCreatedAt(sector.getCreatedAt());;
         return dto;

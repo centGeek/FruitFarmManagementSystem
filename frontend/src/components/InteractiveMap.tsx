@@ -5,7 +5,6 @@ import 'leaflet/dist/leaflet.css';
 import { Trash2, Layers, X, Search, MapPin, Loader, Check, AlertCircle, Edit3 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 
-
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -85,7 +84,7 @@ const LocationSearch = ({ map }) => {
 
     searchTimeoutRef.current = setTimeout(() => {
       searchLocations(value);
-    }, 300);
+    }, 10);
   };
 
   const selectLocation = (location) => {
@@ -431,11 +430,114 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
   const [tempLayer, setTempLayer] = useState(null);
   const [selectedSector, setSelectedSector] = useState(null);
   const [confirmationModal, setConfirmationModal] = useState({ isOpen: false, sectorData: null });
+  const [visibleSectorIndices, setVisibleSectorIndices] = useState([]);
+  const animationTimeoutRef = useRef(null);
+  const [mapStyle, setMapStyle] = useState('streets');
+  const [isMapStyleOpen, setIsMapStyleOpen] = useState(false);
+  const tileLayerRef = useRef(null);
+
+  const mapStyles = {
+    streets: {
+      name: '🗺️ Domyślna',
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    },
+    satellite: {
+      name: '🛰️ Satelita',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    },
+    hybrid: {
+      name: '🌍 Hybrydowa',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
+      overlay: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    },
+    topo: {
+      name: '⛰️ Topograficzna',
+      url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+    }
+  };
 
   const handleMapLoad = (map) => {
     leafletMapRef.current = map;
     setMapInstance(map);
   };
+
+  // Zmiana stylu mapy
+  useEffect(() => {
+    if (!mapInstance) return;
+
+    // Usuń wszystkie warstwy tile
+    mapInstance.eachLayer((layer) => {
+      if (layer instanceof L.TileLayer) {
+        mapInstance.removeLayer(layer);
+      }
+    });
+
+    // Dodaj nową warstwę
+    const style = mapStyles[mapStyle];
+    const newTileLayer = L.tileLayer(style.url, {
+      attribution: style.attribution,
+      maxZoom: 19
+    }).addTo(mapInstance);
+
+    // Dodaj overlay dla hybrydowej mapy
+    if (style.overlay) {
+      L.tileLayer(style.overlay, {
+        attribution: '',
+        maxZoom: 19,
+        opacity: 0.5
+      }).addTo(mapInstance);
+    }
+
+    tileLayerRef.current = newTileLayer;
+  }, [mapStyle, mapInstance]);
+
+  // Animacja wyświetlania sektorów po kolei
+  useEffect(() => {
+    if (sectors.length === 0) {
+      setVisibleSectorIndices([]);
+      return;
+    }
+
+    // Reset animacji przy zmianie liczby sektorów
+    setVisibleSectorIndices([]);
+    
+    // Wyczyść poprzednie timeouty
+    if (animationTimeoutRef.current) {
+      animationTimeoutRef.current.forEach(timeout => clearTimeout(timeout));
+    }
+
+    const timeouts = [];
+    
+    // Animuj każdy sektor z opóźnieniem
+    sectors.forEach((_, index) => {
+      const timeout = setTimeout(() => {
+        setVisibleSectorIndices(prev => [...prev, index]);
+        
+        // Jeśli to ostatni sektor, wycentruj mapę na wszystkich sektorach
+        if (index === sectors.length - 1 && mapInstance && sectors.length > 0) {
+          setTimeout(() => {
+            const allCorners = sectors.flatMap(s => s.corners || []);
+            if (allCorners.length > 0) {
+              const bounds = L.latLngBounds(allCorners);
+              mapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+            }
+          }, 100);
+        }
+      }, index * 300); // 300ms opóźnienia między sektorami
+      
+      timeouts.push(timeout);
+    });
+
+    animationTimeoutRef.current = timeouts;
+
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  }, [sectors.length, mapInstance]);
 
   const startDrawing = () => {
     setDrawingMode('polygon');
@@ -476,7 +578,7 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     });
   };
 
-    const handleSectorConfirm = async (editedSectorData) => {
+  const handleSectorConfirm = async (editedSectorData) => {
     try {
       const coordinatesDTO = editedSectorData.corners.map(corner => ({
         latitude: corner[0],
@@ -591,12 +693,17 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     const drawnItems = drawnItemsRef.current;
     drawnItems.clearLayers();
 
-    sectors.forEach((sector, index) => {
-      if (!sector.corners) return;
+    // Wyświetlaj tylko widoczne sektory (dla animacji)
+    const sectorsToShow = sectors.filter((_, index) => visibleSectorIndices.includes(index));
+
+    sectorsToShow.forEach((sector, visibleIndex) => {
+      if (!sector.corners || sector.corners.length === 0) return;
+
+      const actualIndex = sectors.indexOf(sector);
 
       const polygon = L.polygon(sector.corners, {
-        color: selectedSector === index ? '#ff0000' : '#3388ff',
-        weight: selectedSector === index ? 3 : 2,
+        color: selectedSector === actualIndex ? '#ff0000' : '#3388ff',
+        weight: selectedSector === actualIndex ? 3 : 2,
         fillColor: '#3388ff',
         fillOpacity: 0.2
       });
@@ -605,16 +712,35 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
         <div style="font-weight: bold; margin-bottom: 5px;">${sector.name}</div>
         <div>Uprawa: ${sector.cropType || 'Nie określono'}</div>
         <div style="margin-top: 8px;">
-          <button onclick="window.editSector(${index})" style="background: #3388ff; color: white; border: none; padding: 4px 8px; border-radius: 3px; margin-right: 4px; cursor: pointer;">Edytuj</button>
-          <button onclick="window.deleteSector(${index})" style="background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Usuń</button>
+          <button onclick="window.editSector(${actualIndex})" style="background: #3388ff; color: white; border: none; padding: 4px 8px; border-radius: 3px; margin-right: 4px; cursor: pointer;">Edytuj</button>
+          <button onclick="window.deleteSector(${actualIndex})" style="background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Usuń</button>
         </div>
       `);
 
       polygon.on('click', () => {
-        setSelectedSector(selectedSector === index ? null : index);
+        setSelectedSector(selectedSector === actualIndex ? null : actualIndex);
       });
 
       drawnItems.addLayer(polygon);
+
+      // Dodaj markery dla punktów
+      sector.corners.forEach((corner, cornerIndex) => {
+        const marker = L.circleMarker(corner, {
+          radius: 4,
+          fillColor: '#3388ff',
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        });
+
+        marker.bindTooltip(`Punkt ${cornerIndex + 1}`, {
+          permanent: false,
+          direction: 'top'
+        });
+
+        drawnItems.addLayer(marker);
+      });
     });
 
     window.editSector = (index) => setSelectedSector(index);
@@ -642,7 +768,7 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     }
 
     map.getContainer().style.cursor = drawingMode !== 'none' ? 'crosshair' : '';
-  }, [sectors, selectedSector, drawingMode, drawingPoints, mapInstance]);
+  }, [sectors, selectedSector, drawingMode, drawingPoints, mapInstance, visibleSectorIndices]);
 
   useEffect(() => {
     if (!mapInstance) return;
@@ -689,18 +815,80 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
         </div>
       </div>
 
-      <MapContainer
-        center={[52.2297, 21.0122]}
-        zoom={13}
-        style={{ height: '500px', width: '100%' }}
-        ref={handleMapLoad}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-      </MapContainer>
+           <div className="relative">
+        <MapContainer
+          center={[52.2297, 21.0122]}
+          zoom={13}
+          style={{ height: '500px', width: '100%' }}
+          ref={handleMapLoad}
+          zoomControl={false}
+        >
+          {/* TileLayer jest teraz zarządzany przez useEffect */}
+        </MapContainer>
 
+        {/* Kontrolki zoom i warstwy w jednym miejscu - na mapie */}
+        <div className="absolute top-4 left-4 z-[1000]">
+          <div className="bg-white rounded-lg shadow-lg overflow-visible w-10">
+            {/* Kontrolki zoom */}
+            <button
+              onClick={() => mapInstance?.zoomIn()}
+              className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors border-b border-gray-200"
+              title="Przybliż"
+            >
+              <span className="text-xl font-bold text-gray-700">+</span>
+            </button>
+            <button
+              onClick={() => mapInstance?.zoomOut()}
+              className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors rounded-b-lg"
+              title="Oddal"
+            >
+              <span className="text-xl font-bold text-gray-700">−</span>
+            </button>
+          </div>
+
+          {/* Przycisk warstw - osobny panel z odstępem */}
+          <div className="bg-white rounded-lg shadow-lg overflow-visible w-10 mt-2">
+            <button
+              onClick={() => setIsMapStyleOpen(!isMapStyleOpen)}
+              className={`w-10 h-10 flex items-center justify-center transition-colors rounded-lg ${
+                isMapStyleOpen ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 text-gray-700'
+              }`}
+              title="Warstwy mapy"
+            >
+              <Layers className="w-5 h-5" />
+            </button>
+
+            {/* Lista stylów mapy */}
+            {isMapStyleOpen && (
+              <div className="border-t border-gray-200 bg-white w-40 rounded-b-lg shadow-lg">
+                <div className="p-1 space-y-0.5 max-h-40 overflow-y-auto">
+                  {Object.entries(mapStyles).map(([key, style]) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setMapStyle(key);
+                        setIsMapStyleOpen(false);
+                      }}
+                      className={`w-full text-left px-2 py-1.5 rounded text-xs transition-all ${
+                        mapStyle === key
+                          ? 'bg-blue-500 text-white font-medium'
+                          : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="whitespace-nowrap">{style.name}</span>
+                        {mapStyle === key && (
+                          <Check className="w-3 h-3 ml-1 flex-shrink-0" />
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
       <div className="absolute bottom-4 left-4 flex flex-col gap-2 z-[1000]">
         {drawingMode === 'none' ? (
           <button
@@ -724,7 +912,12 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
           <div className="bg-white p-3 rounded-lg shadow-lg text-xs max-w-48">
             <div className="font-semibold text-gray-700 mb-1">Statystyki:</div>
             <div className="text-gray-600">Sektorów: {sectors.length}</div>
-            <div className="text-gray-500 mt-2 text-xs">Kliknij sektor aby zobaczyć szczegóły</div>
+            <div className="text-gray-500 mt-2 text-xs">
+              {visibleSectorIndices.length < sectors.length 
+                ? `Ładowanie: ${visibleSectorIndices.length}/${sectors.length}`
+                : 'Kliknij sektor aby zobaczyć szczegóły'
+              }
+            </div>
           </div>
         )}
       </div>
@@ -740,7 +933,7 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
   );
 };
 
-const SectorsList = ({ sectors, onSectorsChange }) => {
+const SectorsList = ({ sectors, onSectorsChange, onRefresh, isLoading }) => {
   const updateSector = async (index, field, value) => {
     const updatedSectors = sectors.map((sector, i) => 
       i === index ? { ...sector, [field]: value } : sector
@@ -760,7 +953,7 @@ const SectorsList = ({ sectors, onSectorsChange }) => {
           coordinates: coordinatesDTO
         };
 
-        const response = await fetch(`${BACKEND_URL}/api/sectors${sectors[index].backendId}`, {
+        const response = await fetch(`${BACKEND_URL}/api/sectors/${sectors[index].backendId}`, {
           method: 'PUT',
           headers: getAuthHeaders(),
           body: JSON.stringify(sectorData)
@@ -784,7 +977,7 @@ const SectorsList = ({ sectors, onSectorsChange }) => {
     if (window.confirm('Czy na pewno chcesz usunąć ten sektor?')) {
       if (sectors[index].backendId) {
         try {
-          const response = await fetch(`${BACKEND_URL}/api/sectors${sectors[index].backendId}`, {
+          const response = await fetch(`${BACKEND_URL}/api/sectors/${sectors[index].backendId}`, {
             method: 'DELETE'
           });
 
@@ -814,21 +1007,39 @@ const SectorsList = ({ sectors, onSectorsChange }) => {
           <Layers size={48} className="text-gray-400" />
           <Search size={48} className="text-gray-400" />
         </div>
-        <p className="text-xl text-gray-500 mb-2">Nie zdefiniowano jeszcze żadnych sektorów</p>
-        <p className="text-gray-400 mb-4">
-          Wyszukaj miejscowość i użyj mapy, aby oznaczyć obszary upraw
+        <p className="text-xl text-gray-500 mb-2">
+          {isLoading ? 'Ładowanie sektorów...' : 'Nie zdefiniowano jeszcze żadnych sektorów'}
         </p>
-        <div className="text-sm text-gray-500 space-y-1">
-          <div>• <strong>Wyszukaj miejscowość:</strong> znajdź swoje gospodarstwo</div>
-          <div>• <strong>Rysuj sektor:</strong> kliknij 4 punkty na mapie</div>
-        </div>
+        <p className="text-gray-400 mb-4">
+          {isLoading 
+            ? 'Proszę czekać...'
+            : 'Wyszukaj miejscowość i użyj mapy, aby oznaczyć obszary upraw'
+          }
+        </p>
+        {!isLoading && (
+          <div className="text-sm text-gray-500 space-y-1">
+            <div>• <strong>Wyszukaj miejscowość:</strong> znajdź swoje gospodarstwo</div>
+            <div>• <strong>Rysuj sektor:</strong> kliknij 4 punkty na mapie</div>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4">Zdefiniowane sektory</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-semibold">Zdefiniowane sektory</h2>
+        <button
+          onClick={onRefresh}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          title="Odśwież dane z serwera"
+        >
+          <Loader className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Odśwież
+        </button>
+      </div>
 
       <div className="grid gap-4">
         {sectors.map((sector, index) => (
@@ -880,6 +1091,24 @@ const SectorsList = ({ sectors, onSectorsChange }) => {
               {sector.backendId && (
                 <span className="ml-2">• ID backendu: {sector.backendId}</span>
               )}
+              
+              {sector.corners && sector.corners.length > 0 && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium">
+                    Pokaż współrzędne GPS
+                  </summary>
+                  <div className="mt-2 space-y-1 bg-white p-2 rounded border border-gray-200 max-h-32 overflow-y-auto">
+                    {sector.corners.map((corner, idx) => (
+                      <div key={idx} className="flex justify-between text-xs font-mono">
+                        <span className="text-gray-600">Punkt {idx + 1}:</span>
+                        <span className="text-gray-800">
+                          {corner[0].toFixed(6)}, {corner[1].toFixed(6)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
             </div>
           </div>
         ))}
@@ -890,6 +1119,50 @@ const SectorsList = ({ sectors, onSectorsChange }) => {
 
 const OrchardMapSystem = () => {
   const [sectors, setSectors] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+
+  const loadSectorsFromBackend = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/sectors`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Błąd HTTP: ${response.status}`);
+      }
+
+      const backendSectors = await response.json();
+      console.log('Załadowano sektory z backendu:', backendSectors);
+
+      const mappedSectors = backendSectors.map(sector => ({
+        id: Date.now() + Math.random(),
+        backendId: sector.id,
+        name: sector.description || `Sektor ${sector.id}`,
+        cropType: sector.plantType || '',
+        corners: sector.coordinates?.map(coord => [
+          coord.latitude,
+          coord.longitude
+        ]) || []
+      }));
+
+      setSectors(mappedSectors);
+      
+    } catch (error) {
+      console.error('❌ Błąd podczas ładowania sektorów:', error);
+      setLoadError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSectorsFromBackend();
+  }, [loadSectorsFromBackend]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -900,6 +1173,38 @@ const OrchardMapSystem = () => {
         <p className="text-gray-600 mb-4">
           Mapowanie i zarządzanie sektorami upraw z integracją backend
         </p>
+
+        {isLoading && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center gap-3">
+              <Loader className="w-5 h-5 text-blue-600 animate-spin" />
+              <div>
+                <div className="font-semibold text-blue-900">Ładowanie danych...</div>
+                <div className="text-sm text-blue-700">Pobieranie sektorów z serwera</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {loadError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+                <div>
+                  <div className="font-semibold text-red-900">Błąd ładowania danych</div>
+                  <div className="text-sm text-red-700">{loadError}</div>
+                </div>
+              </div>
+              <button
+                onClick={loadSectorsFromBackend}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+              >
+                Spróbuj ponownie
+              </button>
+            </div>
+          </div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-blue-50 p-4 rounded-lg">
@@ -931,6 +1236,8 @@ const OrchardMapSystem = () => {
       <SectorsList 
         sectors={sectors}
         onSectorsChange={setSectors}
+        onRefresh={loadSectorsFromBackend}
+        isLoading={isLoading}
       />
     </div>
   );
