@@ -24,13 +24,16 @@ public class SectorEntity {
     @Enumerated(EnumType.STRING)
     private PlantType plantType;
 
+    @Column(name = "plant_variety")
+    private String variety;
+
     @Column(name = "description")
     private String description;
 
     @Column(name = "created_at")
     private LocalDate createdAt;
 
-    @OneToMany(mappedBy = "sector", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sector", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CoordinateEntity> coordinates;
 
     @ManyToOne(fetch = FetchType.LAZY)

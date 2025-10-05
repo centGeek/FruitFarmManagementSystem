@@ -13,12 +13,82 @@ L.Icon.Default.mergeOptions({
 });
 
 const CROP_TYPES = [
-  { value: 'APPLE', label: '🍎 Jabłonie' },
-  { value: 'PEAR', label: '🍐 Grusze' },
-  { value: 'PLUM', label: '🟣 Śliwy' },
-  { value: 'CHERRY', label: '🍒 Wiśnie' },
-  { value: 'SWEET_CHERRY', label: '🍒 Czereśnie' },
-  { value: 'RASPBERRY', label: '🍓 Maliny' }
+  { 
+    value: 'APPLE', 
+    label: '🍎 Jabłonie',
+    varieties: [
+      { value: 'GOLDEN_DELICIOUS', label: 'Golden Delicious' },
+      { value: 'RED_DELICIOUS', label: 'Red Delicious' },
+      { value: 'GALA', label: 'Gala' },
+      { value: 'CHAMPION', label: 'Champion' },
+      { value: 'IDARED', label: 'Idared' },
+      { value: 'LIGOL', label: 'Ligol' },
+      { value: 'SZAMPION', label: 'Szampion' },
+      { value: 'JONAGOLD', label: 'Jonagold' },
+      { value: 'GLOSTER', label: 'Gloster' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+  { 
+    value: 'PEAR', 
+    label: '🍐 Grusze',
+    varieties: [
+      { value: 'CONFERENCE', label: 'Conference' },
+      { value: 'WILLIAMS', label: 'Williams' },
+      { value: 'LUKASOWKA', label: 'Łukasówka' },
+      { value: 'FAWORYTKA', label: 'Faworytka' },
+      { value: 'BONKRETA', label: 'Bonkreta' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+  { 
+    value: 'PLUM', 
+    label: '🟣 Śliwy',
+    varieties: [
+      { value: 'WEGIERSKA', label: 'Węgierka' },
+      { value: 'RENKLODA', label: 'Renkloda' },
+      { value: 'ELENA', label: 'Elena' },
+      { value: 'PRESIDENT', label: 'President' },
+      { value: 'CACANSKA', label: 'Čačanska' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+  { 
+    value: 'CHERRY', 
+    label: '🍒 Wiśnie',
+    varieties: [
+      { value: 'LUTOWKA', label: 'Łutówka' },
+      { value: 'NEFRIS', label: 'Nefris' },
+      { value: 'DEBRECENI', label: 'Debreceni' },
+      { value: 'KELLERIS', label: 'Kelleris' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+  { 
+    value: 'SWEET_CHERRY', 
+    label: '🍒 Czereśnie',
+    varieties: [
+      { value: 'BURLAT', label: 'Burlat' },
+      { value: 'KORDIA', label: 'Kordia' },
+      { value: 'REGINA', label: 'Regina' },
+      { value: 'LAPINS', label: 'Lapins' },
+      { value: 'VAN', label: 'Van' },
+      { value: 'SUMMIT', label: 'Summit' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+  { 
+    value: 'RASPBERRY', 
+    label: '🍓 Maliny',
+    varieties: [
+      { value: 'POLKA', label: 'Polka' },
+      { value: 'POLANA', label: 'Polana' },
+      { value: 'LASZKA', label: 'Laszka' },
+      { value: 'GLEN_AMPLE', label: 'Glen Ample' },
+      { value: 'TULAMEEN', label: 'Tulameen' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  }
 ];
 
 const sortPointsClockwise = (points) => {
@@ -84,7 +154,7 @@ const LocationSearch = ({ map }) => {
 
     searchTimeoutRef.current = setTimeout(() => {
       searchLocations(value);
-    }, 10);
+    }, 300);
   };
 
   const selectLocation = (location) => {
@@ -205,6 +275,7 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
     id: null,
     name: '',
     cropType: '',
+    variety: '',
     corners: []
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -215,6 +286,7 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
         id: sectorData.id || null,
         name: sectorData.name || '',
         cropType: sectorData.cropType || '',
+        variety: sectorData.variety || '',
         corners: sectorData.corners || []
       });
     }
@@ -239,10 +311,18 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
   const areaInHa = (areaInM2 / 10000).toFixed(2);
 
   const handleInputChange = (field, value) => {
-    setEditedSector(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setEditedSector(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      
+      if (field === 'cropType') {
+        updated.variety = '';
+      }
+      
+      return updated;
+    });
   };
 
   const handleConfirm = async () => {
@@ -258,6 +338,8 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
       setIsLoading(false);
     }
   };
+
+  const selectedCropType = CROP_TYPES.find(c => c.value === editedSector.cropType);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[2000] p-4">
@@ -319,24 +401,53 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
                     ))}
                   </select>
                 </div>
+                {editedSector.cropType && selectedCropType && (
+                  <div>
+                    <label className="block text-sm font-medium text-blue-800 mb-2">
+                      Odmiana
+                    </label>
+                    <select
+                      value={editedSector.variety}
+                      onChange={(e) => handleInputChange('variety', e.target.value)}
+                      className="w-full p-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    >
+                      <option value="">Wybierz odmianę...</option>
+                      {selectedCropType.varieties.map(variety => (
+                        <option key={variety.value} value={variety.value}>
+                          {variety.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
 
             {editedSector.cropType && (
               <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                 <h4 className="font-semibold text-green-800 mb-2">Wybrana uprawa</h4>
-                <div className="flex items-center gap-3 p-3 bg-white rounded border border-green-300">
-                  <span className="text-2xl">
-                    {CROP_TYPES.find(c => c.value === editedSector.cropType)?.label.split(' ')[0]}
-                  </span>
-                  <div>
-                    <div className="font-bold text-green-900">
-                      {CROP_TYPES.find(c => c.value === editedSector.cropType)?.label}
-                    </div>
-                    <div className="text-xs text-green-700">
-                      Typ: {editedSector.cropType}
+                <div className="p-3 bg-white rounded border border-green-300">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">
+                      {CROP_TYPES.find(c => c.value === editedSector.cropType)?.label.split(' ')[0]}
+                    </span>
+                    <div className="flex-1">
+                      <div className="font-bold text-green-900">
+                        {CROP_TYPES.find(c => c.value === editedSector.cropType)?.label}
+                      </div>
+                      <div className="text-xs text-green-700">
+                        Typ: {editedSector.cropType}
+                      </div>
                     </div>
                   </div>
+                  {editedSector.variety && (
+                    <div className="pt-2 border-t border-green-200">
+                      <div className="text-sm text-green-800">
+                        <span className="font-medium">Odmiana:</span>{' '}
+                        {selectedCropType?.varieties.find(v => v.value === editedSector.variety)?.label || editedSector.variety}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -426,6 +537,9 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
   const drawnItemsRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const [drawingMode, setDrawingMode] = useState('none');
+  const [editMode, setEditMode] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const editMarkersRef = useRef([]);
   const [drawingPoints, setDrawingPoints] = useState([]);
   const [tempLayer, setTempLayer] = useState(null);
   const [selectedSector, setSelectedSector] = useState(null);
@@ -465,25 +579,21 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     setMapInstance(map);
   };
 
-  // Zmiana stylu mapy
   useEffect(() => {
     if (!mapInstance) return;
 
-    // Usuń wszystkie warstwy tile
     mapInstance.eachLayer((layer) => {
       if (layer instanceof L.TileLayer) {
         mapInstance.removeLayer(layer);
       }
     });
 
-    // Dodaj nową warstwę
     const style = mapStyles[mapStyle];
     const newTileLayer = L.tileLayer(style.url, {
       attribution: style.attribution,
       maxZoom: 19
     }).addTo(mapInstance);
 
-    // Dodaj overlay dla hybrydowej mapy
     if (style.overlay) {
       L.tileLayer(style.overlay, {
         attribution: '',
@@ -495,29 +605,24 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     tileLayerRef.current = newTileLayer;
   }, [mapStyle, mapInstance]);
 
-  // Animacja wyświetlania sektorów po kolei
   useEffect(() => {
     if (sectors.length === 0) {
       setVisibleSectorIndices([]);
       return;
     }
 
-    // Reset animacji przy zmianie liczby sektorów
     setVisibleSectorIndices([]);
     
-    // Wyczyść poprzednie timeouty
     if (animationTimeoutRef.current) {
       animationTimeoutRef.current.forEach(timeout => clearTimeout(timeout));
     }
 
     const timeouts = [];
     
-    // Animuj każdy sektor z opóźnieniem
     sectors.forEach((_, index) => {
       const timeout = setTimeout(() => {
         setVisibleSectorIndices(prev => [...prev, index]);
         
-        // Jeśli to ostatni sektor, wycentruj mapę na wszystkich sektorach
         if (index === sectors.length - 1 && mapInstance && sectors.length > 0) {
           setTimeout(() => {
             const allCorners = sectors.flatMap(s => s.corners || []);
@@ -527,7 +632,7 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
             }
           }, 100);
         }
-      }, index * 300); // 300ms opóźnienia między sektorami
+      }, 0);
       
       timeouts.push(timeout);
     });
@@ -579,54 +684,62 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
   };
 
   const handleSectorConfirm = async (editedSectorData) => {
-    try {
-      const coordinatesDTO = editedSectorData.corners.map(corner => ({
-        latitude: corner[0],
-        longitude: corner[1]
-      }));
-      const backendData = {
-        description: editedSectorData.name,
-        plantType: editedSectorData.cropType || null,
-        coordinates: coordinatesDTO
-      };
-      console.log('Wysyłanie danych do backendu:', backendData);
-      const response = await fetch(`${BACKEND_URL}/api/sectors`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(backendData)
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-      let result = null;
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        const text = await response.text();
-        if (text && text.trim().length > 0) {
-          try {
-            result = JSON.parse(text);
-          } catch (e) {
-            console.warn('Nie udało się sparsować odpowiedzi JSON:', e);
-          }
+  try {
+    const coordinatesDTO = editedSectorData.corners.map(corner => ({
+      latitude: corner[0],
+      longitude: corner[1]
+    }));
+    
+    const backendData = {
+      description: editedSectorData.name,
+      plantType: editedSectorData.cropType || null,
+      variety: editedSectorData.variety || null,
+      coordinates: coordinatesDTO
+    };
+    
+    console.log('Wysyłanie danych do backendu:', backendData);
+    
+    const response = await fetch(`${BACKEND_URL}/api/sectors`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(backendData)
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+    
+    let result = null;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      const text = await response.text();
+      if (text && text.trim().length > 0) {
+        try {
+          result = JSON.parse(text);
+        } catch (e) {
+          console.warn('Nie udało się sparsować odpowiedzi JSON:', e);
         }
       }
-      console.log('Sektor wysłany do backendu:', result);
-      const finalSector = { ...editedSectorData };
-      if (result && result.id) {
-        finalSector.backendId = result.id;
-      }
-      onSectorsChange([...sectors, finalSector]);
-      alert('Sektor został pomyślnie dodany i zsynchronizowany z serwerem!');
-    } catch (error) {
-      console.error('Błąd podczas wysyłania sektora do backendu:', error);
-      if (window.confirm('Nie udało się wysłać danych sektora do serwera. Czy chcesz zapisać sektor tylko lokalnie?')) {
-        onSectorsChange([...sectors, editedSectorData]);
-      }
     }
-    setConfirmationModal({ isOpen: false, sectorData: null });
-    cancelDrawing();
-  };
+    
+    console.log('Sektor wysłany do backendu:', result);
+    const finalSector = { ...editedSectorData };
+    if (result && result.id) {
+      finalSector.backendId = result.id;
+    }
+    
+    onSectorsChange([...sectors, finalSector]);
+    alert('Sektor został pomyślnie dodany i zsynchronizowany z serwerem!');
+  } catch (error) {
+    console.error('Błąd podczas wysyłania sektora do backendu:', error);
+    if (window.confirm('Nie udało się wysłać danych sektora do serwera. Czy chcesz zapisać sektor tylko lokalnie?')) {
+      onSectorsChange([...sectors, editedSectorData]);
+    }
+  }
+  setConfirmationModal({ isOpen: false, sectorData: null });
+  cancelDrawing();
+};
 
   const handleSectorEdit = () => {
     setConfirmationModal({ isOpen: false, sectorData: null });
@@ -638,6 +751,71 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
       setTempLayer(null);
     }
   };
+
+  const enableSectorEdit = (sectorIndex) => {
+
+  if (mapInstance) {
+    mapInstance.closePopup();
+    mapInstance.dragging.disable();
+  }
+  
+  setEditMode({ sectorIndex, cornerIndex: null });
+  setDrawingMode('none');
+};
+
+const disableEditMode = () => {
+  setEditMode(null);
+  
+  if (mapInstance) {
+    mapInstance.dragging.enable();
+  }
+  
+  if (editMarkersRef.current && mapInstance) {
+    editMarkersRef.current.forEach(marker => {
+      if (mapInstance.hasLayer(marker)) {
+        mapInstance.removeLayer(marker);
+      }
+    });
+    editMarkersRef.current = [];
+  }
+};
+const updateCornerPosition = async (sectorIndex, cornerIndex, newLatLng) => {
+  const updatedSectors = [...sectors];
+  updatedSectors[sectorIndex].corners[cornerIndex] = [newLatLng.lat, newLatLng.lng];
+  
+  if (updatedSectors[sectorIndex].backendId) {
+    try {
+      const coordinatesDTO = updatedSectors[sectorIndex].corners.map(corner => ({
+        latitude: corner[0],
+        longitude: corner[1]
+      }));
+
+      const sectorData = {
+        id: updatedSectors[sectorIndex].backendId,
+        description: updatedSectors[sectorIndex].name,
+        plantType: updatedSectors[sectorIndex].cropType || null,
+        variety: updatedSectors[sectorIndex].variety || null,
+        coordinates: coordinatesDTO
+      };
+
+      const response = await fetch(`${BACKEND_URL}/api/sectors/${updatedSectors[sectorIndex].backendId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(sectorData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log('Pozycja wierzchołka zaktualizowana w backendzie');
+    } catch (error) {
+      console.error('Błąd podczas aktualizacji pozycji w backendzie:', error);
+    }
+  }
+  
+  onSectorsChange(updatedSectors);
+};
 
   const handleMapClick = useCallback((e) => {
     if (drawingMode !== 'polygon') return;
@@ -683,49 +861,104 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
   };
 
   useEffect(() => {
-    if (!mapInstance) return;
+  if (!mapInstance) return;
 
-    const map = mapInstance;
-    if (!drawnItemsRef.current) {
-      drawnItemsRef.current = new L.FeatureGroup().addTo(map);
+  const map = mapInstance;
+  if (!drawnItemsRef.current) {
+    drawnItemsRef.current = new L.FeatureGroup().addTo(map);
+  }
+
+  const drawnItems = drawnItemsRef.current;
+  drawnItems.clearLayers();
+
+  editMarkersRef.current.forEach(marker => {
+    if (map.hasLayer(marker)) {
+      map.removeLayer(marker);
     }
+  });
+  editMarkersRef.current = [];
 
-    const drawnItems = drawnItemsRef.current;
-    drawnItems.clearLayers();
+  const sectorsToShow = sectors.filter((_, index) => visibleSectorIndices.includes(index));
 
-    // Wyświetlaj tylko widoczne sektory (dla animacji)
-    const sectorsToShow = sectors.filter((_, index) => visibleSectorIndices.includes(index));
+  sectorsToShow.forEach((sector, visibleIndex) => {
+    if (!sector.corners || sector.corners.length === 0) return;
 
-    sectorsToShow.forEach((sector, visibleIndex) => {
-      if (!sector.corners || sector.corners.length === 0) return;
+    const actualIndex = sectors.indexOf(sector);
+    const isBeingEdited = editMode?.sectorIndex === actualIndex;
 
-      const actualIndex = sectors.indexOf(sector);
+    const polygon = L.polygon(sector.corners, {
+      color: isBeingEdited ? '#ff6b00' : (selectedSector === actualIndex ? '#ff0000' : '#3388ff'),
+      weight: isBeingEdited ? 3 : (selectedSector === actualIndex ? 3 : 2),
+      fillColor: isBeingEdited ? '#ff6b00' : '#3388ff',
+      fillOpacity: isBeingEdited ? 0.3 : 0.2
+    });
 
-      const polygon = L.polygon(sector.corners, {
-        color: selectedSector === actualIndex ? '#ff0000' : '#3388ff',
-        weight: selectedSector === actualIndex ? 3 : 2,
-        fillColor: '#3388ff',
-        fillOpacity: 0.2
-      });
+    const cropTypeLabel = sector.cropType 
+      ? CROP_TYPES.find(c => c.value === sector.cropType)?.label || sector.cropType
+      : 'Nie określono';
 
-      polygon.bindPopup(`
-        <div style="font-weight: bold; margin-bottom: 5px;">${sector.name}</div>
-        <div>Uprawa: ${sector.cropType || 'Nie określono'}</div>
-        <div style="margin-top: 8px;">
-          <button onclick="window.editSector(${actualIndex})" style="background: #3388ff; color: white; border: none; padding: 4px 8px; border-radius: 3px; margin-right: 4px; cursor: pointer;">Edytuj</button>
-          <button onclick="window.deleteSector(${actualIndex})" style="background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Usuń</button>
+    const varietyLabel = sector.variety
+      ? CROP_TYPES.find(c => c.value === sector.cropType)?.varieties.find(v => v.value === sector.variety)?.label || sector.variety
+      : null;
+
+    polygon.bindPopup(`
+      <div style="padding: 12px;">
+        <div style="font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 6px;">
+          📍 ${sector.name}
         </div>
-      `);
+        <div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">
+          Uprawa: <b> ${cropTypeLabel} </b>
+        </div>
+        ${varietyLabel ? `
+          <div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">
+            🌱Odmiana: <b>${varietyLabel} </b>
+          </div>
+        ` : ''}
+        ${!isBeingEdited ? `
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+            <button 
+              onclick="window.editSectorVertices(${actualIndex})" 
+              style="width: 100%; padding: 6px 12px; background: #ff6b00; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500;"
+            >
+              ✏️ Edytuj wierzchołki
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `, {
+      maxWidth: 250
+    });
 
-      polygon.on('click', () => {
-        setSelectedSector(selectedSector === actualIndex ? null : actualIndex);
-      });
+    drawnItems.addLayer(polygon);
 
-      drawnItems.addLayer(polygon);
-
-      // Dodaj markery dla punktów
-      sector.corners.forEach((corner, cornerIndex) => {
-        const marker = L.circleMarker(corner, {
+    sector.corners.forEach((corner, cornerIndex) => {
+      const isEditable = isBeingEdited;
+      
+      let marker;
+      
+      if (isEditable) {
+        const editIcon = L.divIcon({
+          className: 'custom-edit-marker',
+          html: `<div style="
+            background: #ff6b00;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            cursor: move;
+          "></div>`,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+        
+        marker = L.marker(corner, {
+          icon: editIcon,
+          draggable: true,
+          autoPan: true
+        });
+      } else {
+        marker = L.circleMarker(corner, {
           radius: 4,
           fillColor: '#3388ff',
           color: '#ffffff',
@@ -733,42 +966,48 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
           opacity: 1,
           fillOpacity: 0.8
         });
+      }
+      
+      if (isEditable) {
+        marker.on('dragstart', () => {
+          setIsDragging(true);
+        });
 
-        marker.bindTooltip(`Punkt ${cornerIndex + 1}`, {
+        marker.on('drag', (e) => {
+          const newLatLng = e.target.getLatLng();
+          const updatedCorners = [...sector.corners];
+          updatedCorners[cornerIndex] = [newLatLng.lat, newLatLng.lng];
+          
+          polygon.setLatLngs(updatedCorners);
+        });
+
+        marker.on('dragend', (e) => {
+          const newLatLng = e.target.getLatLng();
+          updateCornerPosition(actualIndex, cornerIndex, newLatLng);
+          setIsDragging(false);
+        });
+
+        marker.bindTooltip(`Przeciągnij punkt ${cornerIndex + 1}`, {
           permanent: false,
           direction: 'top'
         });
 
-        drawnItems.addLayer(marker);
-      });
+        editMarkersRef.current.push(marker);
+      } else {
+        marker.bindTooltip(`Punkt ${cornerIndex + 1}`, {
+          permanent: false,
+          direction: 'top'
+        });
+      }
+      
+      drawnItems.addLayer(marker);
     });
+  });
 
-    window.editSector = (index) => setSelectedSector(index);
-    window.deleteSector = deleteSector;
+  window.editSectorVertices = enableSectorEdit;
 
-    if (drawingMode === 'polygon' && drawingPoints.length >= 1) {
-      if (tempLayer) drawnItems.removeLayer(tempLayer);
-
-      const tempPolygonLayer = L.polygon(
-        drawingPoints.map(p => [p.lat, p.lng]), 
-        {
-          color: '#ff7800',
-          weight: 2,
-          fillColor: '#ff7800',
-          fillOpacity: 0.3,
-          dashArray: '5, 5'
-        }
-      );
-
-      drawnItems.addLayer(tempPolygonLayer);
-      setTempLayer(tempPolygonLayer);
-    } else if (tempLayer) {
-      drawnItems.removeLayer(tempLayer);
-      setTempLayer(null);
-    }
-
-    map.getContainer().style.cursor = drawingMode !== 'none' ? 'crosshair' : '';
-  }, [sectors, selectedSector, drawingMode, drawingPoints, mapInstance, visibleSectorIndices]);
+  map.getContainer().style.cursor = drawingMode !== 'none' ? 'crosshair' : (isDragging ? 'grabbing' : '');
+}, [sectors, selectedSector, drawingMode, drawingPoints, mapInstance, visibleSectorIndices, editMode, isDragging]);
 
   useEffect(() => {
     if (!mapInstance) return;
@@ -890,37 +1129,52 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
         </div>
       </div>
       <div className="absolute bottom-4 left-4 flex flex-col gap-2 z-[1000]">
-        {drawingMode === 'none' ? (
-          <button
-            onClick={startDrawing}
-            className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
-          >
-            <Layers size={20} />
-            <span className="text-sm font-medium">Rysuj Sektor</span>
-          </button>
-        ) : (
-          <button
-            onClick={cancelDrawing}
-            className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
-          >
-            <X size={20} />
-            <span className="text-sm font-medium">Anuluj</span>
-          </button>
-        )}
+  {editMode !== null ? (
+    <button
+      onClick={disableEditMode}
+      className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+    >
+      <Check size={20} />
+      <span className="text-sm font-medium">Zakończ edycję</span>
+    </button>
+  ) : drawingMode === 'none' ? (
+    <button
+      onClick={startDrawing}
+      className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+    >
+      <Layers size={20} />
+      <span className="text-sm font-medium">Rysuj Sektor</span>
+    </button>
+  ) : (
+    <button
+      onClick={cancelDrawing}
+      className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+    >
+      <X size={20} />
+      <span className="text-sm font-medium">Anuluj</span>
+    </button>
+  )}
 
-        {sectors.length > 0 && (
-          <div className="bg-white p-3 rounded-lg shadow-lg text-xs max-w-48">
-            <div className="font-semibold text-gray-700 mb-1">Statystyki:</div>
-            <div className="text-gray-600">Sektorów: {sectors.length}</div>
-            <div className="text-gray-500 mt-2 text-xs">
-              {visibleSectorIndices.length < sectors.length 
-                ? `Ładowanie: ${visibleSectorIndices.length}/${sectors.length}`
-                : 'Kliknij sektor aby zobaczyć szczegóły'
-              }
-            </div>
-          </div>
-        )}
+  {sectors.length > 0 && (
+    <div className="bg-white p-3 rounded-lg shadow-lg text-xs max-w-48">
+      <div className="font-semibold text-gray-700 mb-1">Statystyki:</div>
+      <div className="text-gray-600">Sektorów: {sectors.length}</div>
+      {editMode !== null && (
+        <div className="text-orange-600 mt-2 text-xs font-medium">
+          🔧 Tryb edycji aktywny
+        </div>
+      )}
+      <div className="text-gray-500 mt-2 text-xs">
+        {visibleSectorIndices.length < sectors.length 
+          ? `Ładowanie: ${visibleSectorIndices.length}/${sectors.length}`
+          : editMode !== null 
+            ? 'Przeciągnij wierzchołki aby zmienić kształt'
+            : 'Kliknij sektor aby zobaczyć szczegóły'
+        }
       </div>
+    </div>
+  )}
+</div>
 
       <SectorConfirmationModal
         isOpen={confirmationModal.isOpen}
@@ -933,73 +1187,7 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
   );
 };
 
-const SectorsList = ({ sectors, onSectorsChange, onRefresh, isLoading }) => {
-  const updateSector = async (index, field, value) => {
-    const updatedSectors = sectors.map((sector, i) => 
-      i === index ? { ...sector, [field]: value } : sector
-    );
-    
-    if (field === 'cropType' && sectors[index].backendId) {
-      try {
-        const coordinatesDTO = updatedSectors[index].corners.map(corner => ({
-          latitude: corner[0],
-          longitude: corner[1]
-        }));
-
-        const sectorData = {
-          id: sectors[index].backendId,
-          description: updatedSectors[index].name,
-          plantType: value || null,
-          coordinates: coordinatesDTO
-        };
-
-        const response = await fetch(`${BACKEND_URL}/api/sectors/${sectors[index].backendId}`, {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(sectorData)
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
-
-        console.log('Sektor zaktualizowany w backendzie');
-      } catch (error) {
-        console.error('Błąd podczas aktualizacji sektora w backendzie:', error);
-      }
-    }
-    
-    onSectorsChange(updatedSectors);
-  };
-
-  const deleteSector = async (index) => {
-    if (window.confirm('Czy na pewno chcesz usunąć ten sektor?')) {
-      if (sectors[index].backendId) {
-        try {
-          const response = await fetch(`${BACKEND_URL}/api/sectors/${sectors[index].backendId}`, {
-            method: 'DELETE'
-          });
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-          }
-
-          console.log('Sektor usunięty z backendu');
-        } catch (error) {
-          console.error('Błąd podczas usuwania sektora z backendu:', error);
-          if (!window.confirm('Nie udało się usunąć sektora z serwera. Czy chcesz usunąć go tylko lokalnie?')) {
-            return;
-          }
-        }
-      }
-
-      const updatedSectors = sectors.filter((_, i) => i !== index);
-      onSectorsChange(updatedSectors);
-    }
-  };
-
+const SectorsList = ({ sectors, onRefresh, isLoading }) => {
   if (sectors.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -1042,76 +1230,66 @@ const SectorsList = ({ sectors, onSectorsChange, onRefresh, isLoading }) => {
       </div>
 
       <div className="grid gap-4">
-        {sectors.map((sector, index) => (
-          <div key={sector.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-              <button
-                onClick={() => deleteSector(index)}
-                className="text-red-500 hover:text-red-700 p-1"
-                title="Usuń sektor"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nazwa sektora
-                </label>
-                <input
-                  type="text"
-                  value={sector.name}
-                  onChange={(e) => updateSector(index, 'name', e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rodzaj uprawy
-                </label>
-                <select
-                  value={sector.cropType}
-                  onChange={(e) => updateSector(index, 'cropType', e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Wybierz rodzaj uprawy...</option>
-                  {CROP_TYPES.map(crop => (
-                    <option key={crop.value} value={crop.value}>
-                      {crop.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="mt-3 text-xs text-gray-500 bg-gray-50 p-2 rounded">
-              <strong>Geometria:</strong> Wielokąt z {sector.corners ? sector.corners.length : 'N/A'} wierzchołkami
-              {sector.backendId && (
-                <span className="ml-2">• ID backendu: {sector.backendId}</span>
-              )}
-              
-              {sector.corners && sector.corners.length > 0 && (
-                <details className="mt-2">
-                  <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium">
-                    Pokaż współrzędne GPS
-                  </summary>
-                  <div className="mt-2 space-y-1 bg-white p-2 rounded border border-gray-200 max-h-32 overflow-y-auto">
-                    {sector.corners.map((corner, idx) => (
-                      <div key={idx} className="flex justify-between text-xs font-mono">
-                        <span className="text-gray-600">Punkt {idx + 1}:</span>
-                        <span className="text-gray-800">
-                          {corner[0].toFixed(6)}, {corner[1].toFixed(6)}
-                        </span>
-                      </div>
-                    ))}
+        {sectors.map((sector) => {
+          const cropTypeData = CROP_TYPES.find(c => c.value === sector.cropType);
+          const varietyData = cropTypeData?.varieties.find(v => v.value === sector.variety);
+          
+          return (
+            <div key={sector.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nazwa sektora
+                  </label>
+                  <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
+                    {sector.name}
                   </div>
-                </details>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Rodzaj uprawy
+                  </label>
+                  <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
+                    {cropTypeData ? cropTypeData.label : (sector.cropType || 'Nie określono')}
+                  </div>
+                </div>
+              </div>
+
+              {sector.variety && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Odmiana
+                  </label>
+                  <div className="block text-sm font-medium text-gray-700 mb-1">
+                    🌱 {varietyData ? varietyData.label : sector.variety}
+                  </div>
+                </div>
               )}
+
+              <div className="mt-3 text-xs text-gray-500 bg-gray-50 p-2 rounded">
+
+                {sector.corners && sector.corners.length > 0 && (
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium">
+                      Pokaż współrzędne GPS
+                    </summary>
+                    <div className="mt-2 space-y-1 bg-white p-2 rounded border border-gray-200 max-h-32 overflow-y-auto">
+                      {sector.corners.map((corner, idx) => (
+                        <div key={idx} className="flex justify-between text-xs font-mono">
+                          <span className="text-gray-600">Punkt {idx + 1}:</span>
+                          <span className="text-gray-800">
+                            {corner[0].toFixed(6)}, {corner[1].toFixed(6)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -1144,6 +1322,7 @@ const OrchardMapSystem = () => {
         backendId: sector.id,
         name: sector.description || `Sektor ${sector.id}`,
         cropType: sector.plantType || '',
+        variety: sector.variety || '',
         corners: sector.coordinates?.map(coord => [
           coord.latitude,
           coord.longitude

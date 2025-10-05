@@ -105,7 +105,7 @@ public class EmployeeController {
             log.info("Nickname: {}", userRequest.getNickname());
             log.info("IsActive: {}", userRequest.isActive());
 
-            UserEntity userEntity = UserMapper.userDTOToEmployeeUserEntity(userRequest, gardener);
+            UserEntity userEntity = UserMapper.mapToEntity(userRequest, gardener);
             UserEntity savedUser = userRepository.save(userEntity);
 
             return ResponseEntity.ok(Map.of(

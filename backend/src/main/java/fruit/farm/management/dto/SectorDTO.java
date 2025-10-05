@@ -23,6 +23,8 @@ public class SectorDTO {
 
     private PlantType plantType;
 
+    private String variety;
+
     @NotEmpty(message = "Współrzędne są wymagane")
     @Size(min = 3, message = "Wymagane co najmniej 3 punkty")
     @Valid
@@ -30,24 +32,23 @@ public class SectorDTO {
 
     private LocalDate createdAt;
 
-    private Double areaInSquareMeters;
-
     public SectorDTO() {}
 
-    public SectorDTO(String description, PlantType plantType, List<CoordinateDTO> coordinates) {
+    public SectorDTO(String description, PlantType plantType, String variety, List<CoordinateDTO> coordinates) {
         this.description = description;
         this.plantType = plantType;
         this.coordinates = coordinates;
+        this.variety = variety;
     }
 
-    public SectorDTO(Long id, String description, PlantType plantType,
-                     List<CoordinateDTO> coordinates, LocalDate createdAt, Double areaInSquareMeters) {
+    public SectorDTO(Long id, String description, PlantType plantType, String variety,
+                     List<CoordinateDTO> coordinates, LocalDate createdAt) {
         this.id = id;
         this.description = description;
         this.plantType = plantType;
         this.coordinates = coordinates;
         this.createdAt = createdAt;
-        this.areaInSquareMeters = areaInSquareMeters;
+        this.variety = variety;
     }
 
     @Override
@@ -56,9 +57,9 @@ public class SectorDTO {
                 "id=" + id +
                 ", description='" + description + '\'' +
                 ", plantType='" + plantType + '\'' +
+                ", variety=" + variety + '\'' +
                 ", coordinates=" + coordinates +
                 ", createdAt=" + createdAt +
-                ", areaInSquareMeters=" + areaInSquareMeters +
                 '}';
     }
 }

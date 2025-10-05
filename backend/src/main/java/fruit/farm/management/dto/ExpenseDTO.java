@@ -32,4 +32,6 @@ public class ExpenseDTO {
     private boolean isPaid;
 
     private Long userId;
+
+    private SectorDTO sectorDTO;
 }

@@ -1,15 +1,17 @@
 package fruit.farm.management.service;
 
+import fruit.farm.management.dto.CoordinateDTO;
 import fruit.farm.management.dto.SectorDTO;
-import fruit.farm.management.dto.UserDTO;
+import fruit.farm.management.entity.CoordinateEntity;
 import fruit.farm.management.entity.SectorEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.CoordinateMapper;
-import fruit.farm.management.mapper.UserMapper;
+import fruit.farm.management.mapper.SectorMapper;
 import fruit.farm.management.repository.SectorRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,6 +30,7 @@ public class SectorService {
         sector.setPlantType(sectorDTO.getPlantType());
         sector.setCreatedAt(LocalDate.now());
         sector.setUserEntity(userEntity);
+        sector.setVariety(sectorDTO.getVariety());
         sector.setCoordinates(CoordinateMapper.mapToEntities(sectorDTO.getCoordinates(), sector));
 
         SectorEntity savedSector = sectorRepository.save(sector);
@@ -35,16 +38,28 @@ public class SectorService {
         return convertToDTO(savedSector);
     }
 
-    public void updateSector(SectorDTO sectorDTO) {
+    public SectorDTO updateSector(SectorDTO sectorDTO) {
         SectorEntity sector = sectorRepository.findById(sectorDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Sector not found"));
 
         sector.setDescription(sectorDTO.getDescription());
         sector.setPlantType(sectorDTO.getPlantType());
-        sector.setCoordinates(CoordinateMapper.mapToEntities(sectorDTO.getCoordinates(), sector));
+        sector.setVariety(sectorDTO.getVariety());
 
+        List<CoordinateEntity> coordsBefore = sector.getCoordinates();
+        List<CoordinateEntity> coordsAfter = new ArrayList<>();
+
+        for (int i = 0; i < coordsBefore.size(); i++) {
+
+            CoordinateEntity coordinateEntity = coordsBefore.get(i);
+            coordinateEntity.setLatitude(sectorDTO.getCoordinates().get(i).getLatitude());
+            coordinateEntity.setLongitude(sectorDTO.getCoordinates().get(i).getLongitude());
+            coordsAfter.add(coordinateEntity);
+        }
+
+        sector.setCoordinates(coordsAfter);
         SectorEntity savedSector = sectorRepository.save(sector);
-        convertToDTO(savedSector);
+        return convertToDTO(savedSector);
     }
 
     public SectorDTO getSector(Long id) {
@@ -65,7 +80,44 @@ public class SectorService {
         dto.setDescription(sector.getDescription());
         dto.setCoordinates(CoordinateMapper.mapFromEntities(sector.getCoordinates(), sector));
         dto.setPlantType(sector.getPlantType());
-        dto.setCreatedAt(sector.getCreatedAt());;
+        dto.setVariety(sector.getVariety());
+        dto.setCreatedAt(sector.getCreatedAt());
+        ;
         return dto;
+    }
+
+    public List<SectorDTO> updateSectors(List<SectorDTO> sectorDTOs, Long userId) {
+        List<SectorDTO> updatedSectors = new ArrayList<>();
+
+        for (SectorDTO sectorDTO : sectorDTOs) {
+            SectorEntity existingSector = sectorRepository.findById(sectorDTO.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Sector not found: " + sectorDTO.getId()));
+
+            if (!existingSector.getUserEntity().getId().equals(userId)) {
+                throw new SecurityException("Unauthorized access to sector: " + sectorDTO.getId());
+            }
+
+            existingSector.setDescription(sectorDTO.getDescription());
+            existingSector.setPlantType(sectorDTO.getPlantType());
+            existingSector.setVariety(sectorDTO.getVariety());
+
+            existingSector.getCoordinates().clear();
+
+
+            for (CoordinateDTO coordDTO : sectorDTO.getCoordinates()) {
+                CoordinateEntity coordEntity = new CoordinateEntity();
+                coordEntity.setLatitude(coordDTO.getLatitude());
+                coordEntity.setLongitude(coordDTO.getLongitude());
+                coordEntity.setSector(existingSector);
+                existingSector.getCoordinates().add(coordEntity);
+            }
+
+            SectorEntity saved = sectorRepository.save(existingSector);
+
+            SectorDTO updated = SectorMapper.mapToDTO(saved);
+            updatedSectors.add(updated);
+        }
+
+        return updatedSectors;
     }
 }

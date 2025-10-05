@@ -8,12 +8,17 @@ import java.time.LocalDate;
 
 public class ExpenseMapper {
 
-    public static ExpenseEntity mapToEntity(ExpenseDTO expenseDTO, UserEntity user){
-        return new ExpenseEntity(expenseDTO.getType(), expenseDTO.getAmount(), expenseDTO.getDescription(), user, expenseDTO.isPaid());
+    public static ExpenseEntity mapToEntity(ExpenseDTO expenseDTO, UserEntity user) {
+        if (expenseDTO.getSectorDTO() == null) {
+            return new ExpenseEntity(expenseDTO.getType(), expenseDTO.getAmount(), expenseDTO.getDescription(), user, expenseDTO.isPaid(), null);
+        }
+        return new ExpenseEntity(expenseDTO.getType(), expenseDTO.getAmount(), expenseDTO.getDescription(), user, expenseDTO.isPaid(), SectorMapper.mapFromDTO(expenseDTO.getSectorDTO(), UserMapper.mapFromEntity(user)));
     }
 
     public static ExpenseDTO mapFromEntity(ExpenseEntity expenseEntity) {
-        return new ExpenseDTO(expenseEntity.getExpenseId(), expenseEntity.getProductType(), expenseEntity.getExpenseCost(),
-                LocalDate.now(), expenseEntity.getDescription(), expenseEntity.isPaid(), expenseEntity.getUserEntity().getId());
+        if(expenseEntity.getSectorEntity() == null) {
+            return new ExpenseDTO(expenseEntity.getExpenseId(), expenseEntity.getProductType(), expenseEntity.getExpenseCost(), LocalDate.now(), expenseEntity.getDescription(), expenseEntity.isPaid(), expenseEntity.getUserEntity().getId(), null); 
+        }
+        return new ExpenseDTO(expenseEntity.getExpenseId(), expenseEntity.getProductType(), expenseEntity.getExpenseCost(), LocalDate.now(), expenseEntity.getDescription(), expenseEntity.isPaid(), expenseEntity.getUserEntity().getId(), SectorMapper.mapToDTO(expenseEntity.getSectorEntity()));
     }
 }
