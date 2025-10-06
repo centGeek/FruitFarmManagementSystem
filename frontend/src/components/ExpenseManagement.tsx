@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
-
-
 
 const EXPENSE_TYPES = [
     { value: 'MACHINE', label: 'Maszyny / Sprzęt 🚜' },
@@ -10,7 +9,6 @@ const EXPENSE_TYPES = [
     { value: 'OTHER', label: 'Inne 🧾' },
 ];
 
-// Nowe stałe dla filtru statusu płatności
 const PAYMENT_STATUS_OPTIONS = [
     { value: '', label: 'Wszystkie 📋' },
     { value: 'paid', label: 'Opłacone ✅' },
@@ -85,7 +83,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     );
 };
 
-const InputField = React.memo(({ label, name, type = 'text', required = false, isPassword = false, error, isLoading, showPassword, setShowPassword, handleChange, value, ...props }) => (
+const InputField = React.memo(({ label, name, type = 'text', required = false, error, isLoading, handleChange, value, ...props }) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
             {label} {required && '*'}
@@ -93,7 +91,7 @@ const InputField = React.memo(({ label, name, type = 'text', required = false, i
         <div className="relative">
             <input
                 id={name}
-                type={type} // Dla uproszczenia w ExpenseForm, typ jest stały
+                type={type}
                 name={name}
                 onChange={handleChange}
                 className={`w-full px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'} border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors`}
@@ -147,12 +145,8 @@ const EmptyState = ({ searchTerm, expensesCount, onAddClick }) => {
     );
 };
 
-
-// --- 1. ExpenseForm (Formularz) ---
-
-const ExpenseForm = ({ expense, onSave, onCancel, isLoading }) => {
+const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
     const isUpdating = !!expense;
-    // Format daty na 'YYYY-MM-DD'
     const today = new Date().toISOString().split('T')[0];
 
     const initialState = useMemo(() => ({
@@ -162,6 +156,7 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading }) => {
         type: expense?.type || EXPENSE_TYPES[0].value,
         description: expense?.description || '',
         paid: expense?.paid ?? false,
+        sectorId: expense?.sectorDTO?.id?.toString() || '',
     }), [expense, today]);
 
     const [formData, setFormData] = useState(initialState);
@@ -204,11 +199,16 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading }) => {
             const submitData = {
                 ...formData,
                 amount: Number(formData.amount),
-                date: formData.date 
+                date: formData.date,
+                sectorDTO: formData.sectorId ? { id: Number(formData.sectorId) } : null
             };
+            // Usuń sectorId z wysyłanych danych
+            delete submitData.sectorId;
             onSave(submitData);
         }
     }, [validate, formData, onSave]);
+
+    const selectedSector = sectors?.find(s => s.id === Number(formData.sectorId));
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -242,6 +242,33 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading }) => {
                     ))}
                 </select>
                 {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type}</p>}
+            </div>
+
+            <div>
+                <label htmlFor="sectorId" className="block text-sm font-medium text-gray-700 mb-2">
+                    Przypisz do Sektora (opcjonalnie) 🗺️
+                </label>
+                <select
+                    id="sectorId"
+                    name="sectorId"
+                    value={formData.sectorId}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border-gray-300 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
+                    disabled={isLoading}
+                >
+                    <option value="">Bez przypisania do sektora</option>
+                    {sectors && sectors.map(sector => (
+                        <option key={sector.id} value={sector.id}>
+                            {sector.description || `Sektor ${sector.id}`}
+                            {sector.plantType && ` - ${sector.plantType}`}
+                        </option>
+                    ))}
+                </select>
+                {selectedSector && (
+                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                        📍 Wydatek zostanie przypisany do: <strong>{selectedSector.description || `Sektor ${selectedSector.id}`}</strong>
+                    </div>
+                )}
             </div>
 
             <div>
@@ -311,10 +338,11 @@ const getExpenseTypeDetails = (type) => {
     }
 };
 
-const ExpenseCard = ({ expense, onEdit, onDelete }) => {
+const ExpenseCard = ({ expense, onEdit, onDelete, sectors }) => {
     const typeDetails = getExpenseTypeDetails(expense.type);
     const isPaid = expense.paid;
     const expenseDate = new Date(expense.date).toLocaleDateString('pl-PL');
+    const assignedSector = expense.sectorDTO || null;
 
     return (
         <div className={`bg-white border-2 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 ${isPaid ? 'border-green-300' : 'border-red-300'}`}>
@@ -335,14 +363,14 @@ const ExpenseCard = ({ expense, onEdit, onDelete }) => {
                     <button
                         onClick={() => onEdit(expense)}
                         className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-base"
-                        title="Edytuj ✏️"
+                        title="Edytuj"
                     >
                         ✏️
                     </button>
                     <button
                         onClick={() => onDelete(expense.id)}
                         className="p-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors text-base"
-                        title="Usuń 🗑️"
+                        title="Usuń"
                     >
                         🗑️
                     </button>
@@ -355,14 +383,23 @@ const ExpenseCard = ({ expense, onEdit, onDelete }) => {
                 </span>
                 {isPaid ? (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                        ✅ Opłacony
+                        Opłacony
                     </span>
                 ) : (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                        ⏳ Nieopłacony
+                        Nieopłacony
                     </span>
                 )}
             </div>
+
+            {assignedSector && (
+                <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-600 font-medium">
+                        Sektor: {assignedSector.description || `Sektor ${assignedSector.id}`}
+                        {assignedSector.plantType && ` (${assignedSector.plantType})`}
+                    </p>
+                </div>
+            )}
 
             <div className="pt-4 border-t border-gray-100">
                 <p className="text-sm font-medium text-gray-500 uppercase mb-1">Opis</p>
@@ -401,8 +438,10 @@ const StatCard = ({ count, label, color, amount }) => {
 
 export default function ExpenseManagement() {
     const [allExpenses, setAllExpenses] = useState([]);
+    const [sectors, setSectors] = useState([]);
     const [selectedType, setSelectedType] = useState('');
-    const [selectedPaymentStatus, setSelectedPaymentStatus] = useState(''); // Nowy stan dla filtru płatności
+    const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('');
+    const [selectedSectorId, setSelectedSectorId] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState(null);
@@ -429,15 +468,48 @@ export default function ExpenseManagement() {
                 setAlert({ type: 'error', message: `Błąd ładowania wydatków: ${error.message || response.statusText}` });
             }
         } catch (error) {
-            setAlert({ type: 'error', message: `Błąd sieci: Nie można połączyć z backendem (8091).` });
+            setAlert({ type: 'error', message: `Błąd sieci: Nie można połączyć z backendem.` });
         } finally {
             setIsLoading(false);
         }
-    }, [closeAlert]); 
+    }, []);
+
+    const fetchSectors = useCallback(async () => {
+        console.log('🔍 Rozpoczynam pobieranie sektorów z:', `${BACKEND_URL}/api/sectors`);
+        try {
+            const headers = getAuthHeaders();
+            console.log('📤 Wysyłam request z nagłówkami:', headers);
+            
+            const response = await fetch(`${BACKEND_URL}/api/sectors`, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            console.log('📥 Odpowiedź serwera - Status:', response.status, response.statusText);
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Załadowane sektory:', data);
+                console.log('📊 Liczba sektorów:', Array.isArray(data) ? data.length : 'Nie jest tablicą');
+                setSectors(Array.isArray(data) ? data : []);
+            } else {
+                const errorText = await response.text();
+                console.error('❌ Błąd HTTP:', response.status, errorText);
+                setAlert({ type: 'warning', message: `Nie udało się załadować sektorów (${response.status}). Możesz dodawać wydatki bez przypisania do sektora.` });
+                setSectors([]); // Ustaw pustą tablicę
+            }
+        } catch (error) {
+            console.error('❌ Błąd pobierania sektorów:', error);
+            console.error('Szczegóły błędu:', error.message);
+            setAlert({ type: 'warning', message: 'Nie można połączyć z API sektorów. Wydatki można dodawać bez przypisania do sektora.' });
+            setSectors([]); // Ustaw pustą tablicę
+        }
+    }, []);
 
     useEffect(() => {
-        fetchExpenses(); 
-    }, [fetchExpenses]); 
+        fetchExpenses();
+        fetchSectors();
+    }, [fetchExpenses, fetchSectors]);
 
     const handleSaveExpense = useCallback(async (expenseData) => {
         setIsLoading(true);
@@ -465,7 +537,7 @@ export default function ExpenseManagement() {
                 setAlert({ type: 'error', message: `Błąd zapisu (${response.status}): ${error.message || error.error || response.statusText}` });
             }
         } catch (error) {
-            setAlert({ type: 'error', message: `Błąd sieci: Nie można zapisać wydatku. Sprawdź CORS/Token.` });
+            setAlert({ type: 'error', message: `Błąd sieci: Nie można zapisać wydatku.` });
         } finally {
             setIsLoading(false);
         }
@@ -507,12 +579,10 @@ export default function ExpenseManagement() {
     const filteredExpenses = useMemo(() => {
         let list = allExpenses;
 
-        // Filtrowanie po typie wydatku
         if (selectedType) {
             list = list.filter(exp => exp.type === selectedType);
         }
 
-        // Filtrowanie po statusie płatności
         if (selectedPaymentStatus) {
             if (selectedPaymentStatus === 'paid') {
                 list = list.filter(exp => exp.paid === true);
@@ -521,7 +591,10 @@ export default function ExpenseManagement() {
             }
         }
 
-        // Filtrowanie po wyszukiwanym terminie
+        if (selectedSectorId) {
+            list = list.filter(exp => exp.sectorDTO?.id === Number(selectedSectorId));
+        }
+
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
             list = list.filter(exp =>
@@ -533,7 +606,7 @@ export default function ExpenseManagement() {
         }
         
         return list.sort((a, b) => new Date(b.date) - new Date(a.date)); 
-    }, [allExpenses, selectedType, selectedPaymentStatus, searchTerm]); 
+    }, [allExpenses, selectedType, selectedPaymentStatus, selectedSectorId, searchTerm]);
     
     const totalAmount = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
     const paidAmount = allExpenses.filter(exp => exp.paid).reduce((sum, exp) => sum + exp.amount, 0);
@@ -574,12 +647,8 @@ export default function ExpenseManagement() {
                     />
                 </div>
 
-                {/* Panel wyszukiwania i filtrów */}
                 <div className="bg-white rounded-2xl shadow-lg border border-red-100 mb-8">
-                    
-                    {/* Zawartość panelu */}
                     <div className="p-6 space-y-6">
-                        {/* Sekcja wyszukiwania */}
                         <div className="space-y-3">
                             <label className="block text-sm font-medium text-gray-700">
                                 🔍 Wyszukiwanie w wydatkach
@@ -605,11 +674,8 @@ export default function ExpenseManagement() {
                             </div>
                         </div>
 
-                        {/* Sekcja filtrów */}
                         <div className="space-y-4">
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Filtr typu wydatku */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-2">
                                     <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
                                         Typ wydatku
@@ -626,7 +692,6 @@ export default function ExpenseManagement() {
                                     </select>
                                 </div>
 
-                                {/* Filtr statusu płatności */}
                                 <div className="space-y-2">
                                     <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
                                         Status płatności
@@ -641,10 +706,28 @@ export default function ExpenseManagement() {
                                         ))}
                                     </select>
                                 </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                        Sektor 🗺️
+                                    </label>
+                                    <select
+                                        value={selectedSectorId}
+                                        onChange={(e) => setSelectedSectorId(e.target.value)}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors shadow-sm"
+                                    >
+                                        <option value="">📋 Wszystkie sektory</option>
+                                        {sectors.map(sector => (
+                                            <option key={sector.id} value={sector.id}>
+                                                {sector.description || `Sektor ${sector.id}`}
+                                                {sector.plantType && ` - ${sector.plantType}`}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>                            
                         </div>
 
-                        {/* Przycisk dodawania wydatku */}
                         <div className="pt-4 border-t border-gray-100">
                             <button
                                 onClick={() => openModal()}
@@ -671,7 +754,7 @@ export default function ExpenseManagement() {
                         <LoadingState />
                     ) : filteredExpenses.length === 0 ? (
                         <EmptyState 
-                            searchTerm={searchTerm || selectedType || selectedPaymentStatus} 
+                            searchTerm={searchTerm || selectedType || selectedPaymentStatus || selectedSectorId} 
                             expensesCount={allExpenses.length}
                             onAddClick={openModal} 
                         />
@@ -683,6 +766,7 @@ export default function ExpenseManagement() {
                                     expense={expense}
                                     onEdit={openModal}
                                     onDelete={handleDeleteExpense}
+                                    sectors={sectors}
                                 />
                             ))}
                         </div>
@@ -693,13 +777,14 @@ export default function ExpenseManagement() {
             <Modal
                 isOpen={isModalOpen}
                 onClose={closeModal}
-                title={'Dodaj Nowy Wydatek'}
+                title={selectedExpense ? 'Edytuj Wydatek' : 'Dodaj Nowy Wydatek'}
             >
                 <ExpenseForm
                     expense={selectedExpense}
                     onSave={handleSaveExpense}
                     onCancel={closeModal}
                     isLoading={isLoading}
+                    sectors={sectors}
                 />
             </Modal>
         </div>

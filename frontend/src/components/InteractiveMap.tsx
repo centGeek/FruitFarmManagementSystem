@@ -877,6 +877,50 @@ const updateCornerPosition = async (sectorIndex, cornerIndex, newLatLng) => {
     }
   });
   editMarkersRef.current = [];
+if (drawingMode === 'polygon' && drawingPoints.length > 0) {
+    // Rysuj już umieszczone punkty
+    drawingPoints.forEach((point, index) => {
+      const pointMarker = L.circleMarker([point.lat, point.lng], {
+        radius: 8,
+        fillColor: '#ff6b00',
+        color: '#ffffff',
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.9
+      }).addTo(drawnItems);
+
+      pointMarker.bindTooltip(`Punkt ${index + 1}`, {
+        permanent: true,
+        direction: 'top',
+        className: 'drawing-tooltip'
+      });
+    });
+
+    // Rysuj linie łączące punkty
+    if (drawingPoints.length > 1) {
+      const linePoints = drawingPoints.map(p => [p.lat, p.lng]);
+      L.polyline(linePoints, {
+        color: '#ff6b00',
+        weight: 2,
+        opacity: 0.7,
+        dashArray: '5, 5'
+      }).addTo(drawnItems);
+    }
+
+    // Jeśli mamy 3 punkty, narysuj linię do pierwszego punktu (zamknięcie)
+    if (drawingPoints.length === 3) {
+      const closingLine = [
+        [drawingPoints[drawingPoints.length - 1].lat, drawingPoints[drawingPoints.length - 1].lng],
+        [drawingPoints[0].lat, drawingPoints[0].lng]
+      ];
+      L.polyline(closingLine, {
+        color: '#ff6b00',
+        weight: 2,
+        opacity: 0.5,
+        dashArray: '10, 10'
+      }).addTo(drawnItems);
+    }
+  }
 
   const sectorsToShow = sectors.filter((_, index) => visibleSectorIndices.includes(index));
 

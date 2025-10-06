@@ -1,12 +1,10 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.SectorDTO;
-import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

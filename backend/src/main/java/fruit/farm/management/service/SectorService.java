@@ -62,7 +62,7 @@ public class SectorService {
         return convertToDTO(savedSector);
     }
 
-    public SectorDTO getSector(Long id) {
+    public SectorDTO getSectorById(Long id) {
         SectorEntity sector = sectorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sector not found"));
         return convertToDTO(sector);

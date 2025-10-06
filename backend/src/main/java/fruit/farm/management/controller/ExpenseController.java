@@ -1,10 +1,12 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.ExpenseDTO;
+import fruit.farm.management.dto.SectorDTO;
 import fruit.farm.management.entity.ExpenseEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.ExpenseMapper;
 import fruit.farm.management.repository.ExpenseRepository;
+import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +26,15 @@ public class ExpenseController {
 
     private final ExpenseRepository expenseRepository;
     private final UserService userService;
+    private final SectorService sectorService;
 
     @PostMapping
     public ResponseEntity<ExpenseDTO> createExpense(@Valid @RequestBody ExpenseDTO expenseDto) {
         UserEntity userEntity = userService.getLoggedInUserId();
         log.info("Creating expense for User ID: {}", userEntity.getId());
+
+        SectorDTO sectorById = sectorService.getSectorById(expenseDto.getSectorDTO().getId());
+        expenseDto.setSectorDTO(sectorById);
 
         try {
             ExpenseEntity expenseEntity = ExpenseMapper.mapToEntity(expenseDto, userEntity);
