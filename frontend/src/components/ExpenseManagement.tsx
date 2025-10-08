@@ -3,10 +3,47 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 
 const EXPENSE_TYPES = [
-    { value: 'MACHINE', label: 'Maszyny / Sprzęt 🚜' },
-    { value: 'GAS', label: 'Paliwo / Gaz ⛽' },
-    { value: 'SUPPLIES', label: 'Zaopatrzenie 🛒' },
-    { value: 'OTHER', label: 'Inne 🧾' },
+  // 🌱 Produkcja i pielęgnacja sadu
+  { value: 'PESTICIDES', label: 'Opryski / Środki ochrony roślin', icon: '🧴', color: 'bg-green-50 text-green-700 border-green-200' },
+  { value: 'FERTILIZERS', label: 'Nawozy', icon: '🌾', color: 'bg-green-50 text-green-700 border-green-200' },
+  { value: 'PLANTING', label: 'Sadzenie / Nowe drzewka', icon: '🌳', color: 'bg-green-50 text-green-700 border-green-200' },
+  { value: 'IRRIGATION', label: 'Nawadnianie / System nawadniania', icon: '💧', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { value: 'ELECTRICITY', label: 'Prąd', icon: '⚡', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  { value: 'WATER', label: 'Woda', icon: '💧', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { value: 'SUPPORT_MATERIALS', label: 'Paliki / Druty / Rusztowania', icon: '🪵', color: 'bg-green-50 text-green-700 border-green-200' },
+  { value: 'PROTECTIVE_NETS', label: 'Siatki / Folie / Agrowłóknina', icon: '🕸️', color: 'bg-green-50 text-green-700 border-green-200' },
+
+  // 🧰 Sprzęt i eksploatacja
+  { value: 'MACHINE', label: 'Maszyny / Sprzęt', icon: '🚜', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  { value: 'REPAIRS', label: 'Naprawy / Części zamienne', icon: '🔧', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  { value: 'FUEL', label: 'Paliwo / Oleje / Smary', icon: '⛽', color: 'bg-orange-50 text-orange-700 border-orange-200' },
+  { value: 'INSURANCE', label: 'Ubezpieczenia (maszyny, sad)', icon: '🧾', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+
+  // 👨‍🌾 Praca i usługi
+  { value: 'LABOUR', label: 'Pracownicy sezonowi', icon: '💼', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'ACCOMMODATION', label: 'Zakwaterowanie / Wyżywienie pracowników', icon: '🏠🍽️', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'AGRI_SERVICES', label: 'Usługi rolnicze / Analizy gleby', icon: '🧪', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'TRANSPORT', label: 'Transport / Logistyka', icon: '🚚', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'TRAINING', label: 'Szkolenia / Doradztwo / Certyfikaty', icon: '🎓', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+
+  // 🍎 Zbiory i sprzedaż
+  { value: 'PACKAGING', label: 'Opakowania / Skrzynki / Kartony', icon: '📦', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  { value: 'COLD_STORAGE', label: 'Chłodnia / Przechowalnia', icon: '🧊', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { value: 'MARKETING', label: 'Marketing / Sprzedaż / Prowizje', icon: '💰', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  { value: 'OFFICE', label: 'Materiały biurowe / Telefon / Internet', icon: '📱', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+
+  // 🏗️ Inwestycje i infrastruktura
+  { value: 'RENOVATIONS', label: 'Renowacje / Inwestycje w sadzie', icon: '🧱', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  { value: 'INFRASTRUCTURE', label: 'Drogi / Ogrodzenia / Budynki', icon: '🚧', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  { value: 'TECH_UPGRADES', label: 'Modernizacje / Nowe technologie', icon: '⚙️', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+
+  // 💸 Podatki i administracja
+  { value: 'TAXES', label: 'Podatki / Opłaty / KRUS', icon: '💸', color: 'bg-red-50 text-red-700 border-red-200' },
+  { value: 'ACCOUNTING', label: 'Księgowość / Biuro rachunkowe', icon: '📊', color: 'bg-red-50 text-red-700 border-red-200' },
+
+  // 🪙 Drobne i inne wydatki
+  { value: 'OTHER_SUPPLIES', label: 'Inne zaopatrzenie', icon: '🛒', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { value: 'OTHER', label: 'Inne wydatki', icon: '🪙', color: 'bg-gray-50 text-gray-700 border-gray-200' },
 ];
 
 const PAYMENT_STATUS_OPTIONS = [
@@ -155,7 +192,7 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
         amount: expense?.amount?.toString() || '',
         type: expense?.type || EXPENSE_TYPES[0].value,
         description: expense?.description || '',
-        paid: expense?.paid ?? false,
+        paid: expense?.paid ?? true,
         sectorId: expense?.sectorDTO?.id?.toString() || '',
     }), [expense, today]);
 
@@ -328,15 +365,14 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
     );
 };
 
-const getExpenseTypeDetails = (type) => {
-    switch(type) {
-        case 'MACHINE': return { label: 'Maszyny', icon: '🚜', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
-        case 'GAS': return { label: 'Paliwo', icon: '⛽', color: 'bg-orange-50 text-orange-700 border-orange-200' };
-        case 'SUPPLIES': return { label: 'Zaopatrzenie', icon: '🛒', color: 'bg-blue-50 text-blue-700 border-blue-200' };
-        case 'OTHER': return { label: 'Inne', icon: '🧾', color: 'bg-gray-50 text-gray-700 border-gray-200' };
-        default: return { label: 'Nieznany', icon: '❓', color: 'bg-gray-50 text-gray-700 border-gray-200' };
-    }
+const getExpenseTypeDetails = (type: string) => {
+  const expense = EXPENSE_TYPES.find(exp => exp.value === type);
+
+  return expense
+    ? { label: expense.label, icon: expense.icon, color: expense.color }
+    : { label: 'Nieznany', icon: '❓', color: 'bg-gray-50 text-gray-700 border-gray-200' };
 };
+
 
 const ExpenseCard = ({ expense, onEdit, onDelete, sectors }) => {
     const typeDetails = getExpenseTypeDetails(expense.type);
@@ -413,7 +449,8 @@ const StatCard = ({ count, label, color, amount }) => {
     const colorMap = {
         green: { bg: 'from-green-100 to-green-200', text: 'text-green-600', icon: '✅' },
         red: { bg: 'from-red-100 to-red-200', text: 'text-red-600', icon: '💸' },
-        blue: { bg: 'from-blue-100 to-blue-200', text: 'text-blue-600', icon: '📊' }
+        blue: { bg: 'from-blue-100 to-blue-200', text: 'text-blue-600', icon: '📊' },
+        purple: { bg: 'from-purple-100 to-purple-200', text: 'text-purple-600', icon: '🗺️' }
     };
     const colors = colorMap[color] || colorMap.red;
     
@@ -496,13 +533,13 @@ export default function ExpenseManagement() {
                 const errorText = await response.text();
                 console.error('❌ Błąd HTTP:', response.status, errorText);
                 setAlert({ type: 'warning', message: `Nie udało się załadować sektorów (${response.status}). Możesz dodawać wydatki bez przypisania do sektora.` });
-                setSectors([]); // Ustaw pustą tablicę
+                setSectors([]);
             }
         } catch (error) {
             console.error('❌ Błąd pobierania sektorów:', error);
             console.error('Szczegóły błędu:', error.message);
             setAlert({ type: 'warning', message: 'Nie można połączyć z API sektorów. Wydatki można dodawać bez przypisania do sektora.' });
-            setSectors([]); // Ustaw pustą tablicę
+            setSectors([]);
         }
     }, []);
 
@@ -608,9 +645,24 @@ export default function ExpenseManagement() {
         return list.sort((a, b) => new Date(b.date) - new Date(a.date)); 
     }, [allExpenses, selectedType, selectedPaymentStatus, selectedSectorId, searchTerm]);
     
-    const totalAmount = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-    const paidAmount = allExpenses.filter(exp => exp.paid).reduce((sum, exp) => sum + exp.amount, 0);
-    const unpaidAmount = totalAmount - paidAmount;
+    // Statystyki dla przefiltrowanych wydatków
+    const filteredStats = useMemo(() => {
+        const total = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const paid = filteredExpenses.filter(exp => exp.paid).reduce((sum, exp) => sum + exp.amount, 0);
+        const unpaid = total - paid;
+        
+        return { total, paid, unpaid };
+    }, [filteredExpenses]);
+
+    // Nazwa wybranego sektora dla wyświetlenia
+    const selectedSectorName = useMemo(() => {
+        if (!selectedSectorId) return null;
+        const sector = sectors.find(s => s.id === Number(selectedSectorId));
+        return sector ? (sector.description || `Sektor ${sector.id}`) : null;
+    }, [selectedSectorId, sectors]);
+
+    // Sprawdzenie czy jakiekolwiek filtry są aktywne
+    const hasActiveFilters = selectedType || selectedPaymentStatus || selectedSectorId || searchTerm;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-red-50 via-red-50 to-orange-100 p-6 font-sans">
@@ -630,22 +682,69 @@ export default function ExpenseManagement() {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <StatCard 
-                        amount={totalAmount} 
-                        label="Całkowite Wydatki (Wszystkie)" 
-                        color="red"
-                    />
-                    <StatCard 
-                        amount={unpaidAmount} 
-                        label="Wydatki Nieopłacone (Do Zapłaty)" 
-                        color="red" 
-                    />
-                    <StatCard 
-                        count={filteredExpenses.length} 
-                        label="Wyświetlanych Wydatków" 
+            <StatCard 
+                        amount={filteredStats.total} 
+                        label={hasActiveFilters ? "Suma Przefiltrowanych" : "Całkowite Wydatki"} 
                         color="blue"
                     />
+                    <StatCard 
+                        amount={filteredStats.paid} 
+                        label={hasActiveFilters ? "Opłacone (Przefiltrowane)" : "Wydatki Opłacone"} 
+                        color="green"
+                    />
+                    <StatCard 
+                        amount={filteredStats.unpaid} 
+                        label={hasActiveFilters ? "Nieopłacone (Przefiltrowane)" : "Wydatki Nieopłacone"} 
+                        color="red" 
+                    />
                 </div>
+
+                {/* Informacja o aktywnych filtrach */}
+                {hasActiveFilters && (
+                    <div className="bg-purple-50 border-2 border-purple-200 rounded-2xl p-4 mb-6 shadow-md">
+                        <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-purple-900 mb-2 flex items-center">
+                                    <span className="mr-2">🔍</span>
+                                    Aktywne Filtry
+                                </h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {selectedType && (
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                            Typ: {EXPENSE_TYPES.find(t => t.value === selectedType)?.label}
+                                        </span>
+                                    )}
+                                    {selectedPaymentStatus && (
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                            Status: {PAYMENT_STATUS_OPTIONS.find(o => o.value === selectedPaymentStatus)?.label}
+                                        </span>
+                                    )}
+                                    {selectedSectorId && selectedSectorName && (
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                            🗺️ Sektor: {selectedSectorName}
+                                        </span>
+                                    )}
+                                    {searchTerm && (
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                            Szukaj: "{searchTerm}"
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setSelectedType('');
+                                    setSelectedPaymentStatus('');
+                                    setSelectedSectorId('');
+                                    setSearchTerm('');
+                                }}
+                                className="ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors text-sm whitespace-nowrap"
+                            >
+                                Wyczyść Filtry
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 <div className="bg-white rounded-2xl shadow-lg border border-red-100 mb-8">
                     <div className="p-6 space-y-6">

@@ -32,9 +32,11 @@ public class ExpenseController {
     public ResponseEntity<ExpenseDTO> createExpense(@Valid @RequestBody ExpenseDTO expenseDto) {
         UserEntity userEntity = userService.getLoggedInUserId();
         log.info("Creating expense for User ID: {}", userEntity.getId());
+        if(expenseDto.getSectorDTO() != null ) {
 
-        SectorDTO sectorById = sectorService.getSectorById(expenseDto.getSectorDTO().getId());
-        expenseDto.setSectorDTO(sectorById);
+            SectorDTO sectorById = sectorService.getSectorById(expenseDto.getSectorDTO().getId());
+            expenseDto.setSectorDTO(sectorById);
+        }
 
         try {
             ExpenseEntity expenseEntity = ExpenseMapper.mapToEntity(expenseDto, userEntity);

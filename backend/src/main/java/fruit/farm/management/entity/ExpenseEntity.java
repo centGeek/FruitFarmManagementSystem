@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,6 +29,9 @@ public class ExpenseEntity {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "created_at")
+    private LocalDate createdAt;
+
     @Column(name = "is_paid")
     private boolean isPaid;
 
@@ -48,5 +52,6 @@ public class ExpenseEntity {
         this.userEntity = userEntity;
         this.isPaid = isPaid;
         this.sectorEntity = sectorEntity;
+        this.createdAt = LocalDate.now();
     }
 }

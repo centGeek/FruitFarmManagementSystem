@@ -1230,9 +1230,205 @@ if (drawingMode === 'polygon' && drawingPoints.length > 0) {
     </div>
   );
 };
+const EditSectorModal = ({ isOpen, onClose, sectorData, onSave }) => {
+  const [editedSector, setEditedSector] = useState({
+    id: null,
+    backendId: null,
+    name: '',
+    cropType: '',
+    variety: '',
+    corners: []
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
-const SectorsList = ({ sectors, onRefresh, isLoading }) => {
-  if (sectors.length === 0) {
+  useEffect(() => {
+    if (sectorData && isOpen) {
+      setEditedSector({
+        id: sectorData.id,
+        backendId: sectorData.backendId,
+        name: sectorData.name || '',
+        cropType: sectorData.cropType || '',
+        variety: sectorData.variety || '',
+        corners: sectorData.corners || []
+      });
+    }
+  }, [sectorData, isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleInputChange = (field, value) => {
+    setEditedSector(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      
+      if (field === 'cropType') {
+        updated.variety = '';
+      }
+      
+      return updated;
+    });
+  };
+
+  const handleSave = async () => {
+    if (!editedSector.name.trim()) {
+      alert('Nazwa sektora jest wymagana!');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await onSave(editedSector);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const selectedCropType = CROP_TYPES.find(c => c.value === editedSector.cropType);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[2000] p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                <Edit3 className="w-5 h-5 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Edytuj sektor
+              </h3>
+            </div>
+            <button 
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              disabled={isLoading}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="space-y-6 mb-6">
+            <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+              <h4 className="font-semibold text-orange-900 mb-4">Dane sektora</h4>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-orange-800 mb-2">
+                    Nazwa sektora *
+                  </label>
+                  <input
+                    type="text"
+                    value={editedSector.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="w-full p-3 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
+                    placeholder="np. Sektor wschodni, Sad jabłoniowy A..."
+                  />
+                  {!editedSector.name.trim() && (
+                    <p className="text-red-600 text-xs mt-1">Nazwa jest wymagana</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-orange-800 mb-2">
+                    Rodzaj uprawy
+                  </label>
+                  <select
+                    value={editedSector.cropType}
+                    onChange={(e) => handleInputChange('cropType', e.target.value)}
+                    className="w-full p-3 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
+                  >
+                    <option value="">Wybierz rodzaj uprawy...</option>
+                    {CROP_TYPES.map(crop => (
+                      <option key={crop.value} value={crop.value}>
+                        {crop.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {editedSector.cropType && selectedCropType && (
+                  <div>
+                    <label className="block text-sm font-medium text-orange-800 mb-2">
+                      Odmiana
+                    </label>
+                    <select
+                      value={editedSector.variety}
+                      onChange={(e) => handleInputChange('variety', e.target.value)}
+                      className="w-full p-3 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
+                    >
+                      <option value="">Wybierz odmianę...</option>
+                      {selectedCropType.varieties.map(variety => (
+                        <option key={variety.value} value={variety.value}>
+                          {variety.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {editedSector.cropType && (
+              <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <h4 className="font-semibold text-green-800 mb-2">Wybrana uprawa</h4>
+                <div className="p-3 bg-white rounded border border-green-300">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">
+                      {CROP_TYPES.find(c => c.value === editedSector.cropType)?.label.split(' ')[0]}
+                    </span>
+                    <div className="flex-1">
+                      <div className="font-bold text-green-900">
+                        {CROP_TYPES.find(c => c.value === editedSector.cropType)?.label}
+                      </div>
+                      <div className="text-xs text-green-700">
+                        Typ: {editedSector.cropType}
+                      </div>
+                    </div>
+                  </div>
+                  {editedSector.variety && (
+                    <div className="pt-2 border-t border-green-200">
+                      <div className="text-sm text-green-800">
+                        <span className="font-medium">Odmiana:</span>{' '}
+                        {selectedCropType?.varieties.find(v => v.value === editedSector.variety)?.label || editedSector.variety}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              disabled={isLoading}
+              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              Anuluj
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={isLoading || !editedSector.name.trim()}
+              className="flex-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 font-medium shadow-lg"
+            >
+              {isLoading ? (
+                <Loader className="w-4 h-4 animate-spin" />
+              ) : (
+                <Check className="w-4 h-4" />
+              )}
+              {isLoading ? 'Zapisywanie...' : 'Zapisz zmiany'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SectorsList = ({ sectors, onRefresh, isLoading, onEditSector }) => {
+    if (sectors.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-lg">
         <div className="flex justify-center gap-4 mb-4">
@@ -1259,91 +1455,101 @@ const SectorsList = ({ sectors, onRefresh, isLoading }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Zdefiniowane sektory</h2>
-        <button
-          onClick={onRefresh}
-          disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-          title="Odśwież dane z serwera"
-        >
-          <Loader className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Odśwież
-        </button>
-      </div>
+  <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-2xl font-semibold">Zdefiniowane sektory</h2>
+      <button
+        onClick={onRefresh}
+        disabled={isLoading}
+        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        title="Odśwież dane z serwera"
+      >
+        <Loader className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+        Odśwież
+      </button>
+    </div>
 
-      <div className="grid gap-4">
-        {sectors.map((sector) => {
-          const cropTypeData = CROP_TYPES.find(c => c.value === sector.cropType);
-          const varietyData = cropTypeData?.varieties.find(v => v.value === sector.variety);
-          
-          return (
-            <div key={sector.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nazwa sektora
-                  </label>
-                  <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
-                    {sector.name}
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Rodzaj uprawy
-                  </label>
-                  <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
-                    {cropTypeData ? cropTypeData.label : (sector.cropType || 'Nie określono')}
-                  </div>
+    <div className="grid gap-4">
+      {sectors.map((sector) => {
+        const cropTypeData = CROP_TYPES.find(c => c.value === sector.cropType);
+        const varietyData = cropTypeData?.varieties.find(v => v.value === sector.variety);
+        
+        return (
+          <div key={sector.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nazwa sektora
+                </label>
+                <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
+                  {sector.name}
                 </div>
               </div>
-
-              {sector.variety && (
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Odmiana
-                  </label>
-                  <div className="block text-sm font-medium text-gray-700 mb-1">
-                    🌱 {varietyData ? varietyData.label : sector.variety}
-                  </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Rodzaj uprawy
+                </label>
+                <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
+                  {cropTypeData ? cropTypeData.label : (sector.cropType || 'Nie określono')}
                 </div>
-              )}
-
-              <div className="mt-3 text-xs text-gray-500 bg-gray-50 p-2 rounded">
-
-                {sector.corners && sector.corners.length > 0 && (
-                  <details className="mt-2">
-                    <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium">
-                      Pokaż współrzędne GPS
-                    </summary>
-                    <div className="mt-2 space-y-1 bg-white p-2 rounded border border-gray-200 max-h-32 overflow-y-auto">
-                      {sector.corners.map((corner, idx) => (
-                        <div key={idx} className="flex justify-between text-xs font-mono">
-                          <span className="text-gray-600">Punkt {idx + 1}:</span>
-                          <span className="text-gray-800">
-                            {corner[0].toFixed(6)}, {corner[1].toFixed(6)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </details>
-                )}
               </div>
             </div>
-          );
-        })}
-      </div>
+
+            {sector.variety && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Odmiana
+                </label>
+                <div className="block text-sm font-medium text-gray-700 mb-1">
+                  🌱 {varietyData ? varietyData.label : sector.variety}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4 flex items-center justify-between gap-4">
+            <button
+              onClick={() => onEditSector(sector)}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+            >
+              <Edit3 className="w-4 h-4" />
+              Edytuj sektor
+            </button>
+
+            {sector.corners && sector.corners.length > 0 && (
+              <details className="text-xs">
+                <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  Współrzędne GPS
+                </summary>
+                <div className="absolute right-0 mt-2 bg-white p-3 rounded-lg border border-gray-200 shadow-lg z-10 max-h-40 overflow-y-auto min-w-64">
+                  <div className="space-y-1 font-mono text-xs">
+                    {sector.corners.map((corner, idx) => (
+                      <div key={idx} className="flex justify-between gap-4">
+                        <span className="text-gray-600">Punkt {idx + 1}:</span>
+                        <span className="text-gray-800">
+                          {corner[0].toFixed(6)}, {corner[1].toFixed(6)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </details>
+            )}
+          </div>
+          </div>
+        );
+      })}
     </div>
-  );
+  </div>
+);
 };
 
 const OrchardMapSystem = () => {
   const [sectors, setSectors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
-
+  const [editSectorModal, setEditSectorModal] = useState({ isOpen: false, sectorData: null });
   const loadSectorsFromBackend = useCallback(async () => {
     setIsLoading(true);
     setLoadError(null);
@@ -1382,6 +1588,63 @@ const OrchardMapSystem = () => {
       setIsLoading(false);
     }
   }, []);
+
+  const handleEditSector = (sector) => {
+  setEditSectorModal({
+    isOpen: true,
+    sectorData: sector
+  });
+};
+
+const handleSaveEditedSector = async (editedSector) => {
+  try {
+    if (!editedSector.backendId) {
+      alert('Brak ID backendu - nie można edytować tego sektora');
+      return;
+    }
+
+    const coordinatesDTO = editedSector.corners.map(corner => ({
+      latitude: corner[0],
+      longitude: corner[1]
+    }));
+
+    const backendData = {
+      id: editedSector.backendId,
+      description: editedSector.name,
+      plantType: editedSector.cropType || null,
+      variety: editedSector.variety || null,
+      coordinates: coordinatesDTO
+    };
+
+    console.log('Aktualizacja sektora w backendzie:', backendData);
+
+    const response = await fetch(`${BACKEND_URL}/api/sectors/${editedSector.backendId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(backendData)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    console.log('Sektor zaktualizowany w backendzie');
+
+    // Aktualizuj lokalny stan
+    const updatedSectors = sectors.map(s => 
+      s.id === editedSector.id ? editedSector : s
+    );
+    setSectors(updatedSectors);
+
+    setEditSectorModal({ isOpen: false, sectorData: null });
+    alert('Sektor został pomyślnie zaktualizowany!');
+    
+  } catch (error) {
+    console.error('Błąd podczas aktualizacji sektora:', error);
+    alert(`Nie udało się zaktualizować sektora: ${error.message}`);
+  }
+};
 
   useEffect(() => {
     loadSectorsFromBackend();
@@ -1429,24 +1692,24 @@ const OrchardMapSystem = () => {
           </div>
         )}
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{sectors.length}</div>
-            <div className="text-blue-800">Zdefiniowane sektory</div>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">
-              {sectors.filter(s => s.cropType).length}
-            </div>
-            <div className="text-green-800">Sektory z uprawą</div>
-          </div>
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">
-              {sectors.filter(s => s.backendId).length}
-            </div>
-            <div className="text-purple-800">Synchronizowane</div>
-          </div>
-        </div>
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div className="bg-blue-50 p-4 rounded-lg">
+    <div className="text-2xl font-bold text-blue-600">{sectors.length}</div>
+    <div className="text-blue-800">Zdefiniowane sektory</div>
+  </div>
+  <div className="bg-green-50 p-4 rounded-lg">
+    <div className="text-2xl font-bold text-green-600">
+      {sectors.filter(s => s.cropType).length}
+    </div>
+    <div className="text-green-800">Sektory z uprawą</div>
+  </div>
+  <div className="bg-amber-50 p-4 rounded-lg">
+    <div className="text-2xl font-bold text-amber-600">
+      {new Set(sectors.map(s => s.variety).filter(Boolean)).size}
+    </div>
+    <div className="text-amber-800">Rodzaje odmian</div>
+  </div>
+</div>
       </div>
 
       <div className="mb-6 rounded-lg overflow-hidden shadow-lg">
@@ -1461,6 +1724,14 @@ const OrchardMapSystem = () => {
         onSectorsChange={setSectors}
         onRefresh={loadSectorsFromBackend}
         isLoading={isLoading}
+        onEditSector={handleEditSector}
+      />
+
+      <EditSectorModal
+        isOpen={editSectorModal.isOpen}
+        onClose={() => setEditSectorModal({ isOpen: false, sectorData: null })}
+        sectorData={editSectorModal.sectorData}
+        onSave={handleSaveEditedSector}
       />
     </div>
   );
