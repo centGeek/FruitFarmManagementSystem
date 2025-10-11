@@ -52,6 +52,5 @@ public class ExpenseEntity {
         this.userEntity = userEntity;
         this.isPaid = isPaid;
         this.sectorEntity = sectorEntity;
-        this.createdAt = LocalDate.now();
     }
 }

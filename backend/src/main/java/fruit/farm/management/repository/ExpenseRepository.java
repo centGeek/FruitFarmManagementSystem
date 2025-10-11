@@ -6,11 +6,18 @@ import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.ExpenseMapper;
 import fruit.farm.management.repository.jpa.ExpenseJpaRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
-
 import org.springframework.http.HttpStatus;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
@@ -20,6 +27,7 @@ public class ExpenseRepository {
     private final ExpenseJpaRepository expenseJpaRepository;
 
     public ExpenseDTO addExpense(ExpenseEntity expenseEntity) {
+        expenseEntity.setCreatedAt(LocalDate.now());
         ExpenseEntity saved = expenseJpaRepository.save(expenseEntity);
         return ExpenseMapper.mapFromEntity(saved);
     }
@@ -29,6 +37,55 @@ public class ExpenseRepository {
                 .stream()
                 .map(ExpenseMapper::mapFromEntity)
                 .collect(Collectors.toList());
+    }
+
+    public Page<ExpenseDTO> getAllExpensesByGardenerWithFilters(
+            Long gardenerId,
+            String type,
+            Boolean paid,
+            Long sectorId,
+            Integer year,
+            String search,
+            Pageable pageable) {
+
+        Page<ExpenseEntity> expensePage = expenseJpaRepository.findByFilters(
+                gardenerId, type, paid, sectorId, year, search, pageable
+        );
+
+        return expensePage.map(ExpenseMapper::mapFromEntity);
+    }
+
+    public Map<String, Object> getAggregates(
+            Long gardenerId,
+            String type,
+            Boolean paid,
+            Long sectorId,
+            Integer year,
+            String search) {
+
+        List<ExpenseEntity> expenses = expenseJpaRepository.findByFiltersWithoutPaging(
+                gardenerId, type, paid, sectorId, year, search
+        );
+
+        BigDecimal total = expenses.stream()
+                .map(ExpenseEntity::getExpenseCost)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal paidSum = expenses.stream()
+                .filter(ExpenseEntity::isPaid)
+                .map(ExpenseEntity::getExpenseCost)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal unpaidSum = total.subtract(paidSum);
+
+        Map<String, Object> aggregates = new HashMap<>();
+        aggregates.put("total", total);
+        aggregates.put("paid", paidSum);
+        aggregates.put("unpaid", unpaidSum);
+
+        return aggregates;
     }
 
     public ExpenseDTO getExpenseById(Long id) {
@@ -49,6 +106,7 @@ public class ExpenseRepository {
         existing.setExpenseCost(expenseDto.getAmount());
         existing.setDescription(expenseDto.getDescription());
         existing.setPaid(expenseDto.isPaid());
+        existing.setCreatedAt(expenseDto.getDate());
 
         ExpenseEntity updated = expenseJpaRepository.save(existing);
         return ExpenseMapper.mapFromEntity(updated);

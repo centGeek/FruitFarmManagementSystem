@@ -780,7 +780,7 @@ const filteredExpenses = useMemo(() => {
                 <header className="mb-8">
                     <h1 className="text-4xl font-extrabold text-gray-900 mb-2 flex items-center">
                         <span className="text-red-600 mr-3">💰</span>
-                        Zarządzanie Wydatkami
+                        Zarządzanie przychodami
                     </h1>
                     <p className="text-gray-600 text-lg flex items-center">
                         Monitoruj koszty paliwa, maszyn i zaopatrzenia. 💸
