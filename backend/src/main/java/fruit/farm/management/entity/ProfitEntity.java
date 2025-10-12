@@ -24,6 +24,9 @@ public class ProfitEntity {
     @Column(name = "profit_type")
     private ProfitType profitType;
 
+    @Column(name = "kilograms_sold")
+    private long kilogramsSold;
+
     @Column(name = "profit")
     private BigDecimal profit;
 
@@ -44,9 +47,10 @@ public class ProfitEntity {
     @JoinColumn(name = "sector_id")
     private SectorEntity sectorEntity;
 
-    public ProfitEntity(ProfitType profitType, BigDecimal profit, String description, LocalDate createdAt,
+    public ProfitEntity(ProfitType profitType, long kilogramsSold, BigDecimal profit, String description, LocalDate createdAt,
                         boolean received, UserEntity userEntity, SectorEntity sectorEntity) {
         this.profitType = profitType;
+        this.kilogramsSold = kilogramsSold;
         this.profit = profit;
         this.description = description;
         this.createdAt = createdAt;

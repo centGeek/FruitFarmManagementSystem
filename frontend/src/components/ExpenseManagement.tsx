@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
+import {formatCurrency} from "../utils/common"
+
 
 const EXPENSE_TYPES = [
   // 🌱 Produkcja i pielęgnacja sadu
@@ -414,7 +416,7 @@ const ExpenseCard = ({ expense, onEdit, onDelete, sectors }) => {
                     </div>
                     <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-800">
-                            {expense.amount.toFixed(2)} PLN
+                            {formatCurrency(expense.amount)} PLN
                         </h3>
                         <p className="text-sm text-gray-500">{expenseDate}</p>
                     </div>
@@ -480,7 +482,7 @@ const StatCard = ({ count, label, color, amount }) => {
     const colors = colorMap[color] || colorMap.red;
     
     const displayValue = amount !== undefined 
-        ? `${amount.toFixed(2)} PLN` 
+        ? `${formatCurrency(amount)} PLN` 
         : count;
 
     return (
@@ -819,18 +821,18 @@ if (searchTerm) {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <StatCard 
-                        amount={filteredStats.total} 
+                    <StatCard 
+                        amount={formatCurrency(filteredStats.total)} 
                         label={hasActiveFilters ? "Suma Przefiltrowanych" : "Całkowite Wydatki"} 
                         color="blue"
                     />
                     <StatCard 
-                        amount={filteredStats.paid} 
+                        amount={formatCurrency(filteredStats.paid)} 
                         label={hasActiveFilters ? "Opłacone (Przefiltrowane)" : "Wydatki Opłacone"} 
                         color="green"
                     />
                     <StatCard 
-                        amount={filteredStats.unpaid} 
+                        amount={formatCurrency(filteredStats.unpaid)} 
                         label={hasActiveFilters ? "Nieopłacone (Przefiltrowane)" : "Wydatki Nieopłacone"} 
                         color="red" 
                     />

@@ -14,7 +14,7 @@ public class TaskDefinitionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "task_def_id")
-    private Integer taskDefId;
+    private Long taskDefId;
 
     @Column(name = "task_name", nullable = false, unique = true, length = 100)
     private String taskName;

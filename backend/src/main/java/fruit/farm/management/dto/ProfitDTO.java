@@ -21,6 +21,9 @@ public class ProfitDTO {
     @NotNull(message = "Typ produktu/usługi jest wymagany.")
     private ProfitType profitType;
 
+    @NotNull(message = "Sprzedano w kilogramach.")
+    private long kilogramsSold;
+
     @NotNull(message = "Kwota wydatku jest wymagana.")
     @DecimalMin(value = "0.01", message = "Kwota musi być większa niż 0.")
     private BigDecimal profit;
