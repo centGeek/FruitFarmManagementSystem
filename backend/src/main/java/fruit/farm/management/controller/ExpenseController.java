@@ -11,12 +11,17 @@ import fruit.farm.management.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -32,8 +37,8 @@ public class ExpenseController {
     public ResponseEntity<ExpenseDTO> createExpense(@Valid @RequestBody ExpenseDTO expenseDto) {
         UserEntity userEntity = userService.getLoggedInUserId();
         log.info("Creating expense for User ID: {}", userEntity.getId());
-        if(expenseDto.getSectorDTO() != null ) {
 
+        if(expenseDto.getSectorDTO() != null ) {
             SectorDTO sectorById = sectorService.getSectorById(expenseDto.getSectorDTO().getId());
             expenseDto.setSectorDTO(sectorById);
         }
@@ -41,10 +46,6 @@ public class ExpenseController {
         try {
             ExpenseEntity expenseEntity = ExpenseMapper.mapToEntity(expenseDto, userEntity);
             ExpenseDTO createdExpense = expenseRepository.addExpense(expenseEntity);
-            for (ExpenseDTO expenseDTO : expenseRepository.getAllExpensesByGardener(userEntity.getId())) {
-                System.out.println("description" + expenseDTO.getDescription());
-                System.out.println("type" + expenseDTO.getType());
-            }
             return ResponseEntity.status(HttpStatus.CREATED).body(createdExpense);
         } catch (Exception e) {
             log.error("Error creating expense: {}", e.getMessage(), e);
@@ -53,18 +54,31 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpenseDTO>> getAllExpenses() {
+    public ResponseEntity<Map<String, Object>> getAllExpenses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size) {
+
         UserEntity user = userService.getLoggedInUserId();
-        log.info("Fetching expenses for User ID: {}", user.getId());
+        log.info("Fetching expenses for User ID: {} - Page: {}, Size: {}", user.getId(), page, size);
 
         try {
-            List<ExpenseDTO> expenses = expenseRepository.getAllExpensesByGardener(user.getId());
-            return ResponseEntity.ok(expenses);
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+            Page<ExpenseDTO> expensePage = expenseRepository.getAllExpensesByGardenerPaginated(
+                    user.getId(),
+                    pageable
+            );
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("content", expensePage.getContent());
+            response.put("currentPage", expensePage.getNumber());
+            response.put("totalElements", expensePage.getTotalElements());
+            response.put("totalPages", expensePage.getTotalPages());
+            response.put("pageSize", expensePage.getSize());
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error fetching expenses for user {}: {}", user.getId(), e.getMessage(), e);
-            for (ExpenseDTO expenseDTO : expenseRepository.getAllExpensesByGardener(user.getId())) {
-                System.out.println("isPaid" + expenseDTO.isPaid());
-            }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -106,6 +107,7 @@ public class EmployeeController {
             log.info("IsActive: {}", userRequest.isActive());
 
             UserEntity userEntity = UserMapper.mapToEntity(userRequest, gardener);
+            userEntity.setCreationDate(LocalDate.now());
             UserEntity savedUser = userRepository.save(userEntity);
 
             return ResponseEntity.ok(Map.of(

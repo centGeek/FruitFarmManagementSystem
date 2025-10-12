@@ -26,7 +26,7 @@ public class ExpenseEntity {
     @Column(name = "expense_cost")
     private BigDecimal expenseCost;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "created_at")

@@ -52,6 +52,22 @@ const PAYMENT_STATUS_OPTIONS = [
     { value: 'unpaid', label: 'Nieopłacone ⏳' }
 ];
 
+const MONTH_OPTIONS = [
+    { value: '', label: 'Wszystkie miesiące 📅' },
+    { value: '1', label: 'Styczeń' },
+    { value: '2', label: 'Luty' },
+    { value: '3', label: 'Marzec' },
+    { value: '4', label: 'Kwiecień' },
+    { value: '5', label: 'Maj' },
+    { value: '6', label: 'Czerwiec' },
+    { value: '7', label: 'Lipiec' },
+    { value: '8', label: 'Sierpień' },
+    { value: '9', label: 'Wrzesień' },
+    { value: '10', label: 'Październik' },
+    { value: '11', label: 'Listopad' },
+    { value: '12', label: 'Grudzień' }
+];
+
 // Generowanie opcji lat (5 lat wstecz + rok bieżący)
 const generateYearOptions = () => {
     const currentYear = new Date().getFullYear();
@@ -61,7 +77,6 @@ const generateYearOptions = () => {
     }
     return years;
 };
-
 const Alert = ({ type, message, onClose }) => {
     if (!message) return null;
     const colors = useMemo(() => ({
@@ -198,7 +213,7 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
 
     const initialState = useMemo(() => ({
     id: expense?.id || null,
-    date: expense?.date || today,
+    date: expense?.createdAt || today,
     amount: expense?.amount?.toString() || '',
     type: expense?.type || EXPENSE_TYPES[0].value,
     description: expense?.description || '',
@@ -387,7 +402,7 @@ const getExpenseTypeDetails = (type: string) => {
 const ExpenseCard = ({ expense, onEdit, onDelete, sectors }) => {
     const typeDetails = getExpenseTypeDetails(expense.type);
     const isPaid = expense.paid;
-    const expenseDate = new Date(expense.date).toLocaleDateString('pl-PL');
+    const expenseDate = new Date(expense.createdAt).toLocaleDateString('pl-PL');
     const assignedSector = expense.sectorDTO || null;
 
     return (
@@ -490,6 +505,7 @@ export default function ExpenseManagement() {
     const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('');
     const [selectedSectorId, setSelectedSectorId] = useState('');
     const [selectedYear, setSelectedYear] = useState('');
+    const [selectedMonth, setSelectedMonth] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(15);
@@ -502,31 +518,36 @@ export default function ExpenseManagement() {
 
 useEffect(() => {
     setCurrentPage(1);
-}, [selectedType, selectedPaymentStatus, selectedSectorId, selectedYear, searchTerm]);
+}, [selectedType, selectedPaymentStatus, selectedSectorId, selectedYear, selectedMonth, searchTerm]);
 
     const fetchExpenses = useCallback(async () => {
-        setIsLoading(true);
-        
-        try {
-            const response = await fetch(`${BACKEND_URL}/api/expenses`, {
-                method: 'GET',
-                headers: getAuthHeaders(),
-            });
-
+    setIsLoading(true);
+    let allData = [];
+    let currentPage = 0;
+    let totalPages = 1;
+    
+    try {
+        while (currentPage < totalPages) {
+            const response = await fetch(
+                `${BACKEND_URL}/api/expenses?page=${currentPage}&size=100`,
+                { method: 'GET', headers: getAuthHeaders() }
+            );
+            
             if (response.ok) {
                 const data = await response.json();
-                const expensesList = Array.isArray(data) ? data : [];
-                setAllExpenses(expensesList); 
-            } else {
-                const error = await response.json();
-                setAlert({ type: 'error', message: `Błąd ładowania wydatków: ${error.message || response.statusText}` });
-            }
-        } catch (error) {
-            setAlert({ type: 'error', message: `Błąd sieci: Nie można połączyć z backendem.` });
-        } finally {
-            setIsLoading(false);
+                allData = [...allData, ...data.content];
+                totalPages = data.totalPages;
+                currentPage++;
+            } else break;
         }
-    }, []);
+        
+        setAllExpenses(allData);
+    } catch (error) {
+        setAlert({ type: 'error', message: 'Błąd ładowania wydatków' });
+    } finally {
+        setIsLoading(false);
+    }
+}, []);
 
     const fetchSectors = useCallback(async () => {
         console.log('🔍 Rozpoczynam pobieranie sektorów z:', `${BACKEND_URL}/api/sectors`);
@@ -650,24 +671,31 @@ const filteredExpenses = useMemo(() => {
     }
 
     if (selectedYear) {
-        list = list.filter(exp => {
-            const expenseYear = new Date(exp.date).getFullYear();
-            return expenseYear === Number(selectedYear);
-        });
-    }
+    list = list.filter(exp => {
+        const expenseYear = new Date(exp.createdAt).getFullYear();
+        return expenseYear === Number(selectedYear);
+    });
+}
 
-    if (searchTerm) {
-        const term = searchTerm.toLowerCase();
+if (selectedMonth) {
+    list = list.filter(exp => {
+        const expenseMonth = new Date(exp.createdAt).getMonth() + 1; // getMonth() zwraca 0-11
+        return expenseMonth === Number(selectedMonth);
+    });
+}
+
+if (searchTerm) {
+    const term = searchTerm.toLowerCase();
         list = list.filter(exp =>
             (exp.description?.toLowerCase().includes(term)) ||
             (exp.amount?.toString().includes(term)) ||
-            (exp.date?.includes(term)) ||
+            (exp.createdAt?.includes(term)) ||
             (getExpenseTypeDetails(exp.type).label.toLowerCase().includes(term))
         );
     }
     
-    return list.sort((a, b) => new Date(b.date) - new Date(a.date)); 
-}, [allExpenses, selectedType, selectedPaymentStatus, selectedSectorId, selectedYear, searchTerm]);
+    return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); 
+}, [allExpenses, selectedType, selectedPaymentStatus, selectedSectorId, selectedYear, selectedMonth, searchTerm]);
 
 // Obliczenia paginacji
     const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
@@ -700,8 +728,7 @@ const filteredExpenses = useMemo(() => {
     
 
     // Sprawdzenie czy jakiekolwiek filtry są aktywne
-    const hasActiveFilters = selectedType || selectedPaymentStatus || selectedSectorId || selectedYear || searchTerm;
-
+    const hasActiveFilters = selectedType || selectedPaymentStatus || selectedSectorId || selectedYear || selectedMonth || searchTerm;
     const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     if (totalPages <= 1) return null;
 
@@ -839,6 +866,11 @@ const filteredExpenses = useMemo(() => {
                                         📅 Rok: {selectedYear}
                                     </span>
                                 )}
+                                {selectedMonth && (
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                        📆 Miesiąc: {MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label}
+                                    </span>
+                                )}
                                 {searchTerm && (
                                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
                                         Szukaj: "{searchTerm}"
@@ -852,6 +884,7 @@ const filteredExpenses = useMemo(() => {
                                     setSelectedPaymentStatus('');
                                     setSelectedSectorId('');
                                     setSelectedYear('');
+                                    setSelectedMonth('');
                                     setSearchTerm('');
                                 }}
                                 className="ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors text-sm whitespace-nowrap"
@@ -890,7 +923,7 @@ const filteredExpenses = useMemo(() => {
                         </div>
 
                         <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                                 <div className="space-y-2">
                                     <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
                                         Typ wydatku
@@ -956,6 +989,20 @@ const filteredExpenses = useMemo(() => {
                                         ))}
                                     </select>
                                 </div>
+                                <div className="space-y-2">
+                                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                    Miesiąc 📆
+                                </label>
+                                <select
+                                    value={selectedMonth}
+                                    onChange={(e) => setSelectedMonth(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors shadow-sm"
+                                >
+                                    {MONTH_OPTIONS.map(option => (
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                </select>
+                            </div>
                             </div>                            
                         </div>
 

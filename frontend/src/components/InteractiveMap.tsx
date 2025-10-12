@@ -1657,7 +1657,7 @@ const handleSaveEditedSector = async (editedSector) => {
           System Zarządzania Gospodarstwem Sadowniczym
         </h1>
         <p className="text-gray-600 mb-4">
-          Mapowanie i zarządzanie sektorami upraw z integracją backend
+          Mapowanie i zarządzanie sektorami upraw 
         </p>
 
         {isLoading && (

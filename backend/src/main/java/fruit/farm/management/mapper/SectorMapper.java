@@ -15,6 +15,6 @@ public class SectorMapper {
     }
     public static SectorDTO mapToDTO(SectorEntity sectorEntity) {
         return new SectorDTO(sectorEntity.getSectorId(), sectorEntity.getDescription(), sectorEntity.getPlantType(),
-                sectorEntity.getVariety(), CoordinateMapper.mapFromEntities(sectorEntity.getCoordinates(), null), LocalDate.now());
+                sectorEntity.getVariety(), CoordinateMapper.mapFromEntities(sectorEntity.getCoordinates(), null), sectorEntity.getCreatedAt());
     }
 }

@@ -17,8 +17,8 @@ public class ExpenseMapper {
 
     public static ExpenseDTO mapFromEntity(ExpenseEntity expenseEntity) {
         if(expenseEntity.getSectorEntity() == null) {
-            return new ExpenseDTO(expenseEntity.getExpenseId(), expenseEntity.getProductType(), expenseEntity.getExpenseCost(), LocalDate.now(), expenseEntity.getDescription(), expenseEntity.isPaid(), expenseEntity.getUserEntity().getId(), null); 
+            return new ExpenseDTO(expenseEntity.getExpenseId(), expenseEntity.getProductType(), expenseEntity.getExpenseCost(), expenseEntity.getCreatedAt(), expenseEntity.getDescription(), expenseEntity.isPaid(), expenseEntity.getUserEntity().getId(), null);
         }
-        return new ExpenseDTO(expenseEntity.getExpenseId(), expenseEntity.getProductType(), expenseEntity.getExpenseCost(), LocalDate.now(), expenseEntity.getDescription(), expenseEntity.isPaid(), expenseEntity.getUserEntity().getId(), SectorMapper.mapToDTO(expenseEntity.getSectorEntity()));
+        return new ExpenseDTO(expenseEntity.getExpenseId(), expenseEntity.getProductType(), expenseEntity.getExpenseCost(), expenseEntity.getCreatedAt(), expenseEntity.getDescription(), expenseEntity.isPaid(), expenseEntity.getUserEntity().getId(), SectorMapper.mapToDTO(expenseEntity.getSectorEntity()));
     }
 }
