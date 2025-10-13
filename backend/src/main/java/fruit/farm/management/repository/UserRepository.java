@@ -26,7 +26,7 @@ public class UserRepository {
         return users;
     }
 
-    public void delete(UserEntity userEntity){
+    public void delete(UserEntity userEntity) {
         userJpaRepository.delete(userEntity);
     }
 
@@ -35,11 +35,12 @@ public class UserRepository {
     }
 
     public List<UserEntity> getAllEmployees(long gardenerId) {
-        System.out.println("Gardener ID" + gardenerId);
+
         return userJpaRepository.getAllEmployees(gardenerId);
     }
 
     public List<UserEntity> getAllArchivedEmployees(long gardenerId) {
+
         return userJpaRepository.getAllArchivedEmployees(gardenerId);
     }
 
@@ -51,7 +52,7 @@ public class UserRepository {
         return userJpaRepository.getAll();
     }
 
-    public UserEntity save(UserEntity userEntity){
+    public UserEntity save(UserEntity userEntity) {
         return userJpaRepository.save(userEntity);
     }
 

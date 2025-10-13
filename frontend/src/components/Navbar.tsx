@@ -7,7 +7,7 @@ function GardenerNavbar({ onLogout }) {
     { name: "Home", path: "/home" },
     { name: "Mapa", path: "/map" },
     { name: "Pracownicy", path: "/employees" },
-    { name: "Ewidencja pracy", path: "/management" },
+    { name: "Ewidencja pracy", path: "/work-schedule" },
     { name: "Wydatki", path: "/expenses" },
     { name: "Przychody", path: "/profits" },
     { name: "Notyfikacje pogodowe", path: "/weather" },

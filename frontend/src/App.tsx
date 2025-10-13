@@ -8,6 +8,8 @@ import InteractiveMap from './components/InteractiveMap'
 import EmployeeManagement from './components/EmployeeManagement'
 import ExpenseManagement from './components/ExpenseManagement'
 import ProfitsManagement from './components/ProfitsManagement'
+import WorkSchedule from './components/WorkSchedule'
+
 
 
 
@@ -135,7 +137,6 @@ function App() {
     return children;
   };
 
-  // Pokaż loading podczas sprawdzania autentyfikacji
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -180,7 +181,6 @@ function App() {
           } 
         />
         
-        {/* Trasy dla Gardener */}
         <Route
           path="/home"
           element={
@@ -214,10 +214,10 @@ function App() {
           }
         />
         <Route
-          path="/management"
+          path="/work-schedule"
           element={
             <ProtectedRoute allowedRoles={["Gardener"]}>
-              <div>Management Page</div>
+              <WorkSchedule/>
             </ProtectedRoute>
           }
         />
