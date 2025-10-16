@@ -5,7 +5,7 @@ CREATE TABLE work_entry
     sector_id   INT,
     start_time  TIMESTAMP    NOT NULL,
     end_time    TIMESTAMP,
-    duration    INTERVAL,
+    duration    int,
     description TEXT,
     is_approved BOOLEAN    DEFAULT FALSE,
     created_at  TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,

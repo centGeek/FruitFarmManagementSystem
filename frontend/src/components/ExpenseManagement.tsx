@@ -550,43 +550,51 @@ useEffect(() => {
         setIsLoading(false);
     }
 }, []);
+const fetchData = useCallback(async (setter, endpoint, entityName) => {
+    console.log(`[FETCH] Rozpoczynam pobieranie ${entityName} z: ${BACKEND_URL}${endpoint}`);
+    try {
+        const headers = getAuthHeaders();
+        console.log(`[FETCH] Headers dla ${entityName}:`, headers);
+        
+        const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+            method: 'GET',
+            headers: headers,
+        });
 
-    const fetchSectors = useCallback(async () => {
-        console.log('🔍 Rozpoczynam pobieranie sektorów z:', `${BACKEND_URL}/api/sectors`);
-        try {
-            const headers = getAuthHeaders();
-            console.log('📤 Wysyłam request z nagłówkami:', headers);
-            
-            const response = await fetch(`${BACKEND_URL}/api/sectors`, {
-                method: 'GET',
-                headers: headers,
+        console.log(`[FETCH] Odpowiedź serwera dla ${entityName} - Status: ${response.status} ${response.statusText}`);
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`[FETCH] ✅ Załadowano ${entityName}:`, data);
+            setter(Array.isArray(data) ? data : []);
+        } else {
+            const errorText = await response.text();
+            console.error(`[FETCH] ❌ Błąd HTTP dla ${entityName}: ${response.status}`, errorText);
+            setAlert({ 
+                type: 'warning', 
+                message: `Nie udało się załadować ${entityName} (${response.status}). Możesz dodawać wydatki bez przypisania do sektora.` 
             });
-
-            console.log('📥 Odpowiedź serwera - Status:', response.status, response.statusText);
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('✅ Załadowane sektory:', data);
-                console.log('📊 Liczba sektorów:', Array.isArray(data) ? data.length : 'Nie jest tablicą');
-                setSectors(Array.isArray(data) ? data : []);
-            } else {
-                const errorText = await response.text();
-                console.error('❌ Błąd HTTP:', response.status, errorText);
-                setAlert({ type: 'warning', message: `Nie udało się załadować sektorów (${response.status}). Możesz dodawać wydatki bez przypisania do sektora.` });
-                setSectors([]);
-            }
-        } catch (error) {
-            console.error('❌ Błąd pobierania sektorów:', error);
-            console.error('Szczegóły błędu:', error.message);
-            setAlert({ type: 'warning', message: 'Nie można połączyć z API sektorów. Wydatki można dodawać bez przypisania do sektora.' });
-            setSectors([]);
+            setter([]);
         }
-    }, []);
+    } catch (error) {
+        console.error(`[FETCH] ❌ Błąd połączenia dla ${entityName}:`, error);
+        setAlert({ 
+            type: 'warning', 
+            message: `Nie można połączyć z API ${entityName}. Wydatki można dodawać bez przypisania do sektora.` 
+        });
+        setter([]);
+    }
+}, []);
 
-    useEffect(() => {
-        fetchExpenses();
-        fetchSectors();
-    }, [fetchExpenses, fetchSectors]);
+const fetchSectors = useCallback(() => {
+    fetchData(setSectors, '/api/sectors', 'sektorów');
+}, [fetchData]);
+
+// Upewnij się też, że useEffect wygląda tak:
+useEffect(() => {
+    fetchExpenses();
+    fetchSectors();
+}, [fetchExpenses, fetchSectors]);
 
     const handleSaveExpense = useCallback(async (expenseData) => {
         setIsLoading(true);

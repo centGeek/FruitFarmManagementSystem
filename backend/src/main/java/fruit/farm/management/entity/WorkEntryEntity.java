@@ -26,7 +26,7 @@ public class WorkEntryEntity {
     private LocalDateTime endTime;
 
     @Column(name = "duration")
-    private Duration duration;
+    private int duration;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;

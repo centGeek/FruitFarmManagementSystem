@@ -30,4 +30,23 @@ public class WorkEntryRepository {
     public void deleteById(Long id) {
         workEntryJpaRepository.deleteById(id);
     }
+
+    public List<WorkEntryEntity> findByUserGardenerId(Long id) {
+
+        return workEntryJpaRepository.findByUserGardenerId(id);
+    }
+
+    public WorkEntryEntity save(WorkEntryEntity existingEntry) {
+
+        return workEntryJpaRepository.save(existingEntry);
+    }
+
+    public void delete(WorkEntryEntity entry) {
+
+        workEntryJpaRepository.delete(entry);
+    }
+
+    public List<WorkEntryEntity> saveAll(List<WorkEntryEntity> entriesToSave) {
+        return workEntryJpaRepository.saveAll(entriesToSave);
+    }
 }

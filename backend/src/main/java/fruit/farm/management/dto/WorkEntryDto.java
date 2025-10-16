@@ -9,9 +9,6 @@ import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.Set;
 
-/**
- * DTO dla encji WorkEntryEntity. Używane w warstwie API/Controller.
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -24,7 +21,7 @@ public class WorkEntryDto {
 
     private LocalDateTime endTime;
 
-    private Duration duration;
+    private int duration;
 
     private String description;
 
@@ -32,9 +29,18 @@ public class WorkEntryDto {
 
     private LocalDateTime createdAt;
 
-    private Long userId;
+    private UserDTO user;
 
-    private Long sectorId;
+    private SectorDTO sector;
 
-    private Set<Long> taskIds;
+    private Set<TaskBasicDto> tasks;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TaskBasicDto {
+        private Long taskDefId;
+        private String taskName;
+    }
 }

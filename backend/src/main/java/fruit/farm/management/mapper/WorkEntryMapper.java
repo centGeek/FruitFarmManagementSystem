@@ -38,16 +38,16 @@ public class WorkEntryMapper {
         dto.setIsApproved(entity.getIsApproved());
         dto.setCreatedAt(entity.getCreatedAt());
 
-        dto.setUserId(entity.getUser() != null ? entity.getUser().getId() : null);
-        dto.setSectorId(entity.getSector() != null ? entity.getSector().getSectorId() : null);
-
-        if (entity.getTasks() != null) {
-            dto.setTaskIds(entity.getTasks().stream()
-                    .map(TaskDefinitionEntity::getTaskDefId)
-                    .collect(Collectors.toSet()));
-        } else {
-            dto.setTaskIds(new HashSet<>());
-        }
+//        dto.setUserId(entity.getUser() != null ? entity.getUser().getId() : null);
+//        dto.setSectorId(entity.getSector() != null ? entity.getSector().getSectorId() : null);
+//
+//        if (entity.getTasks() != null) {
+//            dto.setTaskIds(entity.getTasks().stream()
+//                    .map(TaskDefinitionEntity::getTaskDefId)
+//                    .collect(Collectors.toSet()));
+//        } else {
+//            dto.setTaskIds(new HashSet<>());
+//        }
 
         return dto;
     }
@@ -67,22 +67,22 @@ public class WorkEntryMapper {
         entity.setIsApproved(dto.getIsApproved() != null ? dto.getIsApproved() : false);
         entity.setCreatedAt(dto.getCreatedAt());
 
-        if (dto.getUserId() != null) {
-
-            entity.setUser(userRepository.findById(dto.getUserId()).orElse(null));
-        }
-        if (dto.getSectorId() != null) {
-
-            entity.setSector(sectorRepository.findById(dto.getSectorId()).orElse(null));
-        }
-
-        if (dto.getTaskIds() != null && !dto.getTaskIds().isEmpty()) {
-            entity.setTasks(dto.getTaskIds().stream()
-                    .flatMap(id -> taskDefinitionRepository.findById(id).stream())
-                    .collect(Collectors.toSet()));
-        } else {
-            entity.setTasks(new HashSet<>());
-        }
+//        if (dto.getUserId() != null) {
+//
+//            entity.setUser(userRepository.findById(dto.getUserId()).orElse(null));
+//        }
+//        if (dto.getSectorId() != null) {
+//
+//            entity.setSector(sectorRepository.findById(dto.getSectorId()).orElse(null));
+//        }
+//
+//        if (dto.getTaskIds() != null && !dto.getTaskIds().isEmpty()) {
+//            entity.setTasks(dto.getTaskIds().stream()
+//                    .flatMap(id -> taskDefinitionRepository.findById(id).stream())
+//                    .collect(Collectors.toSet()));
+//        } else {
+//            entity.setTasks(new HashSet<>());
+//        }
 
         return entity;
     }

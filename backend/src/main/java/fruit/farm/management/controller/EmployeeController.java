@@ -29,6 +29,7 @@ public class EmployeeController {
 
     @GetMapping
     public ResponseEntity<List<UserEntity>> fetchListOfEmployees(@RequestParam(required = false) String status) {
+
         log.info("Getting list of users with status filter: {}", status);
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
