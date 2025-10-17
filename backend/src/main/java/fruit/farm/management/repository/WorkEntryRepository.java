@@ -1,10 +1,14 @@
 package fruit.farm.management.repository;
 
+import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.repository.jpa.WorkEntryJpaRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,5 +52,14 @@ public class WorkEntryRepository {
 
     public List<WorkEntryEntity> saveAll(List<WorkEntryEntity> entriesToSave) {
         return workEntryJpaRepository.saveAll(entriesToSave);
+    }
+
+    public List<WorkEntryEntity> findWorkEntriesByGivenDayForEmployee(List<WorkEntryDto> requests) {
+
+        if (requests.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return workEntryJpaRepository.findWorkEntriesByGivenDayForEmployee(requests.get(0).getUser().getEmail(),
+                requests.get(0).getEndTime().toLocalDate());
     }
 }

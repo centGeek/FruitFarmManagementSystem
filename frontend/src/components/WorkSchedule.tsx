@@ -1,6 +1,28 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Calendar, Clock, Users, CheckCircle, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
+import ErrorPage from './ErrorPage'; 
+
+const WORK_TYPE_OPTIONS = [
+    { value: 'HARVEST', label: '🌾 Zbiory', icon: '🌾' },
+    { value: 'WEEDING', label: '🌱 Pielenie', icon: '🌱' },
+    { value: 'WATERING', label: '💧 Nawadnianie', icon: '💧' },
+    { value: 'SPRAYING', label: '💨 Opryski', icon: '💨' },
+    { value: 'PLANTING', label: '🌿 Sadzenie', icon: '🌿' },
+    { value: 'PRUNING', label: '✂️ Przycinanie', icon: '✂️' },
+    { value: 'FERTILIZING', label: '🧪 Nawożenie', icon: '🧪' },
+    { value: 'OTHER', label: '📋 Inne', icon: '📋' }
+];
+
+const getWorkTypeLabel = (workType) => {
+    const option = WORK_TYPE_OPTIONS.find(opt => opt.value === workType);
+    return option ? option.label : workType;
+};
+
+const getWorkTypeIcon = (workType) => {
+    const option = WORK_TYPE_OPTIONS.find(opt => opt.value === workType);
+    return option ? option.icon : '📋';
+};
 
 const Alert = ({ type, message, onClose }) => {
     if (!message) return null;
@@ -123,7 +145,7 @@ const DailyWorkForm = ({ date, employees, sectors, tasks, onSave, onCancel, isLo
                     <div>
                         <label className="text-xs text-gray-600 mb-1 block">Godziny</label>
                         <div className="flex gap-2">
-                            {[4, 6, 8].map(h => (
+                            {[4, 6, 8, 10, 11, 12].map(h => (
                                 <button key={h} onClick={() => quickFillAll('hours', h.toString())} 
                                     className="flex-1 bg-white hover:bg-blue-100 border border-blue-300 rounded-lg py-2 text-sm font-bold transition-colors">
                                     {h}h
@@ -421,6 +443,9 @@ export default function WorkEntryManagement() {
     const [bulkAssignDate, setBulkAssignDate] = useState(null); 
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState({ type: '', message: '' });
+    const [criticalError, setCriticalError] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingEntry, setEditingEntry] = useState(null);
 
     const closeAlert = useCallback(() => setAlert({ type: '', message: '' }), []);
 
@@ -521,6 +546,35 @@ const fetchData = useCallback(async (setter, endpoint, entityName) => {
     useEffect(() => {
         fetchWorkEntries(currentDate, employees, sectors, tasks);
     }, [currentDate, employees, sectors, tasks, fetchWorkEntries]); 
+    const parseApiError = async (response) => {
+        let errorData = {
+            status: response.status,
+            error: response.statusText,
+            message: 'Wystąpił nieoczekiwany błąd',
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const json = await response.json();
+                errorData = {
+                    ...errorData,
+                    error: json.error || json.title || errorData.error,
+                    message: json.message || json.detail || errorData.message,
+                    path: json.path,
+                    timestamp: json.timestamp || errorData.timestamp
+                };
+            } else {
+                const text = await response.text();
+                errorData.message = text || errorData.message;
+            }
+        } catch (e) {
+            console.error('Błąd parsowania odpowiedzi:', e);
+        }
+
+        return errorData;
+    };
 const handleSaveBulkEntries = useCallback(async (entries) => {
         setIsLoading(true);
         closeAlert();
@@ -578,49 +632,167 @@ const handleSaveBulkEntries = useCallback(async (entries) => {
                 
                 // Odśwież dane
                 await fetchWorkEntries();
-            } else {
-                const errorText = await response.text();
-                console.error("❌ Błąd zapisu:", response.status, errorText);
-                setAlert({ 
-                    type: 'error', 
-                    message: `Błąd zapisu wpisów: ${response.status}. Sprawdź logi konsoli.` 
-                });
+             } else {
+                // ✅ DODAJ TO:
+                const errorData = await parseApiError(response);
+                console.error("❌ Błąd API:", errorData);
+                setCriticalError(errorData);
             }
         } catch (error) {
+            // ✅ DODAJ TO:
             console.error("❌ Błąd połączenia:", error);
-            setAlert({ 
-                type: 'error', 
-                message: 'Błąd połączenia z serwerem podczas zapisu wpisów.' 
+            setCriticalError({
+                status: 0,
+                error: 'Błąd połączenia',
+                message: 'Nie udało się połączyć z serwerem. Sprawdź połączenie internetowe.',
+                timestamp: new Date().toISOString()
             });
         } finally {
             setIsLoading(false);
         }
 
-    }, [closeAlert, fetchWorkEntries, bulkAssignDate]);
+}, [closeAlert, fetchWorkEntries, bulkAssignDate, employees, parseApiError]);
+    const handleEditEntry = useCallback(async (updatedEntry) => {
+    setIsLoading(true);
+    
+    try {
+        const headers = getAuthHeaders();
+        const response = await fetch(`${BACKEND_URL}/api/work-entries/${updatedEntry.entryId}`, {
+            method: 'PUT',
+            headers: headers,
+            body: JSON.stringify(updatedEntry),
+        });
 
-
+        if (response.ok) {
+            const result = await response.json();
+            console.log("✅ Wpis zaktualizowany:", result);
+            
+            // Odśwież listę wpisów
+            await fetchWorkEntries();
+            
+            setAlert({ 
+                type: 'success', 
+                message: 'Wpis zaktualizowany pomyślnie' 
+            });
+        } else {
+            const errorData = await parseApiError(response);
+            console.error("❌ Błąd aktualizacji:", errorData);
+            setAlert({ 
+                type: 'error', 
+                message: `Błąd aktualizacji: ${errorData.message}` 
+            });
+        }
+    } catch (error) {
+        console.error("❌ Błąd połączenia:", error);
+        setAlert({ 
+            type: 'error', 
+            message: 'Błąd połączenia z serwerem' 
+        });
+    } finally {
+        setIsLoading(false);
+    }
+}, [fetchWorkEntries, parseApiError]);
     const handleDeleteEntry = useCallback(async (entryId) => {
-        setIsLoading(true);
-        setTimeout(() => {
+    setIsLoading(true);
+    
+    try {
+        const headers = getAuthHeaders();
+        const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}`, {
+            method: 'DELETE',
+            headers: headers,
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log("✅ Wpis usunięty:", result);
+            
+            // Usuń z lokalnego stanu
             setWorkEntries(prev => prev.filter(e => e.entryId !== entryId));
             setSelectedEntry(null);
-            setIsLoading(false);
-            setAlert({ type: 'success', message: 'Wpis usunięty pomyślnie' });
-        }, 500);
-    }, []);
+            
+            setAlert({ 
+                type: 'success', 
+                message: 'Wpis usunięty pomyślnie' 
+            });
+        } else {
+            const errorData = await parseApiError(response);
+            console.error("❌ Błąd usuwania:", errorData);
+            setAlert({ 
+                type: 'error', 
+                message: `Błąd usuwania: ${errorData.message}` 
+            });
+        }
+    } catch (error) {
+        console.error("❌ Błąd połączenia:", error);
+        setAlert({ 
+            type: 'error', 
+            message: 'Błąd połączenia z serwerem' 
+        });
+    } finally {
+        setIsLoading(false);
+    }
+}, [parseApiError]);
+
+const handleOpenEditModal = useCallback((entry) => {
+    setEditingEntry({
+        ...entry,
+        hours: entry.duration || '',
+        sectorId: entry.sector?.id || '',
+        workType: entry.workType || ''  // ✅ DODANO
+    });
+    setSelectedEntry(null);
+    setIsEditModalOpen(true);
+}, []);
 
     const handleToggleApproval = useCallback(async (entryId) => {
-        const entry = workEntries.find(e => e.entryId === entryId);
-        if (!entry) return;
+    const entry = workEntries.find(e => e.entryId === entryId);
+    if (!entry) return;
 
-        setIsLoading(true);
-        setTimeout(() => {
-            setWorkEntries(prev => prev.map(e => e.entryId === entryId ? { ...e, isApproved: !e.isApproved } : e));
-            setSelectedEntry(prev => prev && prev.entryId === entryId ? { ...prev, isApproved: !prev.isApproved } : prev);
-            setIsLoading(false);
-            setAlert({ type: 'success', message: entry.isApproved ? 'Cofnięto zatwierdzenie' : 'Wpis zatwierdzony' });
-        }, 500);
-    }, [workEntries]);
+    setIsLoading(true);
+    const newApprovalStatus = !entry.isApproved;
+
+    try {
+        const headers = getAuthHeaders();
+        const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}/approval`, {
+            method: 'PATCH',
+            headers: headers,
+            body: JSON.stringify({ isApproved: newApprovalStatus }),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log("✅ Zatwierdzenie zmienione:", result);
+            
+            // Zaktualizuj lokalny stan
+            setWorkEntries(prev => prev.map(e => 
+                e.entryId === entryId ? { ...e, isApproved: newApprovalStatus } : e
+            ));
+            setSelectedEntry(prev => 
+                prev && prev.entryId === entryId ? { ...prev, isApproved: newApprovalStatus } : prev
+            );
+            
+            setAlert({ 
+                type: 'success', 
+                message: newApprovalStatus ? 'Wpis zatwierdzony' : 'Cofnięto zatwierdzenie' 
+            });
+        } else {
+            const errorData = await parseApiError(response);
+            console.error("❌ Błąd zmiany zatwierdzenia:", errorData);
+            setAlert({ 
+                type: 'error', 
+                message: `Błąd: ${errorData.message}` 
+            });
+        }
+    } catch (error) {
+        console.error("❌ Błąd połączenia:", error);
+        setAlert({ 
+            type: 'error', 
+            message: 'Błąd połączenia z serwerem' 
+        });
+    } finally {
+        setIsLoading(false);
+    }
+}, [workEntries, parseApiError]);
 
 
     const stats = useMemo(() => ({
@@ -651,6 +823,22 @@ const handleSaveBulkEntries = useCallback(async (entries) => {
              setAlert({ type: alertType, message: alertMessage });
         }
     };
+
+     if (criticalError) {
+        return (
+            <ErrorPage
+                error={criticalError}
+                onRetry={() => setCriticalError(null)}
+                onGoBack={() => setCriticalError(null)}
+                onGoHome={() => {
+                    setCriticalError(null);
+                    setIsModalOpen(false);
+                    setBulkAssignDate(null);
+                }}
+            />
+        );
+    }
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-lime-50 to-green-100 p-6 font-sans">
@@ -688,16 +876,7 @@ const handleSaveBulkEntries = useCallback(async (entries) => {
                         </p>
                     </div>
                 )}
-                
-                {isLoading && (
-                    <div className="text-center py-4 bg-white rounded-xl mb-4 border border-blue-200">
-                        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-                        <p className="text-gray-500 text-sm font-medium mt-2">
-                             Ładowanie danych bazowych (pracownicy/sektory)... 🔄
-                        </p>
-                    </div>
-                )}
-                
+                                
                 <div className="mb-8">
                     <WeekCalendar
                         workEntries={workEntries}
@@ -726,13 +905,117 @@ const handleSaveBulkEntries = useCallback(async (entries) => {
                     />
                 </Modal>
                 
+                 {/* Modal edycji */}
+                {isEditModalOpen && editingEntry && (
+                    <Modal
+                        isOpen={isEditModalOpen}
+                        onClose={() => {
+                            setIsEditModalOpen(false);
+                            setEditingEntry(null);
+                        }}
+                        title={`Edycja wpisu: ${editingEntry.user?.name} ${editingEntry.user?.surname}`}
+                        size="large"
+                    >
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-1 block">Godziny</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.5" 
+                                        min="0" 
+                                        max="24"
+                                        value={editingEntry.duration || ''}
+                                        onChange={(e) => setEditingEntry(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-1 block">Sektor</label>
+                                    <select 
+                                        value={editingEntry.sector?.id || ''}
+                                        onChange={(e) => {
+                                            const sector = sectors.find(s => s.id === parseInt(e.target.value));
+                                            setEditingEntry(prev => ({ ...prev, sector: sector || null }));
+                                        }}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                    >
+                                        <option value="">Brak</option>
+                                        {sectors.map(s => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.description} ({s.plantType})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-xs text-gray-600 mb-1 block">Typ zadania</label>
+                                <select onChange={(e) => quickFillAll('workType', e.target.value)} 
+                                    className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm">
+                                    <option value="">Wybierz...</option>
+                                    <option value="HARVEST">🌾 Zbiory</option>
+                                    <option value="WEEDING">🌱 Pielenie</option>
+                                    <option value="WATERING">💧 Nawadnianie</option>
+                                    <option value="SPRAYING">💨 Opryski</option>
+                                    <option value="PLANTING">🌿 Sadzenie</option>
+                                    <option value="PRUNING">✂️ Przycinanie</option>
+                                    <option value="FERTILIZING">🧪 Nawożenie</option>
+                                    <option value="OTHER">📋 Inne</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-1 block">Opis</label>
+                                <textarea
+                                    value={editingEntry.description || ''}
+                                    onChange={(e) => setEditingEntry(prev => ({ ...prev, description: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                    rows="3"
+                                    placeholder="Dodatkowe uwagi..."
+                                />
+                            </div>
+
+                            <div className="flex space-x-3 pt-4 border-t border-gray-200">
+                                <button
+                                    onClick={() => {
+                                        // Przelicz nowy endTime na podstawie duration
+                                        const updatedEntry = {
+                                            ...editingEntry,
+                                            endTime: editingEntry.duration 
+                                                ? new Date(new Date(editingEntry.startTime).getTime() + editingEntry.duration * 60 * 60 * 1000).toISOString()
+                                                : editingEntry.endTime
+                                        };
+                                        handleEditEntry(updatedEntry);
+                                        setIsEditModalOpen(false);
+                                        setEditingEntry(null);
+                                    }}
+                                    disabled={isLoading}
+                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-colors disabled:opacity-50"
+                                >
+                                    {isLoading ? 'Zapisywanie...' : 'Zapisz zmiany'}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsEditModalOpen(false);
+                                        setEditingEntry(null);
+                                    }}
+                                    disabled={isLoading}
+                                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
+                                >
+                                    Anuluj
+                                </button>
+                            </div>
+                        </div>
+                    </Modal>
+                )}
+                
                 <EventDetailsModal
                     entry={selectedEntry}
                     onClose={() => handleCloseModal()}
-                    onEdit={() => {
-                         setAlert({type: 'warning', message: 'Edycja poszczególnych wpisów nie jest jeszcze zaimplementowana.'});
-                         setSelectedEntry(null);
-                    }}
+                    onEdit={() => handleOpenEditModal(selectedEntry)}
                     onDelete={handleDeleteEntry}
                     onToggleApproval={handleToggleApproval}
                 />

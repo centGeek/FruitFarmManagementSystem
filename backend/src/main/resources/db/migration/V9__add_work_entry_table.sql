@@ -1,14 +1,15 @@
 CREATE TABLE work_entry
 (
     entry_id    SERIAL PRIMARY KEY,
-    user_id     INT          NOT NULL,
+    user_id     INT       NOT NULL,
     sector_id   INT,
-    start_time  TIMESTAMP    NOT NULL,
+    start_time  TIMESTAMP NOT NULL,
     end_time    TIMESTAMP,
     duration    int,
+    work_type   TEXT,
     description TEXT,
-    is_approved BOOLEAN    DEFAULT FALSE,
-    created_at  TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
+    is_approved BOOLEAN   DEFAULT FALSE,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_entry_user
         FOREIGN KEY (user_id)

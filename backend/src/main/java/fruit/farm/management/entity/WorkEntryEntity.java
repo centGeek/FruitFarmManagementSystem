@@ -28,6 +28,10 @@ public class WorkEntryEntity {
     @Column(name = "duration")
     private int duration;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "work_type", columnDefinition = "TEXT")
+    private WorkType workType;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 

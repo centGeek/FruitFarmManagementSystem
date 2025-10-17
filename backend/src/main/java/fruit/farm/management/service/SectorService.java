@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SectorService {
@@ -119,5 +120,10 @@ public class SectorService {
         }
 
         return updatedSectors;
+    }
+
+    public Optional<SectorEntity> findById(long id) {
+
+        return sectorRepository.findById(id);
     }
 }

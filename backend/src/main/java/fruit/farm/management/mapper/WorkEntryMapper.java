@@ -1,7 +1,8 @@
 package fruit.farm.management.mapper;
 
+import fruit.farm.management.dto.SectorDTO;
+import fruit.farm.management.dto.UserDTO;
 import fruit.farm.management.dto.WorkEntryDto;
-import fruit.farm.management.entity.TaskDefinitionEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.repository.SectorRepository;
 import fruit.farm.management.repository.TaskDefinitionRepository;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -52,38 +54,39 @@ public class WorkEntryMapper {
         return dto;
     }
 
-    public WorkEntryEntity mapToEntity(WorkEntryDto dto) {
-        if (dto == null) {
-            return null;
+    public static WorkEntryDto mapToDto(WorkEntryEntity entity) {
+        UserDTO userDto = null;
+        if (entity.getUser() != null) {
+            userDto = UserMapper.mapFromEntity(entity.getUser());
         }
 
-        WorkEntryEntity entity = new WorkEntryEntity();
+        SectorDTO sectorDto = null;
+        if (entity.getSector() != null) {
+            sectorDto = SectorMapper.mapToDTO(entity.getSector());
+        }
 
-        entity.setEntryId(dto.getEntryId());
-        entity.setStartTime(dto.getStartTime());
-        entity.setEndTime(dto.getEndTime());
-        entity.setDuration(dto.getDuration());
-        entity.setDescription(dto.getDescription());
-        entity.setIsApproved(dto.getIsApproved() != null ? dto.getIsApproved() : false);
-        entity.setCreatedAt(dto.getCreatedAt());
+        Set<WorkEntryDto.TaskBasicDto> taskDtos = new HashSet<>();
+        if (entity.getTasks() != null) {
+            taskDtos = entity.getTasks().stream()
+                    .map(task -> WorkEntryDto.TaskBasicDto.builder()
+                            .taskDefId(task.getTaskDefId())
+                            .taskName(task.getTaskName())
+                            .build())
+                    .collect(Collectors.toSet());
+        }
 
-//        if (dto.getUserId() != null) {
-//
-//            entity.setUser(userRepository.findById(dto.getUserId()).orElse(null));
-//        }
-//        if (dto.getSectorId() != null) {
-//
-//            entity.setSector(sectorRepository.findById(dto.getSectorId()).orElse(null));
-//        }
-//
-//        if (dto.getTaskIds() != null && !dto.getTaskIds().isEmpty()) {
-//            entity.setTasks(dto.getTaskIds().stream()
-//                    .flatMap(id -> taskDefinitionRepository.findById(id).stream())
-//                    .collect(Collectors.toSet()));
-//        } else {
-//            entity.setTasks(new HashSet<>());
-//        }
-
-        return entity;
+        return WorkEntryDto.builder()
+                .entryId(entity.getEntryId())
+                .startTime(entity.getStartTime())
+                .endTime(entity.getEndTime())
+                .duration(entity.getDuration())
+                .description(entity.getDescription())
+                .workType(entity.getWorkType())
+                .isApproved(entity.getIsApproved())
+                .createdAt(entity.getCreatedAt())
+                .user(userDto)
+                .sector(sectorDto)
+                .tasks(taskDtos)
+                .build();
     }
 }

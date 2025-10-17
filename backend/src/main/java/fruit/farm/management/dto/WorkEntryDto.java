@@ -1,12 +1,12 @@
 package fruit.farm.management.dto;
 
+import fruit.farm.management.entity.WorkType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.time.Duration;
 import java.util.Set;
 
 @Data
@@ -24,6 +24,8 @@ public class WorkEntryDto {
     private int duration;
 
     private String description;
+
+    private WorkType workType;
 
     private Boolean isApproved;
 
