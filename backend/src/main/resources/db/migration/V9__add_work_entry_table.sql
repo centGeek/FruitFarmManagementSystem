@@ -1,10 +1,9 @@
 CREATE TABLE work_entry
 (
     entry_id    SERIAL PRIMARY KEY,
-    user_id     INT       NOT NULL,
+    user_id     INT  NOT NULL,
     sector_id   INT,
-    start_time  TIMESTAMP NOT NULL,
-    end_time    TIMESTAMP,
+    work_date   DATE NOT NULL,
     duration    int,
     work_type   TEXT,
     description TEXT,

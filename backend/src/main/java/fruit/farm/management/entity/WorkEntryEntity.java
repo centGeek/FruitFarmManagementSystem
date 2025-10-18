@@ -2,11 +2,12 @@ package fruit.farm.management.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Duration;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "work_entry")
@@ -20,11 +21,8 @@ public class WorkEntryEntity {
     @Column(name = "entry_id")
     private Long entryId;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
-
-    @Column(name = "end_time")
-    private LocalDateTime endTime;
+    @Column(name = "work_date", nullable = false)
+    private LocalDate workDate;
 
     @Column(name = "duration")
     private int duration;

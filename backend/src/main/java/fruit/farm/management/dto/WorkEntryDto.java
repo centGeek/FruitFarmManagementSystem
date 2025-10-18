@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
 @Builder
@@ -17,9 +17,7 @@ public class WorkEntryDto {
 
     private Long entryId;
 
-    private LocalDateTime startTime;
-
-    private LocalDateTime endTime;
+    private LocalDate workDate;
 
     private int duration;
 

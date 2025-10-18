@@ -30,9 +30,8 @@ public class WorkEntryMapper {
 
         return WorkEntryDto.builder()
                 .entryId(entity.getEntryId())
-                .startTime(entity.getStartTime())
-                .endTime(entity.getEndTime())
                 .duration(entity.getDuration())
+                .workDate(entity.getWorkDate())
                 .description(entity.getDescription())
                 .workType(entity.getWorkType())
                 .isApproved(entity.getIsApproved())

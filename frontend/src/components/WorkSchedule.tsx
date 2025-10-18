@@ -271,7 +271,7 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onQuickApprove, c
 
     const getEntriesForDate = useCallback((date) => {
         const dateStr = date.toISOString().split('T')[0];
-        return workEntries.filter(entry => new Date(entry.startTime).toISOString().split('T')[0] === dateStr);
+        return workEntries.filter(entry => new Date(entry.workDate).toISOString().split('T')[0] === dateStr);
     }, [workEntries]);
 
     const isToday = useCallback((date) => date.toDateString() === new Date().toDateString(), []);
@@ -348,10 +348,6 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onQuickApprove, c
 const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onToggleApproval }) => {
     if (!entry) return null;
 
-    const formatDateTime = (dateStr) => dateStr ? new Date(dateStr).toLocaleString('pl-PL', {
-        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    }) : '-';
-
     return (
         <Modal isOpen={!!entry} onClose={onClose} title="Szczegóły wpisu" size="medium">
             <div className="space-y-4">
@@ -365,19 +361,6 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onToggleApproval 
                             {entry.isApproved ? <CheckCircle size={40} /> : <Clock size={40} />}
                         </div>
                     </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 p-4 rounded-xl">
-                        <p className="text-xs font-medium text-gray-500 uppercase mb-1">Rozpoczęcie</p>
-                        <p className="text-sm font-bold text-gray-900">{formatDateTime(entry.startTime)}</p>
-                    </div>
-                    {entry.endTime && (
-                        <div className="bg-gray-50 p-4 rounded-xl">
-                            <p className="text-xs font-medium text-gray-500 uppercase mb-1">Zakończenie</p>
-                            <p className="text-sm font-bold text-gray-900">{formatDateTime(entry.endTime)}</p>
-                        </div>
-                    )}
                 </div>
 
                 {entry.duration && (
@@ -557,13 +540,16 @@ export default function WorkEntryManagement() {
     const handleSaveBulkEntries = useCallback(async (entries) => {
         setIsLoading(true);
         closeAlert();
+
+        const workDateString = bulkAssignDate ? new Date(bulkAssignDate).toISOString().split('T')[0] : null; 
+        if (!workDateString) {
+            setAlert({ type: 'error', message: 'Nie wybrano daty pracy.' });
+            setIsLoading(false);
+            return;
+        }
+
         const entriesToSend = entries.map(entry => {
-            const date = new Date(bulkAssignDate);
-            date.setHours(8, 0, 0, 0);
-           
-            const start = date.toISOString();
-            const end = new Date(date.getTime() + parseFloat(entry.hours) * 60 * 60 * 1000).toISOString();
-           
+            
             const fullEmployee = employees.find(emp => emp.id === entry.employeeId);
             
             return {
@@ -577,14 +563,14 @@ export default function WorkEntryManagement() {
                     active: fullEmployee.active
                 } : { id: entry.employeeId },
                 sector: entry.sectorId ? { 
-                    id: entry.sectorId,
-                    sectorId: entry.sectorId 
+                    id: parseInt(entry.sectorId),
+                    sectorId: parseInt(entry.sectorId) 
                 } : null,
                 workType: entry.workType || null,
-                startTime: start,
-                endTime: end,
+                workDate: workDateString,
                 description: entry.description || '',
                 isApproved: entry.isApproved,
+                duration: parseFloat(entry.hours)
             };
         });
         console.log("Dane do wysłania do API:", entriesToSend);
@@ -631,22 +617,24 @@ export default function WorkEntryManagement() {
         setIsLoading(true);
         
         try {
-            const durationInt = Math.round(updatedEntry.duration || 0);
+            
+            const durationFloat = parseFloat(updatedEntry.duration || 0);
 
             const entryToSend = {
-                sector: updatedEntry.sector?.id ? {
-                    id: parseInt(updatedEntry.sector.id),
                 
+                user: updatedEntry.user, 
+                
+                sector: updatedEntry.sector?.id ? {
+                    id: updatedEntry.sector.id,
                 } : null,
-                workType: updatedEntry.workType ? String(updatedEntry.workType) : null,
-                startTime: String(updatedEntry.startTime),
-                endTime: String(updatedEntry.endTime),
-                duration: durationInt,
-                description: updatedEntry.description ? String(updatedEntry.description) : '',
+                workType: updatedEntry.workType || null,
+                workDate: updatedEntry.workDate, 
+                duration: durationFloat,
+                description: updatedEntry.description || '',
                 isApproved: Boolean(updatedEntry.isApproved)
             };
 
-            console.log("📤 Wysyłam dane do API (BEZ USER):", JSON.stringify(entryToSend, null, 2));
+            console.log("📤 Wysyłam dane do API (Z USEREM):", JSON.stringify(entryToSend, null, 2));
             
             const headers = getAuthHeaders();
             const response = await fetch(`${BACKEND_URL}/api/work-entries/${updatedEntry.entryId}`, {
@@ -655,6 +643,7 @@ export default function WorkEntryManagement() {
                 body: JSON.stringify(entryToSend),
             });
 
+         
            if (response.ok) {
     
 
@@ -667,7 +656,7 @@ export default function WorkEntryManagement() {
     setSelectedEntry(null);
     setAlert({ 
         type: 'success', 
-        message: 'Wpis zaktualizowany pomyślnie. (Backend miał problem z serializacją odpowiedzi)' 
+        message: 'Wpis zaktualizowany pomyślnie.'
     });
             } else {
                 const errorData = await parseApiError(response);
@@ -729,10 +718,6 @@ export default function WorkEntryManagement() {
     }, [parseApiError]);
 
 const handleOpenEditModal = useCallback((entry) => {
-        console.log("🔍 WSZYSTKIE POLA w entry:", Object.keys(entry));
-        console.log("🔍 Entry.user:", entry.user);
-        console.log("🔍 Czy istnieje entry.userId?:", entry.userId);
-        console.log("🔍 PEŁNY OBIEKT:", JSON.stringify(entry, null, 2));
         
         setEditingEntry({
             ...entry,
@@ -798,7 +783,7 @@ const handleOpenEditModal = useCallback((entry) => {
         pending: workEntries.filter(e => !e.isApproved).length,
         today: workEntries.filter(e => {
             const today = new Date().toDateString();
-            return new Date(e.startTime).toDateString() === today;
+            return new Date(e.workDate).toDateString() === today;
         }).length
     }), [workEntries]);
 
@@ -845,7 +830,7 @@ const handleOpenEditModal = useCallback((entry) => {
                         Planowanie Pracy Zespołów
                     </h1>
                     <p className="text-gray-600 text-lg">
-                        Planowanie tygodniowe i masowe przypisywanie zadań/godzin do pracowników 🗓️
+                        Planowanie tygodniowe i przypisywanie zadań/godzin do pracowników 🗓️
                     </p>
                 </header>
 
@@ -958,14 +943,11 @@ const handleOpenEditModal = useCallback((entry) => {
                             <div className="flex space-x-3 pt-4 border-t border-gray-200">
                                 <button
                                     onClick={() => {
-                                        const startTime = new Date(editingEntry.startTime);
                                         const durationHours = parseFloat(editingEntry.duration) || 0;
-                                        const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
                                         
                                         const updatedEntry = {
                                             ...editingEntry,
                                             duration: durationHours,
-                                            endTime: endTime.toISOString()
                                         };
                                         
                                         console.log("🔧 Edytowany wpis przed wysłaniem:", updatedEntry);

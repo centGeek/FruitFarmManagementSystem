@@ -17,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,6 @@ public class WorkEntryController {
     private WorkEntryRepository workEntryRepository;
     private WorkScheduleService workScheduleService;
     private UserRepository userRepository;
-    private SectorRepository sectorRepository;
     @GetMapping
     public ResponseEntity<List<WorkEntryDto>> getAllWorkEntries() {
 
@@ -59,6 +57,7 @@ public class WorkEntryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getWorkEntryById(@PathVariable Long id) {
+
         log.info("Getting work entry by ID: {}", id);
         try {
             Optional<WorkEntryEntity> optionalEntry = workEntryRepository.findById(id);
@@ -108,7 +107,7 @@ public class WorkEntryController {
     }
     @PutMapping("/{id}")
     public ResponseEntity<?> updateWorkEntry(@PathVariable Long id, @RequestBody WorkEntryDto request) {
-        log.info("Attempting to update work entry with ID: {}", id);
+
         log.info("Update request body: {}", request);
 
         try {
@@ -118,35 +117,8 @@ public class WorkEntryController {
                         .body(Map.of("error", "Work entry not found with ID: " + id));
             }
 
-            WorkEntryEntity existingEntry = optionalEntry.get();
-
-            if (request.getStartTime() != null) {
-                existingEntry.setStartTime(request.getStartTime());
-            }
-            if (request.getEndTime() != null) {
-                existingEntry.setEndTime(request.getEndTime());
-            }
-
-            existingEntry.setDuration(request.getDuration());
-
-            if (request.getDescription() != null) {
-                existingEntry.setDescription(request.getDescription());
-            }
-            if (request.getIsApproved() != null) {
-                existingEntry.setIsApproved(request.getIsApproved());
-            }
-
-            if (request.getWorkType() != null) {
-                existingEntry.setWorkType(request.getWorkType());
-            }
-
-            if (request.getSector().getId() != null) {
-                SectorEntity sector = sectorRepository.findById(request.getSector().getId())
-                        .orElseThrow(() -> new RuntimeException("Sector not found"));
-                existingEntry.setSector(sector);
-            }
-            WorkEntryEntity updatedEntry = workEntryRepository.save(existingEntry);
-            WorkEntryDto dto = WorkEntryMapper.mapToDto(updatedEntry);
+            WorkEntryEntity updatedWorkEntry = workScheduleService.updateWorkEntry(request, optionalEntry);
+            WorkEntryDto dto = WorkEntryMapper.mapToDto(updatedWorkEntry);
 
             log.info("Work entry updated successfully with ID: {}", id);
 

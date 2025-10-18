@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -29,16 +26,7 @@ public class WorkScheduleService {
 
     public List<WorkEntryEntity> createWorkSchedule(List<WorkEntryDto> requests, UserEntity gardener) {
 
-        List<WorkEntryEntity> workEntriesByGivenDayForGardener = workEntryRepository.findWorkEntriesByGivenDayForEmployee(requests);
-        int durationCalculated = 0;
-        for (WorkEntryEntity workEntryEntity : workEntriesByGivenDayForGardener) {
-            durationCalculated += workEntryEntity.getDuration();
-        }
-        if (durationCalculated > 18) {
-            throw new ExceededWorkHoursException("You can not work more than 18 hours per given day.");
-        }
-
-        List<WorkEntryEntity> entriesToSave = new ArrayList<>();
+            List<WorkEntryEntity> entriesToSave = new ArrayList<>();
 
         for (WorkEntryDto request : requests) {
             log.info("Processing entry for userId: {}", request.getUser());
@@ -52,28 +40,64 @@ public class WorkScheduleService {
 
             WorkEntryEntity entry = new WorkEntryEntity();
             entry.setUser(user);
-            entry.setStartTime(request.getStartTime());
-            entry.setEndTime(request.getEndTime());
             entry.setWorkType(request.getWorkType());
-
-            if (request.getStartTime() != null && request.getEndTime() != null) {
-                Duration duration = Duration.between(request.getStartTime(), request.getEndTime());
-                entry.setDuration(duration.toHoursPart());
-            }
-
             entry.setDescription(request.getDescription());
             entry.setIsApproved(request.getIsApproved() != null ? request.getIsApproved() : false);
             entry.setCreatedAt(LocalDateTime.now());
-
+            entry.setWorkDate(request.getWorkDate());
+            entry.setDuration(request.getDuration());
             if (request.getSector().getId() != null) {
                 SectorEntity sector = sectorService.findById(request.getSector().getId())
                         .orElseThrow(() -> new RuntimeException("Sector not found with ID: " + request.getSector().getId()));
                 entry.setSector(sector);
             }
 
+            validateWorkEntries(requests, entry.getDuration());
+
+
             entriesToSave.add(entry);
         }
 
         return workEntryRepository.saveAll(entriesToSave);
+    }
+
+    private void validateWorkEntries(List<WorkEntryDto> requests, int duration) {
+
+        List<WorkEntryEntity> workEntriesByGivenDayForGardener = workEntryRepository.findWorkEntriesByGivenDayForEmployee(requests);
+        int durationCalculated = duration;
+        for (WorkEntryEntity workEntryEntity : workEntriesByGivenDayForGardener) {
+            durationCalculated += workEntryEntity.getDuration();
+        }
+        if (durationCalculated > 18) {
+            throw new ExceededWorkHoursException("You can not work more than 18 hours per given day.");
+        }
+    }
+
+    public WorkEntryEntity updateWorkEntry(WorkEntryDto request, Optional<WorkEntryEntity> optionalEntry) {
+        WorkEntryEntity existingEntry = optionalEntry.get();
+
+        int durationDiff = request.getDuration() - existingEntry.getDuration();
+        validateWorkEntries(List.of(request), durationDiff);
+
+
+        existingEntry.setDuration(request.getDuration());
+
+        if (request.getDescription() != null) {
+            existingEntry.setDescription(request.getDescription());
+        }
+        if (request.getIsApproved() != null) {
+            existingEntry.setIsApproved(request.getIsApproved());
+        }
+
+        if (request.getWorkType() != null) {
+            existingEntry.setWorkType(request.getWorkType());
+        }
+
+        if (request.getSector().getId() != null) {
+            SectorEntity sector = sectorService.findById(request.getSector().getId())
+                    .orElseThrow(() -> new RuntimeException("Sector not found"));
+            existingEntry.setSector(sector);
+        }
+        return workEntryRepository.save(existingEntry);
     }
 }

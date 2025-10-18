@@ -40,9 +40,9 @@ public class WorkEntryRepository {
         return workEntryJpaRepository.findByUserGardenerId(id);
     }
 
-    public WorkEntryEntity save(WorkEntryEntity existingEntry) {
+    public WorkEntryEntity save(WorkEntryEntity workEntryEntity) {
 
-        return workEntryJpaRepository.save(existingEntry);
+        return workEntryJpaRepository.save(workEntryEntity);
     }
 
     public void delete(WorkEntryEntity entry) {
@@ -60,6 +60,6 @@ public class WorkEntryRepository {
             return new ArrayList<>();
         }
         return workEntryJpaRepository.findWorkEntriesByGivenDayForEmployee(requests.get(0).getUser().getEmail(),
-                requests.get(0).getEndTime().toLocalDate());
+                requests.get(0).getWorkDate());
     }
 }
