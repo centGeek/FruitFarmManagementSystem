@@ -460,7 +460,7 @@ export default function WorkEntryManagement() {
     }, []);
 
     const fetchEmployees = useCallback(async () => {
-        await fetchData(setEmployees, '/api/users', 'pracowników');
+        await fetchData(setEmployees, '/api/users/active', 'pracowników');
     }, [fetchData]);
 
     const fetchSectors = useCallback(async () => {

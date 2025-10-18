@@ -1,0 +1,16 @@
+package fruit.farm.management.controller;
+
+import fruit.farm.management.service.OpenWeatherService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/weather")
+@AllArgsConstructor
+@Slf4j
+public class OpenWeatherController {
+
+    private OpenWeatherService openWeatherService;
+}

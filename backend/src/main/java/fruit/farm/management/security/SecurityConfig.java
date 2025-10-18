@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/expenses/**").hasAnyAuthority("Gardener")
                         .requestMatchers("/api/sectors/**").hasAnyAuthority("Gardener")
                         .requestMatchers("/api/work-entries/**").hasAnyAuthority("Gardener")
+                        .requestMatchers("/api/notification/**").hasAnyAuthority("Gardener")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

@@ -1,9 +1,9 @@
 package fruit.farm.management.controller;
 
+import fruit.farm.management.dto.UserDTO;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.UserMapper;
-import fruit.farm.management.repository.UserRepository;
-import fruit.farm.management.dto.UserDTO;
+import fruit.farm.management.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +24,7 @@ import java.util.Optional;
 @Slf4j
 public class EmployeeController {
 
-    private UserRepository userRepository;
+    private UserService userService;
     private PasswordEncoder passwordEncoder;
 
     @GetMapping
@@ -35,10 +35,10 @@ public class EmployeeController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName();
             System.out.println("Logged user:" + loggedInEmail);
-            UserEntity gardener = userRepository.findByEmail(loggedInEmail)
+            UserEntity gardener = userService.findByEmail(loggedInEmail)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<UserEntity> users = userRepository.getAllEmployees(gardener.getId());
+            List<UserEntity> users = userService.getAllEmployees(gardener.getId());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
             log.error("Error fetching users: {}", e.getMessage(), e);
@@ -52,10 +52,10 @@ public class EmployeeController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName();
-            UserEntity gardener = userRepository.findByEmail(loggedInEmail)
+            UserEntity gardener = userService.findByEmail(loggedInEmail)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<UserEntity> users = userRepository.getAllActiveEmployees(gardener.getId());
+            List<UserEntity> users = userService.getAllActiveEmployees(gardener.getId());
             log.info("Found {} active users", users.size());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
@@ -70,10 +70,10 @@ public class EmployeeController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName();
-            UserEntity gardener = userRepository.findByEmail(loggedInEmail)
+            UserEntity gardener = userService.findByEmail(loggedInEmail)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<UserEntity> users = userRepository.getAllArchivedEmployees(gardener.getId());
+            List<UserEntity> users = userService.getAllArchivedEmployees(gardener.getId());
             log.info("Found {} archived users", users.size());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
@@ -88,7 +88,7 @@ public class EmployeeController {
         log.info("Request body: {}", userRequest);
 
         try {
-            Optional<UserEntity> existingUser = userRepository.findByEmail(userRequest.getEmail());
+            Optional<UserEntity> existingUser = userService.findByEmail(userRequest.getEmail());
             if (existingUser.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(Map.of("error", "Użytkownik z tym adresem email już istnieje"));
@@ -96,7 +96,7 @@ public class EmployeeController {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName();
-            UserEntity gardener = userRepository.findByEmail(loggedInEmail)
+            UserEntity gardener = userService.findByEmail(loggedInEmail)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             log.info("User registration data received:");
@@ -109,8 +109,7 @@ public class EmployeeController {
 
             UserEntity userEntity = UserMapper.mapToEntity(userRequest, gardener);
             userEntity.setCreationDate(LocalDate.now());
-            UserEntity savedUser = userRepository.save(userEntity);
-
+            UserEntity savedUser = userService.save(userEntity);
             return ResponseEntity.ok(Map.of(
                     "message", "User registered successfully",
                     "email", userRequest.getEmail(),
@@ -130,7 +129,7 @@ public class EmployeeController {
         log.info("Update request body: {}", userRequest);
 
         try {
-            Optional<UserEntity> optionalUser = userRepository.findById(id);
+            Optional<UserEntity> optionalUser = userService.findById(id);
             if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "User not found with ID: " + id));
@@ -139,7 +138,7 @@ public class EmployeeController {
             UserEntity existingUser = optionalUser.get();
 
             if (userRequest.getEmail() != null && !userRequest.getEmail().equals(existingUser.getEmail())) {
-                Optional<UserEntity> userWithEmail = userRepository.findByEmail(userRequest.getEmail());
+                Optional<UserEntity> userWithEmail = userService.findByEmail(userRequest.getEmail());
                 if (userWithEmail.isPresent() && !userWithEmail.get().getId().equals(id)) {
                     return ResponseEntity.status(HttpStatus.CONFLICT)
                             .body(Map.of("error", "Email already taken by another user"));
@@ -176,7 +175,7 @@ public class EmployeeController {
             }
             existingUser.setActive(userRequest.isActive());
 
-            UserEntity updatedUser = userRepository.save(existingUser);
+            UserEntity updatedUser = userService.save(existingUser);
             log.info("User updated successfully with ID: {}", updatedUser.getId());
 
             return ResponseEntity.ok(Map.of(
@@ -198,7 +197,7 @@ public class EmployeeController {
         log.info("Status request: {}", statusRequest);
 
         try {
-            Optional<UserEntity> optionalUser = userRepository.findById(id);
+            Optional<UserEntity> optionalUser = userService.findById(id);
             if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "User not found with ID: " + id));
@@ -219,7 +218,7 @@ public class EmployeeController {
                     user.getEmail(), user.isActive(), newStatus);
 
             user.setActive(newStatus);
-            UserEntity updatedUser = userRepository.save(user);
+            UserEntity updatedUser = userService.save(user);
 
             String action = newStatus ? "activated" : "archived";
             log.info("User {} successfully {}", user.getEmail(), action);
@@ -244,16 +243,15 @@ public class EmployeeController {
         log.info("Attempting to delete user with ID: {}", id);
 
         try {
-            Optional<UserEntity> optionalUser = userRepository.findById(id);
-            if (optionalUser.isEmpty()) {
+            Optional<UserEntity> optionalUser = userService.findById(id);
+            if (optionalUser.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "User not found with ID: " + id));
             }
+            UserEntity userEntity = optionalUser.get();
+            String userEmail = userEntity.getEmail();
 
-            UserEntity user = optionalUser.get();
-            String userEmail = user.getEmail();
-
-            userRepository.delete(user);
+            userService.delete(userEntity);
             log.info("User {} deleted successfully", userEmail);
 
             return ResponseEntity.ok(Map.of(
@@ -274,7 +272,7 @@ public class EmployeeController {
         log.info("Getting user by ID: {}", id);
 
         try {
-            Optional<UserEntity> optionalUser = userRepository.findById(id);
+            Optional<UserEntity> optionalUser = userService.findById(id);
             if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "User not found with ID: " + id));

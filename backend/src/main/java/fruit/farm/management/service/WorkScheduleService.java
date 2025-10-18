@@ -10,6 +10,7 @@ import fruit.farm.management.repository.WorkEntryRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ public class WorkScheduleService {
     private SectorService sectorService;
     private WorkEntryRepository workEntryRepository;
 
+    @Transactional
     public List<WorkEntryEntity> createWorkSchedule(List<WorkEntryDto> requests, UserEntity gardener) {
 
             List<WorkEntryEntity> entriesToSave = new ArrayList<>();

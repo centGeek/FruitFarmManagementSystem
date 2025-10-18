@@ -9,6 +9,7 @@ import fruit.farm.management.mapper.CoordinateMapper;
 import fruit.farm.management.mapper.SectorMapper;
 import fruit.farm.management.repository.SectorRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class SectorService {
         this.sectorRepository = sectorRepository;
     }
 
+    @Transactional
     public SectorDTO createSector(SectorDTO sectorDTO, UserEntity userEntity) {
 
         SectorEntity sector = new SectorEntity();
@@ -38,6 +40,7 @@ public class SectorService {
 
         return convertToDTO(savedSector);
     }
+
 
     public SectorDTO updateSector(SectorDTO sectorDTO) {
         SectorEntity sector = sectorRepository.findById(sectorDTO.getId())
