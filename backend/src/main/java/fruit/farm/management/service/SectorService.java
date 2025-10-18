@@ -1,29 +1,32 @@
 package fruit.farm.management.service;
 
 import fruit.farm.management.dto.CoordinateDTO;
+import fruit.farm.management.dto.NotificationDTO;
 import fruit.farm.management.dto.SectorDTO;
 import fruit.farm.management.entity.CoordinateEntity;
 import fruit.farm.management.entity.SectorEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.CoordinateMapper;
 import fruit.farm.management.mapper.SectorMapper;
+import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.SectorRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class SectorService {
 
     private final SectorRepository sectorRepository;
+    private final NotificationService notificationService;
 
-    public SectorService(SectorRepository sectorRepository) {
-        this.sectorRepository = sectorRepository;
-    }
 
     @Transactional
     public SectorDTO createSector(SectorDTO sectorDTO, UserEntity userEntity) {
@@ -37,6 +40,13 @@ public class SectorService {
         sector.setCoordinates(CoordinateMapper.mapToEntities(sectorDTO.getCoordinates(), sector));
 
         SectorEntity savedSector = sectorRepository.save(sector);
+        notificationService.addSectorNotification(NotificationDTO.builder()
+                .title("Dodano nowy sektor w gospodarstwie!")
+                .message("Dodano sektor: " + savedSector.getDescription() +
+                        " z uprawą: " + savedSector.getPlantType() + " i odmianą: " + savedSector.getVariety())
+                .createdAt(LocalDateTime.now())
+                .userDTO(UserMapper.mapFromEntity(userEntity))
+                .build(), userEntity.getId(), userEntity);
 
         return convertToDTO(savedSector);
     }

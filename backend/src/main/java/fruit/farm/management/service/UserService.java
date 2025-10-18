@@ -71,12 +71,11 @@ public class UserService {
 
         UserEntity savedUser = userRepository.save(user);
         UserEntity loggedInUserId = this.getLoggedInUserId();
-        notificationService.addNotification(NotificationDTO.builder()
+        notificationService.addUserNotification(NotificationDTO.builder()
                         .title("Dodano nowego pracownika!")
                         .message("Dodano pracownika: " + user.getName() + " " + user.getSurname())
                         .createdAt(LocalDateTime.now())
                         .userDTO(UserMapper.mapFromEntity(savedUser))
-                        .notificationType(NotificationType.USER)
                 .build(), savedUser.getId(), loggedInUserId);
         return savedUser;
     }
