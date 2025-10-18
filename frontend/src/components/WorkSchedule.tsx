@@ -90,14 +90,14 @@ const StatCard = ({ icon: Icon, count, label, color }) => {
     );
 };
 
-const DailyWorkForm = ({ date, employees, sectors, tasks, onSave, onCancel, isLoading }) => {
+const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }) => {
     const [entries, setEntries] = useState(() => 
         employees.map(emp => ({
             employeeId: emp.id, 
             employee: emp,
             hours: '',
             sectorId: '',
-            taskIds: [],
+            workType: '',
             description: '',
             isApproved: true
         }))
@@ -105,16 +105,6 @@ const DailyWorkForm = ({ date, employees, sectors, tasks, onSave, onCancel, isLo
 
     const updateEntry = useCallback((employeeId, field, value) => {
         setEntries(prev => prev.map(e => e.employeeId === employeeId ? { ...e, [field]: value } : e));
-    }, []);
-
-    const toggleTask = useCallback((employeeId, taskId) => {
-        setEntries(prev => prev.map(e => {
-            if (e.employeeId === employeeId) {
-                const taskIds = e.taskIds.includes(taskId) ? e.taskIds.filter(id => id !== taskId) : [...e.taskIds, taskId];
-                return { ...e, taskIds };
-            }
-            return e;
-        }));
     }, []);
 
     const handleSubmit = () => {
@@ -141,7 +131,7 @@ const DailyWorkForm = ({ date, employees, sectors, tasks, onSave, onCancel, isLo
 
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <p className="text-sm font-bold text-blue-800 mb-3">⚡ Szybkie wypełnienie dla wszystkich:</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
                         <label className="text-xs text-gray-600 mb-1 block">Godziny</label>
                         <div className="flex gap-2">
@@ -159,6 +149,16 @@ const DailyWorkForm = ({ date, employees, sectors, tasks, onSave, onCancel, isLo
                             className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm">
                             <option value="">Wybierz...</option>
                             {sectors.map(s => <option key={s.id} value={s.id}>{s.description}</option>)}
+                        </select>
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="text-xs text-gray-600 mb-1 block">Typ pracy</label>
+                        <select onChange={(e) => quickFillAll('workType', e.target.value)} 
+                            className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm">
+                            <option value="">Wybierz...</option>
+                            {WORK_TYPE_OPTIONS.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -191,17 +191,14 @@ const DailyWorkForm = ({ date, employees, sectors, tasks, onSave, onCancel, isLo
                             </div>
 
                             <div className="md:col-span-4">
-                                <label className="text-xs text-gray-500 mb-1 block">Zadania</label>
-                                <div className="flex flex-wrap gap-1">
-                                    {tasks.map(task => (
-                                        <button key={task.taskDefId} onClick={() => toggleTask(entry.employeeId, task.taskDefId)}
-                                            className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
-                                                entry.taskIds.includes(task.taskDefId) ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                            }`}>
-                                            {task.taskName}
-                                        </button>
+                                <label className="text-xs text-gray-500 mb-1 block">Typ pracy</label>
+                                <select value={entry.workType} onChange={(e) => updateEntry(entry.employeeId, 'workType', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                    <option value="">Brak</option>
+                                    {WORK_TYPE_OPTIONS.map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
                                     ))}
-                                </div>
+                                </select>
                             </div>
                         </div>
 
@@ -252,6 +249,7 @@ const CalendarEvent = ({ entry, onClick, onQuickApprove }) => (
             </button>
         </div>
         {entry.duration && <div className="text-xs font-bold opacity-90">⏱️ {entry.duration}h</div>}
+        {entry.workType && <div className="text-xs mt-1 opacity-75">{getWorkTypeIcon(entry.workType)}</div>}
         {entry.sector && <div className="text-xs mt-1 truncate opacity-75">📍 {entry.sector.description}</div>}
     </div>
 );
@@ -396,12 +394,10 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onToggleApproval 
                     </div>
                 )}
 
-                {entry.tasks?.length > 0 && (
-                    <div>
-                        <p className="text-sm font-medium text-gray-700 mb-2">Zadania:</p>
-                        <div className="flex flex-wrap gap-2">
-                            {entry.tasks.map(t => <span key={t.taskDefId} className="bg-gray-100 px-3 py-1 rounded-full text-sm">{t.taskName}</span>)}
-                        </div>
+                {entry.workType && (
+                    <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+                        <p className="text-xs font-medium text-indigo-700 uppercase mb-1">Typ pracy</p>
+                        <p className="text-sm font-bold text-indigo-900">{getWorkTypeLabel(entry.workType)}</p>
                     </div>
                 )}
 
@@ -436,7 +432,6 @@ export default function WorkEntryManagement() {
     const [workEntries, setWorkEntries] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [sectors, setSectors] = useState([]);
-    const [tasks, setTasks] = useState([]);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEntry, setSelectedEntry] = useState(null); 
@@ -449,7 +444,7 @@ export default function WorkEntryManagement() {
 
     const closeAlert = useCallback(() => setAlert({ type: '', message: '' }), []);
 
-const fetchData = useCallback(async (setter, endpoint, entityName) => {
+    const fetchData = useCallback(async (setter, endpoint, entityName) => {
         console.log(`[FETCH] Rozpoczynam pobieranie ${entityName} z: ${BACKEND_URL}${endpoint}`);
         try {
             const headers = getAuthHeaders();
@@ -481,7 +476,6 @@ const fetchData = useCallback(async (setter, endpoint, entityName) => {
         }
     }, []);
 
-
     const fetchEmployees = useCallback(async () => {
         await fetchData(setEmployees, '/api/users', 'pracowników');
     }, [fetchData]);
@@ -490,17 +484,12 @@ const fetchData = useCallback(async (setter, endpoint, entityName) => {
         await fetchData(setSectors, '/api/sectors', 'sektorów');
     }, [fetchData]);
 
-    const fetchTasks = useCallback(() => {
-        const mockTasks = [
-            { taskDefId: 1, taskName: 'Zbiory' },
-            { taskDefId: 2, taskName: 'Pielenie' },
-            { taskDefId: 3, taskName: 'Nawadnianie' },
-            { taskDefId: 4, taskName: 'Opryski' },
-        ];
-        setTasks(mockTasks);
-    }, []);
-    
-         const fetchWorkEntries = useCallback(async () => {
+    useEffect(() => {
+        fetchEmployees();
+        fetchSectors();
+    }, [fetchEmployees, fetchSectors]);
+
+    const fetchWorkEntries = useCallback(async () => {
         console.log('[FETCH] Rozpoczynam pobieranie wpisów pracy');
         setIsLoading(true);
         
@@ -512,15 +501,9 @@ const fetchData = useCallback(async (setter, endpoint, entityName) => {
             });
 
             console.log(`[FETCH] Odpowiedź serwera dla wpisów - Status: ${response.status}`);
- if (response.ok) {
+            if (response.ok) {
                 const data = await response.json();
                 console.log('[FETCH] ✅ Załadowano wpisy pracy:', data);
-                // Debug - sprawdź pierwszy wpis
-                if (data.length > 0) {
-                    console.log('[DEBUG] Pierwszy wpis RAW:', JSON.stringify(data[0], null, 2));
-                    console.log('[DEBUG] Duration value:', data[0].duration);
-                    console.log('[DEBUG] Duration type:', typeof data[0].duration);
-                }
                 setWorkEntries(Array.isArray(data) ? data : []);
             } else {
                 const errorText = await response.text();
@@ -538,14 +521,9 @@ const fetchData = useCallback(async (setter, endpoint, entityName) => {
     }, []);
 
     useEffect(() => {
-        fetchEmployees();
-        fetchSectors();
-        fetchTasks();
-    }, [fetchEmployees, fetchSectors, fetchTasks]);
+        fetchWorkEntries();
+    }, [currentDate, fetchWorkEntries]);
 
-    useEffect(() => {
-        fetchWorkEntries(currentDate, employees, sectors, tasks);
-    }, [currentDate, employees, sectors, tasks, fetchWorkEntries]); 
     const parseApiError = async (response) => {
         let errorData = {
             status: response.status,
@@ -575,7 +553,8 @@ const fetchData = useCallback(async (setter, endpoint, entityName) => {
 
         return errorData;
     };
-const handleSaveBulkEntries = useCallback(async (entries) => {
+
+    const handleSaveBulkEntries = useCallback(async (entries) => {
         setIsLoading(true);
         closeAlert();
         const entriesToSend = entries.map(entry => {
@@ -585,7 +564,6 @@ const handleSaveBulkEntries = useCallback(async (entries) => {
             const start = date.toISOString();
             const end = new Date(date.getTime() + parseFloat(entry.hours) * 60 * 60 * 1000).toISOString();
            
-            // Znajdź pełny obiekt pracownika z listy employees
             const fullEmployee = employees.find(emp => emp.id === entry.employeeId);
             
             return {
@@ -602,7 +580,7 @@ const handleSaveBulkEntries = useCallback(async (entries) => {
                     id: entry.sectorId,
                     sectorId: entry.sectorId 
                 } : null,
-                tasks: entry.taskIds.map(id => ({ taskDefId: id })),
+                workType: entry.workType || null,
                 startTime: start,
                 endTime: end,
                 description: entry.description || '',
@@ -630,16 +608,13 @@ const handleSaveBulkEntries = useCallback(async (entries) => {
                     message: `Zapisano ${entriesToSend.length} wpisów dla dnia ${new Date(bulkAssignDate).toLocaleDateString()}.` 
                 });
                 
-                // Odśwież dane
                 await fetchWorkEntries();
-             } else {
-                // ✅ DODAJ TO:
+            } else {
                 const errorData = await parseApiError(response);
                 console.error("❌ Błąd API:", errorData);
                 setCriticalError(errorData);
             }
         } catch (error) {
-            // ✅ DODAJ TO:
             console.error("❌ Błąd połączenia:", error);
             setCriticalError({
                 status: 0,
@@ -650,150 +625,172 @@ const handleSaveBulkEntries = useCallback(async (entries) => {
         } finally {
             setIsLoading(false);
         }
+    }, [closeAlert, fetchWorkEntries, bulkAssignDate, employees, parseApiError]);
 
-}, [closeAlert, fetchWorkEntries, bulkAssignDate, employees, parseApiError]);
     const handleEditEntry = useCallback(async (updatedEntry) => {
-    setIsLoading(true);
-    
-    try {
-        const headers = getAuthHeaders();
-        const response = await fetch(`${BACKEND_URL}/api/work-entries/${updatedEntry.entryId}`, {
-            method: 'PUT',
-            headers: headers,
-            body: JSON.stringify(updatedEntry),
-        });
+        setIsLoading(true);
+        
+        try {
+            const durationInt = Math.round(updatedEntry.duration || 0);
 
-        if (response.ok) {
-            const result = await response.json();
-            console.log("✅ Wpis zaktualizowany:", result);
+            const entryToSend = {
+                sector: updatedEntry.sector?.id ? {
+                    id: parseInt(updatedEntry.sector.id),
+                
+                } : null,
+                workType: updatedEntry.workType ? String(updatedEntry.workType) : null,
+                startTime: String(updatedEntry.startTime),
+                endTime: String(updatedEntry.endTime),
+                duration: durationInt,
+                description: updatedEntry.description ? String(updatedEntry.description) : '',
+                isApproved: Boolean(updatedEntry.isApproved)
+            };
+
+            console.log("📤 Wysyłam dane do API (BEZ USER):", JSON.stringify(entryToSend, null, 2));
             
-            // Odśwież listę wpisów
-            await fetchWorkEntries();
-            
-            setAlert({ 
-                type: 'success', 
-                message: 'Wpis zaktualizowany pomyślnie' 
+            const headers = getAuthHeaders();
+            const response = await fetch(`${BACKEND_URL}/api/work-entries/${updatedEntry.entryId}`, {
+                method: 'PUT',
+                headers: headers,
+                body: JSON.stringify(entryToSend),
             });
-        } else {
-            const errorData = await parseApiError(response);
-            console.error("❌ Błąd aktualizacji:", errorData);
+
+           if (response.ok) {
+    
+
+    console.log("✅ Wpis zaktualizowany pomyślnie (ominięto parsowanie JSON odpowiedzi).");
+    
+    await fetchWorkEntries(); 
+    
+    setIsEditModalOpen(false);
+    setEditingEntry(null);
+    setSelectedEntry(null);
+    setAlert({ 
+        type: 'success', 
+        message: 'Wpis zaktualizowany pomyślnie. (Backend miał problem z serializacją odpowiedzi)' 
+    });
+            } else {
+                const errorData = await parseApiError(response);
+                console.error("❌ Błąd aktualizacji:", errorData);
+                setAlert({ 
+                    type: 'error', 
+                    message: `Błąd aktualizacji: ${errorData.message}` 
+                });
+            }
+        } catch (error) {
+            console.error("❌ Błąd połączenia:", error);
             setAlert({ 
                 type: 'error', 
-                message: `Błąd aktualizacji: ${errorData.message}` 
+                message: 'Błąd połączenia z serwerem' 
             });
+        } finally {
+            setIsLoading(false);
         }
-    } catch (error) {
-        console.error("❌ Błąd połączenia:", error);
-        setAlert({ 
-            type: 'error', 
-            message: 'Błąd połączenia z serwerem' 
-        });
-    } finally {
-        setIsLoading(false);
-    }
-}, [fetchWorkEntries, parseApiError]);
+    }, [fetchWorkEntries, parseApiError]);
+
     const handleDeleteEntry = useCallback(async (entryId) => {
-    setIsLoading(true);
-    
-    try {
-        const headers = getAuthHeaders();
-        const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}`, {
-            method: 'DELETE',
-            headers: headers,
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            console.log("✅ Wpis usunięty:", result);
-            
-            // Usuń z lokalnego stanu
-            setWorkEntries(prev => prev.filter(e => e.entryId !== entryId));
-            setSelectedEntry(null);
-            
-            setAlert({ 
-                type: 'success', 
-                message: 'Wpis usunięty pomyślnie' 
+        setIsLoading(true);
+        
+        try {
+            const headers = getAuthHeaders();
+            const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}`, {
+                method: 'DELETE',
+                headers: headers,
             });
-        } else {
-            const errorData = await parseApiError(response);
-            console.error("❌ Błąd usuwania:", errorData);
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log("✅ Wpis usunięty:", result);
+                
+                setWorkEntries(prev => prev.filter(e => e.entryId !== entryId));
+                setSelectedEntry(null);
+                
+                setAlert({ 
+                    type: 'success', 
+                    message: 'Wpis usunięty pomyślnie' 
+                });
+            } else {
+                const errorData = await parseApiError(response);
+                console.error("❌ Błąd usuwania:", errorData);
+                setAlert({ 
+                    type: 'error', 
+                    message: `Błąd usuwania: ${errorData.message}` 
+                });
+            }
+        } catch (error) {
+            console.error("❌ Błąd połączenia:", error);
             setAlert({ 
                 type: 'error', 
-                message: `Błąd usuwania: ${errorData.message}` 
+                message: 'Błąd połączenia z serwerem' 
             });
+        } finally {
+            setIsLoading(false);
         }
-    } catch (error) {
-        console.error("❌ Błąd połączenia:", error);
-        setAlert({ 
-            type: 'error', 
-            message: 'Błąd połączenia z serwerem' 
-        });
-    } finally {
-        setIsLoading(false);
-    }
-}, [parseApiError]);
+    }, [parseApiError]);
 
 const handleOpenEditModal = useCallback((entry) => {
-    setEditingEntry({
-        ...entry,
-        hours: entry.duration || '',
-        sectorId: entry.sector?.id || '',
-        workType: entry.workType || ''  // ✅ DODANO
-    });
-    setSelectedEntry(null);
-    setIsEditModalOpen(true);
-}, []);
-
-    const handleToggleApproval = useCallback(async (entryId) => {
-    const entry = workEntries.find(e => e.entryId === entryId);
-    if (!entry) return;
-
-    setIsLoading(true);
-    const newApprovalStatus = !entry.isApproved;
-
-    try {
-        const headers = getAuthHeaders();
-        const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}/approval`, {
-            method: 'PATCH',
-            headers: headers,
-            body: JSON.stringify({ isApproved: newApprovalStatus }),
+        console.log("🔍 WSZYSTKIE POLA w entry:", Object.keys(entry));
+        console.log("🔍 Entry.user:", entry.user);
+        console.log("🔍 Czy istnieje entry.userId?:", entry.userId);
+        console.log("🔍 PEŁNY OBIEKT:", JSON.stringify(entry, null, 2));
+        
+        setEditingEntry({
+            ...entry,
+            hours: entry.duration || '',
+            sectorId: entry.sector?.id || '',
+            workType: entry.workType || ''
         });
+        setSelectedEntry(null);
+        setIsEditModalOpen(true);
+    }, []);
+    const handleToggleApproval = useCallback(async (entryId) => {
+        const entry = workEntries.find(e => e.entryId === entryId);
+        if (!entry) return;
 
-        if (response.ok) {
-            const result = await response.json();
-            console.log("✅ Zatwierdzenie zmienione:", result);
-            
-            // Zaktualizuj lokalny stan
-            setWorkEntries(prev => prev.map(e => 
-                e.entryId === entryId ? { ...e, isApproved: newApprovalStatus } : e
-            ));
-            setSelectedEntry(prev => 
-                prev && prev.entryId === entryId ? { ...prev, isApproved: newApprovalStatus } : prev
-            );
-            
-            setAlert({ 
-                type: 'success', 
-                message: newApprovalStatus ? 'Wpis zatwierdzony' : 'Cofnięto zatwierdzenie' 
+        setIsLoading(true);
+        const newApprovalStatus = !entry.isApproved;
+
+        try {
+            const headers = getAuthHeaders();
+            const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}/approval`, {
+                method: 'PATCH',
+                headers: headers,
+                body: JSON.stringify({ isApproved: newApprovalStatus }),
             });
-        } else {
-            const errorData = await parseApiError(response);
-            console.error("❌ Błąd zmiany zatwierdzenia:", errorData);
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log("✅ Zatwierdzenie zmienione:", result);
+                
+                setWorkEntries(prev => prev.map(e => 
+                    e.entryId === entryId ? { ...e, isApproved: newApprovalStatus } : e
+                ));
+                setSelectedEntry(prev => 
+                    prev && prev.entryId === entryId ? { ...prev, isApproved: newApprovalStatus } : prev
+                );
+                
+                setAlert({ 
+                    type: 'success', 
+                    message: newApprovalStatus ? 'Wpis zatwierdzony' : 'Cofnięto zatwierdzenie' 
+                });
+            } else {
+                const errorData = await parseApiError(response);
+                console.error("❌ Błąd zmiany zatwierdzenia:", errorData);
+                setAlert({ 
+                    type: 'error', 
+                    message: `Błąd: ${errorData.message}` 
+                });
+            }
+        } catch (error) {
+            console.error("❌ Błąd połączenia:", error);
             setAlert({ 
                 type: 'error', 
-                message: `Błąd: ${errorData.message}` 
+                message: 'Błąd połączenia z serwerem' 
             });
+        } finally {
+            setIsLoading(false);
         }
-    } catch (error) {
-        console.error("❌ Błąd połączenia:", error);
-        setAlert({ 
-            type: 'error', 
-            message: 'Błąd połączenia z serwerem' 
-        });
-    } finally {
-        setIsLoading(false);
-    }
-}, [workEntries, parseApiError]);
-
+    }, [workEntries, parseApiError]);
 
     const stats = useMemo(() => ({
         total: workEntries.length,
@@ -824,7 +821,7 @@ const handleOpenEditModal = useCallback((entry) => {
         }
     };
 
-     if (criticalError) {
+    if (criticalError) {
         return (
             <ErrorPage
                 error={criticalError}
@@ -838,7 +835,6 @@ const handleOpenEditModal = useCallback((entry) => {
             />
         );
     }
-
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-lime-50 to-green-100 p-6 font-sans">
@@ -861,21 +857,6 @@ const handleOpenEditModal = useCallback((entry) => {
                     <StatCard icon={Clock} count={stats.pending} label="Oczekujące" color="amber" />
                     <StatCard icon={Users} count={stats.today} label="Dzisiaj" color="purple" />
                 </div>
-                
-                {(!isLoading && employees.length === 0) && (
-                    <div className="text-center py-4 bg-white rounded-xl mb-4 border border-red-200">
-                        <p className="text-red-500 text-sm font-medium">
-                            🚨 **Brak Pracowników.** Upewnij się, że Twój backend Spring Boot działa i endpoint `/api/users` zwraca listę pracowników.
-                        </p>
-                    </div>
-                )}
-                {(!isLoading && sectors.length === 0) && (
-                    <div className="text-center py-4 bg-white rounded-xl mb-4 border border-amber-200">
-                        <p className="text-amber-600 text-sm font-medium">
-                            ⚠️ **Brak Sektorów.** Upewnij się, że endpoint `/api/sectors` zwraca listę sektorów. Bez sektorów planowanie będzie ograniczone.
-                        </p>
-                    </div>
-                )}
                                 
                 <div className="mb-8">
                     <WeekCalendar
@@ -898,14 +879,12 @@ const handleOpenEditModal = useCallback((entry) => {
                         date={bulkAssignDate}
                         employees={employees}
                         sectors={sectors}
-                        tasks={tasks}
                         onSave={handleSaveBulkEntries}
                         onCancel={handleCloseModal}
                         isLoading={isLoading}
                     />
                 </Modal>
                 
-                 {/* Modal edycji */}
                 {isEditModalOpen && editingEntry && (
                     <Modal
                         isOpen={isEditModalOpen}
@@ -952,18 +931,16 @@ const handleOpenEditModal = useCallback((entry) => {
                             </div>
 
                             <div>
-                                <label className="text-xs text-gray-600 mb-1 block">Typ zadania</label>
-                                <select onChange={(e) => quickFillAll('workType', e.target.value)} 
-                                    className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm">
-                                    <option value="">Wybierz...</option>
-                                    <option value="HARVEST">🌾 Zbiory</option>
-                                    <option value="WEEDING">🌱 Pielenie</option>
-                                    <option value="WATERING">💧 Nawadnianie</option>
-                                    <option value="SPRAYING">💨 Opryski</option>
-                                    <option value="PLANTING">🌿 Sadzenie</option>
-                                    <option value="PRUNING">✂️ Przycinanie</option>
-                                    <option value="FERTILIZING">🧪 Nawożenie</option>
-                                    <option value="OTHER">📋 Inne</option>
+                                <label className="text-sm font-medium text-gray-700 mb-1 block">Typ pracy</label>
+                                <select 
+                                    value={editingEntry.workType || ''}
+                                    onChange={(e) => setEditingEntry(prev => ({ ...prev, workType: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                >
+                                    <option value="">Brak</option>
+                                    {WORK_TYPE_OPTIONS.map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -981,16 +958,18 @@ const handleOpenEditModal = useCallback((entry) => {
                             <div className="flex space-x-3 pt-4 border-t border-gray-200">
                                 <button
                                     onClick={() => {
-                                        // Przelicz nowy endTime na podstawie duration
+                                        const startTime = new Date(editingEntry.startTime);
+                                        const durationHours = parseFloat(editingEntry.duration) || 0;
+                                        const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
+                                        
                                         const updatedEntry = {
                                             ...editingEntry,
-                                            endTime: editingEntry.duration 
-                                                ? new Date(new Date(editingEntry.startTime).getTime() + editingEntry.duration * 60 * 60 * 1000).toISOString()
-                                                : editingEntry.endTime
+                                            duration: durationHours,
+                                            endTime: endTime.toISOString()
                                         };
+                                        
+                                        console.log("🔧 Edytowany wpis przed wysłaniem:", updatedEntry);
                                         handleEditEntry(updatedEntry);
-                                        setIsEditModalOpen(false);
-                                        setEditingEntry(null);
                                     }}
                                     disabled={isLoading}
                                     className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-colors disabled:opacity-50"

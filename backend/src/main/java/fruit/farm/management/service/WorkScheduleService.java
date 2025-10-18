@@ -2,11 +2,9 @@ package fruit.farm.management.service;
 
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.SectorEntity;
-import fruit.farm.management.entity.TaskDefinitionEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.exception.ExceededWorkHoursException;
-import fruit.farm.management.repository.TaskDefinitionRepository;
 import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.repository.WorkEntryRepository;
 import lombok.AllArgsConstructor;
@@ -27,7 +25,6 @@ public class WorkScheduleService {
 
     private UserRepository userRepository;
     private SectorService sectorService;
-    private TaskDefinitionRepository taskDefinitionRepository;
     private WorkEntryRepository workEntryRepository;
 
     public List<WorkEntryEntity> createWorkSchedule(List<WorkEntryDto> requests, UserEntity gardener) {
@@ -57,6 +54,7 @@ public class WorkScheduleService {
             entry.setUser(user);
             entry.setStartTime(request.getStartTime());
             entry.setEndTime(request.getEndTime());
+            entry.setWorkType(request.getWorkType());
 
             if (request.getStartTime() != null && request.getEndTime() != null) {
                 Duration duration = Duration.between(request.getStartTime(), request.getEndTime());
@@ -71,16 +69,6 @@ public class WorkScheduleService {
                 SectorEntity sector = sectorService.findById(request.getSector().getId())
                         .orElseThrow(() -> new RuntimeException("Sector not found with ID: " + request.getSector().getId()));
                 entry.setSector(sector);
-            }
-
-            if (request.getTasks() != null && !request.getTasks().isEmpty()) {
-                Set<TaskDefinitionEntity> tasks = new HashSet<>();
-                for (WorkEntryDto.TaskBasicDto taskId : request.getTasks()) {
-                    TaskDefinitionEntity task = taskDefinitionRepository.findById(taskId.getTaskDefId())
-                            .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskId));
-                    tasks.add(task);
-                }
-                entry.setTasks(tasks);
             }
 
             entriesToSave.add(entry);

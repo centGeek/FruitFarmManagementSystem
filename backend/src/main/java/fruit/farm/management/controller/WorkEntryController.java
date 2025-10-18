@@ -2,12 +2,10 @@ package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.SectorEntity;
-import fruit.farm.management.entity.TaskDefinitionEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.mapper.WorkEntryMapper;
 import fruit.farm.management.repository.SectorRepository;
-import fruit.farm.management.repository.TaskDefinitionRepository;
 import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.repository.WorkEntryRepository;
 import fruit.farm.management.service.WorkScheduleService;
@@ -33,7 +31,6 @@ public class WorkEntryController {
     private WorkScheduleService workScheduleService;
     private UserRepository userRepository;
     private SectorRepository sectorRepository;
-    private TaskDefinitionRepository taskDefinitionRepository;
     @GetMapping
     public ResponseEntity<List<WorkEntryDto>> getAllWorkEntries() {
 
@@ -130,10 +127,7 @@ public class WorkEntryController {
                 existingEntry.setEndTime(request.getEndTime());
             }
 
-            if (existingEntry.getStartTime() != null && existingEntry.getEndTime() != null) {
-                Duration duration = Duration.between(existingEntry.getStartTime(), existingEntry.getEndTime());
-                existingEntry.setDuration(duration.toHoursPart());
-            }
+            existingEntry.setDuration(request.getDuration());
 
             if (request.getDescription() != null) {
                 existingEntry.setDescription(request.getDescription());
@@ -142,22 +136,15 @@ public class WorkEntryController {
                 existingEntry.setIsApproved(request.getIsApproved());
             }
 
+            if (request.getWorkType() != null) {
+                existingEntry.setWorkType(request.getWorkType());
+            }
+
             if (request.getSector().getId() != null) {
                 SectorEntity sector = sectorRepository.findById(request.getSector().getId())
                         .orElseThrow(() -> new RuntimeException("Sector not found"));
                 existingEntry.setSector(sector);
             }
-
-            if (request.getTasks() != null) {
-                Set<TaskDefinitionEntity> tasks = new HashSet<>();
-                for (WorkEntryDto.TaskBasicDto taskId : request.getTasks()) {
-                    TaskDefinitionEntity task = taskDefinitionRepository.findById(taskId.getTaskDefId())
-                            .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskId));
-                    tasks.add(task);
-                }
-                existingEntry.setTasks(tasks);
-            }
-
             WorkEntryEntity updatedEntry = workEntryRepository.save(existingEntry);
             WorkEntryDto dto = WorkEntryMapper.mapToDto(updatedEntry);
 

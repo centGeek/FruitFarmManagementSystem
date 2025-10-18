@@ -51,3 +51,9 @@ logging:
   level:
     org.flywaydb: DEBUG
     org.springframework.boot.autoconfigure.flyway: DEBUG
+jwt:
+  secret:
+    key: 9683bc6f47cc73bd0dc0fd3738cc59ca1a15637eee20af3dc7b9aa1165716db7ba98e845
+security:
+  bcrypt:
+    strength: 4

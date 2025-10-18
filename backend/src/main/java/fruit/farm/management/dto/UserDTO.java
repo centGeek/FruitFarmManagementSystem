@@ -44,7 +44,4 @@ public class UserDTO {
     private String confirmPassword;
 
     private boolean isActive;
-
-    private UserEntity gardener;
-
 }

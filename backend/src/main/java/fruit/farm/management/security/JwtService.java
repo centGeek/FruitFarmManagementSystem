@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -16,8 +17,16 @@ import java.util.List;
 @Slf4j
 public class JwtService {
 
-    private final Key SECRET_KEY = Keys.hmacShaKeyFor("tajny_klucz_tajny_klucz_tajny_klucz"
-            .getBytes(StandardCharsets.UTF_8));
+    private final Key SECRET_KEY;
+
+    public JwtService(@Value("${jwt.secret.key}") String secret) {
+
+        if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            log.error("JWT token is too short.");
+            throw new IllegalArgumentException("JWT Secret Key is too short.");
+        }
+        this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generateToken(Long id, String email, List<String> roles) {
         return Jwts.builder()

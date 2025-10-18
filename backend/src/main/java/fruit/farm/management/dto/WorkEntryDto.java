@@ -34,15 +34,4 @@ public class WorkEntryDto {
     private UserDTO user;
 
     private SectorDTO sector;
-
-    private Set<TaskBasicDto> tasks;
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TaskBasicDto {
-        private Long taskDefId;
-        private String taskName;
-    }
 }
