@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Calendar, Clock, Users, CheckCircle, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Calendar, Clock, Users, CheckCircle, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, X} from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import ErrorPage from './ErrorPage'; 
 
@@ -248,7 +248,15 @@ const CalendarEvent = ({ entry, onClick, onQuickApprove }) => (
                 {entry.isApproved ? '✅' : '⏳'}
             </button>
         </div>
-        {entry.duration && <div className="text-xs font-bold opacity-90">⏱️ {entry.duration}h</div>}
+        <div className="flex items-center space-x-2">
+            {entry.duration && <div className="text-xs font-bold opacity-90 text-black">⏱️ {entry.duration}h</div>}
+            {entry.daySalary !== undefined && entry.daySalary !== null && (
+            <div className="text-xs font-medium text-orange-900 opacity-90 flex items-center">
+                💰 {parseFloat(entry.daySalary).toFixed(0)} zł 
+            </div>
+        )}
+        </div>
+        
         {entry.workType && <div className="text-xs mt-1 opacity-75">{getWorkTypeIcon(entry.workType)}</div>}
         {entry.sector && <div className="text-xs mt-1 truncate opacity-75">📍 {entry.sector.description}</div>}
     </div>
@@ -308,6 +316,7 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onQuickApprove, c
                 {weekDays.map((day, idx) => {
                     const entries = getEntriesForDate(day);
                     const totalHours = entries.reduce((sum, e) => sum + (e.duration || 0), 0);
+                    const totalSalary = entries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0); // SUMOWANIE daySalary
                     const dateStr = day.toISOString().split('T')[0];
                     
                     return (
@@ -315,7 +324,10 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onQuickApprove, c
                             <div className={`p-3 border-b border-gray-200 ${isToday(day) ? 'bg-green-100' : 'bg-gray-50'}`}>
                                 <div className="text-xs text-gray-500 uppercase">{day.toLocaleDateString('pl-PL', { weekday: 'short' })}</div>
                                 <div className={`text-2xl font-bold ${isToday(day) ? 'text-green-600' : 'text-gray-800'}`}>{day.getDate()}</div>
-                                {totalHours > 0 && <div className="text-xs font-medium text-blue-600 mt-1">{totalHours.toFixed(1)}h</div>}
+                                <div className="space-y-0.5 mt-1">
+                                    {totalHours > 0 && <div className="text-xs font-medium text-blue-600">⏱️ {totalHours.toFixed(1)}h</div>}
+                                    {totalSalary > 0 && <div className="text-xs font-medium text-orange-900 opacity-90 flex items-center">💰 {totalSalary.toFixed(2)} zł</div>}
+                                </div>
                             </div>
 
                             <div className="p-2">
@@ -363,12 +375,34 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onToggleApproval 
                     </div>
                 </div>
 
-                {entry.duration && (
-                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                <div className="grid grid-cols-2 gap-4">
+                    {entry.duration !== undefined && entry.duration !== null && (
+                        <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                            <p className="text-xs font-medium text-blue-700 uppercase mb-1">Czas trwania</p>
+                            <p className="text-lg font-bold text-blue-900">{entry.duration}h</p>
+                        </div>
+                    )}
+                    {entry.daySalary !== undefined && entry.daySalary !== null && (
+                        <div className="bg-red-50 p-4 rounded-xl border border-red-200">
+                            <p className="text-xs font-medium text-red-700 uppercase mb-1">Wynagrodzenie dzienne</p>
+                            <p className="text-lg font-bold text-red-900">{parseFloat(entry.daySalary).toFixed(2)} zł</p>
+                        </div>
+                    )}
+                </div>
+                
+                {entry.duration && entry.daySalary === null && (
+                     <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
                         <p className="text-xs font-medium text-blue-700 uppercase mb-1">Czas trwania</p>
                         <p className="text-lg font-bold text-blue-900">{entry.duration}h</p>
                     </div>
                 )}
+                {entry.daySalary !== undefined && entry.daySalary !== null && !entry.duration && (
+                    <div className="bg-red-50 p-4 rounded-xl border border-red-200">
+                        <p className="text-xs font-medium text-red-700 uppercase mb-1">Wynagrodzenie dzienne</p>
+                        <p className="text-lg font-bold text-red-900">{parseFloat(entry.daySalary).toFixed(2)} zł</p>
+                    </div>
+                )}
+
 
                 {entry.sector && (
                     <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
@@ -570,7 +604,8 @@ export default function WorkEntryManagement() {
                 workDate: workDateString,
                 description: entry.description || '',
                 isApproved: entry.isApproved,
-                duration: parseFloat(entry.hours)
+                duration: parseFloat(entry.hours),
+                daySalary: 0, // Domyślnie 0 lub null, jeśli pole nie jest w formularzu
             };
         });
         console.log("Dane do wysłania do API:", entriesToSend);
@@ -631,7 +666,8 @@ export default function WorkEntryManagement() {
                 workDate: updatedEntry.workDate, 
                 duration: durationFloat,
                 description: updatedEntry.description || '',
-                isApproved: Boolean(updatedEntry.isApproved)
+                isApproved: Boolean(updatedEntry.isApproved),
+                daySalary: parseFloat(updatedEntry.daySalary) || 0, 
             };
 
             console.log("📤 Wysyłam dane do API (Z USEREM):", JSON.stringify(entryToSend, null, 2));
@@ -643,7 +679,7 @@ export default function WorkEntryManagement() {
                 body: JSON.stringify(entryToSend),
             });
 
-         
+           
            if (response.ok) {
     
 
@@ -723,7 +759,8 @@ const handleOpenEditModal = useCallback((entry) => {
             ...entry,
             hours: entry.duration || '',
             sectorId: entry.sector?.id || '',
-            workType: entry.workType || ''
+            workType: entry.workType || '',
+            daySalary: entry.daySalary !== undefined && entry.daySalary !== null ? parseFloat(entry.daySalary) : '', // Dodajemy do stanu, aby wysłać PUT
         });
         setSelectedEntry(null);
         setIsEditModalOpen(true);
@@ -842,7 +879,7 @@ const handleOpenEditModal = useCallback((entry) => {
                     <StatCard icon={Clock} count={stats.pending} label="Oczekujące" color="amber" />
                     <StatCard icon={Users} count={stats.today} label="Dzisiaj" color="purple" />
                 </div>
-                                
+                                                
                 <div className="mb-8">
                     <WeekCalendar
                         workEntries={workEntries}
@@ -893,6 +930,13 @@ const handleOpenEditModal = useCallback((entry) => {
                                         onChange={(e) => setEditingEntry(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                                     />
+                                </div>
+                                
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-1 block">Wynagrodzenie (zł)</label>
+                                    <p className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-800 font-bold">
+                                        {parseFloat(editingEntry.daySalary).toFixed(2)} zł
+                                    </p>
                                 </div>
                                 
                                 <div>

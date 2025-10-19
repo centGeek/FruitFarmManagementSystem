@@ -4,14 +4,8 @@ import fruit.farm.management.dto.SectorDTO;
 import fruit.farm.management.dto.UserDTO;
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.WorkEntryEntity;
-import fruit.farm.management.repository.SectorRepository;
-import fruit.farm.management.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -38,6 +32,8 @@ public class WorkEntryMapper {
                 .createdAt(entity.getCreatedAt())
                 .user(userDto)
                 .sector(sectorDto)
+                .daySalary(entity.getDaySalary())
+                .kilogramsPicked(entity.getKilogramsPicked())
                 .build();
     }
 }

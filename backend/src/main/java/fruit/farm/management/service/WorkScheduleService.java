@@ -1,5 +1,6 @@
 package fruit.farm.management.service;
 
+import fruit.farm.management.dto.WorkDetailsDTO;
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.SectorEntity;
 import fruit.farm.management.entity.UserEntity;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -24,11 +26,12 @@ public class WorkScheduleService {
     private UserRepository userRepository;
     private SectorService sectorService;
     private WorkEntryRepository workEntryRepository;
+    private WorkDetailsService workDetailsService;
 
     @Transactional
     public List<WorkEntryEntity> createWorkSchedule(List<WorkEntryDto> requests, UserEntity gardener) {
 
-            List<WorkEntryEntity> entriesToSave = new ArrayList<>();
+        List<WorkEntryEntity> entriesToSave = new ArrayList<>();
 
         for (WorkEntryDto request : requests) {
             log.info("Processing entry for userId: {}", request.getUser());
@@ -53,7 +56,11 @@ public class WorkScheduleService {
                         .orElseThrow(() -> new RuntimeException("Sector not found with ID: " + request.getSector().getId()));
                 entry.setSector(sector);
             }
-
+            WorkDetailsDTO latestWorkDetailsForUser = workDetailsService.getLatestWorkDetailsForUserByEmail(
+                    request.getUser().getEmail());
+            BigDecimal salary = DailySalaryCalculator.calculateDailySalary(request, latestWorkDetailsForUser);
+            entry.setDaySalary(salary);
+            log.info("Day salary is set: " + salary);
             validateWorkEntries(requests, entry.getDuration());
 
 
@@ -76,6 +83,7 @@ public class WorkScheduleService {
     }
 
     public WorkEntryEntity updateWorkEntry(WorkEntryDto request, Optional<WorkEntryEntity> optionalEntry) {
+
         WorkEntryEntity existingEntry = optionalEntry.get();
 
         int durationDiff = request.getDuration() - existingEntry.getDuration();
@@ -94,6 +102,11 @@ public class WorkScheduleService {
         if (request.getWorkType() != null) {
             existingEntry.setWorkType(request.getWorkType());
         }
+        WorkDetailsDTO latestWorkDetailsForUserByEmail = workDetailsService
+                .getLatestWorkDetailsForUserByEmail(request.getUser().getEmail());
+        BigDecimal salary = DailySalaryCalculator.calculateDailySalary(request, latestWorkDetailsForUserByEmail);
+
+        existingEntry.setDaySalary(salary);
 
         if (request.getSector().getId() != null) {
             SectorEntity sector = sectorService.findById(request.getSector().getId())

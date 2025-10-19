@@ -29,7 +29,7 @@ const Alert = ({ type, message, onClose }) => {
     );
 };
 
-const Modal = ({ isOpen, onClose, title, children }) => {
+const Modal = ({ isOpen, onClose, title, children, headerColor = 'bg-green-50' }) => {
     if (!isOpen) return null;
 
     useEffect(() => {
@@ -47,15 +47,14 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             role="dialog"
         >
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-transform duration-300 scale-100">
-                <div className="sticky top-0 bg-green-50 border-b border-green-200 px-6 py-4 rounded-t-2xl z-10">
+                <div className={`sticky top-0 ${headerColor} border-b border-gray-200 px-6 py-4 rounded-t-2xl z-10`}>
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold text-gray-800 flex items-center">
-                            <span className="mr-2 text-green-600">🌱</span>
                             {title}
                         </h2>
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-green-100 rounded-xl transition-colors text-lg"
+                            className="p-2 hover:bg-white hover:bg-opacity-50 rounded-xl transition-colors text-lg"
                             aria-label="Zamknij"
                         >
                             ❌
@@ -67,6 +66,321 @@ const Modal = ({ isOpen, onClose, title, children }) => {
                 </div>
             </div>
         </div>
+    );
+};
+
+const WorkDetailsModal = ({ isOpen, onClose, employee, onSave }) => {
+    const [workDetails, setWorkDetails] = useState(null);
+    const [isPaidHourly, setIsPaidHourly] = useState(true);
+    const [hourlyPay, setHourlyPay] = useState('');
+    const [payPerKilogram, setPayPerKilogram] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const formatPay = (pay) => {
+        if (pay === null || pay === undefined || pay === '') return '';
+        return Number(pay).toFixed(2);
+    };
+
+    const currentRateText = useMemo(() => {
+        if (!workDetails) return null;
+
+        const isHourly = workDetails.isPaidHourly === true;
+        const rate = isHourly ? workDetails.hourlyPay : workDetails.payPerKilogram;
+        const rateUnit = isHourly ? 'PLN/godz' : 'PLN/kg';
+        const rateType = isHourly ? 'Godzinowy' : 'Za Kilogram';
+
+        if (rate === null || rate === undefined) return null;
+
+        const formattedRate = Number(rate).toFixed(2); 
+
+        return {
+            rateType,
+            rateText: `${formattedRate} ${rateUnit}`,
+            isCurrentHourly: isHourly
+        };
+    }, [workDetails]);
+
+    useEffect(() => {
+        if (isOpen && employee) {
+            fetchLatestWorkDetails();
+        } else if (!isOpen) {
+            setWorkDetails(null);
+            setIsPaidHourly(true);
+            setHourlyPay('');
+            setPayPerKilogram('');
+            setError('');
+        }
+    }, [isOpen, employee]);
+
+    const fetchLatestWorkDetails = async () => {
+        setIsLoading(true);
+        setError('');
+        
+        setWorkDetails(null);
+        setIsPaidHourly(true);
+        setHourlyPay('');
+        setPayPerKilogram('');
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/work-details/user/${employee.id}/latest`, {
+                headers: getAuthHeaders()
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`Załadowano detale zatrudnienia dla użytkownika ${employee.name} ${employee.surname}:`, data);
+                setWorkDetails(data);
+                
+                const isPaidHourlyFromBackend = data.isPaidHourly === true;
+                setIsPaidHourly(isPaidHourlyFromBackend);
+                
+                if (isPaidHourlyFromBackend) {
+                    setHourlyPay(formatPay(data.hourlyPay)); 
+                    setPayPerKilogram('');
+                } else {
+                    setPayPerKilogram(formatPay(data.payPerKilogram)); 
+                    setHourlyPay('');
+                }
+            } else if (response.status === 204) {
+                console.log(`Brak zapisanych detali pracy dla użytkownika ${employee.name} ${employee.surname}`);
+            } else {
+                console.error('Błąd pobierania detali:', response.status);
+            }
+        } catch (err) {
+            console.error('Błąd pobierania detali pracy:', err);
+            setError('Nie udało się pobrać detali pracy');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+    setError('');
+    
+    console.log('🔍 DEBUG - Stan przed walidacją:');
+    console.log('isPaidHourly:', isPaidHourly, 'typ:', typeof isPaidHourly);
+    console.log('hourlyPay:', hourlyPay);
+    console.log('payPerKilogram:', payPerKilogram);
+    
+    if (isPaidHourly && (!hourlyPay || parseFloat(hourlyPay) <= 0)) {
+        setError('Wprowadź prawidłową stawkę godzinową');
+        return;
+    }
+    if (!isPaidHourly && (!payPerKilogram || parseFloat(payPerKilogram) <= 0)) {
+        setError('Wprowadź prawidłową stawkę za kilogram');
+        return;
+    }
+
+    const payload = {
+        userDTO: {
+            id: employee.id,
+            name: employee.name,
+            surname: employee.surname,
+            email: employee.email,
+            nickname: employee.nickname || null,
+            phoneNumber: employee.phoneNumber || null,
+            creationDate: employee.creationDate || null,
+            active: employee.active
+        },
+        isPaidHourly: isPaidHourly,
+        hourlyPay: isPaidHourly ? parseFloat(hourlyPay) : null,
+        payPerKilogram: !isPaidHourly ? parseFloat(payPerKilogram) : null
+    };
+
+    console.log('📦 Payload do wysłania:', JSON.stringify(payload, null, 2));
+
+    setIsLoading(true);
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/work-details`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            onSave();
+            onClose();
+        } else {
+            setError('Błąd zapisywania detali pracy');
+        }
+    } catch (err) {
+        setError('Błąd połączenia z serwerem');
+    } finally {
+        setIsLoading(false);
+    }
+};
+
+    if (!isOpen) return null;
+
+    return (
+        <Modal 
+            isOpen={isOpen} 
+            onClose={onClose} 
+            title={<span><span className="mr-2 text-purple-600">💼</span>Detale Zatrudnienia - {employee?.name} {employee?.surname}</span>}
+            headerColor="bg-purple-50"
+        >
+            <div className="space-y-6">
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p className="text-sm font-medium text-blue-900">
+                        👤 {employee?.name} {employee?.surname}
+                        {employee?.nickname && <span className="italic text-blue-700"> "{employee.nickname}"</span>}
+                    </p>
+                    <p className="text-xs text-blue-700 mt-1">
+                        📧 {employee?.email}
+                    </p>
+                </div>
+
+                {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                        ⚠️ {error}
+                    </div>
+                )}
+
+                {isLoading && !error ? (
+                    <div className="text-center py-8">
+                        <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
+                        <p className="text-gray-500 mt-4">Ładowanie...</p>
+                    </div>
+                 ) : (
+                    <>
+                        {currentRateText && (
+                            <div className={`p-4 rounded-xl border-l-4 ${currentRateText.isCurrentHourly ? 'bg-blue-100 border-blue-500' : 'bg-green-100 border-green-500'} transition-all`}>
+                                <p className="text-sm text-gray-800 flex items-center">
+                                    <span className="mr-2 text-xl">
+                                        {currentRateText.isCurrentHourly ? '⏰' : '⚖️'}
+                                    </span> 
+                                    Obecna stawka pracownika: 
+                                    <span className="ml-2 font-bold text-base">
+                                        {currentRateText.rateText}
+                                    </span>
+                                </p>
+                            </div>
+                        )}
+                        
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                Typ Rozliczenia
+                            </label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsPaidHourly(true);
+                                        setPayPerKilogram('');
+                                    }}
+                                    disabled={isLoading}
+                                    className={`py-4 px-4 rounded-xl font-medium transition-all ${
+                                        isPaidHourly
+                                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    <div className="text-3xl mb-2">⏰</div>
+                                    <div className="text-sm font-bold">Płatność Godzinowa</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsPaidHourly(false);
+                                        setHourlyPay('');
+                                    }}
+                                    disabled={isLoading}
+                                    className={`py-4 px-4 rounded-xl font-medium transition-all ${
+                                        !isPaidHourly
+                                            ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg scale-105'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    <div className="text-3xl mb-2">⚖️</div>
+                                    <div className="text-sm font-bold">Płatność Za Kilogram</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        {isPaidHourly ? (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Stawka Godzinowa (PLN) *
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">
+                                        💰
+                                    </span>
+                                    <input
+                                        type="number"
+                                        value={hourlyPay}
+                                        onChange={(e) => setHourlyPay(e.target.value)}
+                                        placeholder="np. 25.50"
+                                        step="0.01"
+                                        min="0"
+                                        disabled={isLoading}
+                                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Kwota wypłacana za każdą przepracowaną godzinę
+                                </p>
+                            </div>
+                        ) : (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Stawka za Kilogram (PLN) *
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">
+                                        🍎
+                                    </span>
+                                    <input
+                                        type="number"
+                                        value={payPerKilogram}
+                                        onChange={(e) => setPayPerKilogram(e.target.value)}
+                                        placeholder="np. 0.80"
+                                        step="0.01"
+                                        min="0"
+                                        disabled={isLoading}
+                                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Kwota wypłacana za każdy zebrany kilogram owoców
+                                </p>
+                            </div>
+                        )}
+
+                        {workDetails && (
+                            <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
+                                <p>📅 Ostatnia aktualizacja: {new Date(workDetails.createdAt).toLocaleDateString('pl-PL')}</p>
+                            </div>
+                        )}
+
+                        <div className="flex gap-3 pt-4 border-t">
+                            <button
+                                onClick={handleSave}
+                                disabled={isLoading}
+                                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center justify-center">
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                        Zapisywanie...
+                                    </span>
+                                ) : (
+                                    <span>💾 Zapisz Nowe Detale</span>
+                                )}
+                            </button>
+                            <button
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
+                            >
+                                Anuluj
+                            </button>
+                        </div>
+                    </>
+                )}
+            </div>
+        </Modal>
     );
 };
 
@@ -100,8 +414,6 @@ const InputField = React.memo(({ label, name, type = 'text', required = false, i
         {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
 ));
-
-// --- EmployeeForm ---
 
 const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
     const isUpdating = !!employee;
@@ -273,9 +585,7 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
     );
 };
 
-// --- EmployeeCard i Statystyki ---
-
-const EmployeeCard = ({ employee, onEdit, onArchive, onRestore }) => {
+const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onWorkDetails }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const isEmployeeActive = employee.active || false; 
     const isArchived = !isEmployeeActive;
@@ -319,6 +629,16 @@ const EmployeeCard = ({ employee, onEdit, onArchive, onRestore }) => {
                     >
                         ✏️
                     </button>
+                    
+                    <button
+                        onClick={() => onWorkDetails(employee)}
+                        className="p-2 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors text-base"
+                        title="Detale Zatrudnienia 💼"
+                        disabled={isProcessing}
+                    >
+                        💼
+                    </button>
+                    
                     <button
                         onClick={handleArchiveToggle}
                         disabled={isProcessing}
@@ -446,6 +766,7 @@ export default function EmployeeManagement() {
     const [searchTerm, setSearchTerm] = useState('');
     const [showArchived, setShowArchived] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isWorkDetailsModalOpen, setIsWorkDetailsModalOpen] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState({ type: '', message: '' });
@@ -477,7 +798,7 @@ export default function EmployeeManagement() {
         } finally {
             setIsLoading(false);
         }
-    }, [showArchived, closeAlert]); 
+    }, [showArchived]); 
 
     const fetchAllEmployeesForStats = useCallback(async () => {
         try {
@@ -492,7 +813,6 @@ export default function EmployeeManagement() {
                 setAllEmployees(usersList);
             }
         } catch (error) {
-            // Ignorujemy błędy dla statystyk
         }
     }, []);
     
@@ -547,8 +867,8 @@ export default function EmployeeManagement() {
                 fetchAllEmployeesForStats();
             } else {
                 let errorMessage = response.statusText;
-                    const error = await response.json();
-                    errorMessage = error.message || error.error || response.statusText; 
+                const error = await response.json();
+                errorMessage = error.message || error.error || response.statusText; 
                 setAlert({ type: 'error', message: `Błąd zapisu (${response.status}): ${errorMessage}` });
             }
         } catch (error) {
@@ -581,7 +901,6 @@ export default function EmployeeManagement() {
                     const error = await response.json();
                     errorMessage = error.message || error.error || response.statusText;
                 } catch (e) {
-                    // Czasami serwer zwraca błąd bez JSONa
                 }
                 setAlert({ type: 'error', message: `Błąd podczas ${action}: ${errorMessage}` });
             }
@@ -598,6 +917,17 @@ export default function EmployeeManagement() {
 
     const closeModal = useCallback(() => {
         setIsModalOpen(false);
+        setSelectedEmployee(null);
+    }, []);
+
+    const handleWorkDetails = useCallback((employee) => {
+        setSelectedEmployee(employee);
+        setIsWorkDetailsModalOpen(true);
+    }, []);
+
+    const handleWorkDetailsSave = useCallback(() => {
+        setAlert({ type: 'success', message: 'Detale zatrudnienia zostały zapisane pomyślnie!' });
+        setIsWorkDetailsModalOpen(false);
         setSelectedEmployee(null);
     }, []);
 
@@ -706,6 +1036,7 @@ export default function EmployeeManagement() {
                                     onEdit={openModal}
                                     onArchive={(id) => toggleEmployeeStatus(id, false)}
                                     onRestore={(id) => toggleEmployeeStatus(id, true)}
+                                    onWorkDetails={handleWorkDetails}
                                 />
                             ))}
                         </div>
@@ -715,7 +1046,8 @@ export default function EmployeeManagement() {
                 <Modal
                     isOpen={isModalOpen}
                     onClose={closeModal}
-                    title={'Dodaj Nowego Pracownika ✨'}
+                    title={<span><span className="mr-2 text-green-600">🌱</span>Dodaj Nowego Pracownika ✨</span>}
+                    headerColor="bg-green-50"
                 >
                     <EmployeeForm
                         employee={selectedEmployee}
@@ -724,6 +1056,16 @@ export default function EmployeeManagement() {
                         isLoading={isLoading}
                     />
                 </Modal>
+
+                <WorkDetailsModal
+                    isOpen={isWorkDetailsModalOpen}
+                    onClose={() => {
+                        setIsWorkDetailsModalOpen(false);
+                        setSelectedEmployee(null);
+                    }}
+                    employee={selectedEmployee}
+                    onSave={handleWorkDetailsSave}
+                />
             </div>
         </div>
     );

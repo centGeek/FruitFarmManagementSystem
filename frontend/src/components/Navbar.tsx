@@ -4,7 +4,7 @@ function GardenerNavbar({ onLogout }) {
   const navigate = useNavigate();
   
   const tabs = [
-    { name: "Home", path: "/home" },
+    { name: "Strona główna", path: "/home" },
     { name: "Mapa", path: "/map" },
     { name: "Pracownicy", path: "/employees" },
     { name: "Ewidencja pracy", path: "/work-schedule" },

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -39,6 +40,12 @@ public class WorkEntryEntity {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "day_salary", nullable = false)
+    private BigDecimal daySalary;
+
+    @Column(name = "kilograms_picked", nullable = false)
+    private long kilogramsPicked;
 
     @JsonIgnore
     @ManyToOne
