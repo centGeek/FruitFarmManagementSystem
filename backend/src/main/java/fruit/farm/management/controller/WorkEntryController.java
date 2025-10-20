@@ -1,11 +1,9 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.WorkEntryDto;
-import fruit.farm.management.entity.SectorEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.mapper.WorkEntryMapper;
-import fruit.farm.management.repository.SectorRepository;
 import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.repository.WorkEntryRepository;
 import fruit.farm.management.service.WorkScheduleService;
@@ -17,7 +15,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController

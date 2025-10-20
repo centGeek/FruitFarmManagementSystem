@@ -9,16 +9,15 @@ import EmployeeManagement from './components/EmployeeManagement'
 import ExpenseManagement from './components/ExpenseManagement'
 import ProfitsManagement from './components/ProfitsManagement'
 import WorkSchedule from './components/WorkSchedule'
-
-
+import WeatherNotifications from './components/WeatherNotifications'
 
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [userRole, setUserRole] = useState(null) // Dodana rola użytkownika
+  const [userRole, setUserRole] = useState(null) 
+  
   const [isLoading, setIsLoading] = useState(true)
 
-  // Funkcja do wyciągania roli z JWT tokenu
   const extractRoleFromToken = (token) => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -29,7 +28,6 @@ function App() {
     }
   };
 
-  // Sprawdź stan autentyfikacji przy ładowaniu aplikacji
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -90,7 +88,6 @@ function App() {
       const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
       
       if (token) {
-        // Powiadom backend o wylogowaniu
         await fetch('/api/auth/logout', {
           method: 'POST',
           headers: {
@@ -102,11 +99,9 @@ function App() {
     } catch (error) {
       console.error('Logout request failed:', error);
     } finally {
-      // Wyczyść tokeny i ciasteczka
       localStorage.removeItem('authToken');
       sessionStorage.removeItem('authToken');
       
-      // Wyczyszczenie wszystkich ciastek
       document.cookie.split(";").forEach((c) => {
         document.cookie = c
           .replace(/^ +/, "")
@@ -118,7 +113,6 @@ function App() {
     }
   };
 
-  // Komponenty ProtectedRoute dla różnych ról
   const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     if (!isLoggedIn) {
       return <Navigate to="/" replace />;
@@ -221,7 +215,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+           <Route
+          path="/weather"
+          element={
+            <ProtectedRoute allowedRoles={["Gardener"]}>
+              <WeatherNotifications/>
+            </ProtectedRoute>
+          }
+        />
         {/* Trasy dostępne dla obu ról */}
         <Route
           path="/employees"

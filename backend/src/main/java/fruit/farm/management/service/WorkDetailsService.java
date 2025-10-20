@@ -12,9 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,9 +43,13 @@ public class WorkDetailsService {
         return WorkDetailsMapper.mapFromEntity(workDetailsRepository.findTopByUserEntityIdOrderByCreatedAtDesc(userId));
     }
 
-    public WorkDetailsDTO getLatestWorkDetailsForUserByEmail(String email) {
+    public Optional<WorkDetailsDTO> getLatestWorkDetailsForUserByEmail(String email) {
 
-        return WorkDetailsMapper.mapFromEntity(workDetailsRepository.getLatestWorkDetailsForUserByEmail(email));
+        WorkDetailsEntity workDetailsForUserByEmail = workDetailsRepository.getLatestWorkDetailsForUserByEmail(email);
+        if(workDetailsForUserByEmail != null) {
+            return Optional.of(WorkDetailsMapper.mapFromEntity(workDetailsForUserByEmail));
+        }
+        return Optional.empty();
     }
 
     @Transactional

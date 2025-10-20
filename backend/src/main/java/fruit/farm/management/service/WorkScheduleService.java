@@ -14,9 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -51,18 +52,21 @@ public class WorkScheduleService {
             entry.setCreatedAt(LocalDateTime.now());
             entry.setWorkDate(request.getWorkDate());
             entry.setDuration(request.getDuration());
-            if (request.getSector().getId() != null) {
-                SectorEntity sector = sectorService.findById(request.getSector().getId())
-                        .orElseThrow(() -> new RuntimeException("Sector not found with ID: " + request.getSector().getId()));
-                entry.setSector(sector);
+            if (request.getSector() != null) {
+                if (request.getSector().getId() != null) {
+                    SectorEntity sector = sectorService.findById(request.getSector().getId())
+                            .orElseThrow(() -> new RuntimeException("Sector not found with ID: " + request.getSector().getId()));
+                    entry.setSector(sector);
+                }
             }
-            WorkDetailsDTO latestWorkDetailsForUser = workDetailsService.getLatestWorkDetailsForUserByEmail(
+            Optional<WorkDetailsDTO> latestWorkDetailsForUser = workDetailsService.getLatestWorkDetailsForUserByEmail(
                     request.getUser().getEmail());
-            BigDecimal salary = DailySalaryCalculator.calculateDailySalary(request, latestWorkDetailsForUser);
+            BigDecimal salary = latestWorkDetailsForUser
+                    .map(workDetailsDTO -> DailySalaryCalculator.calculateDailySalary(request, workDetailsDTO))
+                    .orElse(BigDecimal.ZERO);
             entry.setDaySalary(salary);
             log.info("Day salary is set: " + salary);
             validateWorkEntries(requests, entry.getDuration());
-
 
             entriesToSave.add(entry);
         }
@@ -102,9 +106,11 @@ public class WorkScheduleService {
         if (request.getWorkType() != null) {
             existingEntry.setWorkType(request.getWorkType());
         }
-        WorkDetailsDTO latestWorkDetailsForUserByEmail = workDetailsService
+        Optional<WorkDetailsDTO> latestWorkDetailsForUserByEmail = workDetailsService
                 .getLatestWorkDetailsForUserByEmail(request.getUser().getEmail());
-        BigDecimal salary = DailySalaryCalculator.calculateDailySalary(request, latestWorkDetailsForUserByEmail);
+        BigDecimal salary = latestWorkDetailsForUserByEmail
+                .map(workDetailsDTO -> DailySalaryCalculator.calculateDailySalary(request, workDetailsDTO))
+                .orElse(BigDecimal.ZERO);
 
         existingEntry.setDaySalary(salary);
 

@@ -3,27 +3,27 @@ import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import {formatCurrency} from "../utils/common"
 
 const PROFIT_TYPES = [
-  // 🍎 Sprzedaż owoców
-  { value: 'APPLE_SALE', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
-  { value: 'PEAR_SALE', label: 'Sprzedaż gruszek', icon: '🍐', color: 'bg-green-50 text-green-700 border-green-200' },
-  { value: 'CHERRY_SALE', label: 'Sprzedaż czereśni/wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
-  { value: 'PLUM_SALE', label: 'Sprzedaż śliwek', icon: '🫐', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { value: 'PEACH_SALE', label: 'Sprzedaż brzoskwiń', icon: '🍑', color: 'bg-orange-50 text-orange-700 border-orange-200' },
-  { value: 'OTHER_FRUIT_SALE', label: 'Sprzedaż innych owoców', icon: '🥝', color: 'bg-green-50 text-green-700 border-green-200' },
-  
-  // 🏪 Kanały sprzedaży
-  { value: 'WHOLESALE', label: 'Sprzedaż hurtowa', icon: '🏭', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { value: 'RETAIL', label: 'Sprzedaż detaliczna', icon: '🏪', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { value: 'EXPORT', label: 'Eksport', icon: '🌍', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  { value: 'ONLINE_SALE', label: 'Sprzedaż online', icon: '💻', color: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
-  
-  // 💰 Inne przychody
-  { value: 'SUBSIDY', label: 'Dotacje / Dopłaty', icon: '🏛️', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  { value: 'COMPENSATION', label: 'Odszkodowania / Ubezpieczenia', icon: '🛡️', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  { value: 'EQUIPMENT_SALE', label: 'Sprzedaż sprzętu', icon: '🚜', color: 'bg-gray-50 text-gray-700 border-gray-200' },
-  { value: 'SERVICES', label: 'Usługi rolnicze dla innych', icon: '🤝', color: 'bg-teal-50 text-teal-700 border-teal-200' },
-  { value: 'RENT', label: 'Wynajem ziemi/sprzętu', icon: '🏡', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { value: 'OTHER', label: 'Inne przychody', icon: '💵', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+ // 🍎 Sprzedaż owoców
+ { value: 'APPLE_SALE', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
+ { value: 'PEAR_SALE', label: 'Sprzedaż gruszek', icon: '🍐', color: 'bg-green-50 text-green-700 border-green-200' },
+ { value: 'CHERRY_SALE', label: 'Sprzedaż czereśni/wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
+ { value: 'PLUM_SALE', label: 'Sprzedaż śliwek', icon: '🫐', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+ { value: 'PEACH_SALE', label: 'Sprzedaż brzoskwiń', icon: '🍑', color: 'bg-orange-50 text-orange-700 border-orange-200' },
+ { value: 'OTHER_FRUIT_SALE', label: 'Sprzedaż innych owoców', icon: '🥝', color: 'bg-green-50 text-green-700 border-green-200' },
+ 
+ // 🏪 Kanały sprzedaży
+ { value: 'WHOLESALE', label: 'Sprzedaż hurtowa', icon: '🏭', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+ { value: 'RETAIL', label: 'Sprzedaż detaliczna', icon: '🏪', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+ { value: 'EXPORT', label: 'Eksport', icon: '🌍', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+ { value: 'ONLINE_SALE', label: 'Sprzedaż online', icon: '💻', color: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+ 
+ // 💰 Inne przychody
+ { value: 'SUBSIDY', label: 'Dotacje / Dopłaty', icon: '🏛️', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+ { value: 'COMPENSATION', label: 'Odszkodowania / Ubezpieczenia', icon: '🛡️', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+ { value: 'EQUIPMENT_SALE', label: 'Sprzedaż sprzętu', icon: '🚜', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+ { value: 'SERVICES', label: 'Usługi rolnicze dla innych', icon: '🤝', color: 'bg-teal-50 text-teal-700 border-teal-200' },
+ { value: 'RENT', label: 'Wynajem ziemi/sprzętu', icon: '🏡', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+ { value: 'OTHER', label: 'Inne przychody', icon: '💵', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
 ];
 
 const PAYMENT_STATUS_OPTIONS = [

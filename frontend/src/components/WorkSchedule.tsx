@@ -92,34 +92,51 @@ const StatCard = ({ icon: Icon, count, label, color }) => {
 
 const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }) => {
     const [entries, setEntries] = useState(() => 
-        employees.map(emp => ({
-            employeeId: emp.id, 
-            employee: emp,
-            hours: '',
-            sectorId: '',
-            workType: '',
-            description: '',
-            isApproved: true
-        }))
-    );
+    employees.map(emp => ({
+        employeeId: emp.id, 
+        employee: emp,
+        hours: '',
+        kilogramsPicked: '',
+        sectorId: '',
+        workType: '',
+        description: '',
+        isApproved: true,
+        isPaidHourly: emp.isPaidHourly !== false
+    }))
+);
 
     const updateEntry = useCallback((employeeId, field, value) => {
         setEntries(prev => prev.map(e => e.employeeId === employeeId ? { ...e, [field]: value } : e));
     }, []);
 
     const handleSubmit = () => {
-        const valid = entries.filter(e => e.hours && parseFloat(e.hours) > 0);
-        if (valid.length === 0) {
-            onCancel('warning', 'Podaj godziny pracy dla co najmniej jednego pracownika');
-            return;
+    const valid = entries.filter(e => {
+        const hasHours = e.hours && parseFloat(e.hours) > 0;
+        if (e.isPaidHourly) {
+            return hasHours;
+        } else {
+            const hasKg = e.kilogramsPicked && parseFloat(e.kilogramsPicked) > 0;
+            return hasHours && hasKg;
         }
-        onSave(valid);
-    };
+    });
+    if (valid.length === 0) {
+        onCancel('warning', 'Podaj wymagane dane dla co najmniej jednego pracownika');
+        return;
+    }
+    onSave(valid);
+};
 
     const quickFillAll = (field, value) => setEntries(prev => prev.map(e => ({ ...e, [field]: value })));
 
     const totalHours = useMemo(() => entries.reduce((sum, e) => sum + (parseFloat(e.hours) || 0), 0), [entries]);
-    const filledCount = useMemo(() => entries.filter(e => e.hours && parseFloat(e.hours) > 0).length, [entries]);
+    const totalKilograms = useMemo(() => entries.reduce((sum, e) => sum + (parseFloat(e.kilogramsPicked) || 0), 0), [entries]);
+    const filledCount = useMemo(() => entries.filter(e => {
+        if (e.isPaidHourly) {
+            return e.hours && parseFloat(e.hours) > 0;
+        } else {
+            return e.kilogramsPicked && parseFloat(e.kilogramsPicked) > 0;
+        }
+    }).length, [entries]);
 
     return (
         <div className="space-y-4">
@@ -173,13 +190,32 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
                                 {entry.employee.nickname && <p className="text-xs text-gray-500 italic">"{entry.employee.nickname}"</p>}
                             </div>
 
-                            <div className="md:col-span-2">
-                                <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
-                                <input type="number" step="0.5" min="0" max="24" value={entry.hours}
-                                    onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
-                                    placeholder="8" />
-                            </div>
+                            {entry.isPaidHourly ? (
+                                <div className="md:col-span-2">
+                                    <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
+                                    <input type="number" step="0.5" min="0" max="24" value={entry.hours}
+                                        onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
+                                        placeholder="8" />
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="md:col-span-1">
+                                        <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
+                                        <input type="number" step="0.5" min="0" max="24" value={entry.hours}
+                                            onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
+                                            placeholder="8" />
+                                    </div>
+                                    <div className="md:col-span-1">
+                                        <label className="text-xs text-gray-500 mb-1 block">Kilogramy *</label>
+                                        <input type="number" step="0.1" min="0" value={entry.kilogramsPicked}
+                                            onChange={(e) => updateEntry(entry.employeeId, 'kilogramsPicked', e.target.value)}
+                                            className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-lg font-bold" 
+                                            placeholder="50" />
+                                    </div>
+                                </>
+                            )}
 
                             <div className="md:col-span-3">
                                 <label className="text-xs text-gray-500 mb-1 block">Sektor</label>
@@ -202,7 +238,7 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
                             </div>
                         </div>
 
-                        {entry.hours && (
+                        {(entry.hours || entry.kilogramsPicked) && (
                             <div className="mt-3 pt-3 border-t border-gray-100">
                                 <input type="text" value={entry.description} 
                                     onChange={(e) => updateEntry(entry.employeeId, 'description', e.target.value)}
@@ -216,13 +252,15 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
 
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                 <p className="text-sm text-gray-600 mb-1">
-                    Pracowników z godzinami: <span className="font-bold text-green-600">{filledCount} / {employees.length}</span>
+                    Pracowników z danymi: <span className="font-bold text-green-600">{filledCount} / {employees.length}</span>
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 mb-1">
                     Suma godzin: <span className="font-bold text-blue-600">{totalHours.toFixed(1)}h</span>
                 </p>
+                <p className="text-sm text-gray-600">
+                    Suma kilogramów: <span className="font-bold text-orange-600">{totalKilograms.toFixed(1)} kg</span>
+                </p>
             </div>
-
             <div className="flex space-x-3 pt-2">
                 <button onClick={handleSubmit} disabled={isLoading}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center shadow-md">
@@ -249,7 +287,8 @@ const CalendarEvent = ({ entry, onClick, onQuickApprove }) => (
             </button>
         </div>
         <div className="flex items-center space-x-2">
-            {entry.duration && <div className="text-xs font-bold opacity-90 text-black">⏱️ {entry.duration}h</div>}
+            {entry.duration > 0 && <div className="text-xs font-bold opacity-90 text-black">⏱️ {entry.duration}h</div>}
+            {entry.kilogramsPicked > 0 && <div className="text-xs font-bold opacity-90 text-orange-600">⚖️ {entry.kilogramsPicked} kg</div>}
             {entry.daySalary !== undefined && entry.daySalary !== null && (
             <div className="text-xs font-medium text-orange-900 opacity-90 flex items-center">
                 💰 {parseFloat(entry.daySalary).toFixed(0)} zł 
@@ -376,32 +415,25 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onToggleApproval 
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    {entry.duration !== undefined && entry.duration !== null && (
-                        <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                        {entry.duration !== undefined && entry.duration !== null && (
+                            <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
                             <p className="text-xs font-medium text-blue-700 uppercase mb-1">Czas trwania</p>
                             <p className="text-lg font-bold text-blue-900">{entry.duration}h</p>
                         </div>
                     )}
-                    {entry.daySalary !== undefined && entry.daySalary !== null && (
+                    {entry.kilogramsPicked !== undefined && entry.kilogramsPicked !== null && entry.kilogramsPicked > 0 && (
+                        <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                            <p className="text-xs font-medium text-orange-700 uppercase mb-1">Zebrane kilogramy</p>
+                            <p className="text-lg font-bold text-orange-900">{entry.kilogramsPicked} kg</p>
+                        </div>
+                    )}
+                    {entry.daySalary !== undefined && entry.daySalary !== null && entry.daySalary > 0 && (
                         <div className="bg-red-50 p-4 rounded-xl border border-red-200">
                             <p className="text-xs font-medium text-red-700 uppercase mb-1">Wynagrodzenie dzienne</p>
                             <p className="text-lg font-bold text-red-900">{parseFloat(entry.daySalary).toFixed(2)} zł</p>
                         </div>
                     )}
                 </div>
-                
-                {entry.duration && entry.daySalary === null && (
-                     <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                        <p className="text-xs font-medium text-blue-700 uppercase mb-1">Czas trwania</p>
-                        <p className="text-lg font-bold text-blue-900">{entry.duration}h</p>
-                    </div>
-                )}
-                {entry.daySalary !== undefined && entry.daySalary !== null && !entry.duration && (
-                    <div className="bg-red-50 p-4 rounded-xl border border-red-200">
-                        <p className="text-xs font-medium text-red-700 uppercase mb-1">Wynagrodzenie dzienne</p>
-                        <p className="text-lg font-bold text-red-900">{parseFloat(entry.daySalary).toFixed(2)} zł</p>
-                    </div>
-                )}
 
 
                 {entry.sector && (
@@ -493,13 +525,69 @@ export default function WorkEntryManagement() {
         }
     }, []);
 
-    const fetchEmployees = useCallback(async () => {
-        await fetchData(setEmployees, '/api/users/active', 'pracowników');
-    }, [fetchData]);
+    const fetchEmployeeWorkDetails = useCallback(async (userId) => {
+    try {
+        const headers = getAuthHeaders();
+        const response = await fetch(`${BACKEND_URL}/api/work-details/user/${userId}/latest`, {
+            method: 'GET',
+            headers: headers,
+        });
 
-    const fetchSectors = useCallback(async () => {
-        await fetchData(setSectors, '/api/sectors', 'sektorów');
-    }, [fetchData]);
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        } else if (response.status === 204) {
+            // Brak danych - domyślnie isPaidHourly = true
+            return null;
+        }
+    } catch (error) {
+        console.error(`[FETCH] Błąd pobierania WorkDetails dla użytkownika ${userId}:`, error);
+        return null;
+    }
+}, []);
+
+const fetchEmployees = useCallback(async () => {
+    console.log('[FETCH] Rozpoczynam pobieranie pracowników');
+    try {
+        const headers = getAuthHeaders();
+        const response = await fetch(`${BACKEND_URL}/api/users/active`, {
+            method: 'GET',
+            headers: headers,
+        });
+
+        if (response.ok) {
+            const employeesData = await response.json();
+            console.log('[FETCH] ✅ Załadowano pracowników:', employeesData);
+            
+            // Dla każdego pracownika pobierz jego WorkDetails
+            const employeesWithDetails = await Promise.all(
+                employeesData.map(async (emp) => {
+                    const workDetails = await fetchEmployeeWorkDetails(emp.id);
+                    return {
+                        ...emp,
+                        isPaidHourly: workDetails?.isPaidHourly !== false // domyślnie true
+                    };
+                })
+            );
+            
+            console.log('[FETCH] ✅ Pracownicy z WorkDetails:', employeesWithDetails);
+            setEmployees(employeesWithDetails);
+        } else {
+            const errorText = await response.text();
+            console.error(`[FETCH] ❌ Błąd HTTP dla pracowników: ${response.status}`, errorText);
+            setAlert({ type: 'error', message: `Błąd ładowania pracowników: ${response.status}` });
+            setEmployees([]);
+        }
+    } catch (error) {
+        console.error('[FETCH] ❌ Błąd połączenia dla pracowników:', error);
+        setAlert({ type: 'error', message: 'Błąd połączenia z serwerem podczas ładowania pracowników.' });
+        setEmployees([]);
+    }
+}, [fetchEmployeeWorkDetails]);
+
+const fetchSectors = useCallback(async () => {
+    await fetchData(setSectors, '/api/sectors', 'sektorów');
+}, [fetchData]);
 
     useEffect(() => {
         fetchEmployees();
@@ -583,31 +671,31 @@ export default function WorkEntryManagement() {
         }
 
         const entriesToSend = entries.map(entry => {
-            
-            const fullEmployee = employees.find(emp => emp.id === entry.employeeId);
-            
-            return {
-                user: fullEmployee ? {
-                    id: fullEmployee.id,
-                    name: fullEmployee.name,
-                    surname: fullEmployee.surname,
-                    email: fullEmployee.email,
-                    nickname: fullEmployee.nickname,
-                    phoneNumber: fullEmployee.phoneNumber,
-                    active: fullEmployee.active
-                } : { id: entry.employeeId },
-                sector: entry.sectorId ? { 
-                    id: parseInt(entry.sectorId),
-                    sectorId: parseInt(entry.sectorId) 
-                } : null,
-                workType: entry.workType || null,
-                workDate: workDateString,
-                description: entry.description || '',
-                isApproved: entry.isApproved,
-                duration: parseFloat(entry.hours),
-                daySalary: 0, // Domyślnie 0 lub null, jeśli pole nie jest w formularzu
-            };
-        });
+    const fullEmployee = employees.find(emp => emp.id === entry.employeeId);
+    
+    return {
+        user: fullEmployee ? {
+            id: fullEmployee.id,
+            name: fullEmployee.name,
+            surname: fullEmployee.surname,
+            email: fullEmployee.email,
+            nickname: fullEmployee.nickname,
+            phoneNumber: fullEmployee.phoneNumber,
+            active: fullEmployee.active
+        } : { id: entry.employeeId },
+        sector: entry.sectorId ? { 
+            id: parseInt(entry.sectorId),
+            sectorId: parseInt(entry.sectorId) 
+        } : null,
+        workType: entry.workType || null,
+        workDate: workDateString,
+        description: entry.description || '',
+        isApproved: entry.isApproved,
+        duration: parseFloat(entry.hours) || 0,
+        daySalary: 0,
+        kilogramsPicked: !entry.isPaidHourly ? parseFloat(entry.kilogramsPicked || 0) : 0,
+    };
+});
         console.log("Dane do wysłania do API:", entriesToSend);
 
         try {
@@ -919,6 +1007,7 @@ const handleOpenEditModal = useCallback((entry) => {
                     >
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
+                                {editingEntry.user?.isPaidHourly !== false ? (
                                 <div>
                                     <label className="text-sm font-medium text-gray-700 mb-1 block">Godziny</label>
                                     <input 
@@ -931,6 +1020,33 @@ const handleOpenEditModal = useCallback((entry) => {
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                                     />
                                 </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 mb-1 block">Godziny</label>
+                                        <input 
+                                            type="number" 
+                                            step="0.5" 
+                                            min="0" 
+                                            max="24"
+                                            value={editingEntry.duration || ''}
+                                            onChange={(e) => setEditingEntry(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 mb-1 block">Kilogramy</label>
+                                        <input 
+                                            type="number" 
+                                            step="0.1" 
+                                            min="0"
+                                            value={editingEntry.kilogramsPicked || ''}
+                                            onChange={(e) => setEditingEntry(prev => ({ ...prev, kilogramsPicked: parseFloat(e.target.value) }))}
+                                            className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+                                </>
+)}
                                 
                                 <div>
                                     <label className="text-sm font-medium text-gray-700 mb-1 block">Wynagrodzenie (zł)</label>
