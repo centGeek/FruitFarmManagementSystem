@@ -18,9 +18,9 @@ public class NotificationRepository {
         return notificationJpaRepository.save(notificationEntity);
     }
 
-    public List<NotificationEntity> findAllByOrderByCreatedAtDesc() {
+    public List<NotificationEntity> findAllByUserByOrderCreatedAtDesc(long userId) {
 
-        return notificationJpaRepository.findAllByOrderByCreatedAtDesc();
+        return notificationJpaRepository.findAllByOrderByCreatedAtDesc(userId);
     }
 
     public List<NotificationEntity> findByUserEntityIdOrderByCreatedAtDesc(Long userId) {

@@ -175,7 +175,7 @@ public class EmployeeController {
             }
             existingUser.setActive(userRequest.isActive());
 
-            UserEntity updatedUser = userService.save(existingUser);
+            UserEntity updatedUser = userService.update(existingUser);
             log.info("User updated successfully with ID: {}", updatedUser.getId());
 
             return ResponseEntity.ok(Map.of(

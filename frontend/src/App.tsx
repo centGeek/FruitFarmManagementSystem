@@ -10,6 +10,7 @@ import ExpenseManagement from './components/ExpenseManagement'
 import ProfitsManagement from './components/ProfitsManagement'
 import WorkSchedule from './components/WorkSchedule'
 import WeatherNotifications from './components/WeatherNotifications'
+import GardenerProfile from './components/GardenerProfile'
 
 
 function App() {
@@ -223,7 +224,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Trasy dostępne dla obu ról */}
         <Route
           path="/employees"
           element={
@@ -232,8 +232,23 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
-        {/* Trasy dla Admin */}
+        <Route
+          path="/gardener-profile"
+          element={
+            <ProtectedRoute allowedRoles={["Gardener"]}>
+              <GardenerProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analyse"
+          element={
+            <ProtectedRoute allowedRoles={["Gardener"]}>
+              TODO - cała analiza
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/admin/dashboard"
           element={

@@ -11,6 +11,9 @@ function GardenerNavbar({ onLogout }) {
     { name: "Wydatki", path: "/expenses" },
     { name: "Przychody", path: "/profits" },
     { name: "Notyfikacje pogodowe", path: "/weather" },
+    { name: "Analiza", path: "/analyse" },
+    { name: "Edytuj profil", path: "/gardener-profile" },
+
   ];
 
   const handleLogoClick = () => {
@@ -19,8 +22,10 @@ function GardenerNavbar({ onLogout }) {
 
   return (
     <nav className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-600 text-white shadow-lg border-b border-green-500/20">
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex justify-between items-center">
+      {/* Ten div rozciąga się na 100% szerokości i trzyma padding pionowy/poziomy */}
+      <div className="w-full px-6 py-4">
+        {/* ZMIANA: max-w-7xl na max-w-screen-2xl i zwiększony padding boczny */}
+        <div className="max-w-screen-2xl mx-auto px-10 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <div 
               className="text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200"
@@ -28,7 +33,8 @@ function GardenerNavbar({ onLogout }) {
             >
               🌱 Panel Sadownika
             </div>
-            <div className="flex space-x-2">
+            {/* ZMIANA: space-x-2 na space-x-4 dla szerszych odstępów między linkami */}
+            <div className="flex space-x-4">
               {tabs.map((tab) => (
                 <NavLink
                   key={tab.path}
@@ -76,8 +82,10 @@ function AdminNavbar({ onLogout }) {
 
   return (
     <nav className="bg-gradient-to-r from-gray-900 via-black to-gray-800 text-white shadow-lg border-b border-gray-700/20">
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex justify-between items-center">
+      {/* Ten div rozciąga się na 100% szerokości i trzyma padding pionowy/poziomy */}
+      <div className="w-full px-6 py-4">
+        {/* ZMIANA: max-w-7xl na max-w-screen-2xl i zwiększony padding boczny */}
+        <div className="max-w-screen-2xl mx-auto px-10 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <div 
               className="text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200"
@@ -85,7 +93,8 @@ function AdminNavbar({ onLogout }) {
             >
               👑 Admin Panel
             </div>
-            <div className="flex space-x-2">
+            {/* ZMIANA: space-x-2 na space-x-4 dla szerszych odstępów między linkami */}
+            <div className="flex space-x-4">
               {tabs.map((tab) => (
                 <NavLink
                   key={tab.path}
@@ -126,8 +135,10 @@ export default function Navbar({ onLogout, userRole }) {
   } else {
     return (
       <nav className="bg-gray-600 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
+        {/* Ten div rozciąga się na 100% szerokości i trzyma padding pionowy/poziomy */}
+        <div className="w-full px-6 py-4">
+          {/* ZMIANA: max-w-7xl na max-w-screen-2xl i zwiększony padding boczny */}
+          <div className="max-w-screen-2xl mx-auto px-10 flex justify-between items-center">
             <div className="text-lg font-bold">Farm Management</div>
             <button
               onClick={onLogout}

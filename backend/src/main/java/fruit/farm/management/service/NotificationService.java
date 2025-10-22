@@ -49,9 +49,9 @@ public class NotificationService {
     }
 
 
-    public List<NotificationDTO> getAllNotificationsSortedByDate() {
+    public List<NotificationDTO> getAllNotificationsByUserSortedByDate(long userId) {
 
-        List<NotificationEntity> notifications = notificationRepository.findAllByOrderByCreatedAtDesc();
+        List<NotificationEntity> notifications = notificationRepository.findAllByUserByOrderCreatedAtDesc(userId);
         return notifications.stream()
                 .map(NotificationMapper::mapFromEntity)
                 .collect(Collectors.toList());

@@ -35,7 +35,7 @@ public class ExpenseController {
 
     @PostMapping
     public ResponseEntity<ExpenseDTO> createExpense(@Valid @RequestBody ExpenseDTO expenseDto) {
-        UserEntity userEntity = userService.getLoggedInUserId();
+        UserEntity userEntity = userService.getLoggedUser();
         log.info("Creating expense for User ID: {}", userEntity.getId());
 
         if(expenseDto.getSectorDTO() != null ) {
@@ -58,7 +58,7 @@ public class ExpenseController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
 
-        UserEntity user = userService.getLoggedInUserId();
+        UserEntity user = userService.getLoggedUser();
         log.info("Fetching expenses for User ID: {} - Page: {}, Size: {}", user.getId(), page, size);
 
         try {
@@ -101,7 +101,7 @@ public class ExpenseController {
             @PathVariable Long id,
             @Valid @RequestBody ExpenseDTO expenseDto) {
 
-        UserEntity user = userService.getLoggedInUserId();
+        UserEntity user = userService.getLoggedUser();
         log.info("Updating expense ID: {} for User ID: {}", id, user.getId());
 
         try {
@@ -117,7 +117,7 @@ public class ExpenseController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
-        UserEntity user = userService.getLoggedInUserId();
+        UserEntity user = userService.getLoggedUser();
         log.info("Deleting expense ID: {} for User ID: {}", id, user.getId());
 
         try {

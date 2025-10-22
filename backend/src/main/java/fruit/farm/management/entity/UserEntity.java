@@ -1,5 +1,6 @@
 package fruit.farm.management.entity;
 
+import fruit.farm.management.dto.CoordinateDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -50,8 +51,16 @@ public class UserEntity {
     @JoinColumn(name = "gardener_id")
     private UserEntity gardener;
 
+    @OneToOne
+    @JoinColumn(name = "coordinate_id")
+    private CoordinateEntity coordinateEntity;
+
+    @Column(name = "locality_name")
+    private String localityName;
+
     public UserEntity(String name, String surname, String nickname, String phoneNumber, String email, LocalDate creationDate,
-                      String password, RoleEntity role, boolean isActive, UserEntity gardener) {
+                      String password, RoleEntity role, boolean isActive, UserEntity gardener,
+                      CoordinateEntity coordinateEntity, String localityName) {
         this.name = name;
         this.surname = surname;
         this.nickname = nickname;
@@ -62,5 +71,7 @@ public class UserEntity {
         this.role = role;
         this.isActive = isActive;
         this.gardener = gardener;
+        this.coordinateEntity = coordinateEntity;
+        this.localityName = localityName;
     }
 }

@@ -27,7 +27,7 @@ public class SectorController {
 
         try {
             sectorDTO.setId(System.currentTimeMillis());
-            SectorDTO sector = sectorService.createSector(sectorDTO, userService.getLoggedInUserId());
+            SectorDTO sector = sectorService.createSector(sectorDTO, userService.getLoggedUser());
             log.info("Sector created with ID: {} and description: {}", sector.getId(), sector.getDescription());
             return ResponseEntity.status(HttpStatus.CREATED).body(sectorDTO);
 
@@ -53,7 +53,7 @@ public class SectorController {
     public ResponseEntity<List<SectorDTO>> getAllSectorsByUserI() {
         List<SectorDTO> sectorDTOS;
         try {
-            Long currentUserId = userService.getLoggedInUserId().getId();
+            Long currentUserId = userService.getLoggedUser().getId();
             sectorDTOS = sectorService.getAllSectorsByUserId(currentUserId);
         } catch (Exception e) {
             log.error("Error getting all sectors", e);

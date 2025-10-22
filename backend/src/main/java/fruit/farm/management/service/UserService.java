@@ -1,7 +1,6 @@
 package fruit.farm.management.service;
 
 import fruit.farm.management.dto.NotificationDTO;
-import fruit.farm.management.entity.NotificationType;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.UserRepository;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +24,7 @@ public class UserService {
 
     private UserRepository userRepository;
     private NotificationService notificationService;
-    public UserEntity getLoggedInUserId() {
+    public UserEntity getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedInEmail = authentication.getName();
 
@@ -70,10 +68,24 @@ public class UserService {
     public UserEntity save(UserEntity user) {
 
         UserEntity savedUser = userRepository.save(user);
-        UserEntity loggedInUserId = this.getLoggedInUserId();
+        UserEntity loggedInUserId = this.getLoggedUser();
         notificationService.addUserNotification(NotificationDTO.builder()
                         .title("Dodano nowego pracownika!")
                         .message("Dodano pracownika: " + user.getName() + " " + user.getSurname())
+                        .createdAt(LocalDateTime.now())
+                        .userDTO(UserMapper.mapFromEntity(savedUser))
+                .build(), savedUser.getId(), loggedInUserId);
+        return savedUser;
+    }
+
+    @Transactional
+    public UserEntity update(UserEntity user) {
+
+        UserEntity savedUser = userRepository.save(user);
+        UserEntity loggedInUserId = this.getLoggedUser();
+        notificationService.addUserNotification(NotificationDTO.builder()
+                        .title("Zaktualizowano dane pracownika!")
+                        .message("Zaktualizowano dane pracownika: " + user.getName() + " " + user.getSurname())
                         .createdAt(LocalDateTime.now())
                         .userDTO(UserMapper.mapFromEntity(savedUser))
                 .build(), savedUser.getId(), loggedInUserId);

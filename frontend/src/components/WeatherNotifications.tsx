@@ -1,738 +1,871 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Cloud, 
-  CloudRain, 
-  Sun, 
-  Wind, 
-  Droplets, 
-  Bell, 
-  BellOff, 
-  Plus, 
-  Trash2, 
-  MapPin, 
-  Loader, 
-  AlertCircle, 
-  Check,
-  CloudSnow,
-  CloudDrizzle,
-  Zap,
-  Eye,
-  Thermometer,
-  X
+import { Cloud, CloudRain, Sun, Wind, Droplets, Bell, BellOff, Plus, Trash2, Loader, AlertCircle, Check, CloudSnow, Thermometer, X, Edit3, Calendar, CloudDrizzle, CloudFog, Zap
 } from 'lucide-react';
-import LocationSearch from './LocationSearch';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 
-// Typy danych
-interface WeatherData {
-  temp: number;
-  feels_like: number;
-  humidity: number;
-  pressure: number;
-  description: string;
-  icon: string;
-  wind_speed: number;
-  clouds: number;
-  visibility: number;
-}
+// --- INTERFEJSY I STAŁE ---
 
-interface ForecastItem {
-  dt: number;
-  temp: number;
-  description: string;
-  icon: string;
-  pop: number; // probability of precipitation
+interface CurrentWeather {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+    description: string;
+    icon: JSX.Element; 
+    wind_speed: number;
+    location: string;
 }
 
 interface NotificationRule {
-  id?: number;
-  backendId?: number;
-  locationName: string;
-  latitude: number;
-  longitude: number;
-  notificationType: string;
-  threshold: number;
-  enabled: boolean;
-  createdAt?: string;
+    id?: number;
+    backendId?: number;
+    notificationType: string;
+    threshold: number;
+    daysAhead: number;
+    enabled: boolean;
+    description?: string;
 }
 
-interface LocationData {
-  name: string;
-  lat: number;
-  lon: number;
+// Interfejs zgodny z backendowym CoordinateDTO
+interface CoordinateDTO {
+    latitude: number;
+    longitude: number;
 }
 
-// Typy notyfikacji pogodowych
+// Interfejs zgodny z backendowym UserLocationDTO
+interface UserLocationDTO {
+    userId: number;
+    coordinateDTO: CoordinateDTO;
+    locationName: string;
+}
+
+// Definicja koordynatów dla Open-Meteo
+interface OpenMeteoCoordinates {
+    lat: number;
+    lon: number;
+}
+
+
 const NOTIFICATION_TYPES = [
-  { value: 'TEMP_HIGH', label: '🌡️ Temperatura wysoka', unit: '°C', icon: Thermometer },
-  { value: 'TEMP_LOW', label: '❄️ Temperatura niska', unit: '°C', icon: CloudSnow },
-  { value: 'RAIN_PROB', label: '🌧️ Prawdopodobieństwo opadów', unit: '%', icon: CloudRain },
-  { value: 'WIND_SPEED', label: '💨 Prędkość wiatru', unit: 'km/h', icon: Wind },
-  { value: 'HUMIDITY', label: '💧 Wilgotność', unit: '%', icon: Droplets },
-  { value: 'FROST_WARNING', label: '🧊 Ostrzeżenie o przymrozku', unit: '°C', icon: CloudSnow }
+    { 
+        value: 'FROST_WARNING', 
+        label: '🧊 Ostrzeżenie o przymrozku',
+        description: 'Powiadom gdy temperatura spadnie poniżej',
+        unit: '°C',
+        icon: CloudSnow,
+        defaultThreshold: 2
+    },
+    { 
+        value: 'TEMP_LOW', 
+        label: '❄️ Niska temperatura',
+        description: 'Powiadom gdy temperatura spadnie poniżej',
+        unit: '°C',
+        icon: Thermometer,
+        defaultThreshold: 5
+    },
+    { 
+        value: 'TEMP_HIGH', 
+        label: '🌡️ Wysoka temperatura',
+        description: 'Powiadom gdy temperatura przekroczy',
+        unit: '°C',
+        icon: Thermometer,
+        defaultThreshold: 30
+    },
+    { 
+        value: 'RAIN_FORECAST', 
+        label: '🌧️ Prognoza opadów',
+        description: 'Powiadom o opadach deszczu powyżej',
+        unit: '% prawdopodobieństwa',
+        icon: CloudRain,
+        defaultThreshold: 70
+    },
+    { 
+        value: 'STRONG_WIND', 
+        label: '💨 Silny wiatr',
+        description: 'Powiadom gdy wiatr przekroczy',
+        unit: 'km/h',
+        icon: Wind,
+        defaultThreshold: 40
+    }
 ];
 
-// Funkcja do pobierania ikony pogody
-const getWeatherIcon = (iconCode: string) => {
-  const iconMap: { [key: string]: JSX.Element } = {
-    '01d': <Sun className="w-12 h-12 text-yellow-500" />,
-    '01n': <Sun className="w-12 h-12 text-yellow-300" />,
-    '02d': <Cloud className="w-12 h-12 text-gray-400" />,
-    '02n': <Cloud className="w-12 h-12 text-gray-500" />,
-    '03d': <Cloud className="w-12 h-12 text-gray-400" />,
-    '03n': <Cloud className="w-12 h-12 text-gray-500" />,
-    '04d': <Cloud className="w-12 h-12 text-gray-500" />,
-    '04n': <Cloud className="w-12 h-12 text-gray-600" />,
-    '09d': <CloudDrizzle className="w-12 h-12 text-blue-400" />,
-    '09n': <CloudDrizzle className="w-12 h-12 text-blue-500" />,
-    '10d': <CloudRain className="w-12 h-12 text-blue-500" />,
-    '10n': <CloudRain className="w-12 h-12 text-blue-600" />,
-    '11d': <Zap className="w-12 h-12 text-yellow-600" />,
-    '11n': <Zap className="w-12 h-12 text-yellow-500" />,
-    '13d': <CloudSnow className="w-12 h-12 text-blue-200" />,
-    '13n': <CloudSnow className="w-12 h-12 text-blue-300" />,
-  };
-  return iconMap[iconCode] || <Cloud className="w-12 h-12 text-gray-400" />;
-};
+const DAYS_AHEAD_OPTIONS = [
+    { value: 1, label: 'Za 1 dzień' },
+    { value: 2, label: 'Za 2 dni' },
+    { value: 3, label: 'Za 3 dni' },
+    { value: 5, label: 'Za 5 dni' },
+    { value: 7, label: 'Za 7 dni' }
+];
 
-// Komponent karty pogody
-const WeatherCard: React.FC<{ weather: WeatherData; locationName: string }> = ({ weather, locationName }) => {
-  return (
-    <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-xl p-6 text-white">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-2xl font-bold">{locationName}</h3>
-          <p className="text-blue-100 capitalize">{weather.description}</p>
-        </div>
-        {getWeatherIcon(weather.icon)}
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="bg-white bg-opacity-20 rounded-lg p-3">
-          <div className="text-4xl font-bold">{Math.round(weather.temp)}°C</div>
-          <div className="text-sm text-blue-100">Temperatura</div>
-        </div>
-        <div className="bg-white bg-opacity-20 rounded-lg p-3">
-          <div className="text-4xl font-bold">{Math.round(weather.feels_like)}°C</div>
-          <div className="text-sm text-blue-100">Odczuwalna</div>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-3 gap-3 text-sm">
-        <div className="flex items-center gap-2">
-          <Droplets className="w-4 h-4" />
-          <span>{weather.humidity}%</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Wind className="w-4 h-4" />
-          <span>{Math.round(weather.wind_speed * 3.6)} km/h</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Eye className="w-4 h-4" />
-          <span>{(weather.visibility / 1000).toFixed(1)} km</span>
-        </div>
-      </div>
-    </div>
-  );
-};
+// --- FUNKCJE POGODOWE ---
 
-// Komponent prognozy
-const ForecastCard: React.FC<{ forecast: ForecastItem[] }> = ({ forecast }) => {
-  return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <Cloud className="w-6 h-6 text-blue-500" />
-        Prognoza 5-dniowa
-      </h3>
-      <div className="grid grid-cols-5 gap-3">
-        {forecast.slice(0, 5).map((item, index) => (
-          <div key={index} className="text-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-            <div className="text-sm text-gray-600 mb-2">
-              {new Date(item.dt * 1000).toLocaleDateString('pl-PL', { weekday: 'short' })}
-            </div>
-            <div className="flex justify-center mb-2">
-              {getWeatherIcon(item.icon)}
-            </div>
-            <div className="text-lg font-bold text-gray-800">
-              {Math.round(item.temp)}°C
-            </div>
-            {item.pop > 0 && (
-              <div className="text-xs text-blue-600 mt-1">
-                {Math.round(item.pop * 100)}% 🌧️
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Modal dodawania nowej notyfikacji
-const AddNotificationModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  location: LocationData | null;
-  onAdd: (rule: NotificationRule) => void;
-}> = ({ isOpen, onClose, location, onAdd }) => {
-  const [notificationType, setNotificationType] = useState('');
-  const [threshold, setThreshold] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  if (!isOpen || !location) return null;
-
-  const selectedType = NOTIFICATION_TYPES.find(t => t.value === notificationType);
-
-  const handleAdd = async () => {
-    if (!notificationType || !threshold) {
-      alert('Wypełnij wszystkie pola!');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const newRule: NotificationRule = {
-        locationName: location.name,
-        latitude: location.lat,
-        longitude: location.lon,
-        notificationType,
-        threshold: parseFloat(threshold),
-        enabled: true
-      };
-
-      await onAdd(newRule);
-      onClose();
-      setNotificationType('');
-      setThreshold('');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <Bell className="w-5 h-5 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900">
-                Dodaj notyfikację
-              </h3>
-            </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="space-y-4 mb-6">
-            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-              <div className="flex items-center gap-2 text-blue-800">
-                <MapPin className="w-4 h-4" />
-                <span className="font-medium">{location.name}</span>
-              </div>
-              <div className="text-xs text-blue-600 mt-1">
-                {location.lat.toFixed(4)}, {location.lon.toFixed(4)}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Typ notyfikacji *
-              </label>
-              <select
-                value={notificationType}
-                onChange={(e) => setNotificationType(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Wybierz typ...</option>
-                {NOTIFICATION_TYPES.map(type => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {selectedType && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Próg ({selectedType.unit}) *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={threshold}
-                  onChange={(e) => setThreshold(e.target.value)}
-                  placeholder={`np. ${selectedType.value === 'TEMP_HIGH' ? '30' : selectedType.value === 'TEMP_LOW' ? '0' : '50'}`}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Otrzymasz powiadomienie gdy wartość {selectedType.value.includes('HIGH') || selectedType.value.includes('PROB') ? 'przekroczy' : 'spadnie poniżej'} tego progu
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              disabled={isLoading}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              Anuluj
-            </button>
-            <button
-              onClick={handleAdd}
-              disabled={isLoading || !notificationType || !threshold}
-              className="flex-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 font-medium"
-            >
-              {isLoading ? (
-                <Loader className="w-4 h-4 animate-spin" />
-              ) : (
-                <Plus className="w-4 h-4" />
-              )}
-              {isLoading ? 'Dodawanie...' : 'Dodaj notyfikację'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Główny komponent
-const WeatherNotifications: React.FC = () => {
-  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
-  const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
-  const [forecast, setForecast] = useState<ForecastItem[]>([]);
-  const [notifications, setNotifications] = useState<NotificationRule[]>([]);
-  const [isLoadingWeather, setIsLoadingWeather] = useState(false);
-  const [isLoadingNotifications, setIsLoadingNotifications] = useState(true);
-  const [weatherError, setWeatherError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const OPENWEATHER_API_KEY = 'twoj_klucz_api'; // TODO: Przenieś do zmiennych środowiskowych
-
-  // Ładowanie notyfikacji z backendu
-  const loadNotifications = useCallback(async () => {
-    setIsLoadingNotifications(true);
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/weather-notifications`, {
-        method: 'GET',
-        headers: getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const mappedNotifications: NotificationRule[] = data.map((item: any) => ({
-        id: Date.now() + Math.random(),
-        backendId: item.id,
-        locationName: item.locationName,
-        latitude: item.latitude,
-        longitude: item.longitude,
-        notificationType: item.notificationType,
-        threshold: item.threshold,
-        enabled: item.enabled,
-        createdAt: item.createdAt
-      }));
-
-      setNotifications(mappedNotifications);
-    } catch (error) {
-      console.error('Błąd ładowania notyfikacji:', error);
-    } finally {
-      setIsLoadingNotifications(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
-
-  // Pobieranie danych pogodowych
-  const fetchWeatherData = async (lat: number, lon: number) => {
-    setIsLoadingWeather(true);
-    setWeatherError(null);
-
-    try {
-      // Aktualna pogoda
-      const currentResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=pl`
-      );
-
-      if (!currentResponse.ok) {
-        throw new Error('Nie udało się pobrać danych pogodowych');
-      }
-
-      const currentData = await currentResponse.json();
-      
-      setCurrentWeather({
-        temp: currentData.main.temp,
-        feels_like: currentData.main.feels_like,
-        humidity: currentData.main.humidity,
-        pressure: currentData.main.pressure,
-        description: currentData.weather[0].description,
-        icon: currentData.weather[0].icon,
-        wind_speed: currentData.wind.speed,
-        clouds: currentData.clouds.all,
-        visibility: currentData.visibility
-      });
-
-      // Prognoza
-      const forecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=pl`
-      );
-
-      if (forecastResponse.ok) {
-        const forecastData = await forecastResponse.json();
-        const dailyForecast: ForecastItem[] = [];
-        const processedDays = new Set();
-
-        forecastData.list.forEach((item: any) => {
-          const date = new Date(item.dt * 1000).toDateString();
-          if (!processedDays.has(date) && dailyForecast.length < 5) {
-            processedDays.add(date);
-            dailyForecast.push({
-              dt: item.dt,
-              temp: item.main.temp,
-              description: item.weather[0].description,
-              icon: item.weather[0].icon,
-              pop: item.pop
-            });
-          }
-        });
-
-        setForecast(dailyForecast);
-      }
-    } catch (error) {
-      console.error('Błąd pobierania danych pogodowych:', error);
-      setWeatherError('Nie udało się pobrać danych pogodowych. Sprawdź klucz API.');
-    } finally {
-      setIsLoadingWeather(false);
-    }
-  };
-
-  // Obsługa wyboru lokalizacji
-  const handleLocationSelect = (location: any) => {
-    const locationData: LocationData = {
-      name: location.name.split(',')[0],
-      lat: location.lat,
-      lon: location.lon
+const getWeatherFromCode = (code: number): { description: string; icon: JSX.Element } => {
+    const weatherMap: { [key: number]: { description: string; IconComponent: any; color: string } } = {
+        0: { description: 'Bezchmurnie', IconComponent: Sun, color: 'text-yellow-500' },
+        1: { description: 'Przeważnie bezchmurnie', IconComponent: Sun, color: 'text-yellow-400' },
+        2: { description: 'Częściowe zachmurzenie', IconComponent: Cloud, color: 'text-gray-400' },
+        3: { description: 'Zachmurzenie', IconComponent: Cloud, color: 'text-gray-500' },
+        45: { description: 'Mgła', IconComponent: CloudFog, color: 'text-gray-400' },
+        48: { description: 'Mgła osadzająca szron', IconComponent: CloudFog, color: 'text-blue-300' },
+        51: { description: 'Lekka mżawka', IconComponent: CloudDrizzle, color: 'text-blue-300' },
+        53: { description: 'Umiarkowana mżawka', IconComponent: CloudDrizzle, color: 'text-blue-400' },
+        55: { description: 'Gęsta mżawka', IconComponent: CloudDrizzle, color: 'text-blue-500' },
+        61: { description: 'Słaby deszcz', IconComponent: CloudRain, color: 'text-blue-400' },
+        63: { description: 'Umiarkowany deszcz', IconComponent: CloudRain, color: 'text-blue-500' },
+        65: { description: 'Silny deszcz', IconComponent: CloudRain, color: 'text-blue-600' },
+        71: { description: 'Słabe opady śniegu', IconComponent: CloudSnow, color: 'text-blue-200' },
+        73: { description: 'Umiarkowane opady śniegu', IconComponent: CloudSnow, color: 'text-blue-300' },
+        75: { description: 'Silne opady śniegu', IconComponent: CloudSnow, color: 'text-blue-400' },
+        80: { description: 'Słabe przelotne opady', IconComponent: CloudRain, color: 'text-blue-400' },
+        81: { description: 'Umiarkowane przelotne opady', IconComponent: CloudRain, color: 'text-blue-500' },
+        82: { description: 'Silne przelotne opady', IconComponent: CloudRain, color: 'text-blue-600' },
+        95: { description: 'Burza', IconComponent: Zap, color: 'text-yellow-500' },
+        96: { description: 'Burza z gradem', IconComponent: Zap, color: 'text-yellow-600' },
+        99: { description: 'Burza z silnym gradem', IconComponent: Zap, color: 'text-orange-600' },
     };
-    setSelectedLocation(locationData);
-    fetchWeatherData(location.lat, location.lon);
-  };
 
-  // Dodawanie notyfikacji
-  const handleAddNotification = async (rule: NotificationRule) => {
-    try {
-      const backendData = {
-        locationName: rule.locationName,
-        latitude: rule.latitude,
-        longitude: rule.longitude,
-        notificationType: rule.notificationType,
-        threshold: rule.threshold,
-        enabled: rule.enabled
-      };
+    const weather = weatherMap[code] || { description: 'Nieznane', IconComponent: Cloud, color: 'text-gray-400' };
+    const IconComponent = weather.IconComponent;
+    
+    return {
+        description: weather.description,
+        icon: <IconComponent className={`w-16 h-16 ${weather.color}`} />
+    };
+};
 
-      const response = await fetch(`${BACKEND_URL}/api/weather-notifications`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(backendData)
-      });
+// --- KOMPONENTY WIDOKU (BEZ ZMIAN) ---
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      const finalRule = { ...rule, backendId: result.id };
-      
-      setNotifications([...notifications, finalRule]);
-      alert('Notyfikacja została dodana!');
-    } catch (error) {
-      console.error('Błąd dodawania notyfikacji:', error);
-      alert('Nie udało się dodać notyfikacji do serwera');
-    }
-  };
-
-  // Przełączanie statusu notyfikacji
-  const toggleNotification = async (id: number) => {
-    const notification = notifications.find(n => n.id === id);
-    if (!notification || !notification.backendId) return;
-
-    try {
-      const updatedNotification = { ...notification, enabled: !notification.enabled };
-      
-      const response = await fetch(`${BACKEND_URL}/api/weather-notifications/${notification.backendId}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          locationName: updatedNotification.locationName,
-          latitude: updatedNotification.latitude,
-          longitude: updatedNotification.longitude,
-          notificationType: updatedNotification.notificationType,
-          threshold: updatedNotification.threshold,
-          enabled: updatedNotification.enabled
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      setNotifications(notifications.map(n => 
-        n.id === id ? updatedNotification : n
-      ));
-    } catch (error) {
-      console.error('Błąd aktualizacji notyfikacji:', error);
-      alert('Nie udało się zaktualizować notyfikacji');
-    }
-  };
-
-  // Usuwanie notyfikacji
-  const deleteNotification = async (id: number) => {
-    if (!window.confirm('Czy na pewno chcesz usunąć tę notyfikację?')) return;
-
-    const notification = notifications.find(n => n.id === id);
-    if (!notification || !notification.backendId) return;
-
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/weather-notifications/${notification.backendId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      setNotifications(notifications.filter(n => n.id !== id));
-    } catch (error) {
-      console.error('Błąd usuwania notyfikacji:', error);
-      alert('Nie udało się usunąć notyfikacji z serwera');
-    }
-  };
-
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-          <Cloud className="w-8 h-8 text-blue-500" />
-          Notyfikacje Pogodowe
-        </h1>
-        <p className="text-gray-600">
-          Monitoruj warunki pogodowe i otrzymuj powiadomienia o ważnych zmianach
-        </p>
-      </div>
-
-      {/* Wyszukiwarka lokalizacji */}
-      <div className="mb-6 bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-blue-500" />
-          Wybierz lokalizację
-        </h2>
-        <LocationSearch 
-          map={null}
-          onLocationSelect={handleLocationSelect}
-          placeholder="Wyszukaj miejscowość aby sprawdzić pogodę..."
-        />
-      </div>
-
-      {/* Dane pogodowe */}
-      {isLoadingWeather && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
-          <div className="flex items-center justify-center gap-3">
-            <Loader className="w-6 h-6 text-blue-600 animate-spin" />
-            <span className="text-blue-800 font-medium">Pobieranie danych pogodowych...</span>
-          </div>
-        </div>
-      )}
-
-      {weatherError && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-6 h-6 text-red-600" />
-            <div>
-              <div className="font-semibold text-red-900">{weatherError}</div>
-              <div className="text-sm text-red-700 mt-1">
-                Upewnij się, że masz poprawny klucz API OpenWeather
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {currentWeather && selectedLocation && (
-        <div className="grid grid-cols-1 gap-6 mb-6">
-          <WeatherCard weather={currentWeather} locationName={selectedLocation.name} />
-          {forecast.length > 0 && <ForecastCard forecast={forecast} />}
-          
-          {/* Przycisk dodawania notyfikacji */}
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-4 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all transform hover:scale-105"
-          >
-            <Plus className="w-6 h-6" />
-            <span className="font-semibold text-lg">Dodaj notyfikację dla tej lokalizacji</span>
-          </button>
-        </div>
-      )}
-
-      {/* Panel notyfikacji */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-            <Bell className="w-6 h-6 text-blue-500" />
-            Aktywne notyfikacje
-          </h2>
-          <button
-            onClick={loadNotifications}
-            disabled={isLoadingNotifications}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm"
-          >
-            <Loader className={`w-4 h-4 ${isLoadingNotifications ? 'animate-spin' : ''}`} />
-            Odśwież
-          </button>
-        </div>
-
-        {isLoadingNotifications ? (
-          <div className="text-center py-12">
-            <Loader className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Ładowanie notyfikacji...</p>
-          </div>
-        ) : notifications.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <Bell className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-xl text-gray-500 mb-2">Brak notyfikacji</p>
-            <p className="text-gray-400">
-              Wyszukaj lokalizację i dodaj pierwszą notyfikację pogodową
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {notifications.map((notification) => {
-              const typeData = NOTIFICATION_TYPES.find(t => t.value === notification.notificationType);
-              const Icon = typeData?.icon || Bell;
-              
-              return (
-                <div
-                  key={notification.id}
-                  className={`border-2 rounded-xl p-4 transition-all ${
-                    notification.enabled 
-                      ? 'border-blue-200 bg-blue-50' 
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        notification.enabled ? 'bg-blue-100' : 'bg-gray-200'
-                      }`}>
-                        <Icon className={`w-6 h-6 ${
-                          notification.enabled ? 'text-blue-600' : 'text-gray-500'
-                        }`} />
-                      </div>
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-gray-900">{notification.locationName}</h3>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            notification.enabled 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-gray-200 text-gray-600'
-                          }`}>
-                            {notification.enabled ? 'Aktywna' : 'Nieaktywna'}
-                          </span>
-                        </div>
-                        
-                        <p className="text-sm text-gray-600 mb-2">
-                          {typeData?.label || notification.notificationType}
-                        </p>
-                        
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1 text-gray-700">
-                            <MapPin className="w-4 h-4" />
-                            <span>{notification.latitude.toFixed(4)}, {notification.longitude.toFixed(4)}</span>
-                          </div>
-                          <div className="flex items-center gap-1 text-gray-700">
-                            <Thermometer className="w-4 h-4" />
-                            <span>Próg: {notification.threshold} {typeData?.unit}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => toggleNotification(notification.id!)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          notification.enabled
-                            ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
-                        title={notification.enabled ? 'Wyłącz' : 'Włącz'}
-                      >
-                        {notification.enabled ? (
-                          <Bell className="w-5 h-5" />
-                        ) : (
-                          <BellOff className="w-5 h-5" />
-                        )}
-                      </button>
-                      
-                      <button
-                        onClick={() => deleteNotification(notification.id!)}
-                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                        title="Usuń"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
+const CurrentWeatherCard: React.FC<{ weather: CurrentWeather }> = ({ weather }) => {
+    return (
+        <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-xl p-8 text-white">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h2 className="text-3xl font-bold mb-2">{weather.location}</h2>
+                    <p className="text-blue-100 text-lg capitalize">{weather.description}</p>
+                    <p className="text-blue-200 text-sm mt-1">Aktualna pogoda • Open-Meteo</p>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                {weather.icon}
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                    <div className="text-5xl font-bold mb-2">{Math.round(weather.temp)}°C</div>
+                    <div className="text-blue-100">Temperatura</div>
+                </div>
+                <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                    <div className="text-5xl font-bold mb-2">{Math.round(weather.feels_like)}°C</div>
+                    <div className="text-blue-100">Odczuwalna</div>
+                </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mt-6">
+                <div className="flex items-center gap-3 bg-white bg-opacity-10 rounded-lg p-3">
+                    <Droplets className="w-6 h-6" />
+                    <div>
+                        <div className="text-2xl font-bold">{weather.humidity}%</div>
+                        <div className="text-sm text-blue-100">Wilgotność</div>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3 bg-white bg-opacity-10 rounded-lg p-3">
+                    <Wind className="w-6 h-6" />
+                    <div>
+                        <div className="text-2xl font-bold">{Math.round(weather.wind_speed)} km/h</div>
+                        <div className="text-sm text-blue-100">Wiatr</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
-      {/* Statystyki */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <div className="text-2xl font-bold text-blue-600">
-            {notifications.length}
-          </div>
-          <div className="text-blue-800">Wszystkie notyfikacje</div>
-        </div>
-        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-          <div className="text-2xl font-bold text-green-600">
-            {notifications.filter(n => n.enabled).length}
-          </div>
-          <div className="text-green-800">Aktywne notyfikacje</div>
-        </div>
-        <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-          <div className="text-2xl font-bold text-amber-600">
-            {new Set(notifications.map(n => n.locationName)).size}
-          </div>
-          <div className="text-amber-800">Monitorowane lokalizacje</div>
-        </div>
-      </div>
+const NotificationModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (rule: NotificationRule) => void;
+    editingRule?: NotificationRule | null;
+}> = ({ isOpen, onClose, onSave, editingRule }) => {
+    const [notificationType, setNotificationType] = useState('');
+    const [threshold, setThreshold] = useState('');
+    const [daysAhead, setDaysAhead] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
 
-      {/* Modal dodawania notyfikacji */}
-      <AddNotificationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        location={selectedLocation}
-        onAdd={handleAddNotification}
-      />
-    </div>
-  );
+    useEffect(() => {
+        if (editingRule) {
+            setNotificationType(editingRule.notificationType);
+            setThreshold(editingRule.threshold.toString());
+            setDaysAhead(editingRule.daysAhead);
+        } else {
+            setNotificationType('');
+            setThreshold('');
+            setDaysAhead(1);
+        }
+    }, [editingRule, isOpen]);
+
+    if (!isOpen) return null;
+
+    const selectedType = NOTIFICATION_TYPES.find(t => t.value === notificationType);
+
+    const handleSave = async () => {
+        if (!notificationType || !threshold) {
+            alert('Wypełnij wszystkie pola!');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const rule: NotificationRule = {
+                id: editingRule?.id,
+                backendId: editingRule?.backendId,
+                notificationType,
+                threshold: parseFloat(threshold),
+                daysAhead,
+                enabled: true
+            };
+
+            await onSave(rule);
+            onClose();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+                <div className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <Bell className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900">
+                                {editingRule ? 'Edytuj notyfikację' : 'Dodaj notyfikację'}
+                            </h3>
+                        </div>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    <div className="space-y-4 mb-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Typ ostrzeżenia pogodowego *
+                            </label>
+                            <select
+                                value={notificationType}
+                                onChange={(e) => {
+                                    setNotificationType(e.target.value);
+                                    const type = NOTIFICATION_TYPES.find(t => t.value === e.target.value);
+                                    if (type && !threshold) {
+                                        setThreshold(type.defaultThreshold.toString());
+                                    }
+                                }}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="">Wybierz typ ostrzeżenia...</option>
+                                {NOTIFICATION_TYPES.map(type => (
+                                    <option key={type.value} value={type.value}>
+                                        {type.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {selectedType && (
+                            <>
+                                <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                                    <p className="text-sm text-blue-800">
+                                        {selectedType.description}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Próg ostrzeżenia ({selectedType.unit}) *
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        value={threshold}
+                                        onChange={(e) => setThreshold(e.target.value)}
+                                        placeholder={selectedType.defaultThreshold.toString()}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Wyprzedzenie prognozy *
+                                    </label>
+                                    <select
+                                        value={daysAhead}
+                                        onChange={(e) => setDaysAhead(parseInt(e.target.value))}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        {DAYS_AHEAD_OPTIONS.map(option => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Otrzymasz powiadomienie jeśli warunki wystąpią w tym okresie
+                                    </p>
+                                </div>
+
+                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                    <div className="flex gap-2">
+                                        <Calendar className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                                        <div className="text-sm text-amber-800">
+                                            <p className="font-medium mb-1">Przykład:</p>
+                                            <p>
+                                                {selectedType.value === 'FROST_WARNING' && 
+                                                    `Jeśli za ${daysAhead} ${daysAhead === 1 ? 'dzień' : 'dni'} prognozowana temperatura spadnie poniżej ${threshold}°C, otrzymasz powiadomienie.`
+                                                }
+                                                {selectedType.value === 'RAIN_FORECAST' && 
+                                                    `Jeśli za ${daysAhead} ${daysAhead === 1 ? 'dzień' : 'dni'} prawdopodobieństwo opadów przekroczy ${threshold}%, otrzymasz powiadomienie.`
+                                                }
+                                                {(selectedType.value === 'TEMP_HIGH' || selectedType.value === 'TEMP_LOW') && 
+                                                    `Jeśli za ${daysAhead} ${daysAhead === 1 ? 'dzień' : 'dni'} temperatura ${selectedType.value === 'TEMP_HIGH' ? 'przekroczy' : 'spadnie poniżej'} ${threshold}°C, otrzymasz powiadomienie.`
+                                                }
+                                                {selectedType.value === 'STRONG_WIND' && 
+                                                    `Jeśli za ${daysAhead} ${daysAhead === 1 ? 'dzień' : 'dni'} prędkość wiatru przekroczy ${threshold} km/h, otrzymasz powiadomienie.`
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={onClose}
+                            disabled={isLoading}
+                            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                        >
+                            Anuluj
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={isLoading || !notificationType || !threshold}
+                            className="flex-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 font-medium"
+                        >
+                            {isLoading ? (
+                                <Loader className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Check className="w-4 h-4" />
+                            )}
+                            {isLoading ? 'Zapisywanie...' : editingRule ? 'Zapisz zmiany' : 'Dodaj notyfikację'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// --- GŁÓWNY KOMPONENT I KONTROLER LOGIKI ---
+
+const WeatherNotifications: React.FC = () => {
+    const [currentWeather, setCurrentWeather] = useState<CurrentWeather | null>(null);
+    const [notifications, setNotifications] = useState<NotificationRule[]>([]);
+    const [isLoadingWeather, setIsLoadingWeather] = useState(true);
+    const [isLoadingNotifications, setIsLoadingNotifications] = useState(true);
+    const [weatherError, setWeatherError] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingRule, setEditingRule] = useState<NotificationRule | null>(null);
+    
+    const [locationName, setLocationName] = useState('Ładowanie lokalizacji...');
+    
+    // Zmieniono typ stanu na OpenMeteoCoordinates, aby uniknąć konfliktów z DTO
+    const [coordinates, setCoordinates] = useState<OpenMeteoCoordinates | null>(null);
+    
+    
+    // NOWA FUNKCJA: Pobieranie koordynatów i nazwy miejscowości z endpointu /api/gardener/location
+    const fetchGardenerLocation = useCallback(async () => {
+        setLocationName('Pobieranie koordynatów z profilu...');
+        setWeatherError(null);
+
+        try {
+            // UŻYCIE POPRAWNEGO ENDPOINTU BACKENDU
+            const response = await fetch(`${BACKEND_URL}/api/gardener/location`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            });
+
+            if (!response.ok) {
+                // To wyłapie błędy serwera, np. 404, jeśli użytkownik nie ma koordynatów
+                throw new Error('Błąd serwera: Nie udało się pobrać danych lokalizacji.');
+            }
+
+            const data: UserLocationDTO = await response.json();
+            
+            // KLUCZOWE SPRAWDZENIE: Czy koordynaty istnieją w odpowiedzi (sprawdzamy obiekt coordinateDTO)
+            if (!data.coordinateDTO || data.coordinateDTO.latitude === undefined || data.coordinateDTO.longitude === undefined) {
+                throw new Error('Koordynaty dla sadownika nie są zdefiniowane. Ustaw je w sekcji Profil.');
+            }
+            
+            // Ustawienie stanu w oczekiwanym formacie lat/lon
+            setCoordinates({ 
+                lat: data.coordinateDTO.latitude, 
+                lon: data.coordinateDTO.longitude 
+            });
+            setLocationName(data.locationName || 'Lokalizacja z profilu');
+
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Wystąpił nieznany błąd podczas ładowania lokalizacji.';
+            console.error('Błąd pobierania koordynatów:', message);
+            
+            setWeatherError(message);
+            setLocationName('Brak danych lokalizacji');
+            setCoordinates(null);
+            setIsLoadingWeather(false); // Zatrzymanie ładowania pogody
+        }
+    }, []); 
+
+
+    // ZMODYFIKOWANA FUNKCJA: Pobieranie pogody (używa lat/lon)
+    const fetchCurrentWeather = useCallback(async (coords: OpenMeteoCoordinates, location: string) => { 
+        setIsLoadingWeather(true);
+        // Uwaga: weatherError jest resetowany tylko w fetchGardenerLocation, aby zachować błąd koordynatów
+
+        try {
+            const response = await fetch(
+                `https://api.open-meteo.com/v1/forecast?` +
+                `latitude=${coords.lat}&` + 
+                `longitude=${coords.lon}&` + 
+                `current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&` +
+                `timezone=Europe/Warsaw`
+            );
+
+            if (!response.ok) {
+                throw new Error('Nie udało się pobrać danych pogodowych z Open-Meteo');
+            }
+
+            const data = await response.json();
+            const weatherInfo = getWeatherFromCode(data.current.weather_code);
+            
+            setCurrentWeather({
+                temp: data.current.temperature_2m,
+                feels_like: data.current.apparent_temperature,
+                humidity: data.current.relative_humidity_2m,
+                description: weatherInfo.description,
+                icon: weatherInfo.icon,
+                wind_speed: data.current.wind_speed_10m,
+                location: location,
+            });
+        } catch (error) {
+            console.error('Błąd pobierania danych pogodowych:', error);
+            setWeatherError('Nie udało się pobrać danych pogodowych z Open-Meteo');
+        } finally {
+            setIsLoadingWeather(false);
+        }
+    }, []);
+
+    const loadNotifications = useCallback(async () => {
+        setIsLoadingNotifications(true);
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/weather-notifications`, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const mappedNotifications: NotificationRule[] = data.map((item: any) => ({
+                id: Date.now() + Math.random(),
+                backendId: item.id,
+                notificationType: item.notificationType,
+                threshold: item.threshold,
+                daysAhead: item.daysAhead || 1,
+                enabled: item.enabled,
+                description: item.description
+            }));
+
+            setNotifications(mappedNotifications);
+        } catch (error) {
+            console.error('Błąd ładowania notyfikacji:', error);
+        } finally {
+            setIsLoadingNotifications(false);
+        }
+    }, []);
+
+    // EFEKTY ŁADOWANIA POCZĄTKOWE
+    useEffect(() => {
+        loadNotifications();
+        fetchGardenerLocation(); // Najpierw pobierz lokalizację i koordynaty
+    }, [loadNotifications, fetchGardenerLocation]);
+
+    // EFEKT POBIERANIA POGODY PO ZAŁADOWANIU KOORDYNATÓW
+    useEffect(() => {
+        // Kontynuuj tylko jeśli koordynaty są dostępne i nie ma błędu blokującego
+        if (coordinates && locationName && weatherError === null) {
+            fetchCurrentWeather(coordinates, locationName);
+        }
+    }, [coordinates, locationName, fetchCurrentWeather, weatherError]);
+
+    const handleSaveNotification = async (rule: NotificationRule) => {
+        try {
+            const backendData = {
+                notificationType: rule.notificationType,
+                threshold: rule.threshold,
+                daysAhead: rule.daysAhead,
+                enabled: rule.enabled
+            };
+
+            let response;
+            if (rule.backendId) {
+                response = await fetch(`${BACKEND_URL}/api/weather-notifications/${rule.backendId}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(backendData)
+                });
+            } else {
+                response = await fetch(`${BACKEND_URL}/api/weather-notifications`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(backendData)
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            await loadNotifications();
+            
+            alert(rule.backendId ? 'Notyfikacja zaktualizowana!' : 'Notyfikacja dodana!');
+            setIsModalOpen(false);
+            setEditingRule(null);
+        } catch (error) {
+            console.error('Błąd zapisywania notyfikacji:', error);
+            alert('Nie udało się zapisać notyfikacji');
+        }
+    };
+
+    const toggleNotification = async (id: number) => {
+        const notification = notifications.find(n => n.id === id);
+        if (!notification || !notification.backendId) return;
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/weather-notifications/${notification.backendId}/toggle`, {
+                method: 'PATCH',
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            setNotifications(notifications.map(n => 
+                n.id === id ? { ...n, enabled: !n.enabled } : n
+            ));
+        } catch (error) {
+            console.error('Błąd aktualizacji notyfikacji:', error);
+            alert('Nie udało się zaktualizować notyfikacji');
+        }
+    };
+
+    const deleteNotification = async (id: number) => {
+        if (!window.confirm('Czy na pewno chcesz usunąć tę notyfikację?')) return;
+
+        const notification = notifications.find(n => n.id === id);
+        if (!notification || !notification.backendId) return;
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/weather-notifications/${notification.backendId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            setNotifications(notifications.filter(n => n.id !== id));
+        } catch (error) {
+            console.error('Błąd usuwania notyfikacji:', error);
+            alert('Nie udało się usunąć notyfikacji');
+        }
+    };
+
+    const handleEditClick = (notification: NotificationRule) => {
+        setEditingRule(notification);
+        setIsModalOpen(true);
+    };
+
+    const handleAddClick = () => {
+        setEditingRule(null);
+        setIsModalOpen(true);
+    };
+    
+    // Warunek sprawdzający, czy można ponowić próbę pobrania pogody (jeśli mamy koordynaty)
+    const canRetryWeather = coordinates !== null && weatherError !== null;
+
+
+    return (
+        <div className="p-6 max-w-7xl mx-auto">
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+                    <Cloud className="w-8 h-8 text-blue-500" />
+                    Pogoda i Notyfikacje
+                </h1>
+                <p className="text-gray-600">
+                    Aktualna pogoda oraz zarządzanie alertami pogodowymi • Powered by Open-Meteo
+                </p>
+            </div>
+
+            {/* BLOK ŁADOWANIA/BŁĘDU/POGODY */}
+            {isLoadingWeather && coordinates === null && weatherError === null ? (
+                // Stan początkowy: Ładowanie lokalizacji
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 mb-6">
+                    <div className="flex items-center justify-center gap-3">
+                        <Loader className="w-6 h-6 text-blue-600 animate-spin" />
+                        <span className="text-blue-800 font-medium">
+                            {locationName}
+                        </span>
+                    </div>
+                </div>
+            ) : weatherError ? (
+                // Stan błędu
+                <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
+                    <div className="flex items-center gap-3">
+                        <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
+                        <div>
+                            <div className="font-semibold text-red-900">
+                                {weatherError}
+                            </div>
+                            {canRetryWeather && (
+                                <button 
+                                    onClick={() => coordinates && fetchCurrentWeather(coordinates, locationName)}
+                                    className="text-sm text-red-700 underline mt-1"
+                                >
+                                    Spróbuj ponownie pobrać pogodę
+                                </button>
+                            )}
+                            {/* Propozycja linku do profilu w przypadku błędu koordynatów */}
+                            {weatherError.includes('Koordynaty') && (
+                                <p className="text-sm text-red-700 mt-1">
+                                    Proszę uzupełnij swoją lokalizację w <a href="/profile" className="font-bold underline">Ustawieniach Profilu</a>.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ) : currentWeather ? (
+                // Stan sukcesu
+                <div className="mb-6">
+                    <CurrentWeatherCard weather={currentWeather} />
+                </div>
+            ) : (
+                // Stan ładowania pogody, gdy koordynaty są znane (coordinates !== null), ale trwa pobieranie pogody
+                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 mb-6">
+                    <div className="flex items-center justify-center gap-3">
+                        <Loader className="w-6 h-6 text-blue-600 animate-spin" />
+                        <span className="text-blue-800 font-medium">Pobieranie danych pogodowych dla {locationName}...</span>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+                        <Bell className="w-6 h-6 text-blue-500" />
+                        Alerty Pogodowe
+                    </h2>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={loadNotifications}
+                            disabled={isLoadingNotifications}
+                            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm"
+                        >
+                            <Loader className={`w-4 h-4 ${isLoadingNotifications ? 'animate-spin' : ''}`} />
+                            Odśwież
+                        </button>
+                        <button
+                            onClick={handleAddClick}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Dodaj alert
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-800">
+                        <strong>Jak to działa?</strong> Skonfiguruj alerty pogodowe aby otrzymywać powiadomienia 
+                        o nadchodzących warunkach pogodowych (przymrozki, opady, silne wiatry). 
+                        System sprawdzi prognozę z Open-Meteo i powiadomi Cię z wyprzedzeniem.
+                    </p>
+                </div>
+
+                {isLoadingNotifications ? (
+                    <div className="text-center py-12">
+                        <Loader className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+                        <p className="text-gray-600">Ładowanie alertów...</p>
+                    </div>
+                ) : notifications.length === 0 ? (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                        <Bell className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-xl text-gray-500 mb-2">Brak skonfigurowanych alertów</p>
+                        <p className="text-gray-400 mb-4">
+                            Dodaj pierwszy alert aby otrzymywać powiadomienia o warunkach pogodowych
+                        </p>
+                        <button
+                            onClick={handleAddClick}
+                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        >
+                            Dodaj pierwszy alert
+                        </button>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {notifications.map((notification) => {
+                            const typeData = NOTIFICATION_TYPES.find(t => t.value === notification.notificationType);
+                            const Icon = typeData?.icon || Bell;
+                            const daysLabel = DAYS_AHEAD_OPTIONS.find(d => d.value === notification.daysAhead)?.label || `Za ${notification.daysAhead} dni`;
+                            
+                            return (
+                                <div
+                                    key={notification.id}
+                                    className={`border-2 rounded-xl p-5 transition-all ${
+                                        notification.enabled 
+                                            ? 'border-blue-200 bg-blue-50' 
+                                            : 'border-gray-200 bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex items-start gap-4 flex-1">
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                notification.enabled ? 'bg-blue-100' : 'bg-gray-200'
+                                            }`}>
+                                                <Icon className={`w-6 h-6 ${
+                                                    notification.enabled ? 'text-blue-600' : 'text-gray-500'
+                                                }`} />
+                                            </div>
+                                            
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <h3 className="font-semibold text-gray-900 text-lg">
+                                                        {typeData?.label || notification.notificationType}
+                                                    </h3>
+                                                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                                        notification.enabled 
+                                                            ? 'bg-green-100 text-green-800' 
+                                                            : 'bg-gray-200 text-gray-600'
+                                                    }`}>
+                                                        {notification.enabled ? 'Aktywny' : 'Nieaktywny'}
+                                                    </span>
+                                                </div>
+                                                
+                                                <p className="text-sm text-gray-600 mb-3">
+                                                    {typeData?.description}
+                                                </p>
+                                                
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="flex items-center gap-2 text-sm bg-white rounded-lg p-2 border border-gray-200">
+                                                        <Thermometer className="w-4 h-4 text-gray-500" />
+                                                        <div>
+                                                            <span className="text-gray-500 text-xs">Próg:</span>
+                                                            <span className="font-semibold text-gray-900 ml-1">
+                                                                {notification.threshold} {typeData?.unit}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm bg-white rounded-lg p-2 border border-gray-200">
+                                                        <Calendar className="w-4 h-4 text-gray-500" />
+                                                        <div>
+                                                            <span className="text-gray-500 text-xs">Prognoza:</span>
+                                                            <span className="font-semibold text-gray-900 ml-1">
+                                                                {daysLabel}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                            <button
+                                                onClick={() => handleEditClick(notification)}
+                                                className="p-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors"
+                                                title="Edytuj"
+                                            >
+                                                <Edit3 className="w-5 h-5" />
+                                            </button>
+                                            
+                                            <button
+                                                onClick={() => toggleNotification(notification.id!)}
+                                                className={`p-2 rounded-lg transition-colors ${
+                                                    notification.enabled
+                                                        ? 'bg-green-100 text-green-600 hover:bg-green-200'
+                                                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                                }`}
+                                                title={notification.enabled ? 'Wyłącz' : 'Włącz'}
+                                            >
+                                                {notification.enabled ? (
+                                                    <Bell className="w-5 h-5" />
+                                                ) : (
+                                                    <BellOff className="w-5 h-5" />
+                                                )}
+                                            </button>
+                                            
+                                            <button
+                                                onClick={() => deleteNotification(notification.id!)}
+                                                className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                                                title="Usuń"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            {/* Statystyki */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <div className="text-2xl font-bold text-blue-600">
+                        {notifications.length}
+                        </div>
+                    <div className="text-blue-800">Wszystkie alerty</div>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div className="text-2xl font-bold text-green-600">
+                        {notifications.filter(n => n.enabled).length}
+                    </div>
+                    <div className="text-green-800">Aktywne alerty</div>
+                </div>
+                <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                    <div className="text-2xl font-bold text-amber-600">
+                        {new Set(notifications.map(n => n.notificationType)).size}
+                    </div>
+                    <div className="text-amber-800">Typy alertów</div>
+                </div>
+            </div>
+
+            {/* Modal */}
+            <NotificationModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setEditingRule(null);
+                }}
+                onSave={handleSaveNotification}
+                editingRule={editingRule}
+            />
+        </div>
+    );
 };
 
 export default WeatherNotifications;

@@ -10,12 +10,16 @@ import java.util.List;
 public class CoordinateMapper {
 
     public static CoordinateEntity mapToEntity(CoordinateDTO coordinateDTO, SectorEntity sectorEntity) {
-
+        if (coordinateDTO == null) {
+            return null;
+        }
         return new CoordinateEntity(coordinateDTO.getLatitude(), coordinateDTO.getLongitude(), sectorEntity);
     }
 
     public static CoordinateDTO mapFromEntity(CoordinateEntity coordinateEntity) {
-
+        if (coordinateEntity == null) {
+            return null;
+        }
         return new CoordinateDTO(coordinateEntity.getLatitude(), coordinateEntity.getLongitude());
     }
 

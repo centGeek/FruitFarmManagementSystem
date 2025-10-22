@@ -35,7 +35,7 @@ public class ProfitController {
 
     @PostMapping
     public ResponseEntity<ProfitDTO> createProfit(@Valid @RequestBody ProfitDTO profitDto) {
-        UserEntity userEntity = userService.getLoggedInUserId();
+        UserEntity userEntity = userService.getLoggedUser();
         log.info("Creating profit for User ID: {}", userEntity.getId());
 
         if(profitDto.getSectorDTO() != null) {
@@ -58,7 +58,7 @@ public class ProfitController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
 
-        UserEntity user = userService.getLoggedInUserId();
+        UserEntity user = userService.getLoggedUser();
         log.info("Fetching profits for User ID: {} - Page: {}, Size: {}", user.getId(), page, size);
 
         try {
@@ -101,7 +101,7 @@ public class ProfitController {
             @PathVariable Long id,
             @Valid @RequestBody ProfitDTO profitDto) {
 
-        UserEntity user = userService.getLoggedInUserId();
+        UserEntity user = userService.getLoggedUser();
         log.info("Updating profit ID: {} for User ID: {}", id, user.getId());
 
         try {
@@ -117,7 +117,7 @@ public class ProfitController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProfit(@PathVariable Long id) {
-        UserEntity user = userService.getLoggedInUserId();
+        UserEntity user = userService.getLoggedUser();
         log.info("Deleting profit ID: {} for User ID: {}", id, user.getId());
 
         try {

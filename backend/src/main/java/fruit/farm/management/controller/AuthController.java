@@ -1,7 +1,10 @@
 package fruit.farm.management.controller;
 
+import fruit.farm.management.entity.CoordinateEntity;
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.UserEntity;
+import fruit.farm.management.mapper.CoordinateMapper;
+import fruit.farm.management.repository.CoordinateRepository;
 import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.repository.jpa.RoleJpaRepository;
 import fruit.farm.management.security.JwtService;
@@ -38,6 +41,7 @@ public class AuthController {
     private UserRepository userRepository;
     private RoleJpaRepository roleJpaRepository;
     private PasswordEncoder passwordEncoder;
+    private CoordinateRepository coordinateRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletResponse response) {
@@ -89,6 +93,9 @@ public class AuthController {
             RoleEntity defaultRole = roleJpaRepository.findByRoleName("Gardener")
                     .orElseThrow(() -> new RuntimeException("Domyślna rola nie została znaleziona"));
 
+            CoordinateEntity coordinateEntity = coordinateRepository.addCoordinate(
+                    CoordinateMapper.mapToEntity(request.getCoordinateDTO(), null)
+            );
             UserEntity newUser = new UserEntity(
                     request.getName().trim(),
                     request.getSurname().trim(),
@@ -99,9 +106,10 @@ public class AuthController {
                     passwordEncoder.encode(request.getPassword()),
                     defaultRole,
                     true,
-                    null
+                    null,
+                    coordinateEntity,
+                    request.getLocalityName()
             );
-
             UserEntity savedUser = userRepository.save(newUser);
             log.info("New user registered: {}", savedUser.getEmail());
 

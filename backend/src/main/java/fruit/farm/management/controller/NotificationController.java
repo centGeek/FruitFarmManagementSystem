@@ -1,7 +1,9 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.service.NotificationService;
+import fruit.farm.management.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +21,13 @@ import java.util.List;
 public class NotificationController {
 
     private NotificationService notificationService;
+    private UserService userService;
     @GetMapping
     public ResponseEntity<List<NotificationDTO>> getAllNotifications() {
 
         log.info("Fetching all notifications");
-        List<NotificationDTO> notifications = notificationService.getAllNotificationsSortedByDate();
+        UserEntity loggedUser = userService.getLoggedUser();
+        List<NotificationDTO> notifications = notificationService.getAllNotificationsByUserSortedByDate(loggedUser.getId());
         return ResponseEntity.ok(notifications);
     }
 

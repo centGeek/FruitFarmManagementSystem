@@ -1,17 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Trash2, Layers, X, Search, MapPin, Loader, Check, AlertCircle, Edit3 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import LocationSearch from './LocationSearch';
+import BasicMap from './BasicMap';
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
 
 const CROP_TYPES = [
   { 
@@ -383,64 +377,12 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
   const [confirmationModal, setConfirmationModal] = useState({ isOpen: false, sectorData: null });
   const [visibleSectorIndices, setVisibleSectorIndices] = useState([]);
   const animationTimeoutRef = useRef(null);
-  const [mapStyle, setMapStyle] = useState('streets');
-  const [isMapStyleOpen, setIsMapStyleOpen] = useState(false);
-  const tileLayerRef = useRef(null);
 
-  const mapStyles = {
-    streets: {
-      name: '🗺️ Domyślna',
-      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    },
-    satellite: {
-      name: '🛰️ Satelita',
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
-    },
-    hybrid: {
-      name: '🌍 Hybrydowa',
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
-      overlay: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-    },
-    topo: {
-      name: '⛰️ Topograficzna',
-      url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-      attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
-    }
-  };
-
+  
   const handleMapLoad = (map) => {
     leafletMapRef.current = map;
     setMapInstance(map);
   };
-
-  useEffect(() => {
-    if (!mapInstance) return;
-
-    mapInstance.eachLayer((layer) => {
-      if (layer instanceof L.TileLayer) {
-        mapInstance.removeLayer(layer);
-      }
-    });
-
-    const style = mapStyles[mapStyle];
-    const newTileLayer = L.tileLayer(style.url, {
-      attribution: style.attribution,
-      maxZoom: 19
-    }).addTo(mapInstance);
-
-    if (style.overlay) {
-      L.tileLayer(style.overlay, {
-        attribution: '',
-        maxZoom: 19,
-        opacity: 0.5
-      }).addTo(mapInstance);
-    }
-
-    tileLayerRef.current = newTileLayer;
-  }, [mapStyle, mapInstance]);
 
   useEffect(() => {
     if (sectors.length === 0) {
@@ -919,154 +861,89 @@ if (drawingMode === 'polygon' && drawingPoints.length > 0) {
   };
 
   return (
-    <div className="relative">
-      <LocationSearch map={leafletMapRef.current} />
-      
-      <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-        <h3 className="font-semibold text-blue-800 mb-2">Jak korzystać:</h3>
-        <div className="text-sm text-blue-700 space-y-1">
-          <div><strong>1. Wyszukaj lokalizację:</strong> Wpisz nazwę miejscowości</div>
-          <div><strong>2. Rysuj sektor:</strong> Klikaj 4 punkty na mapie</div>
-          {drawingMode !== 'none' && (
-            <div className="text-orange-700 font-medium mt-2 p-2 bg-orange-100 rounded">
-              {getDrawingInstructions()}
-            </div>
-          )}
-        </div>
-      </div>
-
-           <div className="relative">
-        <MapContainer
-          center={[52.2297, 21.0122]}
-          zoom={13}
-          style={{ height: '500px', width: '100%' }}
-          ref={handleMapLoad}
-          zoomControl={false}
-        >
-          {/* TileLayer jest teraz zarządzany przez useEffect */}
-        </MapContainer>
-
-        {/* Kontrolki zoom i warstwy w jednym miejscu - na mapie */}
-        <div className="absolute top-4 left-4 z-[1000]">
-          <div className="bg-white rounded-lg shadow-lg overflow-visible w-10">
-            {/* Kontrolki zoom */}
-            <button
-              onClick={() => mapInstance?.zoomIn()}
-              className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors border-b border-gray-200"
-              title="Przybliż"
-            >
-              <span className="text-xl font-bold text-gray-700">+</span>
-            </button>
-            <button
-              onClick={() => mapInstance?.zoomOut()}
-              className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors rounded-b-lg"
-              title="Oddal"
-            >
-              <span className="text-xl font-bold text-gray-700">−</span>
-            </button>
+  <div className="relative">
+    <LocationSearch map={leafletMapRef.current} />
+    
+    <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+      <h3 className="font-semibold text-blue-800 mb-2">Jak korzystać:</h3>
+      <div className="text-sm text-blue-700 space-y-1">
+        <div><strong>1. Wyszukaj lokalizację:</strong> Wpisz nazwę miejscowości</div>
+        <div><strong>2. Rysuj sektor:</strong> Klikaj 4 punkty na mapie</div>
+        {drawingMode !== 'none' && (
+          <div className="text-orange-700 font-medium mt-2 p-2 bg-orange-100 rounded">
+            {getDrawingInstructions()}
           </div>
-
-          {/* Przycisk warstw - osobny panel z odstępem */}
-          <div className="bg-white rounded-lg shadow-lg overflow-visible w-10 mt-2">
-            <button
-              onClick={() => setIsMapStyleOpen(!isMapStyleOpen)}
-              className={`w-10 h-10 flex items-center justify-center transition-colors rounded-lg ${
-                isMapStyleOpen ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Warstwy mapy"
-            >
-              <Layers className="w-5 h-5" />
-            </button>
-
-            {/* Lista stylów mapy */}
-            {isMapStyleOpen && (
-              <div className="border-t border-gray-200 bg-white w-40 rounded-b-lg shadow-lg">
-                <div className="p-1 space-y-0.5 max-h-40 overflow-y-auto">
-                  {Object.entries(mapStyles).map(([key, style]) => (
-                    <button
-                      key={key}
-                      onClick={() => {
-                        setMapStyle(key);
-                        setIsMapStyleOpen(false);
-                      }}
-                      className={`w-full text-left px-2 py-1.5 rounded text-xs transition-all ${
-                        mapStyle === key
-                          ? 'bg-blue-500 text-white font-medium'
-                          : 'hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="whitespace-nowrap">{style.name}</span>
-                        {mapStyle === key && (
-                          <Check className="w-3 h-3 ml-1 flex-shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="absolute bottom-4 left-4 flex flex-col gap-2 z-[1000]">
-  {editMode !== null ? (
-    <button
-      onClick={disableEditMode}
-      className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
-    >
-      <Check size={20} />
-      <span className="text-sm font-medium">Zakończ edycję</span>
-    </button>
-  ) : drawingMode === 'none' ? (
-    <button
-      onClick={startDrawing}
-      className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
-    >
-      <Layers size={20} />
-      <span className="text-sm font-medium">Rysuj Sektor</span>
-    </button>
-  ) : (
-    <button
-      onClick={cancelDrawing}
-      className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
-    >
-      <X size={20} />
-      <span className="text-sm font-medium">Anuluj</span>
-    </button>
-  )}
-
-  {sectors.length > 0 && (
-    <div className="bg-white p-3 rounded-lg shadow-lg text-xs max-w-48">
-      <div className="font-semibold text-gray-700 mb-1">Statystyki:</div>
-      <div className="text-gray-600">Sektorów: {sectors.length}</div>
-      {editMode !== null && (
-        <div className="text-orange-600 mt-2 text-xs font-medium">
-          🔧 Tryb edycji aktywny
-        </div>
-      )}
-      <div className="text-gray-500 mt-2 text-xs">
-        {visibleSectorIndices.length < sectors.length 
-          ? `Ładowanie: ${visibleSectorIndices.length}/${sectors.length}`
-          : editMode !== null 
-            ? 'Przeciągnij wierzchołki aby zmienić kształt'
-            : 'Kliknij sektor aby zobaczyć szczegóły'
-        }
+        )}
       </div>
     </div>
-  )}
-</div>
 
-      <SectorConfirmationModal
-        isOpen={confirmationModal.isOpen}
-        onClose={() => setConfirmationModal({ isOpen: false, sectorData: null })}
-        sectorData={confirmationModal.sectorData}
-        onConfirm={handleSectorConfirm}
-        onEdit={handleSectorEdit}
+    {/* TUTAJ JEST MAPA - TO JEST TA ZMIANA! */}
+    <div className="relative">
+      <BasicMap 
+        onMapLoad={handleMapLoad}
+        style={{ height: '500px', width: '100%' }}
       />
     </div>
+
+    {/* Przyciski sterujące */}
+    <div className="absolute bottom-4 left-4 flex flex-col gap-2 z-[1000]">
+      {editMode !== null ? (
+        <button
+          onClick={disableEditMode}
+          className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+        >
+          <Check size={20} />
+          <span className="text-sm font-medium">Zakończ edycję</span>
+        </button>
+      ) : drawingMode === 'none' ? (
+        <button
+          onClick={startDrawing}
+          className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+        >
+          <Layers size={20} />
+          <span className="text-sm font-medium">Rysuj Sektor</span>
+        </button>
+      ) : (
+        <button
+          onClick={cancelDrawing}
+          className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors"
+        >
+          <X size={20} />
+          <span className="text-sm font-medium">Anuluj</span>
+        </button>
+      )}
+
+      {sectors.length > 0 && (
+        <div className="bg-white p-3 rounded-lg shadow-lg text-xs max-w-48">
+          <div className="font-semibold text-gray-700 mb-1">Statystyki:</div>
+          <div className="text-gray-600">Sektorów: {sectors.length}</div>
+          {editMode !== null && (
+            <div className="text-orange-600 mt-2 text-xs font-medium">
+              🔧 Tryb edycji aktywny
+            </div>
+          )}
+          <div className="text-gray-500 mt-2 text-xs">
+            {visibleSectorIndices.length < sectors.length 
+              ? `Ładowanie: ${visibleSectorIndices.length}/${sectors.length}`
+              : editMode !== null 
+                ? 'Przeciągnij wierzchołki aby zmienić kształt'
+                : 'Kliknij sektor aby zobaczyć szczegóły'
+            }
+          </div>
+        </div>
+      )}
+    </div>
+
+    <SectorConfirmationModal
+      isOpen={confirmationModal.isOpen}
+      onClose={() => setConfirmationModal({ isOpen: false, sectorData: null })}
+      sectorData={confirmationModal.sectorData}
+      onConfirm={handleSectorConfirm}
+      onEdit={handleSectorEdit}
+    />
+  </div>
   );
-};
+}
 const EditSectorModal = ({ isOpen, onClose, sectorData, onSave }) => {
   const [editedSector, setEditedSector] = useState({
     id: null,
