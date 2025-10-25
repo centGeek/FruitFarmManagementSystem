@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Calendar, Clock, Users, CheckCircle, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, X} from 'lucide-react';
+import { Calendar, Clock, Users, DollarSign, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, X, Loader2 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import ErrorPage from './ErrorPage'; 
 
@@ -31,7 +31,7 @@ const Alert = ({ type, message, onClose }) => {
         success: 'bg-green-50 border-green-300 text-green-700',
         warning: 'bg-amber-50 border-amber-300 text-amber-700'
     };
-    
+      
     return (
         <div className={`mb-4 p-4 border rounded-xl ${colors[type]} flex items-center justify-between shadow-sm`}>
             <div className="flex items-center">
@@ -67,14 +67,17 @@ const Modal = ({ isOpen, onClose, title, children, size = 'large' }) => {
     );
 };
 
-const StatCard = ({ icon: Icon, count, label, color }) => {
+// Zmieniony: Dodano isCurrency
+const StatCard = ({ icon: Icon, count, label, color, isCurrency = false }) => {
     const colorMap = {
         green: 'from-green-100 to-green-200 text-green-600',
         blue: 'from-blue-100 to-blue-200 text-blue-600',
         amber: 'from-amber-100 to-amber-200 text-amber-600',
-        purple: 'from-purple-100 to-purple-200 text-purple-600'
+        purple: 'from-purple-100 to-purple-200 text-purple-600',
+        red: 'from-red-100 to-red-200 text-red-600',
+        indigo: 'from-indigo-100 to-indigo-200 text-indigo-600'
     };
-    
+      
     return (
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
             <div className="flex items-center space-x-4">
@@ -82,7 +85,9 @@ const StatCard = ({ icon: Icon, count, label, color }) => {
                     <Icon size={28} />
                 </div>
                 <div>
-                    <p className="text-3xl font-extrabold text-gray-900">{count}</p>
+                    <p className="text-3xl font-extrabold text-gray-900">
+                         {isCurrency ? `${parseFloat(count).toFixed(2)} zł` : count}
+                    </p>
                     <p className="text-sm text-gray-500">{label}</p>
                 </div>
             </div>
@@ -100,7 +105,6 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
         sectorId: '',
         workType: '',
         description: '',
-        isApproved: true,
         isPaidHourly: emp.isPaidHourly !== false
     }))
 );
@@ -182,72 +186,77 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
             </div>
 
             <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-                {entries.map(entry => (
-                    <div key={entry.employeeId} className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-green-300 transition-colors">
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
-                            <div className="md:col-span-3">
-                                <p className="font-bold text-gray-900">{entry.employee.name} {entry.employee.surname}</p>
-                                {entry.employee.nickname && <p className="text-xs text-gray-500 italic">"{entry.employee.nickname}"</p>}
-                            </div>
+                {employees.map(emp => {
+                    const entry = entries.find(e => e.employeeId === emp.id);
+                    if (!entry) return null;
 
-                            {entry.isPaidHourly ? (
-                                <div className="md:col-span-2">
-                                    <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
-                                    <input type="number" step="0.5" min="0" max="24" value={entry.hours}
-                                        onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
-                                        placeholder="8" />
+                    return (
+                        <div key={entry.employeeId} className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-green-300 transition-colors">
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                                <div className="md:col-span-3">
+                                    <p className="font-bold text-gray-900">{entry.employee.name} {entry.employee.surname}</p>
+                                    {entry.employee.nickname && <p className="text-xs text-gray-500 italic">"{entry.employee.nickname}"</p>}
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="md:col-span-1">
+
+                                {entry.isPaidHourly ? (
+                                    <div className="md:col-span-2">
                                         <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
                                         <input type="number" step="0.5" min="0" max="24" value={entry.hours}
                                             onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
                                             placeholder="8" />
                                     </div>
-                                    <div className="md:col-span-1">
-                                        <label className="text-xs text-gray-500 mb-1 block">Kilogramy *</label>
-                                        <input type="number" step="0.1" min="0" value={entry.kilogramsPicked}
-                                            onChange={(e) => updateEntry(entry.employeeId, 'kilogramsPicked', e.target.value)}
-                                            className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-lg font-bold" 
-                                            placeholder="50" />
-                                    </div>
-                                </>
+                                ) : (
+                                    <>
+                                        <div className="md:col-span-1">
+                                            <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
+                                            <input type="number" step="0.5" min="0" max="24" value={entry.hours}
+                                                onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
+                                                placeholder="8" />
+                                        </div>
+                                        <div className="md:col-span-1">
+                                            <label className="text-xs text-gray-500 mb-1 block">Kilogramy *</label>
+                                            <input type="number" step="0.1" min="0" value={entry.kilogramsPicked}
+                                                onChange={(e) => updateEntry(entry.employeeId, 'kilogramsPicked', e.target.value)}
+                                                className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-lg font-bold" 
+                                                placeholder="50" />
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="md:col-span-3">
+                                    <label className="text-xs text-gray-500 mb-1 block">Sektor</label>
+                                    <select value={entry.sectorId} onChange={(e) => updateEntry(entry.employeeId, 'sectorId', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                        <option value="">Brak</option>
+                                        {sectors.map(s => <option key={s.id} value={s.id}>{s.description} ({s.plantType})</option>)}
+                                    </select>
+                                </div>
+
+                                <div className="md:col-span-4">
+                                    <label className="text-xs text-gray-500 mb-1 block">Typ pracy</label>
+                                    <select value={entry.workType} onChange={(e) => updateEntry(entry.employeeId, 'workType', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                        <option value="">Brak</option>
+                                        {WORK_TYPE_OPTIONS.map(opt => (
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {(entry.hours || entry.kilogramsPicked) && (
+                                <div className="mt-3 pt-3 border-t border-gray-100">
+                                    <input type="text" value={entry.description} 
+                                        onChange={(e) => updateEntry(entry.employeeId, 'description', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 text-sm" 
+                                        placeholder="Uwagi (opcjonalnie)..." />
+                                </div>
                             )}
-
-                            <div className="md:col-span-3">
-                                <label className="text-xs text-gray-500 mb-1 block">Sektor</label>
-                                <select value={entry.sectorId} onChange={(e) => updateEntry(entry.employeeId, 'sectorId', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
-                                    <option value="">Brak</option>
-                                    {sectors.map(s => <option key={s.id} value={s.id}>{s.description} ({s.plantType})</option>)}
-                                </select>
-                            </div>
-
-                            <div className="md:col-span-4">
-                                <label className="text-xs text-gray-500 mb-1 block">Typ pracy</label>
-                                <select value={entry.workType} onChange={(e) => updateEntry(entry.employeeId, 'workType', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
-                                    <option value="">Brak</option>
-                                    {WORK_TYPE_OPTIONS.map(opt => (
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                    ))}
-                                </select>
-                            </div>
                         </div>
-
-                        {(entry.hours || entry.kilogramsPicked) && (
-                            <div className="mt-3 pt-3 border-t border-gray-100">
-                                <input type="text" value={entry.description} 
-                                    onChange={(e) => updateEntry(entry.employeeId, 'description', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 text-sm" 
-                                    placeholder="Uwagi (opcjonalnie)..." />
-                            </div>
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
@@ -264,7 +273,7 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
             <div className="flex space-x-3 pt-2">
                 <button onClick={handleSubmit} disabled={isLoading}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center shadow-md">
-                    {isLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div> : <CheckCircle className="mr-2" size={20} />}
+                    {isLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div> : <DollarSign className="mr-2" size={20} />}
                     Zapisz wpisy
                 </button>
                 <button onClick={() => onCancel()} disabled={isLoading}
@@ -276,32 +285,42 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
     );
 };
 
-const CalendarEvent = ({ entry, onClick, onQuickApprove }) => (
-    <div onClick={onClick}
-        className={`${entry.isApproved ? 'bg-green-100 border-green-400 text-green-800' : 'bg-amber-100 border-amber-400 text-amber-800'} border-l-4 rounded-lg p-2 cursor-pointer hover:shadow-md transition-all text-xs`}>
-        <div className="flex items-center justify-between mb-1">
-            <span className="font-bold truncate text-xs">{entry.user?.name} {entry.user?.surname?.[0]}.</span>
-            <button onClick={(e) => { e.stopPropagation(); onQuickApprove(entry.entryId); }}
-                className="p-1 hover:bg-white rounded transition-colors text-sm">
-                {entry.isApproved ? '✅' : '⏳'}
-            </button>
-        </div>
-        <div className="flex items-center space-x-2">
-            {entry.duration > 0 && <div className="text-xs font-bold opacity-90 text-black">⏱️ {entry.duration}h</div>}
-            {entry.kilogramsPicked > 0 && <div className="text-xs font-bold opacity-90 text-orange-600">⚖️ {entry.kilogramsPicked} kg</div>}
-            {entry.daySalary !== undefined && entry.daySalary !== null && (
-            <div className="text-xs font-medium text-orange-900 opacity-90 flex items-center">
-                💰 {parseFloat(entry.daySalary).toFixed(0)} zł 
+const CalendarEvent = ({ entry, onClick, onTogglePaid }) => {
+    const paidClass = entry.isPaid ? 'bg-emerald-100 border-emerald-400 text-emerald-800' : 'bg-amber-100 border-amber-400 text-amber-800';
+      
+    return (
+        <div 
+            onClick={onClick}
+            className={`${paidClass} border-l-4 rounded-lg p-2 cursor-pointer hover:shadow-md transition-all text-xs mb-1`}
+        >
+            <div className="flex items-center justify-between">
+                <span className="font-bold truncate text-xs">{entry.user?.name} {entry.user?.surname?.[0]}.</span>
+                <div className="flex items-center space-x-1">
+                    <button onClick={(e) => { e.stopPropagation(); onTogglePaid(entry.entryId); }}
+                        className={`p-1 rounded transition-colors text-sm ${entry.isPaid ? 'text-amber-700 hover:bg-amber-200' : 'text-emerald-700 hover:bg-emerald-200'}`}
+                        title={entry.isPaid ? 'Anuluj płatność (Oznacz jako nieopłacone)' : 'Oznacz jako opłacone'}>
+                        {entry.isPaid ? '❌' : '💵'}
+                    </button>
+                </div>
             </div>
-        )}
+            <div className="flex items-center space-x-2">
+                {entry.duration > 0 && <div className="text-xs font-bold opacity-90 text-black">⏱️ {entry.duration}h</div>}
+                {entry.kilogramsPicked > 0 && <div className="text-xs font-bold opacity-90 text-orange-600">⚖️ {entry.kilogramsPicked} kg</div>}
+                {entry.daySalary !== undefined && entry.daySalary !== null && (
+                    <div className="text-xs font-medium text-orange-900 opacity-90 flex items-center">
+                        💰 {parseFloat(entry.daySalary).toFixed(0)} zł 
+                    </div>
+                )}
+            </div>
+            
+            {entry.workType && <div className="text-xs mt-1 opacity-75">{getWorkTypeIcon(entry.workType)}</div>}
+            {entry.sector && <div className="text-xs mt-1 truncate opacity-75">📍 {entry.sector.description}</div>}
         </div>
-        
-        {entry.workType && <div className="text-xs mt-1 opacity-75">{getWorkTypeIcon(entry.workType)}</div>}
-        {entry.sector && <div className="text-xs mt-1 truncate opacity-75">📍 {entry.sector.description}</div>}
-    </div>
-);
+    );
+};
 
-const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onQuickApprove, currentDate, onDateChange }) => {
+
+const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onTogglePaid, currentDate, onDateChange }) => {
     const getWeekDays = useCallback((date) => {
         const start = new Date(date);
         start.setHours(0, 0, 0, 0);
@@ -355,9 +374,9 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onQuickApprove, c
                 {weekDays.map((day, idx) => {
                     const entries = getEntriesForDate(day);
                     const totalHours = entries.reduce((sum, e) => sum + (e.duration || 0), 0);
-                    const totalSalary = entries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0); // SUMOWANIE daySalary
+                    const totalSalary = entries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0); 
                     const dateStr = day.toISOString().split('T')[0];
-                    
+                      
                     return (
                         <div key={idx} className={`border-r border-b border-gray-200 min-h-64 ${isToday(day) ? 'bg-green-50' : 'bg-white'}`}>
                             <div className={`p-3 border-b border-gray-200 ${isToday(day) ? 'bg-green-100' : 'bg-gray-50'}`}>
@@ -379,7 +398,7 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onQuickApprove, c
                                 ) : (
                                     <>
                                         <div className="space-y-1 mb-2 max-h-96 overflow-y-auto pr-1">
-                                            {entries.map(e => <CalendarEvent key={e.entryId} entry={e} onClick={() => onEventClick(e)} onQuickApprove={onQuickApprove} />)}
+                                            {entries.map(e => <CalendarEvent key={e.entryId} entry={e} onClick={() => onEventClick(e)} onTogglePaid={onTogglePaid} />)}
                                         </div>
                                         <button onClick={() => onAddClick(dateStr)}
                                             className="w-full py-2 border border-green-500 text-green-600 rounded-lg hover:bg-green-50 transition-colors text-sm font-medium">
@@ -396,31 +415,25 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onQuickApprove, c
     );
 };
 
-const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onToggleApproval }) => {
+// Zmieniony: Dodano onOpenPayAllMonthModal
+const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePaid, onOpenPayAllModal, onOpenPayAllMonthModal }) => {
     if (!entry) return null;
 
-    return (
-        <Modal isOpen={!!entry} onClose={onClose} title="Szczegóły wpisu" size="medium">
-            <div className="space-y-4">
-                <div className={`p-4 rounded-xl ${entry.isApproved ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-800">{entry.user?.name} {entry.user?.surname}</h3>
-                            {entry.user?.nickname && <p className="text-sm text-gray-500 italic">"{entry.user.nickname}"</p>}
-                        </div>
-                        <div className={`text-3xl ${entry.isApproved ? 'text-green-600' : 'text-amber-600'}`}>
-                            {entry.isApproved ? <CheckCircle size={40} /> : <Clock size={40} />}
-                        </div>
-                    </div>
-                </div>
 
+    console.log('🔍 EventDetailsModal - entry:', entry);
+    console.log('🔍 EventDetailsModal - entry.user:', entry.user);
+    console.log('🔍 EventDetailsModal - entry.user?.id:', entry.user?.id);
+
+    return (
+        <Modal isOpen={!!entry} onClose={onClose} title={`Szczegóły wpisu dla: ${entry.user?.name} ${entry.user?.surname}`} size="medium">
+            <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                         {entry.duration !== undefined && entry.duration !== null && (
                             <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                            <p className="text-xs font-medium text-blue-700 uppercase mb-1">Czas trwania</p>
-                            <p className="text-lg font-bold text-blue-900">{entry.duration}h</p>
-                        </div>
-                    )}
+                                <p className="text-xs font-medium text-blue-700 uppercase mb-1">Czas trwania</p>
+                                <p className="text-lg font-bold text-blue-900">{entry.duration}h</p>
+                            </div>
+                        )}
                     {entry.kilogramsPicked !== undefined && entry.kilogramsPicked !== null && entry.kilogramsPicked > 0 && (
                         <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
                             <p className="text-xs font-medium text-orange-700 uppercase mb-1">Zebrane kilogramy</p>
@@ -458,12 +471,6 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onToggleApproval 
                 )}
 
                 <div className="flex space-x-2 pt-4 border-t border-gray-200">
-                    <button onClick={() => onToggleApproval(entry.entryId)}
-                        className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                            entry.isApproved ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        }`}>
-                        {entry.isApproved ? '↩️ Cofnij zatwierdzenie' : '✅ Zatwierdź'}
-                    </button>
                     <button onClick={() => onEdit(entry)} className="flex-1 bg-blue-100 text-blue-700 hover:bg-blue-200 py-2 px-4 rounded-lg font-medium transition-colors">
                         <Edit2 className="inline mr-1" size={16} /> Edytuj
                     </button>
@@ -472,10 +479,124 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onToggleApproval 
                         <Trash2 className="inline mr-1" size={16} /> Usuń
                     </button>
                 </div>
+                
+                <div className={`p-4 rounded-xl border ${entry.isPaid ? 'bg-emerald-50 border-emerald-300' : 'bg-amber-50 border-amber-300'}`}>
+                    <div className="flex items-center justify-between">
+                        <div className="mt-1">
+                            <p className="text-xs font-medium text-gray-600 uppercase mb-1">Status płatności</p>
+                            <p className={`text-base font-bold ${entry.isPaid ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                {entry.isPaid ? '✅ Zapłacono' : '🟡 Niezapłacono'}
+                            </p>
+                        </div>
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={() => onTogglePaid(entry.entryId)}
+                                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                    entry.isPaid 
+                                        ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                        : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                }`}
+                            >
+                                {entry.isPaid ? '❌ Oznacz jako niezapłacone' : '💵 Oznacz jako zapłacone'}
+                            </button>
+                        </div>
+                    </div>
+                    {/* NOWY BLOK PRZYCISKÓW MASOWEJ PŁATNOŚCI */}
+                    <div className="mt-4 pt-4 border-t border-gray-200 flex space-x-2">
+                        {/* Zapłać za wszystko */}
+                        <button
+                            onClick={() => onOpenPayAllModal(entry.user?.id)}
+                            className="px-4 py-2 rounded-lg font-medium transition-colors flex-1 bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center justify-center text-sm"
+                        >
+                            <DollarSign size={16} className="mr-1" /> Zapłać za wszystko (do dzisiaj)
+                        </button>
+                        {/* Zapłać za miesiąc (Nowy) */}
+                        <button
+                            onClick={() => onOpenPayAllMonthModal(entry.user?.id)}
+                            className="px-4 py-2 rounded-lg font-medium transition-colors flex-1 bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center justify-center text-sm"
+                        >
+                            <Calendar size={16} className="mr-1" /> Zapłać za miesiąc
+                        </button>
+                    </div>
+                </div>
             </div>
         </Modal>
     );
 };
+
+
+// NOWY KOMPONENT: Modal Potwierdzenia Płatności
+const PayConfirmationModal = ({ isOpen, onClose, employee, entries, totalAmount, paymentType, onConfirm, isLoading }) => {
+    if (!isOpen || !employee || entries.length === 0) return null;
+    
+    const isMonthPayment = paymentType === 'month';
+    const title = isMonthPayment 
+        ? `Potwierdź płatność za cały miesiąc dla: ${employee.name} ${employee.surname}` 
+        : `Potwierdź płatność za wszystkie zaległe wpisy dla: ${employee.name} ${employee.surname}`;
+        
+    const description = isMonthPayment
+        ? `Ta operacja oznaczy wszystkie: ${entries.length} nieopłacone wpisy z miesiąca **${new Date().toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' })}** jako opłacone. Łączna kwota do zapłaty to:`
+        : `Ta operacja oznaczy wszystkie: ${entries.length} nieopłacone wpisy jako opłacone. Łączna kwota do zapłaty to:`;
+
+    const confirmButtonText = isLoading 
+        ? 'Przetwarzanie...' 
+        : isMonthPayment ? 'Potwierdź zapłatę za miesiąc' : 'Potwierdź zapłatę za wszystko';
+        
+    const listTitle = isMonthPayment ? 'Lista wpisów z bieżącego miesiąca:' : 'Lista wszystkich zaległych wpisów:';
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} title={title} size="medium">
+            <div className="space-y-4">
+                <div className="bg-red-50 border border-red-300 rounded-xl p-4">
+                    <p className="text-sm font-medium text-red-700 mb-2">
+                        ⚠️ **WAŻNE:** Ta akcja jest nieodwracalna. Upewnij się, że płatność została faktycznie wykonana.
+                    </p>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-300 rounded-xl p-4">
+                    <h3 className="text-base font-medium text-amber-800 flex items-center mb-2">
+                        <DollarSign className="mr-2" size={20} /> Podsumowanie Płatności
+                    </h3>
+                    <p className="text-sm text-amber-700">{description}</p>
+                    <p className="text-xl font-extrabold text-red-700 mt-2">{totalAmount.toFixed(2)} zł</p>
+                </div>
+
+                <div className="max-h-60 overflow-y-auto space-y-2 p-2 border border-gray-200 rounded-xl bg-white">
+                    <p className="text-sm font-medium text-gray-700">{listTitle}</p>
+                    {entries.map(entry => (
+                        <div key={entry.entryId} className="flex justify-between items-center text-xs p-2 bg-gray-50 rounded-lg border-l-4 border-amber-400">
+                            <span>{new Date(entry.workDate).toLocaleDateString()} - {entry.duration}h</span>
+                            <span className="font-bold text-amber-700">{parseFloat(entry.daySalary).toFixed(2)} zł</span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mt-6 flex space-x-3">
+                    <button
+                        onClick={onConfirm}
+                        disabled={isLoading || entries.length === 0}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center shadow-md"
+                    >
+                        {isLoading ? (
+                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        ) : (
+                            <DollarSign className="mr-2" size={20} />
+                        )}
+                        {confirmButtonText}
+                    </button>
+                    <button
+                        onClick={onClose}
+                        disabled={isLoading}
+                        className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
+                    >
+                        Anuluj
+                    </button>
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
 
 export default function WorkEntryManagement() {
     const [workEntries, setWorkEntries] = useState([]);
@@ -490,6 +611,11 @@ export default function WorkEntryManagement() {
     const [criticalError, setCriticalError] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingEntry, setEditingEntry] = useState(null);
+    
+    // Zmienione stany dla masowej płatności
+    const [isPayAllModalOpen, setIsPayAllModalOpen] = useState(false);
+    const [selectedEmployeeForPayment, setSelectedEmployeeForPayment] = useState(null);
+    const [paymentModalType, setPaymentModalType] = useState('all'); // 'all' lub 'month'
 
     const closeAlert = useCallback(() => setAlert({ type: '', message: '' }), []);
 
@@ -671,31 +797,31 @@ const fetchSectors = useCallback(async () => {
         }
 
         const entriesToSend = entries.map(entry => {
-    const fullEmployee = employees.find(emp => emp.id === entry.employeeId);
-    
-    return {
-        user: fullEmployee ? {
-            id: fullEmployee.id,
-            name: fullEmployee.name,
-            surname: fullEmployee.surname,
-            email: fullEmployee.email,
-            nickname: fullEmployee.nickname,
-            phoneNumber: fullEmployee.phoneNumber,
-            active: fullEmployee.active
-        } : { id: entry.employeeId },
-        sector: entry.sectorId ? { 
-            id: parseInt(entry.sectorId),
-            sectorId: parseInt(entry.sectorId) 
-        } : null,
-        workType: entry.workType || null,
-        workDate: workDateString,
-        description: entry.description || '',
-        isApproved: entry.isApproved,
-        duration: parseFloat(entry.hours) || 0,
-        daySalary: 0,
-        kilogramsPicked: !entry.isPaidHourly ? parseFloat(entry.kilogramsPicked || 0) : 0,
-    };
-});
+        const fullEmployee = employees.find(emp => emp.id === entry.employeeId);
+            
+        return {
+            user: fullEmployee ? {
+                id: fullEmployee.id,
+                name: fullEmployee.name,
+                surname: fullEmployee.surname,
+                email: fullEmployee.email,
+                nickname: fullEmployee.nickname,
+                phoneNumber: fullEmployee.phoneNumber,
+                active: fullEmployee.active
+            } : { id: entry.employeeId },
+            sector: entry.sectorId ? { 
+                id: parseInt(entry.sectorId),
+                sectorId: parseInt(entry.sectorId) 
+            } : null,
+            workType: entry.workType || null,
+            workDate: workDateString,
+            description: entry.description || '',
+            duration: parseFloat(entry.hours) || 0,
+            daySalary: 0,
+            kilogramsPicked: !entry.isPaidHourly ? parseFloat(entry.kilogramsPicked || 0) : 0,
+            isPaid: false,
+        };
+        });
         console.log("Dane do wysłania do API:", entriesToSend);
 
         try {
@@ -741,12 +867,10 @@ const fetchSectors = useCallback(async () => {
         
         try {
             
-            const durationFloat = parseFloat(updatedEntry.duration || 0);
+            const durationFloat = parseFloat(updatedEntry.duration) || 0;
 
             const entryToSend = {
-                
                 user: updatedEntry.user, 
-                
                 sector: updatedEntry.sector?.id ? {
                     id: updatedEntry.sector.id,
                 } : null,
@@ -754,8 +878,9 @@ const fetchSectors = useCallback(async () => {
                 workDate: updatedEntry.workDate, 
                 duration: durationFloat,
                 description: updatedEntry.description || '',
-                isApproved: Boolean(updatedEntry.isApproved),
-                daySalary: parseFloat(updatedEntry.daySalary) || 0, 
+                daySalary: parseFloat(updatedEntry.daySalary) || 0,
+                isPaid: Boolean(updatedEntry.isPaid),
+                kilogramsPicked: parseFloat(updatedEntry.kilogramsPicked) || 0
             };
 
             console.log("📤 Wysyłam dane do API (Z USEREM):", JSON.stringify(entryToSend, null, 2));
@@ -767,21 +892,20 @@ const fetchSectors = useCallback(async () => {
                 body: JSON.stringify(entryToSend),
             });
 
-           
-           if (response.ok) {
-    
-
-    console.log("✅ Wpis zaktualizowany pomyślnie (ominięto parsowanie JSON odpowiedzi).");
-    
-    await fetchWorkEntries(); 
-    
-    setIsEditModalOpen(false);
-    setEditingEntry(null);
-    setSelectedEntry(null);
-    setAlert({ 
-        type: 'success', 
-        message: 'Wpis zaktualizowany pomyślnie.'
-    });
+            
+            if (response.ok) {
+                
+                console.log("✅ Wpis zaktualizowany pomyślnie (ominięto parsowanie JSON odpowiedzi).");
+                
+                await fetchWorkEntries(); 
+                
+                setIsEditModalOpen(false);
+                setEditingEntry(null);
+                setSelectedEntry(null);
+                setAlert({ 
+                    type: 'success', 
+                    message: 'Wpis zaktualizowany pomyślnie.'
+                });
             } else {
                 const errorData = await parseApiError(response);
                 console.error("❌ Błąd aktualizacji:", errorData);
@@ -841,76 +965,165 @@ const fetchSectors = useCallback(async () => {
         }
     }, [parseApiError]);
 
-const handleOpenEditModal = useCallback((entry) => {
+    const handleOpenEditModal = useCallback((entry) => {
         
         setEditingEntry({
             ...entry,
-            hours: entry.duration || '',
+            duration: entry.duration || 0,
             sectorId: entry.sector?.id || '',
             workType: entry.workType || '',
-            daySalary: entry.daySalary !== undefined && entry.daySalary !== null ? parseFloat(entry.daySalary) : '', // Dodajemy do stanu, aby wysłać PUT
+            daySalary: entry.daySalary !== undefined && entry.daySalary !== null ? parseFloat(entry.daySalary) : 0,
+            isPaid: Boolean(entry.isPaid),
+            kilogramsPicked: entry.kilogramsPicked || 0,
         });
         setSelectedEntry(null);
         setIsEditModalOpen(true);
     }, []);
-    const handleToggleApproval = useCallback(async (entryId) => {
-        const entry = workEntries.find(e => e.entryId === entryId);
-        if (!entry) return;
 
-        setIsLoading(true);
-        const newApprovalStatus = !entry.isApproved;
+    const handleTogglePaid = useCallback(async (entryId) => {
+    const entry = workEntries.find(e => e.entryId === entryId);
+    if (!entry) return;
 
-        try {
-            const headers = getAuthHeaders();
-            const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}/approval`, {
-                method: 'PATCH',
-                headers: headers,
-                body: JSON.stringify({ isApproved: newApprovalStatus }),
+    setIsLoading(true);
+    const newPaidStatus = !entry.isPaid;
+
+    try {
+        const headers = getAuthHeaders();
+        const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}/paid`, {
+            method: 'PATCH',
+            headers: headers,
+            body: JSON.stringify({ isPaid: newPaidStatus }),
+        });
+
+        if (response.ok) {
+            setWorkEntries(prev => prev.map(e => 
+                e.entryId === entryId ? { ...e, isPaid: newPaidStatus } : e
+            ));
+            setSelectedEntry(prev => 
+                prev && prev.entryId === entryId ? { ...prev, isPaid: newPaidStatus } : prev
+            );
+            
+            setAlert({ 
+                type: 'success', 
+                message: newPaidStatus ? '✅ Oznaczono jako zapłacone' : '❌ Oznaczono jako niezapłacone' 
             });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log("✅ Zatwierdzenie zmienione:", result);
-                
-                setWorkEntries(prev => prev.map(e => 
-                    e.entryId === entryId ? { ...e, isApproved: newApprovalStatus } : e
-                ));
-                setSelectedEntry(prev => 
-                    prev && prev.entryId === entryId ? { ...prev, isApproved: newApprovalStatus } : prev
-                );
-                
-                setAlert({ 
-                    type: 'success', 
-                    message: newApprovalStatus ? 'Wpis zatwierdzony' : 'Cofnięto zatwierdzenie' 
-                });
-            } else {
-                const errorData = await parseApiError(response);
-                console.error("❌ Błąd zmiany zatwierdzenia:", errorData);
-                setAlert({ 
-                    type: 'error', 
-                    message: `Błąd: ${errorData.message}` 
-                });
-            }
-        } catch (error) {
-            console.error("❌ Błąd połączenia:", error);
+        } else {
+            const errorData = await parseApiError(response);
+            console.error("❌ Błąd zmiany statusu płatności:", errorData);
             setAlert({ 
                 type: 'error', 
-                message: 'Błąd połączenia z serwerem' 
+                message: `Błąd: ${errorData.message}` 
             });
-        } finally {
-            setIsLoading(false);
         }
-    }, [workEntries, parseApiError]);
+    } catch (error) {
+        console.error("❌ Błąd połączenia:", error);
+        setAlert({ 
+            type: 'error', 
+            message: 'Błąd połączenia z serwerem' 
+        });
+    } finally {
+        setIsLoading(false);
+    }
+}, [workEntries, parseApiError]);
 
-    const stats = useMemo(() => ({
-        total: workEntries.length,
-        approved: workEntries.filter(e => e.isApproved).length,
-        pending: workEntries.filter(e => !e.isApproved).length,
-        today: workEntries.filter(e => {
-            const today = new Date().toDateString();
-            return new Date(e.workDate).toDateString() === today;
-        }).length
-    }), [workEntries]);
+
+const handlePayAllForEmployee = useCallback(async (userId) => {
+    setIsLoading(true);
+    closeAlert();
+
+    try {
+        const headers = getAuthHeaders();
+        const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-all`, {
+            method: 'PATCH',
+            headers: headers,
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log(`✅ Zmiana statusu płatności na opłacone dla pracownika ${userId}:`, result);
+            
+            await fetchWorkEntries(); // Odśwież dane PRZED zamknięciem modala
+            handleClosePayAllModal();
+            
+            setAlert({
+                type: 'success',
+                message: `✅ Pomyślnie opłacono ${result.count || 0} zaległych wpisów dla pracownika.`,
+            });
+        } else {
+            const errorData = await parseApiError(response);
+            console.error("❌ Błąd masowej płatności:", errorData);
+            setAlert({
+                type: 'error',
+                message: `Błąd masowej płatności: ${errorData.message}`
+            });
+        }
+    } catch (error) {
+        console.error("❌ Błąd połączenia:", error);
+        setAlert({
+            type: 'error',
+            message: 'Błąd połączenia z serwerem podczas płatności.'
+        });
+    } finally {
+        setIsLoading(false);
+    }
+}, [closeAlert, fetchWorkEntries, parseApiError]);
+
+
+    const stats = useMemo(() => {
+        // 1. Ustalenie daty rozpoczęcia i zakończenia tygodnia (poniedziałek - niedziela)
+        const startOfWeek = new Date(currentDate);
+        startOfWeek.setHours(0, 0, 0, 0);
+        // Przesuń do poniedziałku (0 - niedziela, 1 - poniedziałek, ... 6 - sobota)
+        const day = (startOfWeek.getDay() + 6) % 7; 
+        startOfWeek.setDate(startOfWeek.getDate() - day);
+          
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        // 2. Filtrowanie wpisów dla bieżącego tygodnia
+        const weeklyEntries = workEntries.filter(e => {
+            const workDate = new Date(e.workDate);
+            return workDate >= startOfWeek && workDate <= endOfWeek;
+        });
+
+        // 3. Obliczanie statystyk tygodniowych
+        const totalSalaryWeek = weeklyEntries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0);
+
+        return {
+            total: weeklyEntries.length,
+            paid: weeklyEntries.filter(e => e.isPaid).length, 
+            unpaid: weeklyEntries.filter(e => !e.isPaid).length,
+            totalSalaryWeek: totalSalaryWeek // NOWA STATYSTYKA
+        };
+    }, [workEntries, currentDate]);
+
+    // ZMODYFIKOWANA FILTRACJA wpisów dla modala masowej płatności
+    const employeeEntriesForPayment = useMemo(() => {
+        if (!selectedEmployeeForPayment) return { entries: [], totalAmount: 0 };
+        
+        const allUnpaidEntries = workEntries.filter(e => e.user?.id === selectedEmployeeForPayment.id && !e.isPaid);
+
+        let filteredEntries = [];
+        
+        if (paymentModalType === 'month') {
+            const today = new Date();
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            endOfMonth.setHours(23, 59, 59, 999);
+
+            filteredEntries = allUnpaidEntries.filter(e => {
+                const workDate = new Date(e.workDate);
+                return workDate >= startOfMonth && workDate <= endOfMonth;
+            });
+        } else { 
+            filteredEntries = allUnpaidEntries;
+        }
+
+        const totalAmount = filteredEntries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0);
+
+        return { entries: filteredEntries, totalAmount: totalAmount };
+    }, [workEntries, selectedEmployeeForPayment, paymentModalType]);
 
     const handleOpenBulkAssignModal = (dateStr) => {
         setBulkAssignDate(dateStr);
@@ -921,15 +1134,112 @@ const handleOpenEditModal = useCallback((entry) => {
     const handleOpenDetailsModal = (entry) => {
         setSelectedEntry(entry);
     };
-    
+      
     const handleCloseModal = (alertType, alertMessage) => {
         setIsModalOpen(false);
         setBulkAssignDate(null);
         setSelectedEntry(null);
+        setIsEditModalOpen(false); 
+        setEditingEntry(null);
         if (alertType && alertMessage) {
              setAlert({ type: alertType, message: alertMessage });
         }
     };
+
+    const handleClosePayAllModal = () => {
+    setIsPayAllModalOpen(false);
+    setSelectedEmployeeForPayment(null);
+    setPaymentModalType('all');
+};
+
+// KROK 2B: Potem handlePayAllForMonth (używa handleClosePayAllModal)
+const handlePayAllForMonth = useCallback(async (userId) => {
+    setIsLoading(true);
+    closeAlert();
+
+    try {
+        const headers = getAuthHeaders();
+        const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-month`, {
+            method: 'PATCH',
+            headers: headers,
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log(`✅ Zmiana statusu płatności na opłacone za miesiąc dla pracownika ${userId}:`, result);
+            
+            await fetchWorkEntries();
+            handleClosePayAllModal();
+            
+            setAlert({
+                type: 'success',
+                message: `✅ Pomyślnie opłacono ${result.count || 0} wpisów z bieżącego miesiąca dla pracownika.`,
+            });
+        } else {
+            const errorData = await parseApiError(response);
+            console.error("❌ Błąd masowej płatności za miesiąc:", errorData);
+            setAlert({
+                type: 'error',
+                message: `Błąd masowej płatności za miesiąc: ${errorData.message}`
+            });
+        }
+    } catch (error) {
+        console.error("❌ Błąd połączenia:", error);
+        setAlert({
+            type: 'error',
+            message: 'Błąd połączenia z serwerem podczas płatności.'
+        });
+    } finally {
+        setIsLoading(false);
+    }
+}, [closeAlert, fetchWorkEntries, parseApiError]);
+
+const handleOpenPayAllModal = useCallback((employeeId) => {
+    console.log('🔍 handleOpenPayAllModal wywołane z employeeId:', employeeId, 'typ:', typeof employeeId);
+    console.log('🔍 Dostępni pracownicy:', employees.map(e => ({ id: e.id, name: e.name, typ: typeof e.id })));
+    
+    const employee = employees.find(e => e.id === Number(employeeId));
+    console.log('🔍 Znaleziony pracownik:', employee);
+    
+    if (employee) {
+        setSelectedEmployeeForPayment(employee);
+        setPaymentModalType('all');
+        setIsPayAllModalOpen(true);
+        setSelectedEntry(null);
+    } else {
+        console.error('❌ Nie znaleziono pracownika o ID:', employeeId, 'w tablicy:', employees);
+        setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
+    }
+}, [employees]);
+
+const handleOpenPayAllMonthModal = useCallback((employeeId) => {
+    console.log('🔍 handleOpenPayAllMonthModal wywołane z employeeId:', employeeId, 'typ:', typeof employeeId);
+    console.log('🔍 Dostępni pracownicy:', employees.map(e => ({ id: e.id, name: e.name, typ: typeof e.id })));
+    
+    const employee = employees.find(e => e.id === Number(employeeId));
+    console.log('🔍 Znaleziony pracownik:', employee);
+    
+    if (employee) {
+        setSelectedEmployeeForPayment(employee);
+        setPaymentModalType('month');
+        setIsPayAllModalOpen(true);
+        setSelectedEntry(null);
+    } else {
+        console.error('❌ Nie znaleziono pracownika o ID:', employeeId, 'w tablicy:', employees);
+        setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
+    }
+}, [employees]);
+
+const handleConfirmPayment = () => {
+    if (!selectedEmployeeForPayment) return;
+    
+    if (paymentModalType === 'month') {
+        handlePayAllForMonth(selectedEmployeeForPayment.id);
+    } else {
+        handlePayAllForEmployee(selectedEmployeeForPayment.id);
+    }
+};
+
 
     if (criticalError) {
         return (
@@ -962,18 +1272,24 @@ const handleOpenEditModal = useCallback((entry) => {
                 {alert.message && <Alert type={alert.type} message={alert.message} onClose={closeAlert} />}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <StatCard icon={Calendar} count={stats.total} label="Wszystkie Plany" color="green" />
-                    <StatCard icon={CheckCircle} count={stats.approved} label="Zatwierdzone" color="blue" />
-                    <StatCard icon={Clock} count={stats.pending} label="Oczekujące" color="amber" />
-                    <StatCard icon={Users} count={stats.today} label="Dzisiaj" color="purple" />
+                    <StatCard icon={Calendar} count={stats.total} label="Wpisy w tygodniu" color="green" />
+                    <StatCard icon={Clock} count={stats.unpaid} label="Nieopłacone w tygodniu" color="red" />
+                    <StatCard icon={Users} count={stats.paid} label="Opłacone w tygodniu" color="purple" />
+                    <StatCard 
+                        icon={DollarSign} 
+                        count={stats.totalSalaryWeek} 
+                        label="Łączne wynagrodzenie (tydzień)" 
+                        color="indigo" 
+                        isCurrency={true} 
+                    />
                 </div>
-                                                
+                    
                 <div className="mb-8">
                     <WeekCalendar
                         workEntries={workEntries}
                         onAddClick={handleOpenBulkAssignModal}
                         onEventClick={handleOpenDetailsModal}
-                        onQuickApprove={handleToggleApproval}
+                        onTogglePaid={handleTogglePaid} 
                         currentDate={currentDate}
                         onDateChange={setCurrentDate}
                     />
@@ -994,14 +1310,11 @@ const handleOpenEditModal = useCallback((entry) => {
                         isLoading={isLoading}
                     />
                 </Modal>
-                
+                    
                 {isEditModalOpen && editingEntry && (
                     <Modal
                         isOpen={isEditModalOpen}
-                        onClose={() => {
-                            setIsEditModalOpen(false);
-                            setEditingEntry(null);
-                        }}
+                        onClose={() => handleCloseModal()}
                         title={`Edycja wpisu: ${editingEntry.user?.name} ${editingEntry.user?.surname}`}
                         size="large"
                     >
@@ -1020,41 +1333,41 @@ const handleOpenEditModal = useCallback((entry) => {
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                                     />
                                 </div>
-                            ) : (
-                                <>
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-700 mb-1 block">Godziny</label>
-                                        <input 
-                                            type="number" 
-                                            step="0.5" 
-                                            min="0" 
-                                            max="24"
-                                            value={editingEntry.duration || ''}
-                                            onChange={(e) => setEditingEntry(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-700 mb-1 block">Kilogramy</label>
-                                        <input 
-                                            type="number" 
-                                            step="0.1" 
-                                            min="0"
-                                            value={editingEntry.kilogramsPicked || ''}
-                                            onChange={(e) => setEditingEntry(prev => ({ ...prev, kilogramsPicked: parseFloat(e.target.value) }))}
-                                            className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                                        />
-                                    </div>
-                                </>
-)}
-                                
+                                ) : (
+                                    <>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700 mb-1 block">Godziny</label>
+                                            <input 
+                                                type="number" 
+                                                step="0.5" 
+                                                min="0" 
+                                                max="24"
+                                                value={editingEntry.duration || ''}
+                                                onChange={(e) => setEditingEntry(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700 mb-1 block">Kilogramy</label>
+                                            <input 
+                                                type="number" 
+                                                step="0.1" 
+                                                min="0"
+                                                value={editingEntry.kilogramsPicked || ''}
+                                                onChange={(e) => setEditingEntry(prev => ({ ...prev, kilogramsPicked: parseFloat(e.target.value) }))}
+                                                className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                                    
                                 <div>
                                     <label className="text-sm font-medium text-gray-700 mb-1 block">Wynagrodzenie (zł)</label>
                                     <p className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-800 font-bold">
                                         {parseFloat(editingEntry.daySalary).toFixed(2)} zł
                                     </p>
                                 </div>
-                                
+                                    
                                 <div>
                                     <label className="text-sm font-medium text-gray-700 mb-1 block">Sektor</label>
                                     <select 
@@ -1100,16 +1413,38 @@ const handleOpenEditModal = useCallback((entry) => {
                                 />
                             </div>
 
+                            <div className={`p-4 rounded-xl border mt-4 ${editingEntry.isPaid ? 'bg-emerald-50 border-emerald-300' : 'bg-amber-50 border-amber-300'}`}>
+                                <div className="flex items-center justify-between">
+                                    <div className="mt-1">
+                                        <p className="text-xs font-medium text-gray-600 uppercase mb-1">Status płatności</p>
+                                        <p className={`text-base font-bold ${editingEntry.isPaid ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                            {editingEntry.isPaid ? '✅ Zapłacono' : '🟡 Niezapłacono'}
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditingEntry(prev => ({ ...prev, isPaid: !prev.isPaid }))}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                            editingEntry.isPaid 
+                                                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' 
+                                                : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                        }`}
+                                    >
+                                        {editingEntry.isPaid ? '❌ Oznacz jako niezapłacone' : '💵 Oznacz jako zapłacone'}
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="flex space-x-3 pt-4 border-t border-gray-200">
                                 <button
                                     onClick={() => {
                                         const durationHours = parseFloat(editingEntry.duration) || 0;
-                                        
+                                            
                                         const updatedEntry = {
                                             ...editingEntry,
                                             duration: durationHours,
                                         };
-                                        
+                                            
                                         console.log("🔧 Edytowany wpis przed wysłaniem:", updatedEntry);
                                         handleEditEntry(updatedEntry);
                                     }}
@@ -1119,10 +1454,7 @@ const handleOpenEditModal = useCallback((entry) => {
                                     {isLoading ? 'Zapisywanie...' : 'Zapisz zmiany'}
                                 </button>
                                 <button
-                                    onClick={() => {
-                                        setIsEditModalOpen(false);
-                                        setEditingEntry(null);
-                                    }}
+                                    onClick={() => handleCloseModal()}
                                     disabled={isLoading}
                                     className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
                                 >
@@ -1132,13 +1464,27 @@ const handleOpenEditModal = useCallback((entry) => {
                         </div>
                     </Modal>
                 )}
-                
+                    
                 <EventDetailsModal
                     entry={selectedEntry}
                     onClose={() => handleCloseModal()}
-                    onEdit={() => handleOpenEditModal(selectedEntry)}
+                    onEdit={handleOpenEditModal}
                     onDelete={handleDeleteEntry}
-                    onToggleApproval={handleToggleApproval}
+                    onTogglePaid={handleTogglePaid}
+                    onOpenPayAllModal={handleOpenPayAllModal}
+                    onOpenPayAllMonthModal={handleOpenPayAllMonthModal} // NOWY PROP
+                />
+
+                {/* MODAL POTWIERDZENIA PŁATNOŚCI (dla 'all' i 'month') */}
+                <PayConfirmationModal
+                    isOpen={isPayAllModalOpen}
+                    onClose={handleClosePayAllModal}
+                    employee={selectedEmployeeForPayment}
+                    entries={employeeEntriesForPayment.entries}
+                    totalAmount={employeeEntriesForPayment.totalAmount}
+                    paymentType={paymentModalType}
+                    onConfirm={handleConfirmPayment}
+                    isLoading={isLoading}
                 />
             </div>
         </div>

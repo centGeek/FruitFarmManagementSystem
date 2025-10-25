@@ -2,12 +2,13 @@ package fruit.farm.management.repository.jpa;
 
 import fruit.farm.management.entity.WorkEntryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -25,4 +26,36 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
             @Param("date") LocalDate date
     );
 
+    @Query("SELECT w FROM WorkEntryEntity w WHERE " +
+            "(:year IS NULL OR YEAR(w.workDate) = :year) AND " +
+            "(:month IS NULL OR MONTH(w.workDate) = :month) AND " +
+            "(:sectorId IS NULL OR w.sector.sectorId = :sectorId)")
+    List<WorkEntryEntity> findAllExpensesByGivenDate(
+            @Param("year") Integer year,
+            @Param("month") Integer month,
+            @Param("sectorId") Long sectorId
+    );
+
+    @Query("SELECT w FROM WorkEntryEntity w WHERE " +
+            "(:year IS NULL OR YEAR(w.workDate) = :year) AND " +
+            "(:month IS NULL OR MONTH(w.workDate) = :month) AND " +
+            "(:month IS NULL OR MONTH(w.workDate) = :month)")
+    List<WorkEntryEntity> findAllExpensesByGivenDate(
+            @Param("year") Integer year,
+            @Param("month") Integer month);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE WorkEntryEntity we SET we.isPaid = TRUE " +
+            "WHERE we.user.id = :userId AND we.isPaid = FALSE")
+    int payAllUnpaidEntries(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE WorkEntryEntity we SET we.isPaid = TRUE " +
+            "WHERE we.user.id = :userId " +
+            "AND we.isPaid = FALSE " +
+            "AND YEAR(we.workDate) = YEAR(CURRENT_DATE()) " +
+            "AND MONTH(we.workDate) = MONTH(CURRENT_DATE())")
+    int payAllUnpaidEntriesForCurrentMonth(@Param("userId") Long userId);
 }

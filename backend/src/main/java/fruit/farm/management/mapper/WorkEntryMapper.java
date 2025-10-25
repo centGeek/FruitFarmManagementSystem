@@ -28,12 +28,12 @@ public class WorkEntryMapper {
                 .workDate(entity.getWorkDate())
                 .description(entity.getDescription())
                 .workType(entity.getWorkType())
-                .isApproved(entity.getIsApproved())
                 .createdAt(entity.getCreatedAt())
                 .user(userDto)
                 .sector(sectorDto)
                 .daySalary(entity.getDaySalary())
                 .kilogramsPicked(entity.getKilogramsPicked())
+                .isPaid(entity.getIsPaid())
                 .build();
     }
 }

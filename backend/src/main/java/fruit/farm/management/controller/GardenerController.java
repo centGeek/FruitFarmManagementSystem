@@ -96,7 +96,7 @@ public class GardenerController {
 //                userService.updatePassword(existingGardener, userDTO.getPassword());
 //            }
 
-            userService.save(existingGardener);
+            userService.update(existingGardener);
             log.info("Gardener profile updated successfully for ID: {}", gardenerId);
 
             return ResponseEntity.ok(Map.of("message", "Profil został zaktualizowany pomyślnie!"));

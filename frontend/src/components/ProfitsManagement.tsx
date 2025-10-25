@@ -521,8 +521,8 @@ export default function ProfitManagement() {
     const [selectedType, setSelectedType] = useState('');
     const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('');
     const [selectedSectorId, setSelectedSectorId] = useState('');
-    const [selectedYear, setSelectedYear] = useState('');
-    const [selectedMonth, setSelectedMonth] = useState('');
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+    const [selectedMonth, setSelectedMonth] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(15);

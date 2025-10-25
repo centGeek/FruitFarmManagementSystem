@@ -48,10 +48,10 @@ public class WorkScheduleService {
             entry.setUser(user);
             entry.setWorkType(request.getWorkType());
             entry.setDescription(request.getDescription());
-            entry.setIsApproved(request.getIsApproved() != null ? request.getIsApproved() : false);
             entry.setCreatedAt(LocalDateTime.now());
             entry.setWorkDate(request.getWorkDate());
             entry.setDuration(request.getDuration());
+            entry.setIsPaid(false);
             if (request.getSector() != null) {
                 if (request.getSector().getId() != null) {
                     SectorEntity sector = sectorService.findById(request.getSector().getId())
@@ -99,13 +99,11 @@ public class WorkScheduleService {
         if (request.getDescription() != null) {
             existingEntry.setDescription(request.getDescription());
         }
-        if (request.getIsApproved() != null) {
-            existingEntry.setIsApproved(request.getIsApproved());
-        }
 
         if (request.getWorkType() != null) {
             existingEntry.setWorkType(request.getWorkType());
         }
+        existingEntry.setIsPaid(request.getIsPaid());
         Optional<WorkDetailsDTO> latestWorkDetailsForUserByEmail = workDetailsService
                 .getLatestWorkDetailsForUserByEmail(request.getUser().getEmail());
         BigDecimal salary = latestWorkDetailsForUserByEmail
@@ -120,5 +118,13 @@ public class WorkScheduleService {
             existingEntry.setSector(sector);
         }
         return workEntryRepository.save(existingEntry);
+    }
+
+    public int payAllUnpaidEntries(UserEntity employee) {
+        return workEntryRepository.payAllUnpaidEntries(employee.getId());
+    }
+
+    public int payAllUnpaidEntriesForCurrentMonth(UserEntity employee) {
+        return workEntryRepository.payAllUnpaidEntriesForCurrentMonth(employee.getId());
     }
 }

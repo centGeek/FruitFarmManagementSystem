@@ -35,9 +35,6 @@ public class WorkEntryEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "is_approved", nullable = false)
-    private Boolean isApproved = false;
-
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -55,6 +52,9 @@ public class WorkEntryEntity {
     @ManyToOne
     @JoinColumn(name = "sector_id")
     private SectorEntity sector;
+
+    @Column(name = "is_paid")
+    private Boolean isPaid;
 
     @PrePersist
     protected void onCreate() {

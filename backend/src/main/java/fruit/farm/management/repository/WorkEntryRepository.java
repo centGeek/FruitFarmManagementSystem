@@ -1,6 +1,8 @@
 package fruit.farm.management.repository;
 
 import fruit.farm.management.dto.WorkEntryDto;
+import fruit.farm.management.entity.ExpenseEntity;
+import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.repository.jpa.WorkEntryJpaRepository;
 import lombok.AllArgsConstructor;
@@ -61,5 +63,23 @@ public class WorkEntryRepository {
         }
         return workEntryJpaRepository.findWorkEntriesByGivenDayForEmployee(requests.get(0).getUser().getEmail(),
                 requests.get(0).getWorkDate());
+    }
+
+    public List<WorkEntryEntity> findAllExpensesByGivenDate(Integer year, Integer month, Long sectorId) {
+
+        return workEntryJpaRepository.findAllExpensesByGivenDate(year, month, sectorId);
+    }
+
+    public List<WorkEntryEntity> findAllExpensesByGivenDate(Integer year, Integer month) {
+
+        return workEntryJpaRepository.findAllExpensesByGivenDate(year, month);
+    }
+
+    public int payAllUnpaidEntries(long employeeId) {
+        return workEntryJpaRepository.payAllUnpaidEntries(employeeId);
+    }
+
+    public int payAllUnpaidEntriesForCurrentMonth(long employeeId) {
+        return workEntryJpaRepository.payAllUnpaidEntriesForCurrentMonth(employeeId);
     }
 }

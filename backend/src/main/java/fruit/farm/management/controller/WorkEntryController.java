@@ -29,6 +29,7 @@ public class WorkEntryController {
     private WorkEntryRepository workEntryRepository;
     private WorkScheduleService workScheduleService;
     private UserRepository userRepository;
+
     @GetMapping
     public ResponseEntity<List<WorkEntryDto>> getAllWorkEntries() {
 
@@ -148,25 +149,25 @@ public class WorkEntryController {
 
             WorkEntryEntity entry = optionalEntry.get();
 
-            Boolean newApprovalStatus = approvalRequest.get("isApproved");
-            if (newApprovalStatus == null) {
+            Boolean newPaymentStatus = approvalRequest.get("isApproved");
+            if (newPaymentStatus == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(Map.of("error", "Missing 'isApproved' field in request"));
             }
 
             log.info("Changing work entry {} approval from {} to {}",
-                    id, entry.getIsApproved(), newApprovalStatus);
+                    id, entry.getIsPaid(), newPaymentStatus);
 
-            entry.setIsApproved(newApprovalStatus);
+            entry.setIsPaid(newPaymentStatus);
             workEntryRepository.save(entry);
 
-            String action = newApprovalStatus ? "approved" : "unapproved";
+            String action = newPaymentStatus ? "approved" : "unapproved";
             log.info("Work entry {} successfully {}", id, action);
 
             return ResponseEntity.ok(Map.of(
                     "message", "Work entry approval status updated successfully",
                     "id", id.toString(),
-                    "isApproved", newApprovalStatus.toString(),
+                    "isApproved", newPaymentStatus.toString(),
                     "action", action
             ));
 
@@ -201,6 +202,107 @@ public class WorkEntryController {
             log.error("Error deleting work entry: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Delete failed: " + e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/{id}/paid")
+    public ResponseEntity<?> togglePaid(@PathVariable Long id, @RequestBody Map<String, Boolean> paidRequest) {
+        log.info("Attempting to toggle paid status for work entry ID: {}", id);
+        log.info("Paid request: {}", paidRequest);
+
+        try {
+            Optional<WorkEntryEntity> optionalEntry = workEntryRepository.findById(id);
+            if (optionalEntry.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Work entry not found with ID: " + id));
+            }
+
+            WorkEntryEntity entry = optionalEntry.get();
+
+            Boolean newPaidStatus = paidRequest.get("isPaid");
+            if (newPaidStatus == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Missing 'isPaid' field in request"));
+            }
+
+            log.info("Changing work entry {} paid status from {} to {}",
+                    id, entry.getIsPaid(), newPaidStatus);
+
+            entry.setIsPaid(newPaidStatus);
+            workEntryRepository.save(entry);
+
+            String action = newPaidStatus ? "paid" : "unpaid";
+            log.info("Work entry {} successfully marked as {}", id, action);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Work entry paid status updated successfully",
+                    "id", id.toString(),
+                    "isPaid", newPaidStatus.toString(),
+                    "action", action
+            ));
+
+        } catch (Exception e) {
+            log.error("Error toggling paid status: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Paid status update failed: " + e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/user/{userId}/pay-all")
+    public ResponseEntity<?> payAllUnpaidForUser(@PathVariable Long userId) {
+        log.info("Attempting to mark all unpaid entries as paid for user ID: {}", userId);
+
+        try {
+            UserEntity employee = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + userId));
+
+            int count = workScheduleService.payAllUnpaidEntries(employee);
+
+            log.info("Successfully marked {} unpaid entries as paid for user {}", count, userId);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "All unpaid work entries marked as paid successfully up to today",
+                    "userId", userId.toString(),
+                    "count", count
+            ));
+
+        } catch (RuntimeException e) {
+            log.error("Error during payAllUnpaid for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            log.error("Internal error during payAllUnpaid for user {}: {}", userId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Mass payment failed: " + e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/user/{userId}/pay-month")
+    public ResponseEntity<?> payAllUnpaidForUserMonth(@PathVariable Long userId) {
+        log.info("Attempting to mark all unpaid entries in the current month as paid for user ID: {}", userId);
+
+        try {
+            UserEntity employee = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + userId));
+
+            int count = workScheduleService.payAllUnpaidEntriesForCurrentMonth(employee);
+
+            log.info("Successfully marked {} unpaid entries in the current month as paid for user {}", count, userId);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "All unpaid work entries for the current month marked as paid successfully",
+                    "userId", userId.toString(),
+                    "count", count
+            ));
+
+        } catch (RuntimeException e) {
+            log.error("Error during payAllUnpaidForMonth for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            log.error("Internal error during payAllUnpaidForMonth for user {}: {}", userId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Mass payment for month failed: " + e.getMessage()));
         }
     }
 }

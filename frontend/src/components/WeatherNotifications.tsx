@@ -3,7 +3,6 @@ import { Cloud, CloudRain, Sun, Wind, Droplets, Bell, BellOff, Plus, Trash2, Loa
 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 
-// --- INTERFEJSY I STAŁE ---
 
 interface CurrentWeather {
     temp: number;
@@ -18,30 +17,36 @@ interface CurrentWeather {
 interface NotificationRule {
     id?: number;
     backendId?: number;
-    notificationType: string;
+    weatherNotificationType: string;
     threshold: number;
     daysAhead: number;
     enabled: boolean;
     description?: string;
 }
 
-// Interfejs zgodny z backendowym CoordinateDTO
 interface CoordinateDTO {
     latitude: number;
     longitude: number;
 }
 
-// Interfejs zgodny z backendowym UserLocationDTO
 interface UserLocationDTO {
     userId: number;
     coordinateDTO: CoordinateDTO;
     locationName: string;
 }
 
-// Definicja koordynatów dla Open-Meteo
 interface OpenMeteoCoordinates {
     lat: number;
     lon: number;
+}
+
+interface ForecastAlert {
+    notificationId: number;
+    type: string;
+    message: string;
+    date: string;
+    value: number;
+    threshold: number;
 }
 
 
@@ -96,7 +101,6 @@ const DAYS_AHEAD_OPTIONS = [
     { value: 7, label: 'Za 7 dni' }
 ];
 
-// --- FUNKCJE POGODOWE ---
 
 const getWeatherFromCode = (code: number): { description: string; icon: JSX.Element } => {
     const weatherMap: { [key: number]: { description: string; IconComponent: any; color: string } } = {
@@ -132,7 +136,6 @@ const getWeatherFromCode = (code: number): { description: string; icon: JSX.Elem
     };
 };
 
-// --- KOMPONENTY WIDOKU (BEZ ZMIAN) ---
 
 const CurrentWeatherCard: React.FC<{ weather: CurrentWeather }> = ({ weather }) => {
     return (
@@ -182,18 +185,18 @@ const NotificationModal: React.FC<{
     onSave: (rule: NotificationRule) => void;
     editingRule?: NotificationRule | null;
 }> = ({ isOpen, onClose, onSave, editingRule }) => {
-    const [notificationType, setNotificationType] = useState('');
+    const [weatherNotificationType, setWeatherNotificationType] = useState('');
     const [threshold, setThreshold] = useState('');
     const [daysAhead, setDaysAhead] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (editingRule) {
-            setNotificationType(editingRule.notificationType);
+            setWeatherNotificationType(editingRule.weatherNotificationType);
             setThreshold(editingRule.threshold.toString());
             setDaysAhead(editingRule.daysAhead);
         } else {
-            setNotificationType('');
+            setWeatherNotificationType('');
             setThreshold('');
             setDaysAhead(1);
         }
@@ -201,10 +204,10 @@ const NotificationModal: React.FC<{
 
     if (!isOpen) return null;
 
-    const selectedType = NOTIFICATION_TYPES.find(t => t.value === notificationType);
+    const selectedType = NOTIFICATION_TYPES.find(t => t.value === weatherNotificationType);
 
     const handleSave = async () => {
-        if (!notificationType || !threshold) {
+        if (!weatherNotificationType || !threshold) {
             alert('Wypełnij wszystkie pola!');
             return;
         }
@@ -214,7 +217,7 @@ const NotificationModal: React.FC<{
             const rule: NotificationRule = {
                 id: editingRule?.id,
                 backendId: editingRule?.backendId,
-                notificationType,
+                weatherNotificationType,
                 threshold: parseFloat(threshold),
                 daysAhead,
                 enabled: true
@@ -251,9 +254,9 @@ const NotificationModal: React.FC<{
                                 Typ ostrzeżenia pogodowego *
                             </label>
                             <select
-                                value={notificationType}
+                                value={weatherNotificationType}
                                 onChange={(e) => {
-                                    setNotificationType(e.target.value);
+                                    setWeatherNotificationType(e.target.value);
                                     const type = NOTIFICATION_TYPES.find(t => t.value === e.target.value);
                                     if (type && !threshold) {
                                         setThreshold(type.defaultThreshold.toString());
@@ -348,7 +351,7 @@ const NotificationModal: React.FC<{
                         </button>
                         <button
                             onClick={handleSave}
-                            disabled={isLoading || !notificationType || !threshold}
+                            disabled={isLoading || !weatherNotificationType || !threshold}
                             className="flex-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 font-medium"
                         >
                             {isLoading ? (
@@ -366,7 +369,6 @@ const NotificationModal: React.FC<{
 };
 
 
-// --- GŁÓWNY KOMPONENT I KONTROLER LOGIKI ---
 
 const WeatherNotifications: React.FC = () => {
     const [currentWeather, setCurrentWeather] = useState<CurrentWeather | null>(null);
@@ -376,38 +378,33 @@ const WeatherNotifications: React.FC = () => {
     const [weatherError, setWeatherError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRule, setEditingRule] = useState<NotificationRule | null>(null);
+    const [forecastAlerts, setForecastAlerts] = useState<ForecastAlert[]>([]);
+    const [isCheckingAlerts, setIsCheckingAlerts] = useState(false);
     
     const [locationName, setLocationName] = useState('Ładowanie lokalizacji...');
     
-    // Zmieniono typ stanu na OpenMeteoCoordinates, aby uniknąć konfliktów z DTO
     const [coordinates, setCoordinates] = useState<OpenMeteoCoordinates | null>(null);
     
-    
-    // NOWA FUNKCJA: Pobieranie koordynatów i nazwy miejscowości z endpointu /api/gardener/location
     const fetchGardenerLocation = useCallback(async () => {
         setLocationName('Pobieranie koordynatów z profilu...');
         setWeatherError(null);
 
         try {
-            // UŻYCIE POPRAWNEGO ENDPOINTU BACKENDU
             const response = await fetch(`${BACKEND_URL}/api/gardener/location`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
             });
 
             if (!response.ok) {
-                // To wyłapie błędy serwera, np. 404, jeśli użytkownik nie ma koordynatów
                 throw new Error('Błąd serwera: Nie udało się pobrać danych lokalizacji.');
             }
 
             const data: UserLocationDTO = await response.json();
             
-            // KLUCZOWE SPRAWDZENIE: Czy koordynaty istnieją w odpowiedzi (sprawdzamy obiekt coordinateDTO)
             if (!data.coordinateDTO || data.coordinateDTO.latitude === undefined || data.coordinateDTO.longitude === undefined) {
                 throw new Error('Koordynaty dla sadownika nie są zdefiniowane. Ustaw je w sekcji Profil.');
             }
             
-            // Ustawienie stanu w oczekiwanym formacie lat/lon
             setCoordinates({ 
                 lat: data.coordinateDTO.latitude, 
                 lon: data.coordinateDTO.longitude 
@@ -421,16 +418,14 @@ const WeatherNotifications: React.FC = () => {
             setWeatherError(message);
             setLocationName('Brak danych lokalizacji');
             setCoordinates(null);
-            setIsLoadingWeather(false); // Zatrzymanie ładowania pogody
+            setIsLoadingWeather(false);
         }
     }, []); 
 
 
-    // ZMODYFIKOWANA FUNKCJA: Pobieranie pogody (używa lat/lon)
     const fetchCurrentWeather = useCallback(async (coords: OpenMeteoCoordinates, location: string) => { 
         setIsLoadingWeather(true);
-        // Uwaga: weatherError jest resetowany tylko w fetchGardenerLocation, aby zachować błąd koordynatów
-
+    
         try {
             const response = await fetch(
                 `https://api.open-meteo.com/v1/forecast?` +
@@ -465,54 +460,176 @@ const WeatherNotifications: React.FC = () => {
     }, []);
 
     const loadNotifications = useCallback(async () => {
-        setIsLoadingNotifications(true);
-        try {
-            const response = await fetch(`${BACKEND_URL}/api/weather-notifications`, {
-                method: 'GET',
-                headers: getAuthHeaders()
-            });
+    setIsLoadingNotifications(true);
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/weather-notifications`, {
+            method: 'GET',
+            headers: getAuthHeaders()
+        });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const mappedNotifications: NotificationRule[] = data.map((item: any) => ({
-                id: Date.now() + Math.random(),
-                backendId: item.id,
-                notificationType: item.notificationType,
-                threshold: item.threshold,
-                daysAhead: item.daysAhead || 1,
-                enabled: item.enabled,
-                description: item.description
-            }));
-
-            setNotifications(mappedNotifications);
-        } catch (error) {
-            console.error('Błąd ładowania notyfikacji:', error);
-        } finally {
-            setIsLoadingNotifications(false);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    }, []);
 
-    // EFEKTY ŁADOWANIA POCZĄTKOWE
+        const data = await response.json();
+        
+        // DODAJ CONSOLE.LOG ŻEBY ZOBACZYĆ CO PRZYCHODZI Z BACKENDU
+        console.log('Dane z backendu:', data);
+        
+        const mappedNotifications: NotificationRule[] = data.map((item: any) => ({
+            id: Date.now() + Math.random(),
+            backendId: item.id,
+            weatherNotificationType: item.weatherNotificationType, // <-- TO JEST undefined
+            threshold: item.threshold,
+            daysAhead: item.daysAhead || 1,
+            enabled: item.enabled,
+            description: item.description
+        }));
+
+        console.log('Zmapowane notyfikacje:', mappedNotifications);
+        setNotifications(mappedNotifications);
+    } catch (error) {
+        console.error('Błąd ładowania notyfikacji:', error);
+    } finally {
+        setIsLoadingNotifications(false);
+    }
+}, []);
+const checkWeatherAlerts = useCallback(async (coords: OpenMeteoCoordinates, rules: NotificationRule[]) => {
+    if (rules.length === 0 || !rules.some(r => r.enabled)) {
+        console.log('Brak aktywnych reguł do sprawdzenia');
+        return;
+    }
+
+    setIsCheckingAlerts(true);
+    const alerts: ForecastAlert[] = [];
+
+    try {
+        // Pobierz maksymalną liczbę dni do sprawdzenia
+        const maxDays = Math.max(...rules.filter(r => r.enabled).map(r => r.daysAhead));
+        
+        console.log('Sprawdzanie alertów dla:', {
+            coords,
+            maxDays,
+            activeRules: rules.filter(r => r.enabled)
+        });
+        
+        const response = await fetch(
+            `https://api.open-meteo.com/v1/forecast?` +
+            `latitude=${coords.lat}&` +
+            `longitude=${coords.lon}&` +
+            `daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&` +
+            `timezone=Europe/Warsaw&` +
+            `forecast_days=${maxDays}`
+        );
+
+        if (!response.ok) {
+            throw new Error('Nie udało się pobrać prognozy pogody');
+        }
+
+        const data = await response.json();
+        console.log('Dane prognozy:', data);
+        
+        rules.filter(rule => rule.enabled).forEach(rule => {
+            console.log(`Sprawdzanie reguły: ${rule.weatherNotificationType}, próg: ${rule.threshold}, dni: ${rule.daysAhead}`);
+            
+            for (let i = 0; i < rule.daysAhead && i < data.daily.time.length; i++) {
+                const date = data.daily.time[i];
+                let triggered = false;
+                let value = 0;
+                let message = '';
+
+                switch (rule.weatherNotificationType) {
+                    case 'FROST_WARNING':
+                        value = data.daily.temperature_2m_min[i];
+                        console.log(`  Dzień ${i} (${date}): temp min = ${value}°C, próg = ${rule.threshold}°C`);
+                        if (value < rule.threshold) {
+                            triggered = true;
+                            message = `🧊 Ostrzeżenie o przymrozku: ${value.toFixed(1)}°C (próg: ${rule.threshold}°C)`;
+                        }
+                        break;
+
+                    case 'TEMP_LOW':
+                        value = data.daily.temperature_2m_min[i];
+                        console.log(`  Dzień ${i} (${date}): temp min = ${value}°C, próg = ${rule.threshold}°C`);
+                        if (value < rule.threshold) {
+                            triggered = true;
+                            message = `❄️ Niska temperatura: ${value.toFixed(1)}°C (próg: ${rule.threshold}°C)`;
+                        }
+                        break;
+
+                    case 'TEMP_HIGH':
+                        value = data.daily.temperature_2m_max[i];
+                        console.log(`  Dzień ${i} (${date}): temp max = ${value}°C, próg = ${rule.threshold}°C`);
+                        if (value > rule.threshold) {
+                            triggered = true;
+                            message = `🌡️ Wysoka temperatura: ${value.toFixed(1)}°C (próg: ${rule.threshold}°C)`;
+                        }
+                        break;
+
+                    case 'RAIN_FORECAST':
+                        value = data.daily.precipitation_probability_max[i];
+                        console.log(`  Dzień ${i} (${date}): opady = ${value}%, próg = ${rule.threshold}%`);
+                        if (value > rule.threshold) {
+                            triggered = true;
+                            message = `🌧️ Prognoza opadów: ${value.toFixed(0)}% (próg: ${rule.threshold}%)`;
+                        }
+                        break;
+
+                    case 'STRONG_WIND':
+                        value = data.daily.wind_speed_10m_max[i];
+                        console.log(`  Dzień ${i} (${date}): wiatr = ${value} km/h, próg = ${rule.threshold} km/h`);
+                        if (value > rule.threshold) {
+                            triggered = true;
+                            message = `💨 Silny wiatr: ${value.toFixed(1)} km/h (próg: ${rule.threshold} km/h)`;
+                        }
+                        break;
+                }
+
+                if (triggered) {
+                    console.log(`  ✓ Alert uruchomiony!`);
+                    alerts.push({
+                        notificationId: rule.id!,
+                        type: rule.weatherNotificationType,
+                        message,
+                        date,
+                        value,
+                        threshold: rule.threshold
+                    });
+                }
+            }
+        });
+
+        console.log('Znalezione alerty:', alerts);
+        setForecastAlerts(alerts);
+    } catch (error) {
+        console.error('Błąd sprawdzania alertów pogodowych:', error);
+    } finally {
+        setIsCheckingAlerts(false);
+    }
+}, []);
+
     useEffect(() => {
         loadNotifications();
-        fetchGardenerLocation(); // Najpierw pobierz lokalizację i koordynaty
+        fetchGardenerLocation();
     }, [loadNotifications, fetchGardenerLocation]);
 
-    // EFEKT POBIERANIA POGODY PO ZAŁADOWANIU KOORDYNATÓW
     useEffect(() => {
-        // Kontynuuj tylko jeśli koordynaty są dostępne i nie ma błędu blokującego
         if (coordinates && locationName && weatherError === null) {
             fetchCurrentWeather(coordinates, locationName);
         }
     }, [coordinates, locationName, fetchCurrentWeather, weatherError]);
 
+    // Sprawdź alerty po załadowaniu notyfikacji i koordynatów
+    useEffect(() => {
+        if (coordinates && notifications.length > 0 && !isLoadingNotifications) {
+            checkWeatherAlerts(coordinates, notifications);
+        }
+    }, [coordinates, notifications, isLoadingNotifications, checkWeatherAlerts]);
+
     const handleSaveNotification = async (rule: NotificationRule) => {
         try {
             const backendData = {
-                notificationType: rule.notificationType,
+                weatherNotificationType: rule.weatherNotificationType,
                 threshold: rule.threshold,
                 daysAhead: rule.daysAhead,
                 enabled: rule.enabled
@@ -593,8 +710,7 @@ const WeatherNotifications: React.FC = () => {
             alert('Nie udało się usunąć notyfikacji');
         }
     };
-
-    const handleEditClick = (notification: NotificationRule) => {
+const handleEditClick = (notification: NotificationRule) => {
         setEditingRule(notification);
         setIsModalOpen(true);
     };
@@ -604,9 +720,7 @@ const WeatherNotifications: React.FC = () => {
         setIsModalOpen(true);
     };
     
-    // Warunek sprawdzający, czy można ponowić próbę pobrania pogody (jeśli mamy koordynaty)
     const canRetryWeather = coordinates !== null && weatherError !== null;
-
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
@@ -620,9 +734,7 @@ const WeatherNotifications: React.FC = () => {
                 </p>
             </div>
 
-            {/* BLOK ŁADOWANIA/BŁĘDU/POGODY */}
             {isLoadingWeather && coordinates === null && weatherError === null ? (
-                // Stan początkowy: Ładowanie lokalizacji
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 mb-6">
                     <div className="flex items-center justify-center gap-3">
                         <Loader className="w-6 h-6 text-blue-600 animate-spin" />
@@ -632,7 +744,6 @@ const WeatherNotifications: React.FC = () => {
                     </div>
                 </div>
             ) : weatherError ? (
-                // Stan błędu
                 <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
                     <div className="flex items-center gap-3">
                         <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
@@ -648,7 +759,6 @@ const WeatherNotifications: React.FC = () => {
                                     Spróbuj ponownie pobrać pogodę
                                 </button>
                             )}
-                            {/* Propozycja linku do profilu w przypadku błędu koordynatów */}
                             {weatherError.includes('Koordynaty') && (
                                 <p className="text-sm text-red-700 mt-1">
                                     Proszę uzupełnij swoją lokalizację w <a href="/profile" className="font-bold underline">Ustawieniach Profilu</a>.
@@ -658,12 +768,10 @@ const WeatherNotifications: React.FC = () => {
                     </div>
                 </div>
             ) : currentWeather ? (
-                // Stan sukcesu
                 <div className="mb-6">
                     <CurrentWeatherCard weather={currentWeather} />
                 </div>
             ) : (
-                // Stan ładowania pogody, gdy koordynaty są znane (coordinates !== null), ale trwa pobieranie pogody
                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 mb-6">
                     <div className="flex items-center justify-center gap-3">
                         <Loader className="w-6 h-6 text-blue-600 animate-spin" />
@@ -671,6 +779,68 @@ const WeatherNotifications: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {/* Sekcja alertów pogodowych */}
+            {isCheckingAlerts ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-6">
+                    <div className="flex items-center justify-center gap-3">
+                        <Loader className="w-5 h-5 text-amber-600 animate-spin" />
+                        <span className="text-amber-800 font-medium">Sprawdzanie alertów pogodowych...</span>
+                    </div>
+                </div>
+            ) : forecastAlerts.length > 0 ? (
+                <div className="mb-6 space-y-3">
+                    <div className="flex items-center gap-2 mb-3">
+                        <AlertCircle className="w-5 h-5 text-orange-600" />
+                        <h3 className="text-lg font-semibold text-gray-800">
+                            Ostrzeżenia pogodowe ({forecastAlerts.length})
+                        </h3>
+                    </div>
+                    {forecastAlerts.map((alert, index) => {
+    const alertDate = new Date(alert.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    alertDate.setHours(0, 0, 0, 0);
+    
+    const daysFromNow = Math.round((alertDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    const dateLabel = daysFromNow === 0 ? 'Dziś' : 
+                    daysFromNow === 1 ? 'Jutro' : 
+                    daysFromNow === 2 ? 'Pojutrze' :
+                    `Za ${daysFromNow} dni`;
+    
+    const formattedDate = new Date(alert.date).toLocaleDateString('pl-PL', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+    });
+    
+    return (
+        <div 
+            key={index}
+            className="bg-gradient-to-r from-orange-50 to-red-50 border-l-4 border-orange-500 rounded-lg p-4 shadow-md"
+        >
+            <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="px-3 py-1 bg-orange-600 text-white text-sm font-bold rounded-full">
+                            {dateLabel}
+                        </span>
+                        <span className="text-sm text-gray-600">
+                            {formattedDate}
+                        </span>
+                    </div>
+                    <p className="text-gray-900 font-medium text-lg">
+                        {alert.message}
+                    </p>
+                </div>
+                <AlertCircle className="w-6 h-6 text-orange-600 flex-shrink-0" />
+            </div>
+        </div>
+    );
+})}
+                </div>
+            ) : null}
 
             <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -727,7 +897,7 @@ const WeatherNotifications: React.FC = () => {
                 ) : (
                     <div className="space-y-4">
                         {notifications.map((notification) => {
-                            const typeData = NOTIFICATION_TYPES.find(t => t.value === notification.notificationType);
+                            const typeData = NOTIFICATION_TYPES.find(t => t.value === notification.weatherNotificationType);
                             const Icon = typeData?.icon || Bell;
                             const daysLabel = DAYS_AHEAD_OPTIONS.find(d => d.value === notification.daysAhead)?.label || `Za ${notification.daysAhead} dni`;
                             
@@ -753,7 +923,7 @@ const WeatherNotifications: React.FC = () => {
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <h3 className="font-semibold text-gray-900 text-lg">
-                                                        {typeData?.label || notification.notificationType}
+                                                        {typeData?.label || notification.weatherNotificationType}
                                                     </h3>
                                                     <span className={`px-2 py-1 rounded text-xs font-medium ${
                                                         notification.enabled 
@@ -832,12 +1002,11 @@ const WeatherNotifications: React.FC = () => {
                 )}
             </div>
 
-            {/* Statystyki */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <div className="text-2xl font-bold text-blue-600">
                         {notifications.length}
-                        </div>
+                    </div>
                     <div className="text-blue-800">Wszystkie alerty</div>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
@@ -848,13 +1017,12 @@ const WeatherNotifications: React.FC = () => {
                 </div>
                 <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
                     <div className="text-2xl font-bold text-amber-600">
-                        {new Set(notifications.map(n => n.notificationType)).size}
+                        {new Set(notifications.map(n => n.weatherNotificationType)).size}
                     </div>
                     <div className="text-amber-800">Typy alertów</div>
                 </div>
             </div>
 
-            {/* Modal */}
             <NotificationModal
                 isOpen={isModalOpen}
                 onClose={() => {

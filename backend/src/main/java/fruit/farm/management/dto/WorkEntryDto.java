@@ -26,8 +26,6 @@ public class WorkEntryDto {
 
     private WorkType workType;
 
-    private Boolean isApproved;
-
     private LocalDateTime createdAt;
 
     private UserDTO user;
@@ -37,4 +35,6 @@ public class WorkEntryDto {
     private BigDecimal daySalary;
 
     private long kilogramsPicked;
+
+    private Boolean isPaid;
 }

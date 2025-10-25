@@ -50,7 +50,7 @@ public class SectorController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<SectorDTO>> getAllSectorsByUserI() {
+    public ResponseEntity<List<SectorDTO>> getAllSectorsByUserId() {
         List<SectorDTO> sectorDTOS;
         try {
             Long currentUserId = userService.getLoggedUser().getId();

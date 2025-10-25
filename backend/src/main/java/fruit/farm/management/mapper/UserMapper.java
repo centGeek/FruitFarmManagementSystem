@@ -17,7 +17,7 @@ public class UserMapper {
     }
 
     public static UserDTO mapFromEntity(UserEntity userEntity) {
-        return new UserDTO(userEntity.getName(), userEntity.getSurname(), userEntity.getEmail(), userEntity.getCreationDate(),
+        return new UserDTO(userEntity.getId(), userEntity.getName(), userEntity.getSurname(), userEntity.getEmail(), userEntity.getCreationDate(),
                 userEntity.getNickname(), userEntity.getPhoneNumber(), userEntity.getPassword(), userEntity.getPassword(),
                 userEntity.isActive(), CoordinateMapper.mapFromEntity(userEntity.getCoordinateEntity()),
                 userEntity.getLocalityName());

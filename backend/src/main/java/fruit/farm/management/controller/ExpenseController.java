@@ -4,8 +4,10 @@ import fruit.farm.management.dto.ExpenseDTO;
 import fruit.farm.management.dto.SectorDTO;
 import fruit.farm.management.entity.ExpenseEntity;
 import fruit.farm.management.entity.UserEntity;
+import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.mapper.ExpenseMapper;
 import fruit.farm.management.repository.ExpenseRepository;
+import fruit.farm.management.repository.WorkEntryRepository;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
 import jakarta.validation.Valid;
@@ -20,7 +22,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -32,13 +37,14 @@ public class ExpenseController {
     private final ExpenseRepository expenseRepository;
     private final UserService userService;
     private final SectorService sectorService;
+    private final WorkEntryRepository workEntryRepository;
 
     @PostMapping
     public ResponseEntity<ExpenseDTO> createExpense(@Valid @RequestBody ExpenseDTO expenseDto) {
         UserEntity userEntity = userService.getLoggedUser();
         log.info("Creating expense for User ID: {}", userEntity.getId());
 
-        if(expenseDto.getSectorDTO() != null ) {
+        if (expenseDto.getSectorDTO() != null) {
             SectorDTO sectorById = sectorService.getSectorById(expenseDto.getSectorDTO().getId());
             expenseDto.setSectorDTO(sectorById);
         }
@@ -128,6 +134,79 @@ public class ExpenseController {
         } catch (Exception e) {
             log.error("Error deleting expense ID {} for user {}: {}", id, user.getId(), e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Nie udało się usunąć wydatku");
+        }
+    }
+
+    @GetMapping("/sector-labor-costs")
+    public ResponseEntity<Map<String, Object>> getSectorLaborCosts(
+            @RequestParam(required = false) Long sectorId,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+
+        UserEntity user = userService.getLoggedUser();
+        log.info("Calculating labor costs for Sector ID: {}, Year: {}, Month: {}", sectorId, year, month);
+
+        try {
+            String sectorName;
+            if (sectorId != null) {
+                SectorDTO sector = sectorService.getSectorById(sectorId);
+                sectorName = sector.getDescription();
+            } else {
+                sectorName = "Wszystkie sektory";
+            }
+
+            List<WorkEntryEntity> laborExpenses;
+            if (sectorId != null) {
+                laborExpenses = workEntryRepository.findAllExpensesByGivenDate(year, month, sectorId);
+
+            } else {
+                laborExpenses = workEntryRepository.findAllExpensesByGivenDate(year, month);
+            }
+
+
+            BigDecimal totalLaborCost = BigDecimal.ZERO;
+            BigDecimal sectorLaborCost = BigDecimal.ZERO;
+
+            List<SectorDTO> allSectors = sectorService.getAllSectorsByUserId(user.getId());
+            int totalSectors = allSectors.size();
+
+            if (totalSectors > 0) {
+                for (WorkEntryEntity expense : laborExpenses) {
+                    totalLaborCost = totalLaborCost.add(expense.getDaySalary());
+
+                    if (sectorId != null) {
+                        if (expense.getSector() != null &&
+                                expense.getSector().getSectorId() == (sectorId)) {
+                            sectorLaborCost = sectorLaborCost.add(expense.getDaySalary());
+                        }
+                        else if (expense.getSector() == null) {
+                            BigDecimal proportionalCost = expense.getDaySalary()
+                                    .divide(BigDecimal.valueOf(totalSectors), 2, RoundingMode.HALF_UP);
+                            sectorLaborCost = sectorLaborCost.add(proportionalCost);
+                        }
+                    }
+                    else {
+                        sectorLaborCost = sectorLaborCost.add(expense.getDaySalary());
+                    }
+                }
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("sectorId", sectorId);
+            response.put("sectorName", sectorName);
+            response.put("totalLaborCost", totalLaborCost);
+            response.put("sectorLaborCost", sectorLaborCost);
+            response.put("calculationMethod", "proportional");
+            response.put("totalSectors", totalSectors);
+            response.put("year", year);
+            response.put("month", month);
+            response.put("expenseCount", laborExpenses.size());
+            System.out.println(response);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error calculating labor costs: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

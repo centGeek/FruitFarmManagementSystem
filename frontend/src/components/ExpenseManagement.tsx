@@ -225,7 +225,7 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
 
     const [formData, setFormData] = useState(initialState);
     const [errors, setErrors] = useState({});
-
+    
     useEffect(() => {
         setFormData(initialState);
         setErrors({});
@@ -506,7 +506,7 @@ export default function ExpenseManagement() {
     const [selectedType, setSelectedType] = useState('');
     const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('');
     const [selectedSectorId, setSelectedSectorId] = useState('');
-    const [selectedYear, setSelectedYear] = useState('');
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
     const [selectedMonth, setSelectedMonth] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -515,6 +515,9 @@ export default function ExpenseManagement() {
     const [selectedExpense, setSelectedExpense] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState({ type: '', message: '' });
+    const [sectorLaborCosts, setSectorLaborCosts] = useState(null);
+    const [isLoadingLaborCosts, setIsLoadingLaborCosts] = useState(false);
+
 
     const closeAlert = useCallback(() => setAlert({ type: '', message: '' }), []);
 
@@ -590,11 +593,6 @@ const fetchSectors = useCallback(() => {
     fetchData(setSectors, '/api/sectors', 'sektorów');
 }, [fetchData]);
 
-// Upewnij się też, że useEffect wygląda tak:
-useEffect(() => {
-    fetchExpenses();
-    fetchSectors();
-}, [fetchExpenses, fetchSectors]);
 
     const handleSaveExpense = useCallback(async (expenseData) => {
         setIsLoading(true);
@@ -627,6 +625,62 @@ useEffect(() => {
             setIsLoading(false);
         }
     }, [selectedExpense, fetchExpenses, closeAlert]);
+
+    const fetchSectorLaborCosts = useCallback(async () => {
+    console.log('🔍 [LABOR] START');
+    console.log('🔍 [LABOR] selectedSectorId:', selectedSectorId);
+    console.log('🔍 [LABOR] selectedYear:', selectedYear);
+    console.log('🔍 [LABOR] selectedMonth:', selectedMonth);
+    
+    setIsLoadingLaborCosts(true);
+    
+    try {
+        const params = new URLSearchParams();
+        
+        // 🆕 Zawsze dodaj sectorId - nawet jak jest pusty
+        if (selectedSectorId) {
+            params.append('sectorId', selectedSectorId);
+        }
+        
+        if (selectedYear) params.append('year', selectedYear);
+        if (selectedMonth) params.append('month', selectedMonth);
+        
+        const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
+        console.log('📡 [LABOR] URL:', url);
+        
+        const response = await fetch(url, { 
+            method: 'GET', 
+            headers: getAuthHeaders() 
+        });
+        
+        console.log('📨 [LABOR] Response:', response.status);
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ [LABOR] Data:', data);
+            setSectorLaborCosts(data);
+        } else {
+            const errorText = await response.text();
+            console.error('❌ [LABOR] Error:', response.status, errorText);
+            setSectorLaborCosts(null);
+        }
+    } catch (error) {
+        console.error('❌ [LABOR] Exception:', error);
+        setSectorLaborCosts(null);
+    } finally {
+        setIsLoadingLaborCosts(false);
+    }
+}, [selectedSectorId, selectedYear, selectedMonth]);
+
+useEffect(() => {
+    fetchExpenses();
+    fetchSectors();
+}, [fetchExpenses, fetchSectors]);
+
+useEffect(() => {
+    fetchSectorLaborCosts();
+}, [fetchSectorLaborCosts]);
+
 
     const handleDeleteExpense = useCallback(async (expenseId) => {
         if (!window.confirm('Czy na pewno chcesz usunąć ten wydatek? Tej operacji nie można cofnąć!')) return;
@@ -844,6 +898,23 @@ if (searchTerm) {
                         label={hasActiveFilters ? "Nieopłacone (Przefiltrowane)" : "Wydatki Nieopłacone"} 
                         color="red" 
                     />
+                    {/* 🆕 ZAWSZE pokazuj - bez warunku selectedSectorId */}
+                {isLoadingLaborCosts ? (
+                <div className="col-span-full bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                    <div className="text-center">
+                        <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-gray-500 font-medium">Obliczam koszty pracowników... 🔄</p>
+                    </div>
+                </div>
+                ) : sectorLaborCosts ? (
+                <div className="col-span-full">
+                <StatCard 
+                    amount={sectorLaborCosts.sectorLaborCost} 
+                    label={`💼 Koszty Pracowników - ${sectorLaborCosts.sectorName}`}
+                    color="purple"
+                />
+            </div>
+        ) : null}
                 </div>
 
                 {/* Informacja o aktywnych filtrach */}

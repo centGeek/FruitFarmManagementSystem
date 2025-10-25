@@ -69,7 +69,7 @@ public class WeatherNotificationService {
         entity.setUser(user);
         entity.setEnabled(true);
         entity.setCreatedAt(LocalDateTime.now());
-        entity.setWeatherNotificationType(WeatherNotificationType.RAIN_FORECAST);
+        entity.setWeatherNotificationType(dto.getWeatherNotificationType());
         entity.setThreshold(dto.getThreshold());
         entity.setEnabled(true);
         entity.setDaysAhead(5);
