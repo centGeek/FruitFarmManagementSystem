@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Calendar, Clock, Users, DollarSign, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, X, Loader2 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
+import { Alert} from "../utils/common";
+
 import ErrorPage from './ErrorPage'; 
 
 const WORK_TYPE_OPTIONS = [
@@ -22,25 +24,6 @@ const getWorkTypeLabel = (workType) => {
 const getWorkTypeIcon = (workType) => {
     const option = WORK_TYPE_OPTIONS.find(opt => opt.value === workType);
     return option ? option.icon : '📋';
-};
-
-const Alert = ({ type, message, onClose }) => {
-    if (!message) return null;
-    const colors = {
-        error: 'bg-red-50 border-red-300 text-red-700',
-        success: 'bg-green-50 border-green-300 text-green-700',
-        warning: 'bg-amber-50 border-amber-300 text-amber-700'
-    };
-      
-    return (
-        <div className={`mb-4 p-4 border rounded-xl ${colors[type]} flex items-center justify-between shadow-sm`}>
-            <div className="flex items-center">
-                <div className={`w-2 h-2 rounded-full mr-2 ${type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-                <p className="font-medium">{message}</p>
-            </div>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 p-1 text-lg">❌</button>
-        </div>
-    );
 };
 
 const Modal = ({ isOpen, onClose, title, children, size = 'large' }) => {
@@ -353,6 +336,7 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onTogglePaid, cur
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
+
     return (
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-green-600 to-lime-600 p-4">
@@ -553,8 +537,8 @@ const PayConfirmationModal = ({ isOpen, onClose, employee, entries, totalAmount,
         <Modal isOpen={isOpen} onClose={onClose} title={title} size="medium">
             <div className="space-y-4">
                 <div className="bg-red-50 border border-red-300 rounded-xl p-4">
-                    <p className="text-sm font-medium text-red-700 mb-2">
-                        ⚠️ **WAŻNE:** Ta akcja jest nieodwracalna. Upewnij się, że płatność została faktycznie wykonana.
+                    <p className="text-sm font-medium text-yellow-700 mb-2">
+                        ⚠️ WAŻNE: Upewnij się, że płatność została faktycznie wykonana.
                     </p>
                 </div>
 
@@ -625,7 +609,6 @@ export default function WorkEntryManagement() {
     const closeAlert = useCallback(() => setAlert({ type: '', message: '' }), []);
 
     const fetchData = useCallback(async (setter, endpoint, entityName) => {
-        console.log(`[FETCH] Rozpoczynam pobieranie ${entityName} z: ${BACKEND_URL}${endpoint}`);
         try {
             const headers = getAuthHeaders();
             
@@ -633,8 +616,6 @@ export default function WorkEntryManagement() {
                 method: 'GET',
                 headers: headers,
             });
-
-            console.log(`[FETCH] Odpowiedź serwera dla ${entityName} - Status: ${response.status} ${response.statusText}`);
 
             if (response.ok) {
                 const data = await response.json();
@@ -668,7 +649,6 @@ export default function WorkEntryManagement() {
             const data = await response.json();
             return data;
         } else if (response.status === 204) {
-            // Brak danych - domyślnie isPaidHourly = true
             return null;
         }
     } catch (error) {
@@ -688,9 +668,7 @@ const fetchEmployees = useCallback(async () => {
 
         if (response.ok) {
             const employeesData = await response.json();
-            console.log('[FETCH] ✅ Załadowano pracowników:', employeesData);
             
-            // Dla każdego pracownika pobierz jego WorkDetails
             const employeesWithDetails = await Promise.all(
                 employeesData.map(async (emp) => {
                     const workDetails = await fetchEmployeeWorkDetails(emp.id);
@@ -739,7 +717,6 @@ const fetchSectors = useCallback(async () => {
         endOfWeek.setDate(startOfWeek.getDate() + 6);
         endOfWeek.setHours(23, 59, 59, 999);
         
-        // Format dat do YYYY-MM-DD
         const formatDate = (date) => {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1509,7 +1486,6 @@ const handleConfirmPayment = () => {
                     onOpenPayAllMonthModal={handleOpenPayAllMonthModal} // NOWY PROP
                 />
 
-                {/* MODAL POTWIERDZENIA PŁATNOŚCI (dla 'all' i 'month') */}
                 <PayConfirmationModal
                     isOpen={isPayAllModalOpen}
                     onClose={handleClosePayAllModal}

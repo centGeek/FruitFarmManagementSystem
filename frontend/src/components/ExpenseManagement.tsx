@@ -70,7 +70,6 @@ const MONTH_OPTIONS = [
     { value: '12', label: 'Grudzień' }
 ];
 
-// Generowanie opcji lat (5 lat wstecz + rok bieżący)
 const generateYearOptions = () => {
     const currentYear = new Date().getFullYear();
     const years = [];
@@ -266,7 +265,6 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
                 date: formData.date,
                 sectorDTO: formData.sectorId ? { id: Number(formData.sectorId) } : null
             };
-            // Usuń sectorId z wysyłanych danych
             delete submitData.sectorId;
             onSave(submitData);
         }
@@ -477,7 +475,7 @@ const StatCard = ({ count, label, color, amount }) => {
         green: { bg: 'from-green-100 to-green-200', text: 'text-green-600', icon: '✅' },
         red: { bg: 'from-red-100 to-red-200', text: 'text-red-600', icon: '💸' },
         blue: { bg: 'from-blue-100 to-blue-200', text: 'text-blue-600', icon: '📊' },
-        purple: { bg: 'from-purple-100 to-purple-200', text: 'text-purple-600', icon: '🗺️' }
+        purple: { bg: 'from-purple-100 to-purple-200', text: 'text-purple-600', icon: '🧑‍🌾' }
     };
     const colors = colorMap[color] || colorMap.red;
     
@@ -783,7 +781,6 @@ if (searchTerm) {
         return { total, paid, unpaid };
     }, [filteredExpenses]);
 
-    // Nazwa wybranego sektora dla wyświetlenia
     const selectedSectorName = useMemo(() => {
         if (!selectedSectorId) return null;
         const sector = sectors.find(s => s.id === Number(selectedSectorId));
@@ -791,7 +788,6 @@ if (searchTerm) {
     }, [selectedSectorId, sectors]);
     
 
-    // Sprawdzenie czy jakiekolwiek filtry są aktywne
     const hasActiveFilters = selectedType || selectedPaymentStatus || selectedSectorId || selectedYear || selectedMonth || searchTerm;
     const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     if (totalPages <= 1) return null;
@@ -936,12 +932,11 @@ if (searchTerm) {
                             </div>
                         </div>
                         
-                        {/* Nieopłacone */}
                         <div className="col-span-full md:col-span-1">
                             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
                                 <div className="flex items-center space-x-4">
                                     <div className="w-14 h-14 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl">
-                                        ⏳
+                                        ⚠️
                                     </div>
                                     <div>
                                         <p className="text-3xl font-extrabold text-gray-900">
@@ -958,7 +953,6 @@ if (searchTerm) {
                 ) : null}
                 </div>
 
-                {/* Informacja o aktywnych filtrach */}
                 {hasActiveFilters && (
                     <div className="bg-purple-50 border-2 border-purple-200 rounded-2xl p-4 mb-6 shadow-md">
                         <div className="flex items-start justify-between">

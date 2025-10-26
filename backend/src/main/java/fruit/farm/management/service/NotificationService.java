@@ -24,25 +24,25 @@ public class NotificationService {
     public void addUserNotification(NotificationDTO notificationDTO, long userId, UserEntity gardener) {
 
         notificationDTO.setNotificationType(NotificationType.USER);
-        addNotification(notificationDTO, userId, gardener);
+        addNotification(notificationDTO, gardener);
     }
     @Transactional
-    public void addSectorNotification(NotificationDTO notificationDTO, long userId, UserEntity gardener) {
+    public void addSectorNotification(NotificationDTO notificationDTO, UserEntity gardener) {
 
         notificationDTO.setNotificationType(NotificationType.SECTOR);
-        addNotification(notificationDTO, userId, gardener);
+        addNotification(notificationDTO, gardener);
     }
     @Transactional
     public void addWorkEntriesNotification(NotificationDTO notificationDTO, long userId, UserEntity gardener) {
 
         notificationDTO.setNotificationType(NotificationType.WORK_ENTRY);
-        addNotification(notificationDTO, userId, gardener);
+        addNotification(notificationDTO, gardener);
     }
 
-    private void addNotification(NotificationDTO notificationDTO, long userId, UserEntity gardener) {
+    private void addNotification(NotificationDTO notificationDTO,  UserEntity gardener) {
         notificationDTO.setCreatedAt(LocalDateTime.now());
         NotificationEntity notificationEntity = NotificationMapper.mapToEntity(notificationDTO, gardener);
-        notificationEntity.getUserEntity().setId(userId);
+        notificationEntity.getUserEntity().setId(gardener.getId());
 
         NotificationEntity savedEntity = notificationRepository.save(notificationEntity);
         NotificationMapper.mapFromEntity(savedEntity);

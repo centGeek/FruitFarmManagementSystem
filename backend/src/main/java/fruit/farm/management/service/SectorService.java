@@ -46,7 +46,7 @@ public class SectorService {
                         " z uprawą: " + savedSector.getPlantType() + " i odmianą: " + savedSector.getVariety())
                 .createdAt(LocalDateTime.now())
                 .userDTO(UserMapper.mapFromEntity(userEntity))
-                .build(), userEntity.getId(), userEntity);
+                .build(), userEntity);
 
         return convertToDTO(savedSector);
     }

@@ -7,16 +7,18 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface WorkDetailsJpaRepository extends JpaRepository<WorkDetailsEntity, Long> {
     List<WorkDetailsEntity> findByUserEntityId(Long userId);
 
-    @Query("Select wd from work_details wd where wd.userEntity.id =:userId order by wd.createdAt desc limit 1")
-    WorkDetailsEntity findTopByUserEntityIdOrderByCreatedAtDesc(@Param("userId") Long userId);
     @Query("Select wd from work_details wd where wd.userEntity.email =:email order by wd.createdAt desc limit 1")
     WorkDetailsEntity getLatestWorkDetailsForUserByEmail(@Param("email") String email);
 
+    @Query("Select wd from work_details wd where wd.userEntity.id =:id order by wd.createdAt desc limit 1")
+    Optional<WorkDetailsEntity> getLatestWorkDetailsForUserById(@Param("id") long id);
+
     @Query("Select wd from work_details wd where wd.userEntity.gardener.id =:id order by wd.createdAt desc limit 1")
-    WorkDetailsEntity getLatestWorkDetailsForGardener(@Param("id") long id);
+    Optional<WorkDetailsEntity> getLatestWorkDetailsByGardener(long id);
 }

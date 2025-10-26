@@ -79,7 +79,7 @@ public class UserService {
             workDetailsService.createWorkDetails(new WorkDetailsDTO(
                     workDetails.getIsPaidHourly(), workDetails.getHourlyPay(), workDetails.getPayPerKilogram(),
                     workDetails.getCreatedAt(),
-                    UserMapper.mapFromEntity(workDetails.getUserEntity())));
+                    UserMapper.mapFromEntity(user)));
         }
         UserEntity loggedInUserId = this.getLoggedUser();
         notificationService.addUserNotification(NotificationDTO.builder()

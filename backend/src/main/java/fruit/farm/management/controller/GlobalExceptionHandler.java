@@ -25,6 +25,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+        if (ex instanceof ExceededWorkHoursException) {
+            throw ex;
+        }
+
         Map<String, Object> errorBody = new HashMap<>();
         errorBody.put("timestamp", LocalDateTime.now());
         errorBody.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());

@@ -44,16 +44,20 @@ public class WorkDetailsRepository {
         return workDetailsJpaRepository.existsById(id);
     }
 
-    public WorkDetailsEntity findTopByUserEntityIdOrderByCreatedAtDesc(Long userId) {
 
-        return workDetailsJpaRepository.findTopByUserEntityIdOrderByCreatedAtDesc(userId);
+    public Optional<WorkDetailsEntity> getLatestWorkDetailsForUserByEmail(String email) {
+
+        return Optional.of(workDetailsJpaRepository.getLatestWorkDetailsForUserByEmail(email));
     }
 
-    public WorkDetailsEntity getLatestWorkDetailsForUserByEmail(String email) {
-        return workDetailsJpaRepository.getLatestWorkDetailsForUserByEmail(email);
+    public Optional<WorkDetailsEntity> getLatestWorkDetailsForUserByGardenerId(long id) {
+
+
+        return workDetailsJpaRepository.getLatestWorkDetailsForUserById(id);
     }
 
-    public WorkDetailsEntity getLatestWorkDetailsForGardener(long id) {
-        return workDetailsJpaRepository.getLatestWorkDetailsForGardener(id);
+    public Optional<WorkDetailsEntity> getLatestWorkDetailsByGardener(long id) {
+
+        return workDetailsJpaRepository.getLatestWorkDetailsByGardener(id);
     }
 }

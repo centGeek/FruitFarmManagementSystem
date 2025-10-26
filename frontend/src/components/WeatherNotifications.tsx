@@ -730,7 +730,7 @@ const handleEditClick = (notification: NotificationRule) => {
                     Pogoda i Notyfikacje
                 </h1>
                 <p className="text-gray-600">
-                    Aktualna pogoda oraz zarządzanie alertami pogodowymi • Powered by Open-Meteo
+                    Aktualna pogoda oraz zarządzanie alertami pogodowymi
                 </p>
             </div>
 

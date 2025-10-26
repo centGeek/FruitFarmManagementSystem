@@ -38,18 +38,16 @@ public class WorkDetailsService {
                 .collect(Collectors.toList());
     }
 
-    public WorkDetailsDTO getLatestWorkDetailsForUser(Long userId) {
+    public Optional<WorkDetailsDTO> getLatestWorkDetailsForUser(Long userId) {
 
-        return WorkDetailsMapper.mapFromEntity(workDetailsRepository.findTopByUserEntityIdOrderByCreatedAtDesc(userId));
+        Optional<WorkDetailsEntity> workDetailsEntity = workDetailsRepository.getLatestWorkDetailsForUserByGardenerId(userId);
+        return workDetailsEntity.map(WorkDetailsMapper::mapFromEntity);
     }
 
     public Optional<WorkDetailsDTO> getLatestWorkDetailsForUserByEmail(String email) {
 
-        WorkDetailsEntity workDetailsForUserByEmail = workDetailsRepository.getLatestWorkDetailsForUserByEmail(email);
-        if(workDetailsForUserByEmail != null) {
-            return Optional.of(WorkDetailsMapper.mapFromEntity(workDetailsForUserByEmail));
-        }
-        return Optional.empty();
+        Optional<WorkDetailsEntity> workDetailsForUserByEmail = workDetailsRepository.getLatestWorkDetailsForUserByEmail(email);
+        return workDetailsForUserByEmail.map(WorkDetailsMapper::mapFromEntity);
     }
 
     @Transactional
@@ -102,7 +100,8 @@ public class WorkDetailsService {
     }
 
     public Optional<WorkDetailsEntity> getLatestWorkDetailsByGardener(long id) {
-        return Optional.of(workDetailsRepository.getLatestWorkDetailsForGardener(id));
+
+        return workDetailsRepository.getLatestWorkDetailsByGardener(id);
     }
 
     private void validateWorkDetailsDTO(WorkDetailsDTO dto) {

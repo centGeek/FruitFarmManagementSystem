@@ -1,14 +1,17 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.WorkDetailsDTO;
+import fruit.farm.management.service.UserService;
 import fruit.farm.management.service.WorkDetailsService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/work-details")
@@ -17,6 +20,7 @@ import java.util.List;
 public class WorkDetailsController {
 
     private final WorkDetailsService workDetailsService;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<List<WorkDetailsDTO>> getAllWorkDetails() {
@@ -33,11 +37,9 @@ public class WorkDetailsController {
     @GetMapping("/user/{userId}/latest")
     public ResponseEntity<WorkDetailsDTO> getLatestWorkDetailsForUser(@PathVariable Long userId) {
 
-        WorkDetailsDTO details = workDetailsService.getLatestWorkDetailsForUser(userId);
-        if (details == null) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(details);
+        Optional<WorkDetailsDTO> details = workDetailsService.getLatestWorkDetailsForUser(userId);
+
+        return details.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @PostMapping
