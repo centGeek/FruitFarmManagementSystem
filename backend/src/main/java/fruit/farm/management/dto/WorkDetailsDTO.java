@@ -25,4 +25,11 @@ public class WorkDetailsDTO {
 
     private UserDTO userDTO;
 
+    public WorkDetailsDTO(Boolean isPaidHourly, BigDecimal hourlyPay, BigDecimal payPerKilogram, LocalDateTime createdAt, UserDTO userDTO) {
+        this.isPaidHourly = isPaidHourly;
+        this.hourlyPay = hourlyPay;
+        this.payPerKilogram = payPerKilogram;
+        this.createdAt = createdAt;
+        this.userDTO = userDTO;
+    }
 }

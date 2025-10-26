@@ -885,36 +885,77 @@ if (searchTerm) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <StatCard 
                         amount={formatCurrency(filteredStats.total)} 
-                        label={hasActiveFilters ? "Suma Przefiltrowanych" : "Całkowite Wydatki"} 
+                        label={hasActiveFilters ? "Suma Przefiltrowanych (niepracownicze)" : "Całkowite Wydatki (niepracownicze)"} 
                         color="blue"
                     />
                     <StatCard 
                         amount={formatCurrency(filteredStats.paid)} 
-                        label={hasActiveFilters ? "Opłacone (Przefiltrowane)" : "Wydatki Opłacone"} 
+                        label={hasActiveFilters ? "Opłacone (Przefiltrowane, niepracownicze)" : "Wydatki Opłacone (niepracownicze)"} 
                         color="green"
                     />
                     <StatCard 
                         amount={formatCurrency(filteredStats.unpaid)} 
-                        label={hasActiveFilters ? "Nieopłacone (Przefiltrowane)" : "Wydatki Nieopłacone"} 
+                        label={hasActiveFilters ? "Nieopłacone (Przefiltrowane, niepracownicze)" : "Wydatki Nieopłacone (niepracownicze)"} 
                         color="red" 
                     />
                     {/* 🆕 ZAWSZE pokazuj - bez warunku selectedSectorId */}
                 {isLoadingLaborCosts ? (
-                <div className="col-span-full bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                    <div className="text-center">
-                        <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-gray-500 font-medium">Obliczam koszty pracowników... 🔄</p>
+                    <div className="col-span-full bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                        <div className="text-center">
+                            <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+                            <p className="text-gray-500 font-medium">Obliczam koszty pracowników... 🔄</p>
+                        </div>
                     </div>
-                </div>
                 ) : sectorLaborCosts ? (
-                <div className="col-span-full">
-                <StatCard 
-                    amount={sectorLaborCosts.sectorLaborCost} 
-                    label={`💼 Koszty Pracowników - ${sectorLaborCosts.sectorName}`}
-                    color="purple"
-                />
-            </div>
-        ) : null}
+                    <>
+                        {/* Łączny koszt */}
+                        <div className="col-span-full md:col-span-1">
+                            <StatCard 
+                                amount={sectorLaborCosts.sectorLaborCost || 0} 
+                                label={`Łączne koszty pracownicze - ${sectorLaborCosts.sectorName || 'Wszystkie'}`}
+                                color="purple"
+                            />
+                        </div>
+                        
+                        {/* Opłacone */}
+                        <div className="col-span-full md:col-span-1">
+                            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl">
+                                        ✅
+                                    </div>
+                                    <div>
+                                        <p className="text-3xl font-extrabold text-gray-900">
+                                            {formatCurrency(sectorLaborCosts.paidLaborCost || 0)} PLN
+                                        </p>
+                                        <p className="text-sm text-gray-500">
+                                            Koszty pracownicze: Opłacone ({sectorLaborCosts.paidEntries || 0} {sectorLaborCosts.paidEntries === 1 ? 'wpis' : 'wpisów'})
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Nieopłacone */}
+                        <div className="col-span-full md:col-span-1">
+                            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl">
+                                        ⏳
+                                    </div>
+                                    <div>
+                                        <p className="text-3xl font-extrabold text-gray-900">
+                                            {formatCurrency(sectorLaborCosts.unpaidLaborCost || 0)} PLN
+                                        </p>
+                                        <p className="text-sm text-gray-500">
+                                            Koszty pracownicze: Nieopłacone ({sectorLaborCosts.unpaidEntries || 0} {sectorLaborCosts.unpaidEntries === 1 ? 'wpis' : 'wpisów'})
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                ) : null}
                 </div>
 
                 {/* Informacja o aktywnych filtrach */}

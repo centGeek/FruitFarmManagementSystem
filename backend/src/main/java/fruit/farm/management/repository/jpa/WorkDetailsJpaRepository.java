@@ -16,4 +16,7 @@ public interface WorkDetailsJpaRepository extends JpaRepository<WorkDetailsEntit
     WorkDetailsEntity findTopByUserEntityIdOrderByCreatedAtDesc(@Param("userId") Long userId);
     @Query("Select wd from work_details wd where wd.userEntity.email =:email order by wd.createdAt desc limit 1")
     WorkDetailsEntity getLatestWorkDetailsForUserByEmail(@Param("email") String email);
+
+    @Query("Select wd from work_details wd where wd.userEntity.gardener.id =:id order by wd.createdAt desc limit 1")
+    WorkDetailsEntity getLatestWorkDetailsForGardener(@Param("id") long id);
 }

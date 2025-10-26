@@ -1,5 +1,6 @@
 package fruit.farm.management.service;
 
+import fruit.farm.management.dto.SectorLaborCostDTO;
 import fruit.farm.management.dto.WorkDetailsDTO;
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.SectorEntity;
@@ -126,5 +127,47 @@ public class WorkScheduleService {
 
     public int payAllUnpaidEntriesForCurrentMonth(UserEntity employee) {
         return workEntryRepository.payAllUnpaidEntriesForCurrentMonth(employee.getId());
+    }
+
+    public SectorLaborCostDTO calculateSectorLaborCosts(Long sectorId, Integer year, Integer month) {
+
+        List<WorkEntryEntity> entries = workEntryRepository.findAllExpensesByGivenDate(year, month, sectorId);
+
+        String sectorName = sectorId != null
+                ? sectorService.findById(sectorId)
+                .map(s -> s.getDescription() != null ? s.getDescription() : "Sektor " + s.getSectorId())
+                .orElse("Wszystkie sektory")
+                : "Wszystkie sektory";
+
+        BigDecimal totalCost = entries.stream()
+                .map(WorkEntryEntity::getDaySalary).reduce(BigDecimal::add).get();
+
+        Optional<BigDecimal> paidCost = entries.stream()
+                .filter(WorkEntryEntity::getIsPaid)
+                .map(WorkEntryEntity::getDaySalary).reduce(BigDecimal::add);
+
+        Optional<BigDecimal> unpaidCost = entries.stream()
+                .filter(e -> !e.getIsPaid())
+                .map(WorkEntryEntity::getDaySalary).reduce(BigDecimal::add);
+
+        int totalEntries = entries.size();
+        int paidEntries = (int) entries.stream().filter(WorkEntryEntity::getIsPaid).count();
+        int unpaidEntries = totalEntries - paidEntries;
+        if (paidCost.isEmpty()) {
+            paidCost = Optional.of(BigDecimal.valueOf(0));
+        }
+        if (unpaidCost.isEmpty()) {
+            unpaidCost = Optional.of(BigDecimal.valueOf(0));
+        }
+
+        return new SectorLaborCostDTO(
+                sectorName,
+                totalCost,
+                paidCost.get(),
+                unpaidCost.get(),
+                totalEntries,
+                paidEntries,
+                unpaidEntries
+        );
     }
 }

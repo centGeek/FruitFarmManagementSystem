@@ -47,7 +47,9 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
     @Modifying
     @Transactional
     @Query("UPDATE WorkEntryEntity we SET we.isPaid = TRUE " +
-            "WHERE we.user.id = :userId AND we.isPaid = FALSE")
+            "WHERE we.user.id = :userId " +
+            "AND we.isPaid = FALSE " +
+            "AND we.workDate <= CURRENT_DATE()")
     int payAllUnpaidEntries(@Param("userId") Long userId);
 
     @Modifying
@@ -58,4 +60,15 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
             "AND YEAR(we.workDate) = YEAR(CURRENT_DATE()) " +
             "AND MONTH(we.workDate) = MONTH(CURRENT_DATE())")
     int payAllUnpaidEntriesForCurrentMonth(@Param("userId") Long userId);
+
+
+    @Query("SELECT we FROM WorkEntryEntity we " +
+            "WHERE we.user.gardener.id = :gardenerId " +
+            "AND we.workDate >= :startDate " +
+            "AND we.workDate <= :endDate " +
+            "ORDER BY we.workDate ASC, we.user.surname ASC")
+    List<WorkEntryEntity> findByUserGardenerIdAndWorkDateBetween(
+            @Param("gardenerId") Long gardenerId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }

@@ -101,6 +101,10 @@ public class WorkDetailsService {
         workDetailsRepository.deleteById(id);
     }
 
+    public Optional<WorkDetailsEntity> getLatestWorkDetailsByGardener(long id) {
+        return Optional.of(workDetailsRepository.getLatestWorkDetailsForGardener(id));
+    }
+
     private void validateWorkDetailsDTO(WorkDetailsDTO dto) {
 
 //        if (dto.isPaidHourly()) {

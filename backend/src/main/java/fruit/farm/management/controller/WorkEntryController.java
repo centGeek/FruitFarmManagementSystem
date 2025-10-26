@@ -9,12 +9,14 @@ import fruit.farm.management.repository.WorkEntryRepository;
 import fruit.farm.management.service.WorkScheduleService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,32 +32,34 @@ public class WorkEntryController {
     private WorkScheduleService workScheduleService;
     private UserRepository userRepository;
 
-    @GetMapping
-    public ResponseEntity<List<WorkEntryDto>> getAllWorkEntries() {
+    @GetMapping("/week")
+    public ResponseEntity<List<WorkEntryDto>> getWorkEntriesForWeek(
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName();
-            log.info("Logged user: {}", loggedInEmail);
+            log.info("Logged user: {} - fetching entries from {} to {}", loggedInEmail, startDate, endDate);
 
             UserEntity gardener = userRepository.findByEmail(loggedInEmail)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<WorkEntryEntity> entries = workEntryRepository.findByUserGardenerId(gardener.getId());
+            List<WorkEntryEntity> entries = workEntryRepository
+                    .findByUserGardenerIdAndWorkDateBetween(gardener.getId(), startDate, endDate);
 
             List<WorkEntryDto> dtos = entries.stream()
                     .map(WorkEntryMapper::mapToDto)
                     .collect(Collectors.toList());
 
-            log.info("Found {} work entries", dtos.size());
+            log.info("Found {} work entries for week {} to {}", dtos.size(), startDate, endDate);
             return ResponseEntity.ok(dtos);
 
         } catch (Exception e) {
-            log.error("Error fetching work entries: {}", e.getMessage(), e);
+            log.error("Error fetching work entries for week: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getWorkEntryById(@PathVariable Long id) {
 

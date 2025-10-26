@@ -20,26 +20,8 @@ public class WorkEntryRepository {
 
     private final WorkEntryJpaRepository workEntryJpaRepository;
 
-    public WorkEntryEntity saveOrUpdate(WorkEntryEntity entry) {
-
-        return workEntryJpaRepository.save(entry);
-    }
-
     public Optional<WorkEntryEntity> findById(Long id) {
         return workEntryJpaRepository.findById(id);
-    }
-
-    public List<WorkEntryEntity> findAll() {
-        return workEntryJpaRepository.findAll();
-    }
-
-    public void deleteById(Long id) {
-        workEntryJpaRepository.deleteById(id);
-    }
-
-    public List<WorkEntryEntity> findByUserGardenerId(Long id) {
-
-        return workEntryJpaRepository.findByUserGardenerId(id);
     }
 
     public WorkEntryEntity save(WorkEntryEntity workEntryEntity) {
@@ -82,4 +64,9 @@ public class WorkEntryRepository {
     public int payAllUnpaidEntriesForCurrentMonth(long employeeId) {
         return workEntryJpaRepository.payAllUnpaidEntriesForCurrentMonth(employeeId);
     }
+
+    public List<WorkEntryEntity> findByUserGardenerIdAndWorkDateBetween(Long id, LocalDate startDate, LocalDate endDate) {
+        return workEntryJpaRepository.findByUserGardenerIdAndWorkDateBetween(id, startDate, endDate);
+    }
+
 }

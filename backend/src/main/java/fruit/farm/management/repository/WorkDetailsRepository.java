@@ -52,4 +52,8 @@ public class WorkDetailsRepository {
     public WorkDetailsEntity getLatestWorkDetailsForUserByEmail(String email) {
         return workDetailsJpaRepository.getLatestWorkDetailsForUserByEmail(email);
     }
+
+    public WorkDetailsEntity getLatestWorkDetailsForGardener(long id) {
+        return workDetailsJpaRepository.getLatestWorkDetailsForGardener(id);
+    }
 }

@@ -1,7 +1,9 @@
 package fruit.farm.management.service;
 
 import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.WorkDetailsDTO;
 import fruit.farm.management.entity.UserEntity;
+import fruit.farm.management.entity.WorkDetailsEntity;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -24,6 +26,8 @@ public class UserService {
 
     private UserRepository userRepository;
     private NotificationService notificationService;
+    private WorkDetailsService workDetailsService;
+
     public UserEntity getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedInEmail = authentication.getName();
@@ -64,17 +68,27 @@ public class UserService {
 
         userRepository.delete(userEntity);
     }
+
     @Transactional
     public UserEntity save(UserEntity user) {
+        Optional<WorkDetailsEntity> workDetailsEntity = workDetailsService.getLatestWorkDetailsByGardener(user.getGardener().getId());
 
         UserEntity savedUser = userRepository.save(user);
+        if (workDetailsEntity.isPresent()) {
+            WorkDetailsEntity workDetails = workDetailsEntity.get();
+            workDetailsService.createWorkDetails(new WorkDetailsDTO(
+                    workDetails.getIsPaidHourly(), workDetails.getHourlyPay(), workDetails.getPayPerKilogram(),
+                    workDetails.getCreatedAt(),
+                    UserMapper.mapFromEntity(workDetails.getUserEntity())));
+        }
         UserEntity loggedInUserId = this.getLoggedUser();
         notificationService.addUserNotification(NotificationDTO.builder()
-                        .title("Dodano nowego pracownika!")
-                        .message("Dodano pracownika: " + user.getName() + " " + user.getSurname())
-                        .createdAt(LocalDateTime.now())
-                        .userDTO(UserMapper.mapFromEntity(savedUser))
+                .title("Dodano nowego pracownika!")
+                .message("Dodano pracownika: " + user.getName() + " " + user.getSurname())
+                .createdAt(LocalDateTime.now())
+                .userDTO(UserMapper.mapFromEntity(savedUser))
                 .build(), savedUser.getId(), loggedInUserId);
+
         return savedUser;
     }
 
@@ -84,10 +98,10 @@ public class UserService {
         UserEntity savedUser = userRepository.save(user);
         UserEntity loggedInUserId = this.getLoggedUser();
         notificationService.addUserNotification(NotificationDTO.builder()
-                        .title("Zaktualizowano dane pracownika!")
-                        .message("Zaktualizowano dane pracownika: " + user.getName() + " " + user.getSurname())
-                        .createdAt(LocalDateTime.now())
-                        .userDTO(UserMapper.mapFromEntity(savedUser))
+                .title("Zaktualizowano dane pracownika!")
+                .message("Zaktualizowano dane pracownika: " + user.getName() + " " + user.getSurname())
+                .createdAt(LocalDateTime.now())
+                .userDTO(UserMapper.mapFromEntity(savedUser))
                 .build(), savedUser.getId(), loggedInUserId);
         return savedUser;
     }

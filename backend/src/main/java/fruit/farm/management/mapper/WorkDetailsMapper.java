@@ -13,10 +13,4 @@ public class WorkDetailsMapper {
                 UserMapper.mapFromEntity(workDetailsEntity.getUserEntity()));
     }
 
-    public static WorkDetailsEntity mapFromEntity(WorkDetailsDTO workDetailsDTO, UserEntity gardener) {
-
-        return new WorkDetailsEntity(workDetailsDTO.getId(), workDetailsDTO.getIsPaidHourly(),
-                workDetailsDTO.getHourlyPay(), workDetailsDTO.getPayPerKilogram(), workDetailsDTO.getCreatedAt(),
-                UserMapper.mapToEntity(workDetailsDTO.getUserDTO(), gardener));
-    }
 }

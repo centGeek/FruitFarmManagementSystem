@@ -336,9 +336,9 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onTogglePaid, cur
     const weekDays = useMemo(() => getWeekDays(currentDate), [currentDate, getWeekDays]);
 
     const getEntriesForDate = useCallback((date) => {
-        const dateStr = date.toISOString().split('T')[0];
-        return workEntries.filter(entry => new Date(entry.workDate).toISOString().split('T')[0] === dateStr);
-    }, [workEntries]);
+    const dateStr = formatDateToLocal(date);
+    return workEntries.filter(entry => formatDateToLocal(new Date(entry.workDate)) === dateStr);
+}, [workEntries]);
 
     const isToday = useCallback((date) => date.toDateString() === new Date().toDateString(), []);
 
@@ -347,7 +347,12 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onTogglePaid, cur
         newDate.setDate(newDate.getDate() + days);
         onDateChange(newDate);
     };
-
+    const formatDateToLocal = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
     return (
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-green-600 to-lime-600 p-4">
@@ -375,7 +380,7 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onTogglePaid, cur
                     const entries = getEntriesForDate(day);
                     const totalHours = entries.reduce((sum, e) => sum + (e.duration || 0), 0);
                     const totalSalary = entries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0); 
-                    const dateStr = day.toISOString().split('T')[0];
+                    const dateStr = formatDateToLocal(day);
                       
                     return (
                         <div key={idx} className={`border-r border-b border-gray-200 min-h-64 ${isToday(day) ? 'bg-green-50' : 'bg-white'}`}>
@@ -721,35 +726,60 @@ const fetchSectors = useCallback(async () => {
     }, [fetchEmployees, fetchSectors]);
 
     const fetchWorkEntries = useCallback(async () => {
-        console.log('[FETCH] Rozpoczynam pobieranie wpisów pracy');
-        setIsLoading(true);
+    console.log('[FETCH] Rozpoczynam pobieranie wpisów pracy dla tygodnia');
+    setIsLoading(true);
+    
+    try {
+        const startOfWeek = new Date(currentDate);
+        startOfWeek.setHours(0, 0, 0, 0);
+        const day = (startOfWeek.getDay() + 6) % 7;
+        startOfWeek.setDate(startOfWeek.getDate() - day);
         
-        try {
-            const headers = getAuthHeaders();
-            const response = await fetch(`${BACKEND_URL}/api/work-entries`, {
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+        
+        // Format dat do YYYY-MM-DD
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        const startDateStr = formatDate(startOfWeek);
+        const endDateStr = formatDate(endOfWeek);
+        
+        console.log(`[FETCH] Pobieranie wpisów od ${startDateStr} do ${endDateStr}`);
+        
+        const headers = getAuthHeaders();
+        const response = await fetch(
+            `${BACKEND_URL}/api/work-entries/week?startDate=${startDateStr}&endDate=${endDateStr}`, 
+            {
                 method: 'GET',
                 headers: headers,
-            });
-
-            console.log(`[FETCH] Odpowiedź serwera dla wpisów - Status: ${response.status}`);
-            if (response.ok) {
-                const data = await response.json();
-                console.log('[FETCH] ✅ Załadowano wpisy pracy:', data);
-                setWorkEntries(Array.isArray(data) ? data : []);
-            } else {
-                const errorText = await response.text();
-                console.error(`[FETCH] ❌ Błąd HTTP dla wpisów: ${response.status}`, errorText);
-                setAlert({ type: 'error', message: `Błąd ładowania wpisów: ${response.status}` });
-                setWorkEntries([]);
             }
-        } catch (error) {
-            console.error('[FETCH] ❌ Błąd połączenia dla wpisów:', error);
-            setAlert({ type: 'error', message: 'Błąd połączenia z serwerem podczas ładowania wpisów.' });
+        );
+
+        console.log(`[FETCH] Odpowiedź serwera dla wpisów - Status: ${response.status}`);
+        if (response.ok) {
+            const data = await response.json();
+            console.log('[FETCH] ✅ Załadowano wpisy pracy:', data);
+            setWorkEntries(Array.isArray(data) ? data : []);
+        } else {
+            const errorText = await response.text();
+            console.error(`[FETCH] ❌ Błąd HTTP dla wpisów: ${response.status}`, errorText);
+            setAlert({ type: 'error', message: `Błąd ładowania wpisów: ${response.status}` });
             setWorkEntries([]);
-        } finally {
-            setIsLoading(false);
         }
-    }, []);
+    } catch (error) {
+        console.error('[FETCH] ❌ Błąd połączenia dla wpisów:', error);
+        setAlert({ type: 'error', message: 'Błąd połączenia z serwerem podczas ładowania wpisów.' });
+        setWorkEntries([]);
+    } finally {
+        setIsLoading(false);
+    }
+}, [currentDate]);
 
     useEffect(() => {
         fetchWorkEntries();
@@ -1042,7 +1072,7 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
             const result = await response.json();
             console.log(`✅ Zmiana statusu płatności na opłacone dla pracownika ${userId}:`, result);
             
-            await fetchWorkEntries(); // Odśwież dane PRZED zamknięciem modala
+            await fetchWorkEntries();
             handleClosePayAllModal();
             
             setAlert({
@@ -1070,10 +1100,8 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
 
 
     const stats = useMemo(() => {
-        // 1. Ustalenie daty rozpoczęcia i zakończenia tygodnia (poniedziałek - niedziela)
         const startOfWeek = new Date(currentDate);
         startOfWeek.setHours(0, 0, 0, 0);
-        // Przesuń do poniedziałku (0 - niedziela, 1 - poniedziałek, ... 6 - sobota)
         const day = (startOfWeek.getDay() + 6) % 7; 
         startOfWeek.setDate(startOfWeek.getDate() - day);
           
@@ -1081,49 +1109,56 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
         endOfWeek.setDate(startOfWeek.getDate() + 6);
         endOfWeek.setHours(23, 59, 59, 999);
 
-        // 2. Filtrowanie wpisów dla bieżącego tygodnia
         const weeklyEntries = workEntries.filter(e => {
             const workDate = new Date(e.workDate);
             return workDate >= startOfWeek && workDate <= endOfWeek;
         });
 
-        // 3. Obliczanie statystyk tygodniowych
         const totalSalaryWeek = weeklyEntries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0);
 
         return {
             total: weeklyEntries.length,
             paid: weeklyEntries.filter(e => e.isPaid).length, 
             unpaid: weeklyEntries.filter(e => !e.isPaid).length,
-            totalSalaryWeek: totalSalaryWeek // NOWA STATYSTYKA
+            totalSalaryWeek: totalSalaryWeek
         };
     }, [workEntries, currentDate]);
 
-    // ZMODYFIKOWANA FILTRACJA wpisów dla modala masowej płatności
-    const employeeEntriesForPayment = useMemo(() => {
-        if (!selectedEmployeeForPayment) return { entries: [], totalAmount: 0 };
+const employeeEntriesForPayment = useMemo(() => {
+    if (!selectedEmployeeForPayment) return { entries: [], totalAmount: 0 };
+    
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); 
+    
+    let filteredEntries = [];
+    
+    if (paymentModalType === 'month') {
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        startOfMonth.setHours(0, 0, 0, 0);
         
-        const allUnpaidEntries = workEntries.filter(e => e.user?.id === selectedEmployeeForPayment.id && !e.isPaid);
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        endOfMonth.setHours(23, 59, 59, 999);
 
-        let filteredEntries = [];
-        
-        if (paymentModalType === 'month') {
-            const today = new Date();
-            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            endOfMonth.setHours(23, 59, 59, 999);
+        filteredEntries = workEntries.filter(e => {
+            const workDate = new Date(e.workDate);
+            return e.user?.id === selectedEmployeeForPayment.id 
+                && !e.isPaid 
+                && workDate >= startOfMonth 
+                && workDate <= endOfMonth;
+        });
+    } else { 
+        filteredEntries = workEntries.filter(e => {
+            const workDate = new Date(e.workDate);
+            return e.user?.id === selectedEmployeeForPayment.id 
+                && !e.isPaid 
+                && workDate <= today;
+        });
+    }
 
-            filteredEntries = allUnpaidEntries.filter(e => {
-                const workDate = new Date(e.workDate);
-                return workDate >= startOfMonth && workDate <= endOfMonth;
-            });
-        } else { 
-            filteredEntries = allUnpaidEntries;
-        }
+    const totalAmount = filteredEntries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0);
 
-        const totalAmount = filteredEntries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0);
-
-        return { entries: filteredEntries, totalAmount: totalAmount };
-    }, [workEntries, selectedEmployeeForPayment, paymentModalType]);
+    return { entries: filteredEntries, totalAmount: totalAmount };
+}, [workEntries, selectedEmployeeForPayment, paymentModalType]);
 
     const handleOpenBulkAssignModal = (dateStr) => {
         setBulkAssignDate(dateStr);
@@ -1152,7 +1187,6 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
     setPaymentModalType('all');
 };
 
-// KROK 2B: Potem handlePayAllForMonth (używa handleClosePayAllModal)
 const handlePayAllForMonth = useCallback(async (userId) => {
     setIsLoading(true);
     closeAlert();
