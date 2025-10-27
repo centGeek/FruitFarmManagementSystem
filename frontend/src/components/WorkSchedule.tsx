@@ -50,7 +50,6 @@ const Modal = ({ isOpen, onClose, title, children, size = 'large' }) => {
     );
 };
 
-// Zmieniony: Dodano isCurrency
 const StatCard = ({ icon: Icon, count, label, color, isCurrency = false }) => {
     const colorMap = {
         green: 'from-green-100 to-green-200 text-green-600',
