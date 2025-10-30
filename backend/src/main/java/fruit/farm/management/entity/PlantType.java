@@ -1,12 +1,12 @@
 package fruit.farm.management.entity;
 
 public enum PlantType {
-    APPLE(AppleVariety.class),
-    PEAR(PearVariety.class),
-    CHERRY(CherryVariety.class),
-    PLUM(PlumVariety.class),
-    RASPBERRY(RaspberryVariety.class),
-    SWEET_CHERRY(SweetCherryVariety.class);
+    JABŁOŃ(AppleVariety.class),
+    GRUSZA(PearVariety.class),
+    WIŚNIA(CherryVariety.class),
+    ŚLIWA(PlumVariety.class),
+    MALINA(RaspberryVariety.class),
+    CZEREŚNIA(SweetCherryVariety.class);
 
     private final Class<? extends Enum<?>> varietyClass;
 

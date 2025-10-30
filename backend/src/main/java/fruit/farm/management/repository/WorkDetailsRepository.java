@@ -1,6 +1,7 @@
 package fruit.farm.management.repository;
 
 import fruit.farm.management.entity.WorkDetailsEntity;
+import fruit.farm.management.exception.WorkDetailsIsNotFoundException;
 import fruit.farm.management.repository.jpa.WorkDetailsJpaRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -46,8 +47,15 @@ public class WorkDetailsRepository {
 
 
     public Optional<WorkDetailsEntity> getLatestWorkDetailsForUserByEmail(String email) {
+        Optional<WorkDetailsEntity> workDetailsOptional =
+                workDetailsJpaRepository.getLatestWorkDetailsForUserByEmail(email);
 
-        return Optional.of(workDetailsJpaRepository.getLatestWorkDetailsForUserByEmail(email));
+        return workDetailsOptional.or(() -> {
+            throw new WorkDetailsIsNotFoundException(
+                    "Nie stworzono warunków pracowniczych. Przejdź do zakładki pracownicy, " +
+                            "następnie do detali pracy \uD83D\uDCBC i dodaj zasady rozliczenia"
+            );
+        });
     }
 
     public Optional<WorkDetailsEntity> getLatestWorkDetailsForUserByGardenerId(long id) {

@@ -1,11 +1,11 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.AdvancePayDTO;
+import fruit.farm.management.dto.AdvancePaySumDTO;
 import fruit.farm.management.entity.UserEntity;
-import fruit.farm.management.repository.UserRepository;
+import fruit.farm.management.service.UserService;
 import fruit.farm.management.service.WorkScheduleService;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +15,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+
 @RestController
 @RequestMapping("/api/advances")
 @AllArgsConstructor
 @Slf4j
 public class AdvancePayController {
 
-    private UserRepository userRepository;
+    private UserService userService;
     private WorkScheduleService workScheduleService;
+
     @PostMapping
     public ResponseEntity<?> createAdvance(@RequestBody AdvancePayDTO request) {
 
@@ -34,7 +36,7 @@ public class AdvancePayController {
         }
 
         try {
-            UserEntity employee = userRepository.findById(request.getUserId())
+            UserEntity employee = userService.findById(request.getUserId())
                     .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + request.getUserId()));
 
             workScheduleService.saveAdvance(
@@ -63,10 +65,6 @@ public class AdvancePayController {
         }
     }
 
-    /**
-     * Zwraca listę nieuregulowanych zaliczek dla podanego pracownika.
-     * Endpoint: GET /api/advances/user/{userId}/unsettled
-     */
     @GetMapping("/user/{userId}/unsettled")
     public ResponseEntity<List<AdvancePayDTO>> getUnsettledAdvancesForEmployee(@PathVariable Long userId) {
 
@@ -84,6 +82,48 @@ public class AdvancePayController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
             log.error("Internal error fetching unsettled advances for user {}: {}", userId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/user/sum-unsettled")
+    public ResponseEntity<AdvancePaySumDTO> getSumUnsettledAdvancesForEmployee() {
+
+        Long userId = userService.getLoggedUser().getId();
+        try {
+
+            AdvancePaySumDTO advancePaySumDTO = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
+
+            return ResponseEntity.ok(advancePaySumDTO);
+
+        } catch (RuntimeException e) {
+            log.error("Error fetching unsettled advances for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            log.error("Internal error fetching unsettled advances for user {}: {}", userId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/user/{userId}")
+    public ResponseEntity<AdvancePaySumDTO> payOffAllUnsettledAdvancePays(@PathVariable Long userId) {
+
+        log.info("Attempting to pay off all unsettled advances for user ID: {}", userId);
+
+        try {
+
+            workScheduleService.payOffAllUnsettledAdvancePays(userId);
+
+            AdvancePaySumDTO advancePaySumDTO = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
+
+            log.info("Successfully paid off advances for user {}. New unsettled sum: {}", userId, advancePaySumDTO.getAmount());
+            return ResponseEntity.ok(advancePaySumDTO);
+
+        } catch (RuntimeException e) {
+            log.error("Error paying off unsettled advances for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            log.error("Internal error paying off unsettled advances for user {}: {}", userId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

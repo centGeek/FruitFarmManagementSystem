@@ -1490,7 +1490,7 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
                     <StatCard 
                         icon={DollarSign} 
                         count={stats.totalSalaryWeek} 
-                        label="Łączne wynagrodzenie (tydzień)" 
+                        label="Tygodniowe wynagrodzenie" 
                         color="indigo" 
                         isCurrency={true} 
                     />

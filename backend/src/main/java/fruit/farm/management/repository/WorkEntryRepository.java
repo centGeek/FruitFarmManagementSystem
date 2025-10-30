@@ -103,4 +103,11 @@ public class WorkEntryRepository {
                 .stream()
                 .map(AdvancePayMapper::mapToDTO).toList();
     }
+
+    public List<AdvancePayDTO> getUnsettledAdvancesByGardenerId(Long userId) {
+
+        return workEntryJpaRepository.getUnsettledAdvancesByGardenerId(userId)
+                .stream()
+                .map(AdvancePayMapper::mapToDTO).toList();
+    }
 }

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -87,4 +88,10 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
             WHERE ae.isSettled = FALSE and ae.user.id = :userId
             """)
     List<AdvancePayEntity> getUnsettledAdvancesByUserId(Long userId);
+
+    @Query("""
+            SELECT ae FROM AdvancePayEntity ae
+            WHERE ae.isSettled = FALSE and ae.user.gardener.id = :userId
+            """)
+    List<AdvancePayEntity> getUnsettledAdvancesByGardenerId(Long userId);
 }

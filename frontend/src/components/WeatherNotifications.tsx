@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Cloud, CloudRain, Sun, Wind, Droplets, Bell, BellOff, Plus, Trash2, Loader, AlertCircle, Check, CloudSnow, Thermometer, X, Edit3, Calendar, CloudDrizzle, CloudFog, Zap
 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
+import { Link } from "react-router-dom";
 
 
 interface CurrentWeather {
@@ -761,7 +762,13 @@ const handleEditClick = (notification: NotificationRule) => {
                             )}
                             {weatherError.includes('Koordynaty') && (
                                 <p className="text-sm text-red-700 mt-1">
-                                    Proszę uzupełnij swoją lokalizację w <a href="/profile" className="font-bold underline">Ustawieniach Profilu</a>.
+                                Proszę uzupełnij swoją lokalizację w{" "}
+                                <Link
+                                    to="/gardener-profile"
+                                    className="font-bold underline text-red-800 hover:text-red-900"
+                                >
+                                    Ustawieniach Profilu
+                                </Link>.
                                 </p>
                             )}
                         </div>

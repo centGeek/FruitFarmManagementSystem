@@ -514,6 +514,7 @@ export default function ExpenseManagement() {
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState({ type: '', message: '' });
     const [sectorLaborCosts, setSectorLaborCosts] = useState(null);
+    const [advancesSum, setAdvancesSum] = useState(null);
     const [isLoadingLaborCosts, setIsLoadingLaborCosts] = useState(false);
 
 
@@ -667,6 +668,24 @@ const fetchSectors = useCallback(() => {
     } finally {
         setIsLoadingLaborCosts(false);
     }
+    try {
+    const advancesResponse = await fetch(`${BACKEND_URL}/api/advances/user/sum-unsettled`, { 
+        method: 'GET', 
+        headers: getAuthHeaders() 
+    });
+    
+    if (advancesResponse.ok) {
+        const data = await advancesResponse.json();
+        console.log('✅ [Advances] Data:', data);
+        setAdvancesSum(data.amount || 0);
+    } else {
+        console.error('❌ [Advances] Error:', advancesResponse.status);
+        setAdvancesSum(null);
+    }
+} catch (error) {
+    console.error('❌ [Advances] Exception:', error);
+    setAdvancesSum(null);
+}
 }, [selectedSectorId, selectedYear, selectedMonth]);
 
 useEffect(() => {
@@ -902,7 +921,6 @@ if (searchTerm) {
                     </div>
                 ) : sectorLaborCosts ? (
                     <>
-                        {/* Łączny koszt */}
                         <div className="col-span-full md:col-span-1">
                             <StatCard 
                                 amount={sectorLaborCosts.sectorLaborCost || 0} 
@@ -911,42 +929,65 @@ if (searchTerm) {
                             />
                         </div>
                         
-                        {/* Opłacone */}
                         <div className="col-span-full md:col-span-1">
-                            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl">
-                                        ✅
-                                    </div>
-                                    <div>
-                                        <p className="text-3xl font-extrabold text-gray-900">
-                                            {formatCurrency(sectorLaborCosts.paidLaborCost || 0)} PLN
+                        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
+                            <div className="flex items-center space-x-4">
+                                <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl">
+                                    ✅
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-3xl font-extrabold text-gray-900">
+                                        {formatCurrency((sectorLaborCosts.paidLaborCost || 0) + (advancesSum || 0))} PLN
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        Koszty pracownicze: Opłacone ({sectorLaborCosts.paidEntries || 0} {sectorLaborCosts.paidEntries === 1 ? 'wpis' : 'wpisów'})
+                                    </p>
+                                    {advancesSum > 0 && (
+                                        <p className="text-xs text-green-600 font-medium mt-1">
+                                            💰 w tym zaliczki: +{formatCurrency(advancesSum)} PLN
                                         </p>
-                                        <p className="text-sm text-gray-500">
-                                            Koszty pracownicze: Opłacone ({sectorLaborCosts.paidEntries || 0} {sectorLaborCosts.paidEntries === 1 ? 'wpis' : 'wpisów'})
-                                        </p>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
+                    </div>
                         
-                        <div className="col-span-full md:col-span-1">
-                            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-14 h-14 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl">
-                                        ⚠️
-                                    </div>
-                                    <div>
-                                        <p className="text-3xl font-extrabold text-gray-900">
-                                            {formatCurrency(sectorLaborCosts.unpaidLaborCost || 0)} PLN
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            Koszty pracownicze: Nieopłacone ({sectorLaborCosts.unpaidEntries || 0} {sectorLaborCosts.unpaidEntries === 1 ? 'wpis' : 'wpisów'})
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                      <div className="col-span-full md:col-span-1">
+    <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
+        <div className="flex items-center space-x-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl">
+                ⚠️
+            </div>
+            <div className="flex-1">
+                {(() => {
+                    const unpaidAfterAdvances = (sectorLaborCosts.unpaidLaborCost || 0) - (advancesSum || 0);
+                    const isNegative = unpaidAfterAdvances < 0;
+                    
+                    return (
+                        <>
+                            <p className={`text-3xl font-extrabold ${isNegative ? 'text-green-600' : 'text-gray-900'}`}>
+                                {isNegative ? '-' : ''}{formatCurrency(Math.abs(unpaidAfterAdvances))} PLN
+                            </p>
+                            <p className="text-sm text-gray-500">
+                                Koszty pracownicze: Nieopłacone ({sectorLaborCosts.unpaidEntries || 0} {sectorLaborCosts.unpaidEntries === 1 ? 'wpis' : 'wpisów'})
+                            </p>
+                            {advancesSum > 0 && (
+                                <p className="text-xs text-orange-600 font-medium mt-1">
+                                    ⚡ w tym pomniejszone o zaliczki: -{formatCurrency(advancesSum)} PLN
+                                </p>
+                            )}
+                            {isNegative && (
+                                <p className="text-xs text-green-600 font-semibold mt-1">
+                                    💰 Nadpłata zaliczek
+                                </p>
+                            )}
+                        </>
+                    );
+                })()}
+            </div>
+        </div>
+    </div>
+</div>
                     </>
                 ) : null}
                 </div>

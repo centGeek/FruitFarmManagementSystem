@@ -1,9 +1,6 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.AdvancePayDTO;
-import fruit.farm.management.dto.SectorLaborCostDTO;
-import fruit.farm.management.dto.WorkDetailsDTO;
-import fruit.farm.management.dto.WorkEntryDto;
+import fruit.farm.management.dto.*;
 import fruit.farm.management.entity.SectorEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
@@ -22,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -125,6 +123,7 @@ public class WorkScheduleService {
         }
         return workEntryRepository.save(existingEntry);
     }
+
     @Transactional
     public int payAllUnpaidEntries(UserEntity employee) {
 
@@ -144,7 +143,7 @@ public class WorkScheduleService {
                 .map(s -> s.getDescription() != null ? s.getDescription() : "Sektor " + s.getSectorId())
                 .orElse("Wszystkie sektory")
                 : "Wszystkie sektory";
-        if(entries.isEmpty()) {
+        if (entries.isEmpty()) {
             return null;
         }
 
@@ -194,5 +193,19 @@ public class WorkScheduleService {
     public List<AdvancePayDTO> getUnsettledAdvancesByUserId(Long userId) {
 
         return workEntryRepository.getUnsettledAdvancesByUserId(userId);
+    }
+
+    public AdvancePaySumDTO getSumUnsettledAdvancesByUserId(Long userId) {
+
+        BigDecimal sum = workEntryRepository.getUnsettledAdvancesByGardenerId(userId).stream()
+                .map(AdvancePayDTO::getAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return new AdvancePaySumDTO(sum);
+    }
+
+    public void payOffAllUnsettledAdvancePays(Long userId) {
+
+        advancePayRepository.settleAdvancePayEntries(userId);
     }
 }

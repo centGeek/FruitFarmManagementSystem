@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
-
+import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs"; 
 
 const Alert = ({ type, message, onClose }) => {
     if (!message) return null;
@@ -66,321 +65,6 @@ const Modal = ({ isOpen, onClose, title, children, headerColor = 'bg-green-50' }
                 </div>
             </div>
         </div>
-    );
-};
-
-const WorkDetailsModal = ({ isOpen, onClose, employee, onSave }) => {
-    const [workDetails, setWorkDetails] = useState(null);
-    const [isPaidHourly, setIsPaidHourly] = useState(true);
-    const [hourlyPay, setHourlyPay] = useState('');
-    const [payPerKilogram, setPayPerKilogram] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    const formatPay = (pay) => {
-        if (pay === null || pay === undefined || pay === '') return '';
-        return Number(pay).toFixed(2);
-    };
-
-    const currentRateText = useMemo(() => {
-        if (!workDetails) return null;
-
-        const isHourly = workDetails.isPaidHourly === true;
-        const rate = isHourly ? workDetails.hourlyPay : workDetails.payPerKilogram;
-        const rateUnit = isHourly ? 'PLN/godz' : 'PLN/kg';
-        const rateType = isHourly ? 'Godzinowy' : 'Za Kilogram';
-
-        if (rate === null || rate === undefined) return null;
-
-        const formattedRate = Number(rate).toFixed(2); 
-
-        return {
-            rateType,
-            rateText: `${formattedRate} ${rateUnit}`,
-            isCurrentHourly: isHourly
-        };
-    }, [workDetails]);
-
-    useEffect(() => {
-        if (isOpen && employee) {
-            fetchLatestWorkDetails();
-        } else if (!isOpen) {
-            setWorkDetails(null);
-            setIsPaidHourly(true);
-            setHourlyPay('');
-            setPayPerKilogram('');
-            setError('');
-        }
-    }, [isOpen, employee]);
-
-    const fetchLatestWorkDetails = async () => {
-        setIsLoading(true);
-        setError('');
-        
-        setWorkDetails(null);
-        setIsPaidHourly(true);
-        setHourlyPay('');
-        setPayPerKilogram('');
-        
-        try {
-            const response = await fetch(`${BACKEND_URL}/api/work-details/user/${employee.id}/latest`, {
-                headers: getAuthHeaders()
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log(`Załadowano detale zatrudnienia dla użytkownika ${employee.name} ${employee.surname}:`, data);
-                setWorkDetails(data);
-                
-                const isPaidHourlyFromBackend = data.isPaidHourly === true;
-                setIsPaidHourly(isPaidHourlyFromBackend);
-                
-                if (isPaidHourlyFromBackend) {
-                    setHourlyPay(formatPay(data.hourlyPay)); 
-                    setPayPerKilogram('');
-                } else {
-                    setPayPerKilogram(formatPay(data.payPerKilogram)); 
-                    setHourlyPay('');
-                }
-            } else if (response.status === 204) {
-                console.log(`Brak zapisanych detali pracy dla użytkownika ${employee.name} ${employee.surname}`);
-            } else {
-                console.error('Błąd pobierania detali:', response.status);
-            }
-        } catch (err) {
-            console.error('Błąd pobierania detali pracy:', err);
-            setError('Nie udało się pobrać detali pracy');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleSave = async () => {
-    setError('');
-    
-    console.log('🔍 DEBUG - Stan przed walidacją:');
-    console.log('isPaidHourly:', isPaidHourly, 'typ:', typeof isPaidHourly);
-    console.log('hourlyPay:', hourlyPay);
-    console.log('payPerKilogram:', payPerKilogram);
-    
-    if (isPaidHourly && (!hourlyPay || parseFloat(hourlyPay) <= 0)) {
-        setError('Wprowadź prawidłową stawkę godzinową');
-        return;
-    }
-    if (!isPaidHourly && (!payPerKilogram || parseFloat(payPerKilogram) <= 0)) {
-        setError('Wprowadź prawidłową stawkę za kilogram');
-        return;
-    }
-
-    const payload = {
-        userDTO: {
-            id: employee.id,
-            name: employee.name,
-            surname: employee.surname,
-            email: employee.email,
-            nickname: employee.nickname || null,
-            phoneNumber: employee.phoneNumber || null,
-            creationDate: employee.creationDate || null,
-            active: employee.active
-        },
-        isPaidHourly: isPaidHourly,
-        hourlyPay: isPaidHourly ? parseFloat(hourlyPay) : null,
-        payPerKilogram: !isPaidHourly ? parseFloat(payPerKilogram) : null
-    };
-
-    console.log('📦 Payload do wysłania:', JSON.stringify(payload, null, 2));
-
-    setIsLoading(true);
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/work-details`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            onSave();
-            onClose();
-        } else {
-            setError('Błąd zapisywania detali pracy');
-        }
-    } catch (err) {
-        setError('Błąd połączenia z serwerem');
-    } finally {
-        setIsLoading(false);
-    }
-};
-
-    if (!isOpen) return null;
-
-    return (
-        <Modal 
-            isOpen={isOpen} 
-            onClose={onClose} 
-            title={<span><span className="mr-2 text-purple-600">💼</span>Detale Zatrudnienia - {employee?.name} {employee?.surname}</span>}
-            headerColor="bg-purple-50"
-        >
-            <div className="space-y-6">
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-                    <p className="text-sm font-medium text-blue-900">
-                        👤 {employee?.name} {employee?.surname}
-                        {employee?.nickname && <span className="italic text-blue-700"> "{employee.nickname}"</span>}
-                    </p>
-                    <p className="text-xs text-blue-700 mt-1">
-                        📧 {employee?.email}
-                    </p>
-                </div>
-
-                {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
-                        ⚠️ {error}
-                    </div>
-                )}
-
-                {isLoading && !error ? (
-                    <div className="text-center py-8">
-                        <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
-                        <p className="text-gray-500 mt-4">Ładowanie...</p>
-                    </div>
-                 ) : (
-                    <>
-                        {currentRateText && (
-                            <div className={`p-4 rounded-xl border-l-4 ${currentRateText.isCurrentHourly ? 'bg-blue-100 border-blue-500' : 'bg-green-100 border-green-500'} transition-all`}>
-                                <p className="text-sm text-gray-800 flex items-center">
-                                    <span className="mr-2 text-xl">
-                                        {currentRateText.isCurrentHourly ? '⏰' : '⚖️'}
-                                    </span> 
-                                    Obecna stawka pracownika: 
-                                    <span className="ml-2 font-bold text-base">
-                                        {currentRateText.rateText}
-                                    </span>
-                                </p>
-                            </div>
-                        )}
-                        
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-3">
-                                Typ Rozliczenia
-                            </label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsPaidHourly(true);
-                                        setPayPerKilogram('');
-                                    }}
-                                    disabled={isLoading}
-                                    className={`py-4 px-4 rounded-xl font-medium transition-all ${
-                                        isPaidHourly
-                                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    <div className="text-3xl mb-2">⏰</div>
-                                    <div className="text-sm font-bold">Płatność Godzinowa</div>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsPaidHourly(false);
-                                        setHourlyPay('');
-                                    }}
-                                    disabled={isLoading}
-                                    className={`py-4 px-4 rounded-xl font-medium transition-all ${
-                                        !isPaidHourly
-                                            ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg scale-105'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    <div className="text-3xl mb-2">⚖️</div>
-                                    <div className="text-sm font-bold">Płatność Za Kilogram</div>
-                                </button>
-                            </div>
-                        </div>
-
-                        {isPaidHourly ? (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Stawka Godzinowa (PLN) *
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">
-                                        💰
-                                    </span>
-                                    <input
-                                        type="number"
-                                        value={hourlyPay}
-                                        onChange={(e) => setHourlyPay(e.target.value)}
-                                        placeholder="np. 25.50"
-                                        step="0.01"
-                                        min="0"
-                                        disabled={isLoading}
-                                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    />
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Kwota wypłacana za każdą przepracowaną godzinę
-                                </p>
-                            </div>
-                        ) : (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Stawka za Kilogram (PLN) *
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">
-                                        🍎
-                                    </span>
-                                    <input
-                                        type="number"
-                                        value={payPerKilogram}
-                                        onChange={(e) => setPayPerKilogram(e.target.value)}
-                                        placeholder="np. 0.80"
-                                        step="0.01"
-                                        min="0"
-                                        disabled={isLoading}
-                                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                    />
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Kwota wypłacana za każdy zebrany kilogram owoców
-                                </p>
-                            </div>
-                        )}
-
-                        {workDetails && (
-                            <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
-                                <p>📅 Ostatnia aktualizacja: {new Date(workDetails.createdAt).toLocaleDateString('pl-PL')}</p>
-                            </div>
-                        )}
-
-                        <div className="flex gap-3 pt-4 border-t">
-                            <button
-                                onClick={handleSave}
-                                disabled={isLoading}
-                                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                            >
-                                {isLoading ? (
-                                    <span className="flex items-center justify-center">
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                        Zapisywanie...
-                                    </span>
-                                ) : (
-                                    <span>💾 Zapisz Nowe Detale</span>
-                                )}
-                            </button>
-                            <button
-                                onClick={onClose}
-                                disabled={isLoading}
-                                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
-                            >
-                                Anuluj
-                            </button>
-                        </div>
-                    </>
-                )}
-            </div>
-        </Modal>
     );
 };
 
@@ -585,124 +269,6 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
     );
 };
 
-const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onWorkDetails }) => {
-    const [isProcessing, setIsProcessing] = useState(false);
-    const isEmployeeActive = employee.active || false; 
-    const isArchived = !isEmployeeActive;
-
-    const handleArchiveToggle = async () => {
-        setIsProcessing(true);
-        try {
-            if (isEmployeeActive) {
-                await onArchive(employee.id);
-            } else { 
-                await onRestore(employee.id);
-            }
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-
-    return (
-        <div className={`bg-white border rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 ${isArchived ? 'opacity-70 border-gray-300' : 'border-green-200'}`}>
-            <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl ${isArchived ? 'bg-gray-100' : 'bg-gradient-to-br from-green-50 to-green-100'}`}>
-                        🧑‍🌾
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-800">
-                            {employee.name} {employee.surname}
-                        </h3>
-                        {employee.nickname && (
-                            <p className="text-sm text-gray-500 italic">"{employee.nickname}"</p>
-                        )}
-                    </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                    <button
-                        onClick={() => onEdit(employee)}
-                        className="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors text-base"
-                        title="Edytuj ✏️"
-                        disabled={isProcessing}
-                    >
-                        ✏️
-                    </button>
-                    
-                    <button
-                        onClick={() => onWorkDetails(employee)}
-                        className="p-2 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors text-base"
-                        title="Detale Zatrudnienia 💼"
-                        disabled={isProcessing}
-                    >
-                        💼
-                    </button>
-                    
-                    <button
-                        onClick={handleArchiveToggle}
-                        disabled={isProcessing}
-                        className={`p-2 rounded-lg transition-colors text-base ${
-                            isArchived 
-                                ? 'bg-lime-50 text-lime-600 hover:bg-lime-100' 
-                                : 'bg-red-50 text-red-600 hover:bg-red-100'
-                        } disabled:opacity-50`}
-                        title={isArchived ? "Przywróć (Aktywuj) 🔄" : "Archiwizuj (Dezaktywuj) 📦"}
-                    >
-                        {isProcessing ? (
-                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                        ) : isArchived ? (
-                            '🔄'
-                        ) : (
-                            '📦'
-                        )}
-                    </button>
-                </div>
-            </div>
-
-            <div className="mb-4 space-x-2">
-                {isEmployeeActive ? (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                        <span className="mr-1">✅</span>
-                        Aktywny 🌱
-                    </span>
-                ) : (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                        <span className="mr-1">❌</span>
-                        Zarchiwizowany 🍂
-                    </span>
-                )}
-                
-                {employee.role && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-lime-100 text-lime-700">
-                        <span className="mr-1">⚙️</span>
-                        {employee.role.name || employee.role.roleName || 'Brak roli'}
-                    </span>
-                )}
-            </div>
-
-            <div className="space-y-3 pt-4 border-t border-gray-100">
-                {[
-                    { icon: '✉️', label: 'Email', value: employee.email, truncate: true },
-                    { icon: '📞', label: 'Telefon', value: employee.phoneNumber },
-                    { icon: '📅', label: 'Data utworzenia', value: employee.creationDate ? new Date(employee.creationDate).toLocaleDateString('pl-PL') : null },
-                    { icon: '🆔', label: 'ID', value: `#${employee.id}` }
-                ].map((item, index) => item.value && (
-                    <div key={index} className="flex items-center space-x-3 text-gray-600">
-                        <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 text-lg">
-                            {item.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-gray-500 uppercase">{item.label}</p>
-                            <p className={`text-sm font-medium text-gray-900 ${item.truncate ? 'truncate' : ''}`}>{item.value}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
 const StatCard = ({ count, label, color }) => {
     const colorMap = {
         green: { bg: 'from-green-100 to-green-200', text: 'text-green-600', emoji: '🟢', icon: '🍃' },
@@ -760,13 +326,691 @@ const EmptyState = ({ searchTerm, employeesCount, showArchived, onAddClick }) =>
     );
 };
 
+const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinanceDetails }) => {
+    const [isProcessing, setIsProcessing] = useState(false);
+    const isEmployeeActive = employee.active || false; 
+    const isArchived = !isEmployeeActive;
+
+    const handleArchiveToggle = async () => {
+        setIsProcessing(true);
+        try {
+            if (isEmployeeActive) {
+                await onArchive(employee.id);
+            } else { 
+                await onRestore(employee.id);
+            }
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    return (
+        <div className={`bg-white border rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 ${isArchived ? 'opacity-70 border-gray-300' : 'border-green-200'}`}>
+            <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl ${isArchived ? 'bg-gray-100' : 'bg-gradient-to-br from-green-50 to-green-100'}`}>
+                        🧑‍🌾
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                            {employee.name} {employee.surname}
+                            {/* IKONA FINANSÓW USUNIĘTA Z NAGŁÓWKA */}
+                        </h3>
+                        {employee.nickname && (
+                            <p className="text-sm text-gray-500 italic">"{employee.nickname}"</p>
+                        )}
+                    </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                    <button
+                        onClick={() => onEdit(employee)}
+                        className="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors text-base"
+                        title="Edytuj ✏️"
+                        disabled={isProcessing}
+                    >
+                        ✏️
+                    </button>
+                    
+                    {/* PRZYCISK MODALA FINANSÓW/PRACY - Używamy ikony 💼 */}
+                    <button
+                        onClick={() => onFinanceDetails(employee)}
+                        className="p-2 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors text-base"
+                        title="Detale Pracy / Finanse 💼"
+                        disabled={isProcessing}
+                    >
+                        💼
+                    </button>
+                    
+                    <button
+                        onClick={handleArchiveToggle}
+                        disabled={isProcessing}
+                        className={`p-2 rounded-lg transition-colors text-base ${
+                            isArchived 
+                                ? 'bg-lime-50 text-lime-600 hover:bg-lime-100' 
+                                : 'bg-red-50 text-red-600 hover:bg-red-100'
+                        } disabled:opacity-50`}
+                        title={isArchived ? "Przywróć (Aktywuj) 🔄" : "Archiwizuj (Dezaktywuj) 📦"}
+                    >
+                        {isProcessing ? (
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                        ) : isArchived ? (
+                            '🔄'
+                        ) : (
+                            '📦'
+                        )}
+                    </button>
+                </div>
+            </div>
+
+            <div className="mb-4 space-x-2">
+                {isEmployeeActive ? (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        <span className="mr-1">✅</span>
+                        Aktywny 🌱
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                        <span className="mr-1">❌</span>
+                        Zarchiwizowany 🍂
+                    </span>
+                )}
+                
+                {employee.role && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-lime-100 text-lime-700">
+                        <span className="mr-1">⚙️</span>
+                        {employee.role.roleName === 'Employee' ? 'Pracownik' : employee.role.roleName || 'Brak roli'}
+                    </span>
+                )}
+            </div>
+
+            <div className="space-y-3 pt-4 border-t border-gray-100">
+                {[
+                    { icon: '✉️', label: 'Email', value: employee.email, truncate: true },
+                    { icon: '📞', label: 'Telefon', value: employee.phoneNumber },
+                    { icon: '📅', label: 'Data utworzenia', value: employee.creationDate ? new Date(employee.creationDate).toLocaleDateString('pl-PL') : null },
+                    { icon: '🆔', label: 'ID', value: `#${employee.id}` }
+                ].map((item, index) => item.value && (
+                    <div key={index} className="flex items-center space-x-3 text-gray-600">
+                        <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 text-lg">
+                            {item.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-gray-500 uppercase">{item.label}</p>
+                            <p className={`text-sm font-medium text-gray-900 ${item.truncate ? 'truncate' : ''}`}>{item.value}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const AdvancePaySection = ({ employee, onAdvanceSave }) => {
+    const [advances, setAdvances] = useState([]);
+    const [advanceAmount, setAdvanceAmount] = useState('');
+    const [advanceDescription, setAdvanceDescription] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isPayingOff, setIsPayingOff] = useState(false); // NOWY STAN
+    const [error, setError] = useState('');
+
+    const fetchAdvances = useCallback(async () => {
+        setIsLoading(true);
+        setError('');
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/advances/user/${employee.id}/unsettled`, {
+                headers: getAuthHeaders()
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setAdvances(Array.isArray(data) ? data : []);
+            } else if (response.status === 404) {
+                setAdvances([]); 
+            } else {
+                setError('Błąd pobierania zaliczek: ' + response.statusText);
+            }
+        } catch (err) {
+            setError('Błąd sieci podczas pobierania zaliczek');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [employee.id]);
+
+    useEffect(() => {
+        fetchAdvances();
+    }, [fetchAdvances]);
+
+    const handleNewAdvance = async () => {
+        setError('');
+        
+        const amount = parseFloat(advanceAmount);
+        if (isNaN(amount) || amount <= 0) {
+            setError('Wprowadź prawidłową kwotę zaliczki');
+            return;
+        }
+
+        const payload = {
+            userId: employee.id,
+            amount: amount,
+            description: advanceDescription.trim() || null,
+            date: new Date().toISOString().split('T')[0] 
+        };
+
+        setIsSaving(true);
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/advances`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                setAdvanceAmount('');
+                setAdvanceDescription('');
+                await fetchAdvances(); 
+                onAdvanceSave('success', 'Zaliczka została pomyślnie dodana!');
+            } else {
+                let errorMessage = response.statusText;
+                try {
+                    const errorJson = await response.json();
+                    errorMessage = errorJson.error || errorJson.message || response.statusText;
+                } catch (e) {}
+                setError(`Błąd dodawania zaliczki: ${errorMessage}`);
+            }
+        } catch (err) {
+            setError('Błąd sieci podczas dodawania zaliczki.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+    
+    const handlePayOff = async () => {
+        setError('');
+        setIsPayingOff(true);
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/advances/user/${employee.id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+            });
+
+            if (response.ok) {
+                const sumBefore = unsettledSum;
+                await fetchAdvances(); // Odśwież listę, aby pokazać spłatę
+                onAdvanceSave('success', `Wszystkie zaliczki (${sumBefore} PLN) zostały spłacone pomyślnie!`);
+            } else {
+                let errorMessage = response.statusText;
+                try {
+                    const errorJson = await response.json();
+                    errorMessage = errorJson.error || errorJson.message || response.statusText;
+                } catch (e) {}
+                setError(`Błąd spłacania zaliczek: ${errorMessage}`);
+            }
+        } catch (err) {
+            setError('Błąd sieci podczas spłacania zaliczek.');
+        } finally {
+            setIsPayingOff(false);
+        }
+    };
+
+    const unsettledSum = useMemo(() => {
+        return advances.reduce((sum, advance) => sum + (advance.amount || 0), 0).toFixed(2);
+    }, [advances]);
+
+    const hasUnsettledAdvances = parseFloat(unsettledSum) > 0;
+
+    return (
+        <div className="space-y-6">
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                    ⚠️ {error}
+                </div>
+            )}
+            
+            {/* SUMA ZALICZEK */}
+            <div className="p-4 rounded-xl border-l-4 border-yellow-500 bg-yellow-50">
+                <p className="text-sm text-gray-800 flex items-center">
+                    <span className="mr-2 text-xl">💵</span> 
+                    Całkowita niespłacona zaliczka: <span className="ml-2 font-bold text-lg text-yellow-700">
+                        {unsettledSum} PLN
+                    </span>
+                </p>
+                <p className="text-xs text-gray-600 mt-1">Suma zaliczek oczekujących na rozliczenie.</p>
+            </div>
+
+            <div className="p-4 border rounded-xl shadow-sm bg-gray-50 space-y-4">
+                <h4 className="text-lg font-bold text-gray-800 flex items-center">
+                    ➕ Wypłać pracownikowi Zaliczkę
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="sm:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Kwota Zaliczki (PLN) *
+                        </label>
+                        <input
+                            type="number"
+                            value={advanceAmount}
+                            onChange={(e) => setAdvanceAmount(e.target.value)}
+                            placeholder="np. 50.00"
+                            step="10"
+                            min="1"
+                            disabled={isSaving || isLoading}
+                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
+                        />
+                    </div>
+                    <div className="sm:col-span-1 flex items-end">
+                         <button
+                            onClick={handleNewAdvance}
+                            disabled={isSaving || isLoading}
+                            className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2.5 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center shadow-md text-base"
+                        >
+                            {isSaving ? (
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                            ) : (
+                                'Zapisz 💾'
+                            )}
+                        </button>
+                    </div>
+                </div>
+                <InputField 
+                    label="Opis (opcjonalnie)" 
+                    name="advanceDescription" 
+                    value={advanceDescription}
+                    handleChange={(e) => setAdvanceDescription(e.target.value)} 
+                    isLoading={isSaving || isLoading}
+                    placeholder="np. Na paliwo, Na obiad"
+                />
+            </div>
+
+            {hasUnsettledAdvances && (
+                <div className="pt-4 border-t border-gray-100">
+                    <button
+                        onClick={handlePayOff}
+                        disabled={isPayingOff || isLoading}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center shadow-lg hover:shadow-xl"
+                    >
+                        {isPayingOff ? (
+                            <span className="flex items-center justify-center">
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                Spłacanie...
+                            </span>
+                        ) : (
+                            <span>Spłać wszystkie zaliczki ({unsettledSum} PLN) 💸</span>
+                        )}
+                    </button>
+                </div>
+            )}
+            
+            <h4 className="text-lg font-bold text-gray-800 mt-6 pt-4 border-t">
+                Historia Niespłaconych Zaliczek ({advances.length})
+            </h4>
+            
+            {isLoading ? (
+                <div className="text-center text-gray-500 py-4">Ładowanie historii...</div>
+            ) : advances.length === 0 ? (
+                <div className="text-center text-gray-500 py-4 border border-gray-100 rounded-xl">Brak niespłaconych zaliczek.</div>
+            ) : (
+                <ul className="space-y-3">
+                    {advances.map((advance, index) => (
+                        <li 
+                            key={index} 
+                            className="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm"
+                        >
+                            <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-gray-800">{advance.amount?.toFixed(2) || '0.00'} PLN</p>
+                                <p className="text-xs text-gray-500 truncate">{advance.description || 'Brak opisu'}</p>
+                            </div>
+                            <div className="text-sm text-gray-600 ml-4 flex-shrink-0">
+                                📅 {new Date(advance.date || advance.createdAt).toLocaleDateString('pl-PL')}
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
+
+const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsSave }) => {
+    const [activeTab, setActiveTab] = useState('workDetails'); 
+
+    const [workDetails, setWorkDetails] = useState(null);
+    const [isPaidHourly, setIsPaidHourly] = useState(true);
+    const [hourlyPay, setHourlyPay] = useState('');
+    const [payPerKilogram, setPayPerKilogram] = useState('');
+    const [isLoadingWorkDetails, setIsLoadingWorkDetails] = useState(false);
+    const [error, setError] = useState('');
+
+    const formatPay = (pay) => {
+        if (pay === null || pay === undefined || pay === '') return '';
+        return Number(pay).toFixed(2);
+    };
+
+    const currentRateText = useMemo(() => {
+        if (!workDetails) return null;
+
+        const isHourly = workDetails.isPaidHourly === true;
+        const rate = isHourly ? workDetails.hourlyPay : workDetails.payPerKilogram;
+        const rateUnit = isHourly ? 'PLN/godz' : 'PLN/kg';
+        
+        if (rate === null || rate === undefined) return null;
+        const formattedRate = Number(rate).toFixed(2); 
+
+        return {
+            rateText: `${formattedRate} ${rateUnit}`,
+            isCurrentHourly: isHourly
+        };
+    }, [workDetails]);
+
+    const fetchLatestWorkDetails = useCallback(async () => {
+        setIsLoadingWorkDetails(true);
+        setError('');
+        
+        setWorkDetails(null);
+        setIsPaidHourly(true);
+        setHourlyPay('');
+        setPayPerKilogram('');
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/work-details/user/${employee.id}/latest`, {
+                headers: getAuthHeaders()
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setWorkDetails(data);
+                
+                const isPaidHourlyFromBackend = data.isPaidHourly === true;
+                setIsPaidHourly(isPaidHourlyFromBackend);
+                
+                if (isPaidHourlyFromBackend) {
+                    setHourlyPay(formatPay(data.hourlyPay)); 
+                    setPayPerKilogram('');
+                } else {
+                    setPayPerKilogram(formatPay(data.payPerKilogram)); 
+                    setHourlyPay('');
+                }
+            } else if (response.status !== 204) {
+                console.error('Błąd pobierania detali:', response.status);
+            }
+        } catch (err) {
+            console.error('Błąd pobierania detali pracy:', err);
+            setError('Nie udało się pobrać detali pracy. Dodaj sposób rozliczania i stawkę');
+        } finally {
+            setIsLoadingWorkDetails(false);
+        }
+    }, [employee]);
+
+    useEffect(() => {
+        if (isOpen && employee) {
+            fetchLatestWorkDetails();
+            setActiveTab('workDetails');
+        } else if (!isOpen) {
+            setWorkDetails(null);
+            setIsPaidHourly(true);
+            setHourlyPay('');
+            setPayPerKilogram('');
+            setError('');
+        }
+    }, [isOpen, employee, fetchLatestWorkDetails]);
+
+    const handleSaveWorkDetails = async () => {
+        setError('');
+        
+        if (isPaidHourly && (!hourlyPay || parseFloat(hourlyPay) <= 0)) {
+            setError('Wprowadź prawidłową stawkę godzinową');
+            return;
+        }
+        if (!isPaidHourly && (!payPerKilogram || parseFloat(payPerKilogram) <= 0)) {
+            setError('Wprowadź prawidłową stawkę za kilogram');
+            return;
+        }
+
+        const payload = {
+            userDTO: employee, 
+            isPaidHourly: isPaidHourly,
+            hourlyPay: isPaidHourly ? parseFloat(hourlyPay) : null,
+            payPerKilogram: !isPaidHourly ? parseFloat(payPerKilogram) : null
+        };
+
+        setIsLoadingWorkDetails(true);
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/work-details`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                onWorkDetailsSave('success', 'Detale zatrudnienia zostały zapisane pomyślnie!');
+                await fetchLatestWorkDetails(); 
+            } else {
+                setError('Błąd zapisywania detali pracy');
+            }
+        } catch (err) {
+            setError('Błąd połączenia z serwerem');
+        } finally {
+            setIsLoadingWorkDetails(false);
+        }
+    };
+    
+    // Funkcja przekazywana do AdvancePaySection, aby wyświetlić Alert na poziomie modala
+    const handleFinanceAlert = (type, message) => {
+        onWorkDetailsSave(type, message); 
+    };
+
+    if (!isOpen || !employee) return null;
+
+    return (
+        <Modal 
+            isOpen={isOpen} 
+            onClose={onClose} 
+            title={<span><span className="mr-2 text-purple-600">💼</span>Detale Pracy i Finanse - {employee.name} {employee.surname}</span>}
+            headerColor="bg-purple-50"
+        >
+            <div className="space-y-6">
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p className="text-sm font-medium text-blue-900">
+                        👤 {employee.name} {employee.surname}
+                        {employee.nickname && <span className="italic text-blue-700"> "{employee.nickname}"</span>}
+                    </p>
+                    <p className="text-xs text-blue-700 mt-1">
+                        📧 {employee.email}
+                    </p>
+                </div>
+                
+                {/* ZAKŁADKI */}
+                <div className="flex border-b border-gray-200">
+                    <button
+                        onClick={() => setActiveTab('workDetails')}
+                        className={`py-2 px-4 text-sm font-semibold transition-colors ${
+                            activeTab === 'workDetails' 
+                                ? 'border-b-2 border-purple-600 text-purple-600' 
+                                : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                    >
+                        💼 Detale Pracy
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('advances')}
+                        className={`py-2 px-4 text-sm font-semibold transition-colors ${
+                            activeTab === 'advances' 
+                                ? 'border-b-2 border-yellow-600 text-yellow-600' 
+                                : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                    >
+                        💸 Zaliczki
+                    </button>
+                </div>
+
+                {activeTab === 'workDetails' && (
+                    <div className="space-y-6">
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                                ⚠️ {error}
+                            </div>
+                        )}
+                        
+                        {isLoadingWorkDetails ? (
+                            <div className="text-center py-8">
+                                <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
+                                <p className="text-gray-500 mt-4">Ładowanie detali...</p>
+                            </div>
+                        ) : (
+                            <>
+                                {currentRateText && (
+                                    <div className={`p-4 rounded-xl border-l-4 ${currentRateText.isCurrentHourly ? 'bg-blue-100 border-blue-500' : 'bg-green-100 border-green-500'} transition-all`}>
+                                        <p className="text-sm text-gray-800 flex items-center">
+                                            <span className="mr-2 text-xl">
+                                                {currentRateText.isCurrentHourly ? '⏰' : '⚖️'}
+                                            </span> 
+                                            Obecna stawka pracownika: 
+                                            <span className="ml-2 font-bold text-base">
+                                                {currentRateText.rateText}
+                                            </span>
+                                        </p>
+                                    </div>
+                                )}
+                                
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                        Typ Rozliczenia
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setIsPaidHourly(true);
+                                                setPayPerKilogram('');
+                                            }}
+                                            disabled={isLoadingWorkDetails}
+                                            className={`py-4 px-4 rounded-xl font-medium transition-all ${
+                                                isPaidHourly
+                                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            <div className="text-3xl mb-2">⏰</div>
+                                            <div className="text-sm font-bold">Płatność Godzinowa</div>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setIsPaidHourly(false);
+                                                setHourlyPay('');
+                                            }}
+                                            disabled={isLoadingWorkDetails}
+                                            className={`py-4 px-4 rounded-xl font-medium transition-all ${
+                                                !isPaidHourly
+                                                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg scale-105'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            <div className="text-3xl mb-2">⚖️</div>
+                                            <div className="text-sm font-bold">Płatność Za Kilogram</div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {isPaidHourly ? (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Stawka Godzinowa (PLN) *
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">
+                                                💼
+                                            </span>
+                                            <input
+                                                type="number"
+                                                value={hourlyPay}
+                                                onChange={(e) => setHourlyPay(e.target.value)}
+                                                placeholder="np. 25.50"
+                                                step="1"
+                                                min="10"
+                                                disabled={isLoadingWorkDetails}
+                                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Stawka za Kilogram (PLN) *
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">
+                                                🍎
+                                            </span>
+                                            <input
+                                                type="number"
+                                                value={payPerKilogram}
+                                                onChange={(e) => setPayPerKilogram(e.target.value)}
+                                                placeholder="np. 0.80"
+                                                step="0.01"
+                                                min="0.01"
+                                                disabled={isLoadingWorkDetails}
+                                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {workDetails && (
+                                    <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
+                                        <p>📅 Ostatnia aktualizacja detali pracy: {new Date(workDetails.createdAt).toLocaleDateString('pl-PL')}</p>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-3 pt-4 border-t">
+                                    <button
+                                        onClick={handleSaveWorkDetails}
+                                        disabled={isLoadingWorkDetails}
+                                        className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                                    >
+                                        {isLoadingWorkDetails ? (
+                                            <span className="flex items-center justify-center">
+                                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                Zapisywanie...
+                                            </span>
+                                        ) : (
+                                            <span>💾 Zapisz Nowe Detale</span>
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={onClose}
+                                        disabled={isLoadingWorkDetails}
+                                        className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
+                                    >
+                                        Zamknij
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {activeTab === 'advances' && (
+                    <AdvancePaySection 
+                        employee={employee}
+                        onAdvanceSave={handleFinanceAlert} 
+                    />
+                )}
+
+            </div>
+        </Modal>
+    );
+};
 
 export default function EmployeeManagement() {
     const [employees, setEmployees] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showArchived, setShowArchived] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isWorkDetailsModalOpen, setIsWorkDetailsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false); 
+    const [isFinanceModalOpen, setIsFinanceModalOpen] = useState(false); 
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState({ type: '', message: '' });
@@ -842,7 +1086,7 @@ export default function EmployeeManagement() {
     
     const activeCount = allEmployees.filter(e => e.active).length;
     const archivedCount = allEmployees.filter(e => !e.active).length;
-
+    
     const handleSaveEmployee = useCallback(async (employeeData) => {
         setIsLoading(true);
         closeAlert();
@@ -920,17 +1164,24 @@ export default function EmployeeManagement() {
         setSelectedEmployee(null);
     }, []);
 
-    const handleWorkDetails = useCallback((employee) => {
+    const handleFinanceDetails = useCallback((employee) => {
         setSelectedEmployee(employee);
-        setIsWorkDetailsModalOpen(true);
-    }, []);
+        setIsFinanceModalOpen(true);
+        closeAlert();
+    }, [closeAlert]);
 
-    const handleWorkDetailsSave = useCallback(() => {
-        setAlert({ type: 'success', message: 'Detale zatrudnienia zostały zapisane pomyślnie!' });
-        setIsWorkDetailsModalOpen(false);
+    const closeFinanceModal = useCallback(() => {
+        setIsFinanceModalOpen(false);
         setSelectedEmployee(null);
     }, []);
 
+    const handleFinanceSave = useCallback((type, message) => {
+        setAlert({ type, message });
+    }, []);
+
+
+    // --- Renderowanie ---
+    
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-50 to-lime-100 p-6 font-sans">
             <div className="max-w-7xl mx-auto">
@@ -1023,7 +1274,7 @@ export default function EmployeeManagement() {
                     ) : filteredEmployees.length === 0 ? (
                         <EmptyState 
                             searchTerm={searchTerm} 
-                            employeesCount={employees.length}
+                            employeesCount={allEmployees.length}
                             showArchived={showArchived} 
                             onAddClick={openModal} 
                         />
@@ -1036,7 +1287,7 @@ export default function EmployeeManagement() {
                                     onEdit={openModal}
                                     onArchive={(id) => toggleEmployeeStatus(id, false)}
                                     onRestore={(id) => toggleEmployeeStatus(id, true)}
-                                    onWorkDetails={handleWorkDetails}
+                                    onFinanceDetails={handleFinanceDetails} 
                                 />
                             ))}
                         </div>
@@ -1046,7 +1297,7 @@ export default function EmployeeManagement() {
                 <Modal
                     isOpen={isModalOpen}
                     onClose={closeModal}
-                    title={<span><span className="mr-2 text-green-600">🌱</span>Dodaj Nowego Pracownika ✨</span>}
+                    title={<span><span className="mr-2 text-green-600">🌱</span>{selectedEmployee ? 'Edytuj Pracownika' : 'Dodaj Nowego Pracownika'} ✨</span>}
                     headerColor="bg-green-50"
                 >
                     <EmployeeForm
@@ -1057,14 +1308,11 @@ export default function EmployeeManagement() {
                     />
                 </Modal>
 
-                <WorkDetailsModal
-                    isOpen={isWorkDetailsModalOpen}
-                    onClose={() => {
-                        setIsWorkDetailsModalOpen(false);
-                        setSelectedEmployee(null);
-                    }}
+                <EmployeeFinanceModal
+                    isOpen={isFinanceModalOpen}
+                    onClose={closeFinanceModal}
                     employee={selectedEmployee}
-                    onSave={handleWorkDetailsSave}
+                    onWorkDetailsSave={handleFinanceSave}
                 />
             </div>
         </div>

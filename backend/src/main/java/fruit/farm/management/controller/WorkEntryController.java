@@ -115,7 +115,7 @@ public class WorkEntryController {
         } catch (Exception e) {
             log.error("Error creating bulk work entries: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Creation failed: " + e.getMessage()));
+                    .body(Map.of("error", "Błąd w rejestracji pracy: " + e.getMessage()));
         }
     }
     @PutMapping("/{id}")
