@@ -53,7 +53,7 @@ public class SectorController {
     public ResponseEntity<List<SectorDTO>> getAllSectorsByUserId() {
         List<SectorDTO> sectorDTOS;
         try {
-            Long currentUserId = userService.getLoggedUser().getId();
+                Long currentUserId = userService.getLoggedUser().getId();
             sectorDTOS = sectorService.getAllSectorsByUserId(currentUserId);
         } catch (Exception e) {
             log.error("Error getting all sectors", e);

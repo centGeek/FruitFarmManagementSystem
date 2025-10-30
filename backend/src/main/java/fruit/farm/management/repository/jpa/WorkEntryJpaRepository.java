@@ -1,5 +1,7 @@
 package fruit.farm.management.repository.jpa;
 
+import fruit.farm.management.dto.AdvancePayDTO;
+import fruit.farm.management.entity.AdvancePayEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,11 +32,13 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
     @Query("SELECT w FROM WorkEntryEntity w WHERE " +
             "(:year IS NULL OR YEAR(w.workDate) = :year) AND " +
             "(:month IS NULL OR MONTH(w.workDate) = :month) AND " +
-            "(:sectorId IS NULL OR w.sector.sectorId = :sectorId)")
+            "(:sectorId IS NULL OR w.sector.sectorId = :sectorId) AND" +
+            "(w.user.gardener.id = :userId)")
     List<WorkEntryEntity> findAllExpensesByGivenDate(
             @Param("year") Integer year,
             @Param("month") Integer month,
-            @Param("sectorId") Long sectorId
+            @Param("sectorId") Long sectorId,
+            @Param("userId") Long userId
     );
 
     @Query("SELECT w FROM WorkEntryEntity w WHERE " +
@@ -71,4 +76,15 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
             @Param("gardenerId") Long gardenerId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+    @Query("""
+            SELECT we FROM WorkEntryEntity we
+            WHERE we.user.id =:userId and we.isPaid = FALSE
+            """)
+    List<WorkEntryEntity> getUnpaidEntriesByUserId(@Param("userId") Long userId);
+
+    @Query("""
+            SELECT ae FROM AdvancePayEntity ae
+            WHERE ae.isSettled = FALSE and ae.user.id = :userId
+            """)
+    List<AdvancePayEntity> getUnsettledAdvancesByUserId(Long userId);
 }

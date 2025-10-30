@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-// Zakładane importy
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs"; 
 import BasicMap from './BasicMap'; 
-import LocationSearch from './LocationSearch'; // Komponent do wyszukiwania
+import LocationSearch from './LocationSearch';
 import { MapPin } from 'lucide-react';
-
-// UWAGA: Usunięto import L z tego pliku, ponieważ logika Leaflet i ikon jest w BasicMap.
-
-// ---------------------------
-// KOMPONENTY POMOCNICZE
-// ---------------------------
 
 const Alert = React.memo(({ type, message, onClose }) => {
     if (!message) return null;
@@ -77,16 +70,10 @@ const LoadingState = React.memo(() => (
     </div>
 ));
 
-
-// ---------------------------
-// GŁÓWNY KOMPONENT
-// ---------------------------
-
 export default function GardenerProfile() {
     const defaultCenter = useMemo(() => [52.2297, 21.0122], []); // Warszawa
     const [mapInstance, setMapInstance] = useState(null);
 
-    // Stan do kontrolowania widoku mapy (center, zoom, klucz do wymuszenia centrowania)
     const [mapView, setMapView] = useState({
         center: defaultCenter, 
         zoom: 6,
@@ -115,7 +102,6 @@ export default function GardenerProfile() {
 
     const closeAlert = useCallback(() => setAlert({ type: '', message: '' }), []);
 
-    // Pobranie danych profilu
     const fetchProfile = useCallback(async () => {
         setIsLoading(true);
         closeAlert();
@@ -151,7 +137,6 @@ export default function GardenerProfile() {
                 setProfileData(profileInfo);
                 setOriginalData(profileInfo);
                 
-                // Aktualizacja stanu mapy po załadowaniu danych
                 setMapView({ center: [initialLat, initialLon], zoom: initialZoom, viewUpdateKey: Date.now() });
 
             } else {
@@ -170,7 +155,6 @@ export default function GardenerProfile() {
     }, [fetchProfile]);
 
 
-    // Sprawdzenie czy są zmiany
     useEffect(() => {
         if (!originalData) return;
 
@@ -209,7 +193,6 @@ export default function GardenerProfile() {
             localityName: locality,
         }));
         
-        // Zmiana stanu mapy, aby wyśrodkować i zaktualizować marker w BasicMap
         setMapView(prev => ({ 
             center: [location.lat, location.lon], 
             zoom: 13, 
@@ -234,7 +217,6 @@ export default function GardenerProfile() {
         
         if (!profileData.phoneNumber.trim()) newErrors.phoneNumber = 'Numer telefonu jest wymagany';
         
-        // Walidacja, czy lokalizacja została zmieniona z domyślnej
         if (!profileData.localityName || profileData.localityName === 'Nieustawiona' || (profileData.latitude === defaultCenter[0] && profileData.longitude === defaultCenter[1] && originalData)) {
              newErrors.localityName = 'Wybierz miejscowość, ustawiając ją na mapie/wyszukując.';
         }
@@ -288,7 +270,7 @@ export default function GardenerProfile() {
             if (response.ok) {
                 setAlert({ type: 'success', message: 'Profil został zaktualizowany pomyślnie!' });
                 
-                await fetchProfile(); // Ponowne załadowanie danych
+                await fetchProfile();
                 
                 setProfileData(prev => ({
                     ...prev,
@@ -296,7 +278,6 @@ export default function GardenerProfile() {
                     confirmPassword: ''
                 }));
                 
-                // Opcjonalne odświeżenie widoku po zapisie
                 setMapView(prev => ({ 
                     center: [profileData.latitude, profileData.longitude], 
                     zoom: 13, 
@@ -320,7 +301,6 @@ export default function GardenerProfile() {
             setErrors({});
             closeAlert();
             
-            // Cofnięcie widoku mapy do stanu oryginalnego
             setMapView(prev => ({ 
                 center: [originalData.latitude, originalData.longitude], 
                 zoom: 13, 
@@ -345,7 +325,7 @@ export default function GardenerProfile() {
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-50 to-lime-100 p-6 font-sans">
             <div className="max-w-4xl mx-auto">
                 <header className="mb-8">
-                    <h1 className="text-4xl font-extrabold text-gray-900 mb-2 flex items-center">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
                         <span className="text-green-600 mr-3">👤</span>
                         Mój Profil
                     </h1>
@@ -364,7 +344,6 @@ export default function GardenerProfile() {
 
                 <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
                     
-                    {/* Informacje Podstawowe */}
                     <div className="mb-8 pb-6 border-b border-gray-200">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                             <span className="mr-2">📋</span>
@@ -376,7 +355,6 @@ export default function GardenerProfile() {
                         </div>
                     </div>
 
-                    {/* Dane kontaktowe */}
                     <div className="mb-8 pb-6 border-b border-gray-200">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                             <span className="mr-2">📞</span>
@@ -391,7 +369,6 @@ export default function GardenerProfile() {
                         </div>
                     </div>
 
-                    {/* Lokalizacja */}
                     <div className="mb-8 pb-6 border-b border-gray-200">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                             <MapPin className="mr-2 text-red-500 w-6 h-6" />
@@ -401,7 +378,6 @@ export default function GardenerProfile() {
                             Użyj pola wyszukiwania poniżej, aby znaleźć swoją miejscowość. Twoja aktualna lokalizacja: {profileData.localityName}
                         </p>
                         
-                        {/* WYSZUKIWARKA: Nad mapą i interaktywna. */}
                         <div className="mb-4 relative z-10"> 
                             <label htmlFor="location-search" className="block text-sm font-medium text-gray-700 mb-2">
                                 Wyszukaj Miejscowość
@@ -414,18 +390,16 @@ export default function GardenerProfile() {
                             )}
                         </div>
                         
-                        {/* Mapa: Użycie BasicMap i przekazanie propsów markera/widoku */}
                         <div className="rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0" style={{ height: '400px' }}>
                             <BasicMap
-                                center={mapView.center} // Kontrolowane przez stan mapView
+                                center={mapView.center}
                                 zoom={mapView.zoom}
                                 onMapLoad={setMapInstance}
                                 style={{ height: '400px', width: '100%' }}
                                 
-                                // Przekazywanie danych markera do BasicMap
                                 markerPosition={[profileData.latitude, profileData.longitude]}
                                 markerPopupContent={`📍 ${profileData.localityName || 'Nieznana lokalizacja'}`}
-                                viewUpdateKey={mapView.viewUpdateKey} // Klucz do odświeżania widoku/markera
+                                viewUpdateKey={mapView.viewUpdateKey}
                             />
                         </div>
 
@@ -447,7 +421,6 @@ export default function GardenerProfile() {
                         </p>
                     </div>
 
-                    {/* Zmiana hasła */}
                     <div className="mb-8">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                             <span className="mr-2">🔒</span>
@@ -466,7 +439,6 @@ export default function GardenerProfile() {
                         </div>
                     </div>
 
-                    {/* Status zmian i Przyciski akcji */}
                     {hasChanges && (
                         <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                             <p className="text-sm text-amber-800 flex items-center">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Calendar, Clock, Users, DollarSign, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, X, Loader2 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
-import { Alert} from "../utils/common";
+import { Alert } from "../utils/common";
 
 import ErrorPage from './ErrorPage'; 
 
@@ -59,7 +59,7 @@ const StatCard = ({ icon: Icon, count, label, color, isCurrency = false }) => {
         red: 'from-red-100 to-red-200 text-red-600',
         indigo: 'from-indigo-100 to-indigo-200 text-indigo-600'
     };
-      
+    
     return (
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
             <div className="flex items-center space-x-4">
@@ -68,7 +68,7 @@ const StatCard = ({ icon: Icon, count, label, color, isCurrency = false }) => {
                 </div>
                 <div>
                     <p className="text-3xl font-extrabold text-gray-900">
-                         {isCurrency ? `${parseFloat(count).toFixed(2)} zł` : count}
+                            {isCurrency ? `${parseFloat(count).toFixed(2)} zł` : count}
                     </p>
                     <p className="text-sm text-gray-500">{label}</p>
                 </div>
@@ -269,7 +269,7 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
 
 const CalendarEvent = ({ entry, onClick, onTogglePaid }) => {
     const paidClass = entry.isPaid ? 'bg-emerald-100 border-emerald-400 text-emerald-800' : 'bg-amber-100 border-amber-400 text-amber-800';
-      
+    
     return (
         <div 
             onClick={onClick}
@@ -364,7 +364,7 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onTogglePaid, cur
                     const totalHours = entries.reduce((sum, e) => sum + (e.duration || 0), 0);
                     const totalSalary = entries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0); 
                     const dateStr = formatDateToLocal(day);
-                      
+                    
                     return (
                         <div key={idx} className={`border-r border-b border-gray-200 min-h-64 ${isToday(day) ? 'bg-green-50' : 'bg-white'}`}>
                             <div className={`p-3 border-b border-gray-200 ${isToday(day) ? 'bg-green-100' : 'bg-gray-50'}`}>
@@ -403,14 +403,94 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onTogglePaid, cur
     );
 };
 
-// Zmieniony: Dodano onOpenPayAllMonthModal
-const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePaid, onOpenPayAllModal, onOpenPayAllMonthModal }) => {
+// ZAKTUALIZOWANY KOMPONENT: AdvancePayModal
+const AdvancePayModal = ({ isOpen, onClose, employee, onConfirm, isLoading }) => {
+    const [amount, setAmount] = useState('');
+    const [description, setDescription] = useState('');
+
+    useEffect(() => {
+        if (!isOpen) {
+            setAmount('');
+            setDescription('');
+        }
+    }, [isOpen]);
+
+    if (!isOpen || !employee) return null;
+
+    const handleSubmit = () => {
+        const amountNum = parseFloat(amount);
+        if (isNaN(amountNum) || amountNum <= 0) {
+            alert('Podaj prawidłową kwotę zaliczki większą od 0.');
+            return;
+        }
+        onConfirm(employee.id, amountNum, description);
+    };
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} title={`Wypłata zaliczki dla: ${employee.name} ${employee.surname}`} size="medium">
+            <div className="space-y-4">
+                <div className="bg-blue-50 border border-blue-300 rounded-xl p-4">
+                    <h3 className="text-base font-medium text-blue-800 flex items-center mb-2">
+                        <DollarSign className="mr-2 text-blue-600" size={20} /> Wypłata zaliczki
+                    </h3>
+                    <p className="text-sm text-blue-700">
+                        Wypłać pracownikowi część należności jako zaliczkę. Kwota ta zostanie odliczona od kolejnej wypłaty.
+                    </p>
+                </div>
+
+                <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Kwota zaliczki (zł) *</label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder="np. 500.00"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold"
+                    />
+                </div>
+
+                <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Opis (opcjonalnie)</label>
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="np. Zaliczka na poczet wypłaty tygodniowej..."
+                        rows="3"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    />
+                </div>
+
+                <div className="mt-6 flex space-x-3">
+                    <button
+                        onClick={handleSubmit}
+                        disabled={isLoading || !amount || parseFloat(amount) <= 0}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center shadow-md"
+                    >
+                        {isLoading ? (
+                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        ) : (
+                            <DollarSign className="mr-2" size={20} />
+                        )}
+                        {isLoading ? 'Przetwarzanie...' : 'Potwierdź wypłatę zaliczki'}
+                    </button>
+                    <button
+                        onClick={onClose}
+                        disabled={isLoading}
+                        className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
+                    >
+                        Anuluj
+                    </button>
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
+// ZAKTUALIZOWANY KOMPONENT: EventDetailsModal
+const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePaid, onOpenPayAllModal, onOpenPayAllMonthModal, onOpenAdvancePayModal }) => {
     if (!entry) return null;
-
-
-    console.log('🔍 EventDetailsModal - entry:', entry);
-    console.log('🔍 EventDetailsModal - entry.user:', entry.user);
-    console.log('🔍 EventDetailsModal - entry.user?.id:', entry.user?.id);
 
     return (
         <Modal isOpen={!!entry} onClose={onClose} title={`Szczegóły wpisu dla: ${entry.user?.name} ${entry.user?.surname}`} size="medium">
@@ -467,7 +547,7 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePaid, onO
                         <Trash2 className="inline mr-1" size={16} /> Usuń
                     </button>
                 </div>
-                
+                    
                 <div className={`p-4 rounded-xl border ${entry.isPaid ? 'bg-emerald-50 border-emerald-300' : 'bg-amber-50 border-amber-300'}`}>
                     <div className="flex items-center justify-between">
                         <div className="mt-1">
@@ -489,23 +569,30 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePaid, onO
                             </button>
                         </div>
                     </div>
-                    {/* NOWY BLOK PRZYCISKÓW MASOWEJ PŁATNOŚCI */}
-                    <div className="mt-4 pt-4 border-t border-gray-200 flex space-x-2">
-                        {/* Zapłać za wszystko */}
-                        <button
+                    {/* ZAKTUALIZOWANY BLOK PRZYCISKÓW MASOWEJ PŁATNOŚCI */}
+                <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+                    <p className="text-xs font-medium text-gray-500 uppercase">Szybkie płatności dla pracownika:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                        <button 
                             onClick={() => onOpenPayAllModal(entry.user?.id)}
-                            className="px-4 py-2 rounded-lg font-medium transition-colors flex-1 bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center justify-center text-sm"
+                            className="w-full py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded-lg text-sm font-medium transition-colors"
                         >
-                            <DollarSign size={16} className="mr-1" /> Zapłać za wszystko (do dzisiaj)
+                            Zapłać za wszystko (zaległe)
                         </button>
-                        {/* Zapłać za miesiąc (Nowy) */}
-                        <button
+                        <button 
                             onClick={() => onOpenPayAllMonthModal(entry.user?.id)}
-                            className="px-4 py-2 rounded-lg font-medium transition-colors flex-1 bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center justify-center text-sm"
+                            className="w-full py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded-lg text-sm font-medium transition-colors"
                         >
-                            <Calendar size={16} className="mr-1" /> Zapłać za miesiąc
+                            Zapłać za miesiąc
                         </button>
                     </div>
+                    <button 
+                        onClick={() => onOpenAdvancePayModal(entry.user?.id)}
+                        className="w-full py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
+                    >
+                        <DollarSign size={16} className="mr-2" /> Wypłać część (zaliczka)
+                    </button>
+                </div>
                 </div>
             </div>
         </Modal>
@@ -513,8 +600,7 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePaid, onO
 };
 
 
-// NOWY KOMPONENT: Modal Potwierdzenia Płatności
-const PayConfirmationModal = ({ isOpen, onClose, employee, entries, totalAmount, paymentType, onConfirm, isLoading }) => {
+const PayConfirmationModal = ({ isOpen, onClose, employee, entries, totalGrossAmount, advances, netAmount, paymentType, onConfirm, isLoading }) => {
     if (!isOpen || !employee || entries.length === 0) return null;
     
     const isMonthPayment = paymentType === 'month';
@@ -523,8 +609,8 @@ const PayConfirmationModal = ({ isOpen, onClose, employee, entries, totalAmount,
         : `Potwierdź płatność za wszystkie zaległe wpisy dla: ${employee.name} ${employee.surname}`;
         
     const description = isMonthPayment
-        ? `Ta operacja oznaczy wszystkie: ${entries.length} nieopłacone wpisy z miesiąca **${new Date().toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' })}** jako opłacone. Łączna kwota do zapłaty to:`
-        : `Ta operacja oznaczy wszystkie: ${entries.length} nieopłacone wpisy jako opłacone. Łączna kwota do zapłaty to:`;
+        ? `Ta operacja oznaczy wszystkie: ${entries.length} nieopłacone wpisy z bieżącego miesiąca jako opłacone.`
+        : `Ta operacja oznaczy wszystkie: ${entries.length} nieopłacone wpisy do dzisiaj jako opłacone.`;
 
     const confirmButtonText = isLoading 
         ? 'Przetwarzanie...' 
@@ -532,11 +618,13 @@ const PayConfirmationModal = ({ isOpen, onClose, employee, entries, totalAmount,
         
     const listTitle = isMonthPayment ? 'Lista wpisów z bieżącego miesiąca:' : 'Lista wszystkich zaległych wpisów:';
 
+    const totalAdvanceAmount = advances.reduce((sum, a) => sum + (parseFloat(a.amount) || 0), 0);
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={title} size="medium">
             <div className="space-y-4">
                 <div className="bg-red-50 border border-red-300 rounded-xl p-4">
-                    <p className="text-sm font-medium text-yellow-700 mb-2">
+                    <p className="text-sm font-medium text-red-700 mb-2">
                         ⚠️ WAŻNE: Upewnij się, że płatność została faktycznie wykonana.
                     </p>
                 </div>
@@ -546,8 +634,38 @@ const PayConfirmationModal = ({ isOpen, onClose, employee, entries, totalAmount,
                         <DollarSign className="mr-2" size={20} /> Podsumowanie Płatności
                     </h3>
                     <p className="text-sm text-amber-700">{description}</p>
-                    <p className="text-xl font-extrabold text-red-700 mt-2">{totalAmount.toFixed(2)} zł</p>
+                    
+                    <div className="mt-3 flex justify-between items-center">
+                        <span className="text-sm text-amber-800 font-medium">Łączne wynagrodzenie: </span>
+                        <span className="text-lg font-extrabold text-amber-800">{totalGrossAmount.toFixed(2)} zł</span>
+                    </div>
+
+                    {totalAdvanceAmount > 0 && (
+                        <div className="mt-1 flex justify-between items-center border-t border-amber-300 pt-2">
+                            <span className="text-sm text-red-700 font-medium">Odliczone zaliczki:</span>
+                            <span className="text-lg font-extrabold text-red-700">-{totalAdvanceAmount.toFixed(2)} zł</span>
+                        </div>
+                    )}
+                    
+                    <div className="mt-3 flex justify-between items-center border-t border-amber-300 pt-2">
+                        <span className="text-lg text-green-700 font-bold">Kwota do zapłaty:</span>
+                        <span className="text-2xl font-extrabold text-green-700">{netAmount.toFixed(2)} zł</span>
+                    </div>
                 </div>
+
+                {advances.length > 0 && (
+                    <div className="max-h-40 overflow-y-auto space-y-2 p-2 border border-blue-200 rounded-xl bg-blue-50">
+                        <p className="text-sm font-medium text-blue-700 flex items-center">
+                            <DollarSign size={16} className="mr-1" /> Nieuregulowane zaliczki:
+                        </p>
+                        {advances.map(advance => (
+                            <div key={advance.id} className="flex justify-between items-center text-xs p-2 bg-blue-100 rounded-lg border-l-4 border-blue-400">
+                                <span>{new Date(advance.createdAt).toLocaleDateString()} - {advance.description || 'Brak opisu'}</span>
+                                <span className="font-bold text-red-700">-{parseFloat(advance.amount).toFixed(2)} zł</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 <div className="max-h-60 overflow-y-auto space-y-2 p-2 border border-gray-200 rounded-xl bg-white">
                     <p className="text-sm font-medium text-gray-700">{listTitle}</p>
@@ -600,10 +718,15 @@ export default function WorkEntryManagement() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingEntry, setEditingEntry] = useState(null);
     
-    // Zmienione stany dla masowej płatności
     const [isPayAllModalOpen, setIsPayAllModalOpen] = useState(false);
     const [selectedEmployeeForPayment, setSelectedEmployeeForPayment] = useState(null);
-    const [paymentModalType, setPaymentModalType] = useState('all'); // 'all' lub 'month'
+    const [paymentModalType, setPaymentModalType] = useState('all');
+    const [unpaidEntriesForPayment, setUnpaidEntriesForPayment] = useState([]);
+    const [unsettledAdvances, setUnsettledAdvances] = useState([]); 
+
+    const [isAdvancePayModalOpen, setIsAdvancePayModalOpen] = useState(false);
+    const [selectedEmployeeForAdvance, setSelectedEmployeeForAdvance] = useState(null);
+
 
     const closeAlert = useCallback(() => setAlert({ type: '', message: '' }), []);
 
@@ -636,66 +759,57 @@ export default function WorkEntryManagement() {
         }
     }, []);
 
-    const fetchEmployeeWorkDetails = useCallback(async (userId) => {
-    try {
-        const headers = getAuthHeaders();
-        const response = await fetch(`${BACKEND_URL}/api/work-details/user/${userId}/latest`, {
-            method: 'GET',
-            headers: headers,
-        });
+    const fetchEmployees = useCallback(async () => {
+        console.log('[FETCH] Rozpoczynam pobieranie pracowników');
+        try {
+            const headers = getAuthHeaders();
+            const response = await fetch(`${BACKEND_URL}/api/users/active`, {
+                method: 'GET',
+                headers: headers,
+            });
 
-        if (response.ok) {
-            const data = await response.json();
-            return data;
-        } else if (response.status === 204) {
-            return null;
-        }
-    } catch (error) {
-        console.error(`[FETCH] Błąd pobierania WorkDetails dla użytkownika ${userId}:`, error);
-        return null;
-    }
-}, []);
-
-const fetchEmployees = useCallback(async () => {
-    console.log('[FETCH] Rozpoczynam pobieranie pracowników');
-    try {
-        const headers = getAuthHeaders();
-        const response = await fetch(`${BACKEND_URL}/api/users/active`, {
-            method: 'GET',
-            headers: headers,
-        });
-
-        if (response.ok) {
-            const employeesData = await response.json();
-            
-            const employeesWithDetails = await Promise.all(
-                employeesData.map(async (emp) => {
-                    const workDetails = await fetchEmployeeWorkDetails(emp.id);
-                    return {
-                        ...emp,
-                        isPaidHourly: workDetails?.isPaidHourly !== false // domyślnie true
-                    };
-                })
-            );
-            
-            console.log('[FETCH] ✅ Pracownicy z WorkDetails:', employeesWithDetails);
-            setEmployees(employeesWithDetails);
-        } else {
-            const errorText = await response.text();
-            console.error(`[FETCH] ❌ Błąd HTTP dla pracowników: ${response.status}`, errorText);
-            setAlert({ type: 'error', message: `Błąd ładowania pracowników: ${response.status}` });
+            if (response.ok) {
+                const employeesData = await response.json();
+                console.log('[FETCH] ✅ Pracownicy:', employeesData);
+                setEmployees(employeesData);
+            } else {
+                const errorText = await response.text();
+                console.error(`[FETCH] ❌ Błąd HTTP dla pracowników: ${response.status}`, errorText);
+                setAlert({ type: 'error', message: `Błąd ładowania pracowników: ${response.status}` });
+                setEmployees([]);
+            }
+        } catch (error) {
+            console.error('[FETCH] ❌ Błąd połączenia dla pracowników:', error);
+            setAlert({ type: 'error', message: 'Błąd połączenia z serwerem podczas ładowania pracowników.' });
             setEmployees([]);
         }
-    } catch (error) {
-        console.error('[FETCH] ❌ Błąd połączenia dla pracowników:', error);
-        setAlert({ type: 'error', message: 'Błąd połączenia z serwerem podczas ładowania pracowników.' });
-        setEmployees([]);
-    }
-}, [fetchEmployeeWorkDetails]);
+    }, []);
 
-const fetchSectors = useCallback(async () => {
-    await fetchData(setSectors, '/api/sectors', 'sektorów');
-}, [fetchData]);
+    const fetchSectors = useCallback(async () => {
+        await fetchData(setSectors, '/api/sectors', 'sektorów');
+    }, [fetchData]);
+
+    const fetchUnsettledAdvances = useCallback(async (userId) => {
+        try {
+            const headers = getAuthHeaders();
+            const response = await fetch(`${BACKEND_URL}/api/advances/user/${userId}/unsettled`, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`✅ Załadowano ${data.length} nieuregulowanych zaliczek dla pracownika ${userId}`);
+                setUnsettledAdvances(data);
+            } else {
+                console.error(`❌ Błąd pobierania nieuregulowanych zaliczek: ${response.status}`);
+                setUnsettledAdvances([]);
+            }
+        } catch (error) {
+            console.error("❌ Błąd połączenia (zaliczki):", error);
+            setUnsettledAdvances([]);
+        }
+    }, []);
 
     useEffect(() => {
         fetchEmployees();
@@ -703,59 +817,59 @@ const fetchSectors = useCallback(async () => {
     }, [fetchEmployees, fetchSectors]);
 
     const fetchWorkEntries = useCallback(async () => {
-    console.log('[FETCH] Rozpoczynam pobieranie wpisów pracy dla tygodnia');
-    setIsLoading(true);
-    
-    try {
-        const startOfWeek = new Date(currentDate);
-        startOfWeek.setHours(0, 0, 0, 0);
-        const day = (startOfWeek.getDay() + 6) % 7;
-        startOfWeek.setDate(startOfWeek.getDate() - day);
+        console.log('[FETCH] Rozpoczynam pobieranie wpisów pracy dla tygodnia');
+        setIsLoading(true);
         
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-        endOfWeek.setHours(23, 59, 59, 999);
-        
-        const formatDate = (date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        };
-        
-        const startDateStr = formatDate(startOfWeek);
-        const endDateStr = formatDate(endOfWeek);
-        
-        console.log(`[FETCH] Pobieranie wpisów od ${startDateStr} do ${endDateStr}`);
-        
-        const headers = getAuthHeaders();
-        const response = await fetch(
-            `${BACKEND_URL}/api/work-entries/week?startDate=${startDateStr}&endDate=${endDateStr}`, 
-            {
-                method: 'GET',
-                headers: headers,
-            }
-        );
+        try {
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setHours(0, 0, 0, 0);
+            const day = (startOfWeek.getDay() + 6) % 7;
+            startOfWeek.setDate(startOfWeek.getDate() - day);
+            
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            endOfWeek.setHours(23, 59, 59, 999);
+            
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            const startDateStr = formatDate(startOfWeek);
+            const endDateStr = formatDate(endOfWeek);
+            
+            console.log(`[FETCH] Pobieranie wpisów od ${startDateStr} do ${endDateStr}`);
+            
+            const headers = getAuthHeaders();
+            const response = await fetch(
+                `${BACKEND_URL}/api/work-entries/week?startDate=${startDateStr}&endDate=${endDateStr}`, 
+                {
+                    method: 'GET',
+                    headers: headers,
+                }
+            );
 
-        console.log(`[FETCH] Odpowiedź serwera dla wpisów - Status: ${response.status}`);
-        if (response.ok) {
-            const data = await response.json();
-            console.log('[FETCH] ✅ Załadowano wpisy pracy:', data);
-            setWorkEntries(Array.isArray(data) ? data : []);
-        } else {
-            const errorText = await response.text();
-            console.error(`[FETCH] ❌ Błąd HTTP dla wpisów: ${response.status}`, errorText);
-            setAlert({ type: 'error', message: `Błąd ładowania wpisów: ${response.status}` });
+            console.log(`[FETCH] Odpowiedź serwera dla wpisów - Status: ${response.status}`);
+            if (response.ok) {
+                const data = await response.json();
+                console.log('[FETCH] ✅ Załadowano wpisy pracy:', data);
+                setWorkEntries(Array.isArray(data) ? data : []);
+            } else {
+                const errorText = await response.text();
+                console.error(`[FETCH] ❌ Błąd HTTP dla wpisów: ${response.status}`, errorText);
+                setAlert({ type: 'error', message: `Błąd ładowania wpisów: ${response.status}` });
+                setWorkEntries([]);
+            }
+        } catch (error) {
+            console.error('[FETCH] ❌ Błąd połączenia dla wpisów:', error);
+            setAlert({ type: 'error', message: 'Błąd połączenia z serwerem podczas ładowania wpisów.' });
             setWorkEntries([]);
+        } finally {
+            setIsLoading(false);
         }
-    } catch (error) {
-        console.error('[FETCH] ❌ Błąd połączenia dla wpisów:', error);
-        setAlert({ type: 'error', message: 'Błąd połączenia z serwerem podczas ładowania wpisów.' });
-        setWorkEntries([]);
-    } finally {
-        setIsLoading(false);
-    }
-}, [currentDate]);
+    }, [currentDate]);
 
     useEffect(() => {
         fetchWorkEntries();
@@ -804,7 +918,7 @@ const fetchSectors = useCallback(async () => {
 
         const entriesToSend = entries.map(entry => {
         const fullEmployee = employees.find(emp => emp.id === entry.employeeId);
-            
+        
         return {
             user: fullEmployee ? {
                 id: fullEmployee.id,
@@ -1039,7 +1153,8 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
 
     try {
         const headers = getAuthHeaders();
-        const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-all`, {
+        // Endpoint do płacenia za wszystko (i rozliczania zaliczek)
+        const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-all-and-settle`, { 
             method: 'PATCH',
             headers: headers,
         });
@@ -1053,7 +1168,7 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
             
             setAlert({
                 type: 'success',
-                message: `✅ Pomyślnie opłacono ${result.count || 0} zaległych wpisów dla pracownika.`,
+                message: `✅ Pomyślnie rozliczono zaległe wpisy`,
             });
         } else {
             const errorData = await parseApiError(response);
@@ -1080,7 +1195,7 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
         startOfWeek.setHours(0, 0, 0, 0);
         const day = (startOfWeek.getDay() + 6) % 7; 
         startOfWeek.setDate(startOfWeek.getDate() - day);
-          
+        
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6);
         endOfWeek.setHours(23, 59, 59, 999);
@@ -1100,41 +1215,68 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
         };
     }, [workEntries, currentDate]);
 
-const employeeEntriesForPayment = useMemo(() => {
-    if (!selectedEmployeeForPayment) return { entries: [], totalAmount: 0 };
-    
-    const today = new Date();
-    today.setHours(23, 59, 59, 999); 
-    
-    let filteredEntries = [];
-    
-    if (paymentModalType === 'month') {
-        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        startOfMonth.setHours(0, 0, 0, 0);
+    const fetchUnpaidEntriesForEmployee = useCallback(async (userId) => {
+        try {
+            const headers = getAuthHeaders();
+            const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/unpaid`, {
+                method: 'GET',
+                headers: headers,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`✅ Załadowano ${data.length} nieopłaconych wpisów dla pracownika ${userId}`);
+                setUnpaidEntriesForPayment(data);
+            } else {
+                console.error(`❌ Błąd pobierania nieopłaconych wpisów: ${response.status}`);
+                setUnpaidEntriesForPayment([]);
+            }
+        } catch (error) {
+            console.error("❌ Błąd połączenia:", error);
+            setUnpaidEntriesForPayment([]);
+        }
+    }, []);
+
+    // ZAKTUALIZOWANA LOGIKA: Obliczanie kwoty do zapłaty z uwzględnieniem zaliczek
+    const employeeEntriesForPayment = useMemo(() => {
+        if (!selectedEmployeeForPayment) return { entries: [], totalGrossAmount: 0, advances: [], netAmount: 0 };
         
-        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        endOfMonth.setHours(23, 59, 59, 999);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); 
+        
+        let filteredEntries = [];
+        
+        if (paymentModalType === 'month') {
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            startOfMonth.setHours(0, 0, 0, 0);
+            
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            endOfMonth.setHours(23, 59, 59, 999);
 
-        filteredEntries = workEntries.filter(e => {
-            const workDate = new Date(e.workDate);
-            return e.user?.id === selectedEmployeeForPayment.id 
-                && !e.isPaid 
-                && workDate >= startOfMonth 
-                && workDate <= endOfMonth;
-        });
-    } else { 
-        filteredEntries = workEntries.filter(e => {
-            const workDate = new Date(e.workDate);
-            return e.user?.id === selectedEmployeeForPayment.id 
-                && !e.isPaid 
-                && workDate <= today;
-        });
-    }
+            filteredEntries = unpaidEntriesForPayment.filter(e => {
+                const workDate = new Date(e.workDate);
+                return workDate >= startOfMonth && workDate <= endOfMonth;
+            });
+        } else { 
+            filteredEntries = unpaidEntriesForPayment.filter(e => {
+                const workDate = new Date(e.workDate);
+                return workDate <= today;
+            });
+        }
 
-    const totalAmount = filteredEntries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0);
+        const totalGrossAmount = filteredEntries.reduce((sum, e) => sum + (parseFloat(e.daySalary) || 0), 0);
+        
+        const totalAdvanceAmount = unsettledAdvances.reduce((sum, a) => sum + (parseFloat(a.amount) || 0), 0);
+        
+        const netAmount = Math.max(0, totalGrossAmount - totalAdvanceAmount);
 
-    return { entries: filteredEntries, totalAmount: totalAmount };
-}, [workEntries, selectedEmployeeForPayment, paymentModalType]);
+        return { 
+            entries: filteredEntries, 
+            totalGrossAmount: totalGrossAmount,
+            advances: unsettledAdvances,
+            netAmount: netAmount
+        };
+    }, [unpaidEntriesForPayment, unsettledAdvances, selectedEmployeeForPayment, paymentModalType]);
 
     const handleOpenBulkAssignModal = (dateStr) => {
         setBulkAssignDate(dateStr);
@@ -1145,7 +1287,7 @@ const employeeEntriesForPayment = useMemo(() => {
     const handleOpenDetailsModal = (entry) => {
         setSelectedEntry(entry);
     };
-      
+    
     const handleCloseModal = (alertType, alertMessage) => {
         setIsModalOpen(false);
         setBulkAssignDate(null);
@@ -1158,97 +1300,157 @@ const employeeEntriesForPayment = useMemo(() => {
     };
 
     const handleClosePayAllModal = () => {
-    setIsPayAllModalOpen(false);
-    setSelectedEmployeeForPayment(null);
-    setPaymentModalType('all');
-};
+        setIsPayAllModalOpen(false);
+        setSelectedEmployeeForPayment(null);
+        setPaymentModalType('all');
+        setUnpaidEntriesForPayment([]);
+        setUnsettledAdvances([]); // ZEROWANIE ZALICZEK
+    };
 
-const handlePayAllForMonth = useCallback(async (userId) => {
-    setIsLoading(true);
-    closeAlert();
+    const handleCloseAdvancePayModal = () => {
+        setIsAdvancePayModalOpen(false);
+        setSelectedEmployeeForAdvance(null);
+    };
 
-    try {
-        const headers = getAuthHeaders();
-        const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-month`, {
-            method: 'PATCH',
-            headers: headers,
-        });
+    const handlePayAllForMonth = useCallback(async (userId) => {
+        setIsLoading(true);
+        closeAlert();
 
-        if (response.ok) {
-            const result = await response.json();
-            console.log(`✅ Zmiana statusu płatności na opłacone za miesiąc dla pracownika ${userId}:`, result);
-            
-            await fetchWorkEntries();
-            handleClosePayAllModal();
-            
-            setAlert({
-                type: 'success',
-                message: `✅ Pomyślnie opłacono ${result.count || 0} wpisów z bieżącego miesiąca dla pracownika.`,
+        try {
+            const headers = getAuthHeaders();
+            // Endpoint do płacenia za miesiąc (i rozliczania zaliczek)
+            const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-month-and-settle`, { 
+                method: 'PATCH',
+                headers: headers,
             });
-        } else {
-            const errorData = await parseApiError(response);
-            console.error("❌ Błąd masowej płatności za miesiąc:", errorData);
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(`✅ Zmiana statusu płatności na opłacone za miesiąc dla pracownika ${userId}:`, result);
+                
+                await fetchWorkEntries();
+                handleClosePayAllModal();
+                
+                setAlert({
+                    type: 'success',
+                    message: `✅ Pomyślnie opłacono potrzebne wpisy z obecnego miesiąca`,
+                });
+            } else {
+                const errorData = await parseApiError(response);
+                console.error("❌ Błąd masowej płatności za miesiąc:", errorData);
+                setAlert({
+                    type: 'error',
+                    message: `Błąd masowej płatności za miesiąc: ${errorData.message}`
+                });
+            }
+        } catch (error) {
+            console.error("❌ Błąd połączenia:", error);
             setAlert({
                 type: 'error',
-                message: `Błąd masowej płatności za miesiąc: ${errorData.message}`
+                message: 'Błąd połączenia z serwerem podczas płatności.'
             });
+        } finally {
+            setIsLoading(false);
         }
-    } catch (error) {
-        console.error("❌ Błąd połączenia:", error);
-        setAlert({
-            type: 'error',
-            message: 'Błąd połączenia z serwerem podczas płatności.'
-        });
-    } finally {
-        setIsLoading(false);
-    }
-}, [closeAlert, fetchWorkEntries, parseApiError]);
+    }, [closeAlert, fetchWorkEntries, parseApiError]);
 
-const handleOpenPayAllModal = useCallback((employeeId) => {
-    console.log('🔍 handleOpenPayAllModal wywołane z employeeId:', employeeId, 'typ:', typeof employeeId);
-    console.log('🔍 Dostępni pracownicy:', employees.map(e => ({ id: e.id, name: e.name, typ: typeof e.id })));
-    
-    const employee = employees.find(e => e.id === Number(employeeId));
-    console.log('🔍 Znaleziony pracownik:', employee);
-    
-    if (employee) {
-        setSelectedEmployeeForPayment(employee);
-        setPaymentModalType('all');
-        setIsPayAllModalOpen(true);
-        setSelectedEntry(null);
-    } else {
-        console.error('❌ Nie znaleziono pracownika o ID:', employeeId, 'w tablicy:', employees);
-        setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
-    }
-}, [employees]);
+    // ZAKTUALIZOWANA FUNKCJA: Otwieranie Modalu Płatności - Pobieranie Zaliczek
+    const handleOpenPayAllModal = useCallback((employeeId) => {
+        const employee = employees.find(e => e.id === Number(employeeId));
+        if (employee) {
+            setSelectedEmployeeForPayment(employee);
+            setPaymentModalType('all');
+            setIsPayAllModalOpen(true);
+            setSelectedEntry(null);
+            fetchUnpaidEntriesForEmployee(employee.id);
+            fetchUnsettledAdvances(employee.id); // POBIERZ ZALICZKI
+        } else {
+            setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
+        }
+    }, [employees, fetchUnpaidEntriesForEmployee, fetchUnsettledAdvances]);
 
-const handleOpenPayAllMonthModal = useCallback((employeeId) => {
-    console.log('🔍 handleOpenPayAllMonthModal wywołane z employeeId:', employeeId, 'typ:', typeof employeeId);
-    console.log('🔍 Dostępni pracownicy:', employees.map(e => ({ id: e.id, name: e.name, typ: typeof e.id })));
-    
-    const employee = employees.find(e => e.id === Number(employeeId));
-    console.log('🔍 Znaleziony pracownik:', employee);
-    
-    if (employee) {
-        setSelectedEmployeeForPayment(employee);
-        setPaymentModalType('month');
-        setIsPayAllModalOpen(true);
-        setSelectedEntry(null);
-    } else {
-        console.error('❌ Nie znaleziono pracownika o ID:', employeeId, 'w tablicy:', employees);
-        setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
-    }
-}, [employees]);
+    // ZAKTUALIZOWANA FUNKCJA: Otwieranie Modalu Płatności za miesiąc - Pobieranie Zaliczek
+    const handleOpenPayAllMonthModal = useCallback((employeeId) => {
+        const employee = employees.find(e => e.id === Number(employeeId));
+        if (employee) {
+            setSelectedEmployeeForPayment(employee);
+            setPaymentModalType('month');
+            setIsPayAllModalOpen(true);
+            setSelectedEntry(null);
+            fetchUnpaidEntriesForEmployee(employee.id);
+            fetchUnsettledAdvances(employee.id); // POBIERZ ZALICZKI
+        } else {
+            setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
+        }
+    }, [employees, fetchUnpaidEntriesForEmployee, fetchUnsettledAdvances]);
 
-const handleConfirmPayment = () => {
-    if (!selectedEmployeeForPayment) return;
+    const handleConfirmPayment = () => {
+        if (!selectedEmployeeForPayment) return;
+        
+        if (paymentModalType === 'month') {
+            handlePayAllForMonth(selectedEmployeeForPayment.id);
+        } else {
+            handlePayAllForEmployee(selectedEmployeeForPayment.id);
+        }
+    };
     
-    if (paymentModalType === 'month') {
-        handlePayAllForMonth(selectedEmployeeForPayment.id);
-    } else {
-        handlePayAllForEmployee(selectedEmployeeForPayment.id);
-    }
-};
+    const handleOpenAdvancePayModal = useCallback((employeeId) => {
+        const employee = employees.find(e => e.id === Number(employeeId));
+        if (employee) {
+            setSelectedEmployeeForAdvance(employee);
+            setIsAdvancePayModalOpen(true);
+            setSelectedEntry(null);
+        } else {
+            setAlert({ type: 'error', message: 'Nie znaleziono pracownika dla zaliczki.' });
+        }
+    }, [employees]);
+
+    // ZAKTUALIZOWANA FUNKCJA: Potwierdzenie Wypłaty Zaliczki (API CALL) - DODANIE ODŚWIEŻANIA ZALICZEK
+    const handleConfirmAdvancePayment = useCallback(async (userId, amount, description) => {
+        setIsLoading(true);
+        closeAlert();
+
+        try {
+            const headers = getAuthHeaders();
+            const response = await fetch(`${BACKEND_URL}/api/advances`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ 
+                    userId: userId, 
+                    amount: amount, 
+                    description: description,
+                    advanceDate: new Date().toISOString().split('T')[0]
+                }),
+            });
+
+            if (response.ok) {
+                
+                handleCloseAdvancePayModal();
+                setAlert({
+                    type: 'success',
+                    message: `✅ Pomyślnie zapisano zaliczkę ${amount.toFixed(2)} zł dla pracownika.`,
+                });
+                // Odświeżamy listę zaliczek, aby była gotowa, jeśli użytkownik od razu otworzy modal płatności.
+                fetchUnsettledAdvances(userId);
+                
+            } else {
+                const errorData = await parseApiError(response);
+                console.error("❌ Błąd zapisu zaliczki:", errorData);
+                setAlert({
+                    type: 'error',
+                    message: `Błąd zapisu zaliczki: ${errorData.message}`
+                });
+            }
+        } catch (error) {
+            console.error("❌ Błąd połączenia:", error);
+            setAlert({
+                type: 'error',
+                message: 'Błąd połączenia z serwerem podczas zapisu zaliczki.'
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [closeAlert, parseApiError, fetchUnsettledAdvances]);
 
 
     if (criticalError) {
@@ -1270,7 +1472,7 @@ const handleConfirmPayment = () => {
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-lime-50 to-green-100 p-6 font-sans">
             <div className="max-w-7xl mx-auto">
                 <header className="mb-8">
-                    <h1 className="text-4xl font-extrabold text-gray-900 mb-2 flex items-center">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
                         <Calendar className="text-green-600 mr-3" size={40} />
                         Planowanie Pracy Zespołów
                     </h1>
@@ -1293,7 +1495,7 @@ const handleConfirmPayment = () => {
                         isCurrency={true} 
                     />
                 </div>
-                    
+                
                 <div className="mb-8">
                     <WeekCalendar
                         workEntries={workEntries}
@@ -1320,7 +1522,7 @@ const handleConfirmPayment = () => {
                         isLoading={isLoading}
                     />
                 </Modal>
-                    
+                
                 {isEditModalOpen && editingEntry && (
                     <Modal
                         isOpen={isEditModalOpen}
@@ -1370,14 +1572,14 @@ const handleConfirmPayment = () => {
                                         </div>
                                     </>
                                 )}
-                                    
+                                
                                 <div>
                                     <label className="text-sm font-medium text-gray-700 mb-1 block">Wynagrodzenie (zł)</label>
                                     <p className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-800 font-bold">
                                         {parseFloat(editingEntry.daySalary).toFixed(2)} zł
                                     </p>
                                 </div>
-                                    
+                                
                                 <div>
                                     <label className="text-sm font-medium text-gray-700 mb-1 block">Sektor</label>
                                     <select 
@@ -1449,12 +1651,12 @@ const handleConfirmPayment = () => {
                                 <button
                                     onClick={() => {
                                         const durationHours = parseFloat(editingEntry.duration) || 0;
-                                            
+                                        
                                         const updatedEntry = {
                                             ...editingEntry,
                                             duration: durationHours,
                                         };
-                                            
+                                        
                                         console.log("🔧 Edytowany wpis przed wysłaniem:", updatedEntry);
                                         handleEditEntry(updatedEntry);
                                     }}
@@ -1474,7 +1676,7 @@ const handleConfirmPayment = () => {
                         </div>
                     </Modal>
                 )}
-                    
+                
                 <EventDetailsModal
                     entry={selectedEntry}
                     onClose={() => handleCloseModal()}
@@ -1482,7 +1684,8 @@ const handleConfirmPayment = () => {
                     onDelete={handleDeleteEntry}
                     onTogglePaid={handleTogglePaid}
                     onOpenPayAllModal={handleOpenPayAllModal}
-                    onOpenPayAllMonthModal={handleOpenPayAllMonthModal} // NOWY PROP
+                    onOpenPayAllMonthModal={handleOpenPayAllMonthModal}
+                    onOpenAdvancePayModal={handleOpenAdvancePayModal}
                 />
 
                 <PayConfirmationModal
@@ -1490,9 +1693,20 @@ const handleConfirmPayment = () => {
                     onClose={handleClosePayAllModal}
                     employee={selectedEmployeeForPayment}
                     entries={employeeEntriesForPayment.entries}
-                    totalAmount={employeeEntriesForPayment.totalAmount}
+                    totalGrossAmount={employeeEntriesForPayment.totalGrossAmount}
+                    advances={employeeEntriesForPayment.advances}
+                    netAmount={employeeEntriesForPayment.netAmount}
                     paymentType={paymentModalType}
                     onConfirm={handleConfirmPayment}
+                    isLoading={isLoading}
+                />
+
+                {/* KOMPONENT MODALU ZALICZKI */}
+                <AdvancePayModal
+                    isOpen={isAdvancePayModalOpen}
+                    onClose={handleCloseAdvancePayModal}
+                    employee={selectedEmployeeForAdvance}
+                    onConfirm={handleConfirmAdvancePayment} 
                     isLoading={isLoading}
                 />
             </div>

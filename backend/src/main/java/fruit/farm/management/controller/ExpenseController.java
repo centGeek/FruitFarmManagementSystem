@@ -151,7 +151,8 @@ public class ExpenseController {
                 user.getId(), sectorId, year, month);
 
         try {
-            SectorLaborCostDTO laborCosts = workScheduleService.calculateSectorLaborCosts(sectorId, year, month);
+            SectorLaborCostDTO laborCosts = workScheduleService.calculateSectorLaborCosts(
+                    sectorId, user.getId(), year, month);
             return ResponseEntity.ok(laborCosts);
         } catch (Exception e) {
             log.error("Error calculating labor costs: {}", e.getMessage(), e);

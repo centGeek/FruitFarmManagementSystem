@@ -172,7 +172,7 @@ export default function NotificationHome() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6 font-sans">
       <div className="max-w-7xl mx-auto">
         <header className="mb-6">
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-1 flex items-center">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
             <span className="text-indigo-600 mr-3">🔔</span>
             Powiadomienia
           </h1>

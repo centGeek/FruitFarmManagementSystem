@@ -1,5 +1,6 @@
 package fruit.farm.management.service;
 
+import fruit.farm.management.dto.AdvancePayDTO;
 import fruit.farm.management.dto.SectorLaborCostDTO;
 import fruit.farm.management.dto.WorkDetailsDTO;
 import fruit.farm.management.dto.WorkEntryDto;
@@ -7,6 +8,8 @@ import fruit.farm.management.entity.SectorEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.exception.ExceededWorkHoursException;
+import fruit.farm.management.mapper.WorkEntryMapper;
+import fruit.farm.management.repository.AdvancePayRepository;
 import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.repository.WorkEntryRepository;
 import lombok.AllArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +29,7 @@ import java.util.Optional;
 @Slf4j
 public class WorkScheduleService {
 
+    private AdvancePayRepository advancePayRepository;
     private UserRepository userRepository;
     private SectorService sectorService;
     private WorkEntryRepository workEntryRepository;
@@ -120,8 +125,9 @@ public class WorkScheduleService {
         }
         return workEntryRepository.save(existingEntry);
     }
-
+    @Transactional
     public int payAllUnpaidEntries(UserEntity employee) {
+
         return workEntryRepository.payAllUnpaidEntries(employee.getId());
     }
 
@@ -129,15 +135,18 @@ public class WorkScheduleService {
         return workEntryRepository.payAllUnpaidEntriesForCurrentMonth(employee.getId());
     }
 
-    public SectorLaborCostDTO calculateSectorLaborCosts(Long sectorId, Integer year, Integer month) {
+    public SectorLaborCostDTO calculateSectorLaborCosts(Long sectorId, Long userId, Integer year, Integer month) {
 
-        List<WorkEntryEntity> entries = workEntryRepository.findAllExpensesByGivenDate(year, month, sectorId);
+        List<WorkEntryEntity> entries = workEntryRepository.findAllExpensesByGivenDate(year, month, sectorId, userId);
 
         String sectorName = sectorId != null
                 ? sectorService.findById(sectorId)
                 .map(s -> s.getDescription() != null ? s.getDescription() : "Sektor " + s.getSectorId())
                 .orElse("Wszystkie sektory")
                 : "Wszystkie sektory";
+        if(entries.isEmpty()) {
+            return null;
+        }
 
         BigDecimal totalCost = entries.stream()
                 .map(WorkEntryEntity::getDaySalary).reduce(BigDecimal::add).get();
@@ -169,5 +178,21 @@ public class WorkScheduleService {
                 paidEntries,
                 unpaidEntries
         );
+    }
+
+    public List<WorkEntryDto> getUnpaidEntriesByUserId(Long userId) {
+
+        return workEntryRepository.getUnpaidEntriesByUserId(userId)
+                .stream().map(WorkEntryMapper::mapToDto).toList();
+    }
+
+    public void saveAdvance(UserEntity userEntity, BigDecimal amount, String description, LocalDate now) {
+
+        workEntryRepository.saveAdvance(userEntity, amount, description, now);
+    }
+
+    public List<AdvancePayDTO> getUnsettledAdvancesByUserId(Long userId) {
+
+        return workEntryRepository.getUnsettledAdvancesByUserId(userId);
     }
 }

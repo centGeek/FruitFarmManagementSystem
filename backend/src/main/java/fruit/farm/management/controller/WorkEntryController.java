@@ -1,5 +1,6 @@
 package fruit.farm.management.controller;
 
+import fruit.farm.management.dto.AdvancePayDTO;
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +62,12 @@ public class WorkEntryController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+        @GetMapping("/user/{userId}/unpaid")
+        public ResponseEntity<List<WorkEntryDto>> getUnpaidEntriesByUserId(@PathVariable Long userId) {
+            List<WorkEntryDto> unpaidEntries = workScheduleService.getUnpaidEntriesByUserId(userId);
+            return ResponseEntity.ok(unpaidEntries);
+        }
     @GetMapping("/{id}")
     public ResponseEntity<?> getWorkEntryById(@PathVariable Long id) {
 
@@ -252,7 +260,7 @@ public class WorkEntryController {
         }
     }
 
-    @PatchMapping("/user/{userId}/pay-all")
+    @PatchMapping("/user/{userId}/pay-all-and-settle")
     public ResponseEntity<?> payAllUnpaidForUser(@PathVariable Long userId) {
         log.info("Attempting to mark all unpaid entries as paid for user ID: {}", userId);
 
@@ -281,9 +289,9 @@ public class WorkEntryController {
         }
     }
 
-    @PatchMapping("/user/{userId}/pay-month")
+    @PatchMapping("/user/{userId}/pay-month-and-settle")
     public ResponseEntity<?> payAllUnpaidForUserMonth(@PathVariable Long userId) {
-        log.info("Attempting to mark all unpaid entries in the current month as paid for user ID: {}", userId);
+         log.info("Attempting to mark all unpaid entries in the current month as paid for user ID: {}", userId);
 
         try {
             UserEntity employee = userRepository.findById(userId)

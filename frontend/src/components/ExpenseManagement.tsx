@@ -635,7 +635,6 @@ const fetchSectors = useCallback(() => {
     try {
         const params = new URLSearchParams();
         
-        // 🆕 Zawsze dodaj sectorId - nawet jak jest pusty
         if (selectedSectorId) {
             params.append('sectorId', selectedSectorId);
         }
@@ -865,7 +864,7 @@ if (searchTerm) {
         <div className="min-h-screen bg-gradient-to-br from-red-50 via-red-50 to-orange-100 p-6 font-sans">
             <div className="max-w-7xl mx-auto">
                 <header className="mb-8">
-                    <h1 className="text-4xl font-extrabold text-gray-900 mb-2 flex items-center">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2">
                         <span className="text-red-600 mr-3">💰</span>
                         Zarządzanie Wydatkami
                     </h1>
@@ -894,7 +893,6 @@ if (searchTerm) {
                         label={hasActiveFilters ? "Nieopłacone (Przefiltrowane, niepracownicze)" : "Wydatki Nieopłacone (niepracownicze)"} 
                         color="red" 
                     />
-                    {/* 🆕 ZAWSZE pokazuj - bez warunku selectedSectorId */}
                 {isLoadingLaborCosts ? (
                     <div className="col-span-full bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
                         <div className="text-center">
