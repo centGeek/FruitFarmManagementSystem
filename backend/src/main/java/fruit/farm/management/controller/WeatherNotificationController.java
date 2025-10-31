@@ -24,12 +24,13 @@ public class WeatherNotificationController {
 
     @GetMapping
     public ResponseEntity<List<WeatherNotificationDTO>> getAllNotifications() {
+
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
-            log.info("Fetching notifications for user: {}", loggedInEmail);
+            String loggedWithNickname = authentication.getName();
+            log.info("Fetching notifications for user: {}", loggedWithNickname);
 
-            List<WeatherNotificationDTO> notifications = notificationService.getAllNotificationsForUser(loggedInEmail);
+            List<WeatherNotificationDTO> notifications = notificationService.getAllNotificationsForUser(loggedWithNickname);
 
             log.info("Found {} notifications", notifications.size());
             return ResponseEntity.ok(notifications);
@@ -42,13 +43,14 @@ public class WeatherNotificationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getNotificationById(@PathVariable Long id) {
+
         log.info("Getting notification by ID: {}", id);
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
+            String loggedWithNickname = authentication.getName();
 
-            Optional<ResponseEntity<WeatherNotificationDTO>> weatherNotificationDTOResponseEntity = notificationService.getNotificationById(id, loggedInEmail)
+            Optional<ResponseEntity<WeatherNotificationDTO>> weatherNotificationDTOResponseEntity = notificationService.getNotificationById(id, loggedWithNickname)
                     .map(ResponseEntity::ok);
             if (weatherNotificationDTOResponseEntity.isPresent()) {
                 return ResponseEntity.ok(weatherNotificationDTOResponseEntity);
@@ -66,13 +68,14 @@ public class WeatherNotificationController {
 
     @PostMapping
     public ResponseEntity<?> createNotification(@RequestBody WeatherNotificationDTO request) {
+
         log.info("Creating notification: {}", request);
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
+            String loggedWithNickname = authentication.getName();
 
-            WeatherNotificationDTO created = notificationService.createNotification(request, loggedInEmail);
+            WeatherNotificationDTO created = notificationService.createNotification(request, loggedWithNickname);
 
             log.info("Notification created successfully with ID: {}", created.getId());
 
@@ -91,13 +94,14 @@ public class WeatherNotificationController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateNotification(@PathVariable Long id, @RequestBody WeatherNotificationDTO request) {
+
         log.info("Updating notification with ID: {}", id);
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
+            String loggedWithNickname = authentication.getName();
 
-            WeatherNotificationDTO updated = notificationService.updateNotification(id, request, loggedInEmail);
+            WeatherNotificationDTO updated = notificationService.updateNotification(id, request, loggedWithNickname);
 
             log.info("Notification updated successfully with ID: {}", id);
 
@@ -120,9 +124,9 @@ public class WeatherNotificationController {
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
+            String loggedWithNickname = authentication.getName();
 
-            WeatherNotificationDTO updated = notificationService.toggleNotificationStatus(id, loggedInEmail);
+            WeatherNotificationDTO updated = notificationService.toggleNotificationStatus(id, loggedWithNickname);
 
             log.info("Notification {} status toggled to: {}", id, updated.getEnabled());
 
@@ -145,9 +149,9 @@ public class WeatherNotificationController {
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
+            String loggedWithNickname = authentication.getName();
 
-            notificationService.deleteNotification(id, loggedInEmail);
+            notificationService.deleteNotification(id, loggedWithNickname);
 
             log.info("Notification {} deleted successfully", id);
 
@@ -167,10 +171,10 @@ public class WeatherNotificationController {
     public ResponseEntity<?> getNotificationStats() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
+            String loggedWithNickname = authentication.getName();
 
             WeatherNotificationService.NotificationStats stats =
-                    notificationService.getNotificationStats(loggedInEmail);
+                    notificationService.getNotificationStats(loggedWithNickname);
 
             return ResponseEntity.ok(stats);
 

@@ -6,7 +6,8 @@ const PROFIT_TYPES = [
  
     { value: 'SPRZEDAZ_JABLEK', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
  { value: 'SPRZEDAZ_GRUSZEK', label: 'Sprzedaż gruszek', icon: '🍐', color: 'bg-green-50 text-green-700 border-green-200' },
- { value: 'SPRZEDAZ_WISNI', label: 'Sprzedaż czereśni/wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
+ { value: 'SPRZEDAZ_WISNI', label: 'Sprzedaż wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
+ { value: 'SPRZEDAZ_CZERESNI', label: 'Sprzedaż czereśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200'},
  { value: 'SPRZEDAZ_SLIW', label: 'Sprzedaż śliwek', icon: '🫐', color: 'bg-purple-50 text-purple-700 border-purple-200' },
  { value: 'SPRZEDAZ_BRSKWIN', label: 'Sprzedaż brzoskwiń', icon: '🍑', color: 'bg-orange-50 text-orange-700 border-orange-200' },
  { value: 'SPRZEDAZ_INNYCH_OWOCOW', label: 'Sprzedaż innych owoców', icon: '🥝', color: 'bg-green-50 text-green-700 border-green-200' },
@@ -1045,8 +1046,7 @@ export default function ProfitManagement() {
                                         sectors={sectors}
                                     />
                                 ))}
-                            </div>
-                            
+                            </div>                          
                             <Pagination 
                                 currentPage={currentPage}
                                 totalPages={totalPages}
@@ -1056,7 +1056,6 @@ export default function ProfitManagement() {
                     )}
                 </div>
             </div>
-
             <Modal
                 isOpen={isModalOpen}
                 onClose={closeModal}

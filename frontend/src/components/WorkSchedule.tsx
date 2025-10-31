@@ -248,9 +248,11 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
                 <p className="text-sm text-gray-600 mb-1">
                     Suma godzin: <span className="font-bold text-blue-600">{totalHours.toFixed(1)}h</span>
                 </p>
-                <p className="text-sm text-gray-600">
-                    Suma kilogramów: <span className="font-bold text-orange-600">{totalKilograms.toFixed(1)} kg</span>
-                </p>
+                {totalKilograms > 0 && (
+                    <p className="text-sm text-gray-600">
+                        Suma kilogramów: <span className="font-bold text-orange-600">{totalKilograms.toFixed(1)} kg</span>
+                    </p>
+                )}
             </div>
             <div className="flex space-x-3 pt-2">
                 <button onClick={handleSubmit} disabled={isLoading}

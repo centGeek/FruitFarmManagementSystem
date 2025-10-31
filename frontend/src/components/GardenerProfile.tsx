@@ -212,9 +212,11 @@ export default function GardenerProfile() {
         if (!profileData.surname.trim()) newErrors.surname = 'Nazwisko jest wymagane';
         else if (profileData.surname.length < 2 || profileData.surname.length > 50) newErrors.surname = 'Nazwisko musi mieć między 2 a 50 znaków';
         
-        if (!profileData.email.trim()) newErrors.email = 'Email jest wymagany';
-        else if (!/\S+@\S+\.\S+/.test(profileData.email)) newErrors.email = 'Nieprawidłowy format email';
-                
+        if (!profileData.nickname.trim()) newErrors.nickname = 'Nazwa użytkownika jest wymagana';
+
+        if(profileData.email) {
+        if (!/\S+@\S+\.\S+/.test(profileData.email)) newErrors.email = 'Nieprawidłowy format email';
+        }
         if (!profileData.localityName || profileData.localityName === 'Nieustawiona' || (profileData.latitude === defaultCenter[0] && profileData.longitude === defaultCenter[1] && originalData)) {
              newErrors.localityName = 'Wybierz miejscowość, ustawiając ją na mapie/wyszukując.';
         }
@@ -359,11 +361,11 @@ export default function GardenerProfile() {
                             Dane Kontaktowe
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <InputField label="Email" name="email" type="email" required value={profileData.email} onChange={handleChange} error={errors.email} isLoading={isSaving} placeholder="email@example.com"/>
+                            <InputField label="Email (opcjonalnie)" name="email" type="email" value={profileData.email} onChange={handleChange} error={errors.email} isLoading={isSaving} placeholder="email@example.com"/>
                             <InputField label="Numer Telefonu (opcjonalnie)" name="phoneNumber" value={profileData.phoneNumber} onChange={handleChange} error={errors.phoneNumber} isLoading={isSaving} placeholder="+48 123 456 789"/>
                         </div>
                         <div className="mt-6">
-                            <InputField label="Pseudonim (opcjonalnie)" name="nickname" value={profileData.nickname} onChange={handleChange} isLoading={isSaving} placeholder="Twój pseudonim"/>
+                            <InputField label="Pseudonim (obowiązkowo)" name="nickname" required value={profileData.nickname} onChange={handleChange} isLoading={isSaving} placeholder="Twój pseudonim"/>
                         </div>
                     </div>
 

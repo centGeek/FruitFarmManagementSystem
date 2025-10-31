@@ -28,9 +28,9 @@ public class JwtService {
         this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(Long id, String email, List<String> roles) {
+    public String generateToken(Long id, String nickname, List<String> roles) {
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(nickname)
                 .claim("id", id)
                 .claim("roles", roles)
                 .setIssuedAt(new Date())
@@ -48,7 +48,7 @@ public class JwtService {
         }
     }
 
-    public String getEmailFromToken(String token) {
+    public String getNicknameFromToken(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).build().parseClaimsJws(token).getBody().getSubject();
     }
 

@@ -70,7 +70,7 @@ const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disable
   </div>
 );
 
-const handleLoginSuccess = (token, email, loginMethod, rememberMe) => {
+const handleLoginSuccess = (token, nickname, loginMethod, rememberMe) => {
   // Store token
   if (rememberMe) {
     localStorage.setItem('authToken', token);
@@ -78,20 +78,18 @@ const handleLoginSuccess = (token, email, loginMethod, rememberMe) => {
     sessionStorage.setItem('authToken', token);
   }
   
-  // Store user info
   localStorage.setItem('user', JSON.stringify({
-    email: email,
+    nickname: nickname,
     loginTime: new Date().toISOString(),
     loginMethod: loginMethod
   }));
   
-  // Immediate redirect
   window.location.href = '/home';
 };
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });
+  const [formData, setFormData] = useState({nickname: '', password: '', rememberMe: false });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -164,7 +162,7 @@ export default function LoginPage() {
       if (res.ok && data.token) {
         handleLoginSuccess(
           data.token,
-          data.email || 'google-user@example.com',
+          data.nickname || 'google-user@example.com',
           'google',
           formData.rememberMe
         );
@@ -178,7 +176,6 @@ export default function LoginPage() {
     }
   };
 
-  // Form Input Handler
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -188,14 +185,9 @@ export default function LoginPage() {
     setError('');
   };
 
-  // Form Validation
   const validateForm = () => {
-    if (!formData.email.trim()) {
-      setError('Adres email jest wymagany');
-      return false;
-    }
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      setError('Podaj prawidłowy adres email');
+    if (!formData.nickname.trim()) {
+      setError('Nazwa użytkownika jest wymagana');
       return false;
     }
     if (!formData.password.trim()) {
@@ -205,7 +197,6 @@ export default function LoginPage() {
     return true;
   };
 
-  // Email Login Handler
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -218,7 +209,7 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          email: formData.email.trim().toLowerCase(),
+          nickname: formData.nickname.trim().toLowerCase(),
           password: formData.password,
           rememberMe: formData.rememberMe
         }),
@@ -229,8 +220,8 @@ export default function LoginPage() {
       if (res.ok && data.token) {
         handleLoginSuccess(
           data.token,
-          formData.email.trim().toLowerCase(),
-          'email',
+          formData.nickname.trim().toLowerCase(),
+          'nickname',
           formData.rememberMe
         );
       } else {
@@ -277,19 +268,19 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">lub użyj email</span>
+                <span className="px-4 bg-white text-gray-500">lub użyj nazwy użytkownika</span>
               </div>
             </div>
 
             {/* Login Form */}
             <div className="space-y-5">
               <TextInput
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
+                id="nickname"
+                name="nickname"
+                type="nickname"
+                value={formData.nickname}
                 onChange={handleInputChange}
-                placeholder="Adres email"
+                placeholder="Nazwa użytkownika"
                 icon={User}
                 disabled={isLoading}
               />

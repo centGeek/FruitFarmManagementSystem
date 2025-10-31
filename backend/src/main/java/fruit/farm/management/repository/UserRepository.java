@@ -56,8 +56,9 @@ public class UserRepository {
         return userJpaRepository.save(userEntity);
     }
 
-    public Optional<UserEntity> findByEmail(String email) {
-        return userJpaRepository.findByEmail(email);
+    public Optional<UserEntity> findByNickname(String nickname) {
+
+        return userJpaRepository.findByNickname(nickname);
     }
 
     public Long getCurrentUserId() {
@@ -70,7 +71,7 @@ public class UserRepository {
         System.out.println(principal.toString());
         if (principal instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
-            UserEntity dbUser = userJpaRepository.findByEmail(username).get();
+            UserEntity dbUser = userJpaRepository.findByNickname(username).get();
             return dbUser.getId();
         }
         throw new IllegalStateException("Unsupported principal type: " + principal.getClass());

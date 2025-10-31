@@ -1,12 +1,15 @@
 package fruit.farm.management.controller;
 
+import fruit.farm.management.dto.UserCredentialsDTO;
 import fruit.farm.management.dto.UserDTO;
-import fruit.farm.management.entity.UserCredentialsEntity;
 import fruit.farm.management.entity.UserEntity;
+import fruit.farm.management.exception.NicknameAlreadyExistsException;
+import fruit.farm.management.mapper.UserCredentialsMapper;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -34,9 +37,9 @@ public class EmployeeController {
         log.info("Getting list of users with status filter: {}", status);
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
-            System.out.println("Logged user:" + loggedInEmail);
-            UserEntity gardener = userService.findByEmail(loggedInEmail)
+            String loggedWithNickname = authentication.getName();
+            System.out.println("Logged user:" + loggedWithNickname);
+            UserEntity gardener = userService.findByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<UserDTO> users = userService.getAllEmployees(gardener.getId());
@@ -49,11 +52,12 @@ public class EmployeeController {
 
     @GetMapping("/active")
     public ResponseEntity<List<UserDTO>> fetchActiveUsers() {
+
         log.info("Getting list of active users");
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
-            UserEntity gardener = userService.findByEmail(loggedInEmail)
+            String loggedWithNickname = authentication.getName();
+            UserEntity gardener = userService.findByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<UserDTO> users = userService.getAllActiveEmployees(gardener.getId());
@@ -67,11 +71,12 @@ public class EmployeeController {
 
     @GetMapping("/archived")
     public ResponseEntity<List<UserDTO>> fetchArchivedUsers() {
+
         log.info("Getting list of archived users");
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
-            UserEntity gardener = userService.findByEmail(loggedInEmail)
+            String loggedInNickname = authentication.getName();
+            UserEntity gardener = userService.findByNickname(loggedInNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<UserDTO> users = userService.getAllArchivedEmployees(gardener.getId());
@@ -85,25 +90,24 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO userRequest) {
-        log.info("Attempting to register user with email: {}", userRequest.getEmail());
-        log.info("Request body: {}", userRequest);
+
+        log.info("Attempting to register user with nickname: {}", userRequest.getNickname());
 
         try {
-            Optional<UserEntity> existingUser = userService.findByEmail(userRequest.getEmail());
+            Optional<UserEntity> existingUser = userService.findByNickname(userRequest.getNickname());
             if (existingUser.isPresent()) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Map.of("error", "Użytkownik z tym adresem email już istnieje"));
+                throw new NicknameAlreadyExistsException ("Użytkownik z tą nazwą użytkownika już istnieje");
             }
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
-            UserEntity gardener = userService.findByEmail(loggedInEmail)
+            String loggedInNickname = authentication.getName();
+            UserEntity gardener = userService.findByNickname(loggedInNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             log.info("User registration data received:");
             log.info("Name: {}", userRequest.getName());
             log.info("Surname: {}", userRequest.getSurname());
-            log.info("Email: {}", userRequest.getEmail());
+            log.info("Nickname: {}", userRequest.getNickname());
             log.info("Phone: {}", userRequest.getPhoneNumber());
             log.info("Nickname: {}", userRequest.getNickname());
             log.info("IsActive: {}", userRequest.isActive());
@@ -113,19 +117,19 @@ public class EmployeeController {
             UserEntity savedUser = userService.save(userEntity);
             return ResponseEntity.ok(Map.of(
                     "message", "User registered successfully",
-                    "email", userRequest.getEmail(),
+                    "nickname", userRequest.getNickname(),
                     "id", savedUser.getId().toString()
             ));
 
         } catch (Exception e) {
             log.error("Error registering user: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Registration failed: " + e.getMessage()));
+                    .body(Map.of("error", "Błąd rejestracji: " + e.getMessage()));
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody UserEntity userRequest) {
+    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody UserDTO userRequest) {
         log.info("Attempting to update user with ID: {}", id);
         log.info("Update request body: {}", userRequest);
 
@@ -138,47 +142,13 @@ public class EmployeeController {
 
             UserEntity existingUser = optionalUser.get();
 
-            if (userRequest.getEmail() != null && !userRequest.getEmail().equals(existingUser.getEmail())) {
-                Optional<UserEntity> userWithEmail = userService.findByEmail(userRequest.getEmail());
-                if (userWithEmail.isPresent() && !userWithEmail.get().getId().equals(id)) {
-                    return ResponseEntity.status(HttpStatus.CONFLICT)
-                            .body(Map.of("error", "Email already taken by another user"));
-                }
-            }
-
-            log.info("User update data received:");
-            log.info("ID: {}", id);
-            log.info("Name: {}", userRequest.getName());
-            log.info("Surname: {}", userRequest.getSurname());
-            log.info("Email: {}", userRequest.getEmail());
-            log.info("Phone: {}", userRequest.getPhoneNumber());
-            log.info("Nickname: {}", userRequest.getNickname());
-            log.info("IsActive: {}", userRequest.isActive());
-
-            if (userRequest.getName() != null) {
-                existingUser.setName(userRequest.getName());
-            }
-            if (userRequest.getSurname() != null) {
-                existingUser.setSurname(userRequest.getSurname());
-            }
-            if (userRequest.getEmail() != null) {
-                existingUser.setEmail(userRequest.getEmail());
-            }
-            if (userRequest.getPhoneNumber() != null) {
-                existingUser.setPhoneNumber(userRequest.getPhoneNumber());
-            }
-            if (userRequest.getNickname() != null) {
-                existingUser.setNickname(userRequest.getNickname());
-            }
-            existingUser.setActive(userRequest.isActive());
-
-            UserEntity updatedUser = userService.update(existingUser, userRequest.getCredentials().getPasswordHash());
+            UserEntity updatedUser = userService.update(existingUser, userRequest);
             log.info("User updated successfully with ID: {}", updatedUser.getId());
 
             return ResponseEntity.ok(Map.of(
                     "message", "User updated successfully",
                     "id", id.toString(),
-                    "email", updatedUser.getEmail()
+                    "nickname", updatedUser.getNickname()
             ));
 
         } catch (Exception e) {
@@ -199,15 +169,15 @@ public class EmployeeController {
                         .body(Map.of("error", "User not found with ID: " + id));
             }
             UserEntity userEntity = optionalUser.get();
-            String userEmail = userEntity.getEmail();
+            String userNickname = userEntity.getNickname();
 
             userService.delete(userEntity);
-            log.info("User {} deleted successfully", userEmail);
+            log.info("User {} deleted successfully", userNickname);
 
             return ResponseEntity.ok(Map.of(
                     "message", "User deleted successfully",
                     "id", id.toString(),
-                    "email", userEmail
+                    "nickname", userNickname
             ));
 
         } catch (Exception e) {
@@ -229,7 +199,7 @@ public class EmployeeController {
             }
 
             UserEntity user = optionalUser.get();
-            log.info("Found user: {}", user.getEmail());
+            log.info("Found user: {}", user.getNickname());
 
             return ResponseEntity.ok(user);
 

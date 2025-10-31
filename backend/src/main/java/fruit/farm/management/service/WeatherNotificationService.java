@@ -3,7 +3,6 @@ package fruit.farm.management.service;
 import fruit.farm.management.dto.WeatherNotificationDTO;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WeatherNotificationEntity;
-import fruit.farm.management.entity.WeatherNotificationType;
 import fruit.farm.management.mapper.WeatherNotificationMapper;
 import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.repository.jpa.WeatherNotificationJpaRepository;
@@ -27,15 +26,15 @@ public class WeatherNotificationService {
     private UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public List<WeatherNotificationDTO> getAllNotificationsForUser(String userEmail) {
-        log.info("Fetching notifications for user: {}", userEmail);
+    public List<WeatherNotificationDTO> getAllNotificationsForUser(String userNickname) {
+        log.info("Fetching notifications for user: {}", userNickname);
 
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
+        UserEntity user = userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userNickname));
 
         List<WeatherNotificationEntity> notifications = notificationRepository.findByUserId(user.getId());
 
-        log.info("Found {} notifications for user {}", notifications.size(), userEmail);
+        log.info("Found {} notifications for user {}", notifications.size(), userNickname);
 
         return notifications.stream()
                 .map(WeatherNotificationMapper::mapToDto)
@@ -43,11 +42,11 @@ public class WeatherNotificationService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<WeatherNotificationDTO> getNotificationById(Long id, String userEmail) {
-        log.info("Fetching notification with ID: {} for user: {}", id, userEmail);
+    public Optional<WeatherNotificationDTO> getNotificationById(Long id, String userNickname) {
+        log.info("Fetching notification with ID: {} for user: {}", id, userNickname);
 
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
+        UserEntity user = userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userNickname));
 
         return notificationRepository.findById(id)
                 .filter(notification -> notification.getUser().getId().equals(user.getId()))
@@ -55,11 +54,11 @@ public class WeatherNotificationService {
     }
 
     @Transactional
-    public WeatherNotificationDTO createNotification(WeatherNotificationDTO dto, String userEmail) {
-        log.info("Creating notification for user: {}", userEmail);
+    public WeatherNotificationDTO createNotification(WeatherNotificationDTO dto, String userNickname) {
+        log.info("Creating notification for user: {}", userNickname);
 
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
+        UserEntity user = userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userNickname));
 
         if (dto.getDaysAhead() < 1 || dto.getDaysAhead() > 7) {
             throw new RuntimeException("Days ahead must be between 1 and 7");
@@ -81,11 +80,11 @@ public class WeatherNotificationService {
     }
 
     @Transactional
-    public WeatherNotificationDTO updateNotification(Long id, WeatherNotificationDTO dto, String userEmail) {
-        log.info("Updating notification with ID: {} for user: {}", id, userEmail);
+    public WeatherNotificationDTO updateNotification(Long id, WeatherNotificationDTO dto, String userNickname) {
+        log.info("Updating notification with ID: {} for user: {}", id, userNickname);
 
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
+        UserEntity user = userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userNickname));
 
         WeatherNotificationEntity existing = notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification not found with ID: " + id));
@@ -110,11 +109,11 @@ public class WeatherNotificationService {
     }
 
     @Transactional
-    public WeatherNotificationDTO toggleNotificationStatus(Long id, String userEmail) {
+    public WeatherNotificationDTO toggleNotificationStatus(Long id, String userNickname) {
         log.info("Toggling notification status for ID: {}", id);
 
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
+        UserEntity user = userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userNickname));
 
         WeatherNotificationEntity notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification not found with ID: " + id));
@@ -132,11 +131,11 @@ public class WeatherNotificationService {
     }
 
     @Transactional
-    public void deleteNotification(Long id, String userEmail) {
-        log.info("Deleting notification with ID: {} for user: {}", id, userEmail);
+    public void deleteNotification(Long id, String userNickname) {
+        log.info("Deleting notification with ID: {} for user: {}", id, userNickname);
 
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
+        UserEntity user = userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userNickname));
 
         WeatherNotificationEntity notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification not found with ID: " + id));
@@ -175,9 +174,9 @@ public class WeatherNotificationService {
     }
 
     @Transactional(readOnly = true)
-    public NotificationStats getNotificationStats(String userEmail) {
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
+    public NotificationStats getNotificationStats(String userNickname) {
+        UserEntity user = userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userNickname));
 
         List<WeatherNotificationEntity> notifications = notificationRepository.findByUserId(user.getId());
 

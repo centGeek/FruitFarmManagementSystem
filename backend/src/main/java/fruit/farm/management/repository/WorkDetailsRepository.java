@@ -46,9 +46,9 @@ public class WorkDetailsRepository {
     }
 
 
-    public Optional<WorkDetailsEntity> getLatestWorkDetailsForUserByEmail(String email) {
+    public Optional<WorkDetailsEntity> getLatestWorkDetailsForUserByNickname(String nickname) {
         Optional<WorkDetailsEntity> workDetailsOptional =
-                workDetailsJpaRepository.getLatestWorkDetailsForUserByEmail(email);
+                workDetailsJpaRepository.getLatestWorkDetailsForUserByNickname(nickname);
 
         return workDetailsOptional.or(() -> {
             throw new WorkDetailsIsNotFoundException(

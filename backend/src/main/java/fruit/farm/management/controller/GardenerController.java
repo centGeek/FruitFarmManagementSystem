@@ -4,12 +4,11 @@ import fruit.farm.management.dto.UserDTO;
 import fruit.farm.management.dto.UserLocationDTO;
 import fruit.farm.management.entity.CoordinateEntity;
 import fruit.farm.management.entity.UserEntity;
-import fruit.farm.management.exception.EmailAlreadyExistsException;
+import fruit.farm.management.exception.NicknameAlreadyExistsException;
 import fruit.farm.management.exception.NotFoundException;
 import fruit.farm.management.mapper.CoordinateMapper;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.CoordinateRepository;
-import fruit.farm.management.repository.UserCredentialsRepository;
 import fruit.farm.management.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -32,9 +31,9 @@ public class GardenerController {
     private final CoordinateRepository coordinateRepository;
     private UserEntity getGardenerId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInEmail = authentication.getName();
+        String loggedWithNickname = authentication.getName();
 
-        return userService.findByEmail(loggedInEmail)
+        return userService.findByNickname(loggedWithNickname)
                 .orElseThrow(() -> new NotFoundException("Logged in gardener not found"));
     }
 
@@ -63,7 +62,7 @@ public class GardenerController {
     public ResponseEntity<Map<String, String>> updateGardenerProfile(
             @Valid @RequestBody UserDTO userDTO) {
 
-        log.info("Attempting to update profile for logged-in gardener with email: {}", userDTO.getEmail());
+        log.info("Attempting to update profile for logged-in gardener with nickname: {}", userDTO.getNickname());
 
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
             if (!userDTO.getPassword().equals(userDTO.getConfirmPassword())) {
@@ -77,32 +76,27 @@ public class GardenerController {
             UserEntity existingGardener = userService.findById(gardenerId)
                     .orElseThrow(() -> new NotFoundException("Gardener not found with ID: " + gardenerId));
 
-            if (!userDTO.getEmail().equals(existingGardener.getEmail())) {
-                if (userService.findByEmail(userDTO.getEmail()).isPresent()) {
-                    throw new EmailAlreadyExistsException("Ten adres email jest już zajęty");
+            if (!userDTO.getNickname().equals(existingGardener.getNickname())) {
+                if (userService.findByNickname(userDTO.getNickname()).isPresent()) {
+                    throw new NicknameAlreadyExistsException("Ta nazwa użytkownika jest już zajęta");
                 }
             }
             CoordinateEntity coordinateEntity = coordinateRepository.addCoordinate(
                     CoordinateMapper.mapToEntity(userDTO.getCoordinateDTO(), null));
 
-            existingGardener.setSurname(userDTO.getSurname());
-            existingGardener.setNickname(userDTO.getNickname());
-            existingGardener.setPhoneNumber(userDTO.getPhoneNumber());
-            existingGardener.setEmail(userDTO.getEmail());
             existingGardener.setCoordinateEntity(coordinateEntity);
-            existingGardener.setLocalityName(userDTO.getLocalityName());
 
-            userService.update(existingGardener, userDTO.getPassword());
+            userService.update(existingGardener, userDTO);
             log.info("Gardener profile updated successfully for ID: {}", gardenerId);
 
             return ResponseEntity.ok(Map.of("message", "Profil został zaktualizowany pomyślnie!"));
 
         } catch (NotFoundException e) {
             log.error("Gardener not found during update: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404
-        } catch (EmailAlreadyExistsException e) {
-            log.warn("Email conflict during update: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT) // 409
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (NicknameAlreadyExistsException e) {
+            log.warn("Nickname conflict during update: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             log.error("Error updating gardener profile: {}", e.getMessage(), e);

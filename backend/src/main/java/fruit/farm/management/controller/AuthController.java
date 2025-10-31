@@ -37,13 +37,13 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletResponse response) {
 
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword())
         );
 
         User user = (User) authentication.getPrincipal();
-        Optional<UserEntity> userByEmail = userService.findByEmail(user.getUsername());
+        Optional<UserEntity> userByNickname = userService.findByNickname(user.getUsername());
         String token = jwtService.generateToken(
-                userByEmail.get().getId(),
+                userByNickname.get().getId(),
                 user.getUsername(),
                 user.getAuthorities()
                         .stream()
@@ -57,7 +57,7 @@ public class AuthController {
 
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(new AuthResponse(token, request.getEmail()));
+        return ResponseEntity.ok(new AuthResponse(token, request.getNickname()));
     }
 
     @PostMapping("/register")
@@ -65,7 +65,7 @@ public class AuthController {
         try {
             UserEntity savedUser = userService.registerUser(request);
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                    new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword())
             );
 
             User user = (User) authentication.getPrincipal();
@@ -82,7 +82,7 @@ public class AuthController {
             cookie.setMaxAge(3600);
             response.addCookie(cookie);
 
-            return ResponseEntity.ok(new AuthResponse(token, request.getEmail()));
+            return ResponseEntity.ok(new AuthResponse(token, request.getNickname()));
 
         } catch (Exception e) {
             log.error("Registration error: ", e);
@@ -103,7 +103,7 @@ public class AuthController {
 
     @Data
     public static class AuthRequest {
-        private String email;
+        private String nickname;
         private String password;
     }
 

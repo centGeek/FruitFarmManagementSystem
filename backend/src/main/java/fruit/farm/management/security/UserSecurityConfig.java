@@ -22,11 +22,11 @@ public class UserSecurityConfig implements UserDetailsService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<UserEntity> user = userRepository.findByEmail(email);
+    public UserDetails loadUserByUsername(String nickname) throws UsernameNotFoundException {
+        Optional<UserEntity> user = userRepository.findByNickname(nickname);
 
         if (user.isEmpty()) {
-            throw new UsernameNotFoundException("User with email " + email + " not found");
+            throw new UsernameNotFoundException("User with nickname " + nickname + " not found");
         }
 
         SimpleGrantedAuthority authorities = getUserAuthority(user.get().getRole());
@@ -43,7 +43,7 @@ public class UserSecurityConfig implements UserDetailsService {
             List<SimpleGrantedAuthority> authorities
     ) {
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
+                user.getNickname(),
                 user.getCredentials().getPasswordHash(),
                 user.isActive(),
                 true,

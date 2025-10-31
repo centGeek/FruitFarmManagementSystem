@@ -49,7 +49,7 @@ public class WorkEntryRepository {
         if (requests.isEmpty()) {
             return new ArrayList<>();
         }
-        return workEntryJpaRepository.findWorkEntriesByGivenDayForEmployee(requests.get(0).getUser().getEmail(),
+        return workEntryJpaRepository.findWorkEntriesByGivenDayForEmployee(requests.get(0).getUser().getNickname(),
                 requests.get(0).getWorkDate());
     }
 

@@ -757,7 +757,7 @@ const handleEditClick = (notification: NotificationRule) => {
                                     onClick={() => coordinates && fetchCurrentWeather(coordinates, locationName)}
                                     className="text-sm text-red-700 underline mt-1"
                                 >
-                                    Spróbuj ponownie pobrać pogodę
+                                    Spróbuj ponownie pobrać pogodę. Sprawdź połączenie internetowe
                                 </button>
                             )}
                             {weatherError.includes('Koordynaty') && (

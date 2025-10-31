@@ -13,6 +13,9 @@ public class UserCredentialsMapper {
 
     public static UserCredentialsDTO mapFromEntity(UserCredentialsEntity userCredentialsEntity) {
 
+        if (userCredentialsEntity == null) {
+            return null;
+        }
         return new UserCredentialsDTO(userCredentialsEntity.getPasswordHash(), userCredentialsEntity.getPasswordHash());
     }
 }

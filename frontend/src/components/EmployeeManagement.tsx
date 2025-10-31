@@ -124,8 +124,7 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
         if (!formData.name.trim()) newErrors.name = 'Imię jest wymagane';
         if (!formData.surname.trim()) newErrors.surname = 'Nazwisko jest wymagane';
         
-        if (!formData.email.trim()) newErrors.email = 'Email jest wymagany';
-        else if (!/\S+@\S+\.\S/.test(formData.email)) newErrors.email = 'Nieprawidłowy format email';
+        if (!formData.nickname.trim()) newErrors.email = 'Nazwa użytkownika jest wymagana';
         
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -153,7 +152,7 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
             </div>
 
             <InputField 
-                label="Pseudonim" name="nickname" value={formData.nickname}
+                label="Pseudonim" name="nickname" required value={formData.nickname} error={errors.nickname}
                 handleChange={handleChange} isLoading={isLoading}
             />
 
@@ -163,7 +162,7 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
                     handleChange={handleChange} isLoading={isLoading}
                 />
                 <InputField 
-                    label="Email" name="email" type="email" required value={formData.email} error={errors.email}
+                    label="Email" name="email" type="email" value={formData.email}
                     handleChange={handleChange} isLoading={isLoading}
                 />
             </div>

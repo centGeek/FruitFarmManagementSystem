@@ -12,5 +12,15 @@ public class WorkDetailsMapper {
                 workDetailsEntity.getHourlyPay(), workDetailsEntity.getPayPerKilogram(), workDetailsEntity.getCreatedAt(),
                 UserMapper.mapFromEntity(workDetailsEntity.getUserEntity()));
     }
+    public static WorkDetailsDTO mapToDTO(WorkDetailsEntity entity) {
+        WorkDetailsDTO dto = new WorkDetailsDTO();
+        dto.setId(entity.getId());
+        dto.setIsPaidHourly(entity.getIsPaidHourly());
+        dto.setHourlyPay(entity.getHourlyPay());
+        dto.setPayPerKilogram(entity.getPayPerKilogram());
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUserDTO(UserMapper.mapFromEntity(entity.getUserEntity()));
+        return dto;
+    }
 
 }

@@ -3,7 +3,6 @@ package fruit.farm.management.service;
 import fruit.farm.management.dto.WorkDetailsDTO;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkDetailsEntity;
-import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.mapper.WorkDetailsMapper;
 import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.repository.WorkDetailsRepository;
@@ -17,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static fruit.farm.management.mapper.WorkDetailsMapper.mapToDTO;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -27,14 +28,14 @@ public class WorkDetailsService {
 
     public List<WorkDetailsDTO> getAllWorkDetails() {
         return workDetailsRepository.findAll().stream()
-                .map(this::mapToDTO)
+                .map(WorkDetailsMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<WorkDetailsDTO> getWorkDetailsByUserId(Long userId) {
         return workDetailsRepository.findByUserEntityId(userId).stream()
-                .map(this::mapToDTO)
+                .map(WorkDetailsMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -44,19 +45,19 @@ public class WorkDetailsService {
         return workDetailsEntity.map(WorkDetailsMapper::mapFromEntity);
     }
 
-    public Optional<WorkDetailsDTO> getLatestWorkDetailsForUserByEmail(String email) {
+    public Optional<WorkDetailsDTO> getLatestWorkDetailsForUserByNickname(String nickname) {
 
-        Optional<WorkDetailsEntity> workDetailsForUserByEmail = workDetailsRepository.getLatestWorkDetailsForUserByEmail(email);
-        return workDetailsForUserByEmail.map(WorkDetailsMapper::mapFromEntity);
+        Optional<WorkDetailsEntity> workDetailsForUserByNickname = workDetailsRepository.getLatestWorkDetailsForUserByNickname(nickname);
+        return workDetailsForUserByNickname.map(WorkDetailsMapper::mapFromEntity);
     }
 
     @Transactional
     public WorkDetailsDTO createWorkDetails(WorkDetailsDTO dto) {
 
 
-        String email = dto.getUserDTO().getEmail();
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Nie znaleziono użytkownika o email: " + email));
+        String nickname = dto.getUserDTO().getNickname();
+        UserEntity user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono użytkownika o nickname: " + nickname));
 
         WorkDetailsEntity entity = new WorkDetailsEntity();
         entity.setIsPaidHourly(dto.getIsPaidHourly());
@@ -64,8 +65,6 @@ public class WorkDetailsService {
         entity.setPayPerKilogram(dto.getPayPerKilogram());
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUserEntity(user);
-
-        validateWorkDetailsDTO(dto);
 
         WorkDetailsEntity saved = workDetailsRepository.save(entity);
         log.info("Zapisano detale pracy o ID: {}", saved.getId());
@@ -76,8 +75,6 @@ public class WorkDetailsService {
     @Transactional
     public WorkDetailsDTO updateWorkDetails(Long id, WorkDetailsDTO dto) {
         log.info("Aktualizacja detali pracy ID: {}", id);
-
-        validateWorkDetailsDTO(dto);
 
         WorkDetailsEntity entity = workDetailsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nie znaleziono detali pracy o ID: " + id));
@@ -104,33 +101,4 @@ public class WorkDetailsService {
         return workDetailsRepository.getLatestWorkDetailsByGardener(id);
     }
 
-    private void validateWorkDetailsDTO(WorkDetailsDTO dto) {
-
-//        if (dto.isPaidHourly()) {
-//            if (dto.getHourlyPay() == null || dto.getHourlyPay() <= 0) {
-//                throw new IllegalArgumentException("Dla płatności godzinowej wymagana jest stawka godzinowa");
-//            }
-//            if (dto.getPayPerKilogram() != null) {
-//                throw new IllegalArgumentException("Dla płatności godzinowej nie można ustawić stawki za kilogram");
-//            }
-//        } else {
-//            if (dto.getPayPerKilogram() == null || dto.getPayPerKilogram() <= 0) {
-//                throw new IllegalArgumentException("Dla płatności od kilogramów wymagana jest stawka za kilogram");
-//            }
-//            if (dto.getHourlyPay() != null) {
-//                throw new IllegalArgumentException("Dla płatności od kilogramów nie można ustawić stawki godzinowej");
-//            }
-//        }
-    }
-
-    private WorkDetailsDTO mapToDTO(WorkDetailsEntity entity) {
-        WorkDetailsDTO dto = new WorkDetailsDTO();
-        dto.setId(entity.getId());
-        dto.setIsPaidHourly(entity.getIsPaidHourly());
-        dto.setHourlyPay(entity.getHourlyPay());
-        dto.setPayPerKilogram(entity.getPayPerKilogram());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUserDTO(UserMapper.mapFromEntity(entity.getUserEntity()));
-        return dto;
-    }
 }

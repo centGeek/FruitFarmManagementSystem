@@ -22,11 +22,11 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
 
     @Query("""
             SELECT we FROM WorkEntryEntity we
-            WHERE we.user.email =:email
+            WHERE we.user.nickname =:nickname
             AND FUNCTION('DATE', we.workDate) =:date
             """)
     List<WorkEntryEntity> findWorkEntriesByGivenDayForEmployee(
-            @Param("email") String email,
+            @Param("nickname") String nickname,
             @Param("date") LocalDate date
     );
 

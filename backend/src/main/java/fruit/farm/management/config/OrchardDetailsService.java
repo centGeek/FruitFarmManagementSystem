@@ -26,25 +26,25 @@ public class OrchardDetailsService implements UserDetailsService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<UserEntity> userOpt = userRepository.findByEmail(email);
+    public UserDetails loadUserByUsername(String nickname) throws UsernameNotFoundException {
+        Optional<UserEntity> userOpt = userRepository.findByNickname(nickname);
         if (userOpt.isEmpty()) {
-            log.warn("User not found: {}", email);
-            throw new UsernameNotFoundException("User with email [%s] doesn't exist".formatted(email));
+            log.warn("User not found: {}", nickname);
+            throw new UsernameNotFoundException("User with nickname [%s] doesn't exist".formatted(nickname));
         }
 
         UserEntity user = userOpt.get();
         log.info("Loading user: {}, active: {}, role: {}",
-                email, user.isActive(),
+                nickname, user.isActive(),
                 user.getRole() != null ? user.getRole().getRoleName() : "null");
 
         if (user.getRole() == null) {
-            log.error("User {} has no role assigned", email);
+            log.error("User {} has no role assigned", nickname);
             throw new UsernameNotFoundException("User has no role assigned");
         }
 
         List<SimpleGrantedAuthority> authorities = getUserAuthority(Set.of(user.getRole()));
-        log.info("User {} loaded with authorities: {}", email, authorities);
+        log.info("User {} loaded with authorities: {}", nickname, authorities);
 
         return buildUserForAuthentication(user, authorities);
     }
@@ -69,12 +69,13 @@ public class OrchardDetailsService implements UserDetailsService {
         return authorities;
     }
 
+
     private UserDetails buildUserForAuthentication(
             UserEntity user,
             List<SimpleGrantedAuthority> authorities
     ) {
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
+                user.getNickname(),
                 user.getCredentials().getPasswordHash(),
                 user.isActive(),
                 true,

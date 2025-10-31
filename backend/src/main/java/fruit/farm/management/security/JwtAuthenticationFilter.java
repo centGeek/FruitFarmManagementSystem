@@ -35,21 +35,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 if (jwtService.validateToken(token)) {
-                    String email = jwtService.getEmailFromToken(token);
+                    String nickname = jwtService.getNicknameFromToken(token);
                     List<String> roles = jwtService.getRolesFromToken(token);
 
-                    log.debug("Valid token for user: {}, roles: {}", email, roles);
+                    log.debug("Valid token for user: {}, roles: {}", nickname, roles);
 
                     List<SimpleGrantedAuthority> authorities = roles.stream()
                             .map(SimpleGrantedAuthority::new)
                             .collect(Collectors.toList());
 
                     UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(email, null, authorities);
+                            new UsernamePasswordAuthenticationToken(nickname, null, authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    log.debug("Authentication set successfully for user: {}", email);
+                    log.debug("Authentication set successfully for user: {}", nickname);
                 } else {
                     log.warn("Invalid JWT token");
                 }

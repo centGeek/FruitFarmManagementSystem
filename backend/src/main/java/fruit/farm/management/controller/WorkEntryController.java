@@ -1,6 +1,5 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.AdvancePayDTO;
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
@@ -17,7 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +39,10 @@ public class WorkEntryController {
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
-            log.info("Logged user: {} - fetching entries from {} to {}", loggedInEmail, startDate, endDate);
+            String loggedWithNickname = authentication.getName();
+            log.info("Logged user: {} - fetching entries from {} to {}", loggedWithNickname, startDate, endDate);
 
-            UserEntity gardener = userRepository.findByEmail(loggedInEmail)
+            UserEntity gardener = userRepository.findByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<WorkEntryEntity> entries = workEntryRepository
@@ -94,8 +92,8 @@ public class WorkEntryController {
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String loggedInEmail = authentication.getName();
-            UserEntity gardener = userRepository.findByEmail(loggedInEmail)
+            String loggedWithNickname = authentication.getName();
+            UserEntity gardener = userRepository.findByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<WorkEntryEntity> savedEntries = workScheduleService.createWorkSchedule(requests, gardener);

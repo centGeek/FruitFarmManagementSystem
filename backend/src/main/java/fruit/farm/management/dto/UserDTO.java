@@ -26,17 +26,15 @@ public class UserDTO {
     @Size(min = 2, max = 50, message = "Nazwisko musi mieć między 2 a 50 znaków")
     private String surname;
 
-    @NotBlank(message = "Email jest wymagany")
     @Email(message = "Email musi być poprawny")
     private String email;
 
     private LocalDate creationDate;
 
-    @Email(message = "Email musi być poprawny")
+    @NotBlank(message = "Nickname jest wymagany")
     private String nickname;
 
     @NotBlank(message = "Numer telefonu jest wymagany")
-    @Email(message = "Numer telefonu musi byc poprawny")
     private String phoneNumber;
 
     private String password;

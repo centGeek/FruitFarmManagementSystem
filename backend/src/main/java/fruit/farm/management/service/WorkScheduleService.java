@@ -41,8 +41,8 @@ public class WorkScheduleService {
         for (WorkEntryDto request : requests) {
             log.info("Processing entry for userId: {}", request.getUser());
 
-            UserEntity user = userRepository.findByEmail(request.getUser().getEmail())
-                    .orElseThrow(() -> new RuntimeException("User not found with email: " + request.getUser().getEmail()));
+            UserEntity user = userRepository.findByNickname(request.getUser().getNickname())
+                    .orElseThrow(() -> new RuntimeException("User not found with nickname: " + request.getUser().getNickname()));
 
             if (!user.getGardener().getId().equals(gardener.getId())) {
                 throw new RuntimeException("User does not belong to logged gardener");
@@ -63,8 +63,8 @@ public class WorkScheduleService {
                     entry.setSector(sector);
                 }
             }
-            Optional<WorkDetailsDTO> latestWorkDetailsForUser = workDetailsService.getLatestWorkDetailsForUserByEmail(
-                    request.getUser().getEmail());
+            Optional<WorkDetailsDTO> latestWorkDetailsForUser = workDetailsService.getLatestWorkDetailsForUserByNickname(
+                    request.getUser().getNickname());
             BigDecimal salary = latestWorkDetailsForUser
                     .map(workDetailsDTO -> DailySalaryCalculator.calculateDailySalary(request, workDetailsDTO))
                     .orElse(BigDecimal.ZERO);
@@ -108,9 +108,9 @@ public class WorkScheduleService {
             existingEntry.setWorkType(request.getWorkType());
         }
         existingEntry.setIsPaid(request.getIsPaid());
-        Optional<WorkDetailsDTO> latestWorkDetailsForUserByEmail = workDetailsService
-                .getLatestWorkDetailsForUserByEmail(request.getUser().getEmail());
-        BigDecimal salary = latestWorkDetailsForUserByEmail
+        Optional<WorkDetailsDTO> latestWorkDetailsForUserByNickname = workDetailsService
+                .getLatestWorkDetailsForUserByNickname(request.getUser().getNickname());
+        BigDecimal salary = latestWorkDetailsForUserByNickname
                 .map(workDetailsDTO -> DailySalaryCalculator.calculateDailySalary(request, workDetailsDTO))
                 .orElse(BigDecimal.ZERO);
 

@@ -5,8 +5,8 @@ import fruit.farm.management.dto.UserCredentialsDTO;
 import fruit.farm.management.dto.UserDTO;
 import fruit.farm.management.dto.WorkDetailsDTO;
 import fruit.farm.management.entity.*;
-import fruit.farm.management.exception.EmailAlreadyExistsException;
 import fruit.farm.management.exception.IncorrectInputFormatException;
+import fruit.farm.management.exception.NicknameAlreadyExistsException;
 import fruit.farm.management.mapper.CoordinateMapper;
 import fruit.farm.management.mapper.UserCredentialsMapper;
 import fruit.farm.management.mapper.UserMapper;
@@ -42,11 +42,11 @@ public class UserService {
 
     public UserEntity getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInEmail = authentication.getName();
+        String loggedWithNickname = authentication.getName();
 
-        return userRepository.findByEmail(loggedInEmail)
+        return userRepository.findByNickname(loggedWithNickname)
                 .orElseThrow(() -> {
-                    log.error("Logged in user with email {} not found in database.", loggedInEmail);
+                    log.error("Logged in user with nickname {} not found in database.", loggedWithNickname);
                     return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Zalogowany użytkownik nie istnieje w bazie danych.");
                 });
     }
@@ -56,9 +56,9 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public Optional<UserEntity> findByEmail(String loggedInEmail) {
+    public Optional<UserEntity> findByNickname(String loggedWithNickname) {
 
-        return userRepository.findByEmail(loggedInEmail);
+        return userRepository.findByNickname(loggedWithNickname);
     }
 
     public List<UserDTO> getAllEmployees(Long id) {
@@ -114,17 +114,54 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity update(UserEntity user, String password) {
-        UserEntity savedUser = userRepository.save(user);
+    public UserEntity update(UserEntity existingUser, UserDTO userRequest) {
 
-        if (password != null) {
-            userCredentialsRepository.update(new UserCredentialsEntity(savedUser, password));
+        if (userRequest.getNickname() != null && !userRequest.getNickname().equals(existingUser.getNickname())) {
+            Optional<UserEntity> userWithNickname = this.findByNickname(userRequest.getNickname());
+            if (userWithNickname.isPresent() && !userWithNickname.get().getId().equals(existingUser.getId())) {
+                throw new NicknameAlreadyExistsException("Nazwa użytkownika już jest zajęta");
+            }
+        }
+
+        log.info("User update data received:");
+        log.info("ID: {}", userRequest.getId());
+        log.info("Name: {}", userRequest.getName());
+        log.info("Surname: {}", userRequest.getSurname());
+        log.info("Nickname: {}", userRequest.getNickname());
+        log.info("Phone: {}", userRequest.getPhoneNumber());
+        log.info("Nickname: {}", userRequest.getNickname());
+        log.info("IsActive: {}", userRequest.isActive());
+
+        if (userRequest.getName() != null) {
+            existingUser.setName(userRequest.getName());
+        }
+        if (userRequest.getSurname() != null) {
+            existingUser.setSurname(userRequest.getSurname());
+        }
+        if (userRequest.getNickname() != null) {
+            existingUser.setNickname(userRequest.getNickname());
+        }
+        if (userRequest.getPhoneNumber() != null) {
+            existingUser.setPhoneNumber(userRequest.getPhoneNumber());
+        }
+        if (userRequest.getNickname() != null) {
+            existingUser.setNickname(userRequest.getNickname());
+        }
+        if (userRequest.getEmail() != null) {
+            existingUser.setEmail(userRequest.getEmail());
+        }
+        existingUser.setActive(userRequest.isActive());
+
+        UserEntity savedUser = userRepository.save(existingUser);
+
+        if (userRequest.getPassword() != null) {
+            userCredentialsRepository.update(new UserCredentialsEntity(savedUser, userRequest.getPassword()));
         }
         UserEntity loggedInUserId = this.getLoggedUser();
 
         notificationService.addUserNotification(NotificationDTO.builder()
                 .title("Zaktualizowano dane pracownika!")
-                .message("Zaktualizowano dane pracownika: " + user.getName() + " " + user.getSurname())
+                .message("Zaktualizowano dane pracownika: " + userRequest.getName() + " " + userRequest.getSurname())
                 .createdAt(LocalDateTime.now())
                 .userDTO(UserMapper.mapFromEntity(savedUser))
                 .build(), savedUser.getId(), loggedInUserId);
@@ -133,9 +170,9 @@ public class UserService {
 
     @Transactional
     public UserEntity registerUser(UserDTO request) {
-        Optional<UserEntity> existingUser = this.findByEmail(request.getEmail().toLowerCase());
+        Optional<UserEntity> existingUser = this.findByNickname(request.getNickname().toLowerCase());
         if (existingUser.isPresent()) {
-            throw new EmailAlreadyExistsException("Użytkownik z tym adresem email już istnieje");
+            throw new NicknameAlreadyExistsException("Użytkownik z tą nazwą użytkownika już istnieje");
         }
 
         if (request.getName() == null || request.getName().trim().isEmpty()) {
@@ -146,9 +183,9 @@ public class UserService {
 
             throw new IncorrectInputFormatException("Nazwisko jest wymagane");
         }
-        if (request.getEmail() == null || !request.getEmail().matches("\\S+@\\S+\\.\\S+")) {
+        if (request.getNickname() == null) {
 
-            throw new IncorrectInputFormatException("Email nie spełnia wymagań");
+            throw new IncorrectInputFormatException("Nickname jest wymagany");
         }
         if (request.getPassword() == null || request.getPassword().length() < 6) {
 
@@ -180,7 +217,7 @@ public class UserService {
         UserCredentialsEntity userCredentialsEntity = UserCredentialsMapper.mapToEntity(
                 savedUser, new UserCredentialsDTO(request.getPassword(), request.getConfirmPassword()));
         userCredentialsRepository.save(userCredentialsEntity);
-        log.info("New user registered: {}", savedUser.getEmail());
+        log.info("New user registered: {}", savedUser.getNickname());
         savedUser.setCredentials(userCredentialsEntity);
         return savedUser;
     }
