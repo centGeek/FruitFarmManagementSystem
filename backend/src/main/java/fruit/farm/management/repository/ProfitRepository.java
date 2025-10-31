@@ -60,6 +60,7 @@ public class ProfitRepository {
         existing.setDescription(profitDto.getDescription());
         existing.setCreatedAt(profitDto.getCreatedAt());
         existing.setReceived(profitDto.isReceived());
+        existing.setKilogramsSold(profitDto.getKilogramsSold());
 
         if (profitDto.getSectorDTO() != null) {
             SectorEntity sectorById = sectorRepository.findById(profitDto.getSectorDTO().getId()).get();

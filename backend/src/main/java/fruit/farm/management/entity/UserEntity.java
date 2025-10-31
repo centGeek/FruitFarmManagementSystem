@@ -1,6 +1,5 @@
 package fruit.farm.management.entity;
 
-import fruit.farm.management.dto.CoordinateDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,9 +36,6 @@ public class UserEntity {
     @Column(name = "creation_date")
     private LocalDate creationDate;
 
-    @Column(name = "password")
-    private String password;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private RoleEntity role;
@@ -58,20 +54,23 @@ public class UserEntity {
     @Column(name = "locality_name")
     private String localityName;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserCredentialsEntity credentials;
+
     public UserEntity(String name, String surname, String nickname, String phoneNumber, String email, LocalDate creationDate,
-                      String password, RoleEntity role, boolean isActive, UserEntity gardener,
-                      CoordinateEntity coordinateEntity, String localityName) {
+                      RoleEntity role, boolean isActive, UserEntity gardener,
+                      CoordinateEntity coordinateEntity, String localityName, UserCredentialsEntity credentials) {
         this.name = name;
         this.surname = surname;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.creationDate = creationDate;
-        this.password = password;
         this.role = role;
         this.isActive = isActive;
         this.gardener = gardener;
         this.coordinateEntity = coordinateEntity;
         this.localityName = localityName;
+        this.credentials = credentials;
     }
 }

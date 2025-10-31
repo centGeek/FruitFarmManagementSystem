@@ -249,7 +249,6 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
         if (!formData.amount || isNaN(amountNum) || amountNum <= 0) {
             newErrors.amount = 'Kwota musi być dodatnią liczbą';
         }
-        if (!formData.description.trim()) newErrors.description = 'Opis jest wymagany';
         if (!formData.type) newErrors.type = 'Typ wydatku jest wymagany';
         
         setErrors(newErrors);
@@ -335,7 +334,7 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
 
             <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                    Opis Wydatku *
+                    Opis Wydatku
                 </label>
                 <textarea
                     id="description"
@@ -360,7 +359,7 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
                     disabled={isLoading}
                 />
                 <label htmlFor="paid" className="ml-2 text-sm text-gray-700 font-medium">
-                    Opłacone (Faktura Zrealizowana)
+                    Opłacone (Płatność Zrealizowana)
                 </label>
             </div>
 

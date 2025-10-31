@@ -1,6 +1,7 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.UserDTO;
+import fruit.farm.management.entity.UserCredentialsEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.service.UserService;
@@ -28,7 +29,7 @@ public class EmployeeController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping
-    public ResponseEntity<List<UserEntity>> fetchListOfEmployees(@RequestParam(required = false) String status) {
+    public ResponseEntity<List<UserDTO>> fetchListOfEmployees(@RequestParam(required = false) String status) {
 
         log.info("Getting list of users with status filter: {}", status);
         try {
@@ -38,7 +39,7 @@ public class EmployeeController {
             UserEntity gardener = userService.findByEmail(loggedInEmail)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<UserEntity> users = userService.getAllEmployees(gardener.getId());
+            List<UserDTO> users = userService.getAllEmployees(gardener.getId());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
             log.error("Error fetching users: {}", e.getMessage(), e);
@@ -47,7 +48,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<UserEntity>> fetchActiveUsers() {
+    public ResponseEntity<List<UserDTO>> fetchActiveUsers() {
         log.info("Getting list of active users");
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -55,7 +56,7 @@ public class EmployeeController {
             UserEntity gardener = userService.findByEmail(loggedInEmail)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<UserEntity> users = userService.getAllActiveEmployees(gardener.getId());
+            List<UserDTO> users = userService.getAllActiveEmployees(gardener.getId());
             log.info("Found {} active users", users.size());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
@@ -65,7 +66,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/archived")
-    public ResponseEntity<List<UserEntity>> fetchArchivedUsers() {
+    public ResponseEntity<List<UserDTO>> fetchArchivedUsers() {
         log.info("Getting list of archived users");
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -73,7 +74,7 @@ public class EmployeeController {
             UserEntity gardener = userService.findByEmail(loggedInEmail)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<UserEntity> users = userService.getAllArchivedEmployees(gardener.getId());
+            List<UserDTO> users = userService.getAllArchivedEmployees(gardener.getId());
             log.info("Found {} archived users", users.size());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
@@ -169,13 +170,9 @@ public class EmployeeController {
             if (userRequest.getNickname() != null) {
                 existingUser.setNickname(userRequest.getNickname());
             }
-            if (userRequest.getPassword() != null && !userRequest.getPassword().trim().isEmpty()) {
-                existingUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-                log.info("Password updated for user ID: {}", id);
-            }
             existingUser.setActive(userRequest.isActive());
 
-            UserEntity updatedUser = userService.update(existingUser);
+            UserEntity updatedUser = userService.update(existingUser, userRequest.getCredentials().getPasswordHash());
             log.info("User updated successfully with ID: {}", updatedUser.getId());
 
             return ResponseEntity.ok(Map.of(
@@ -188,53 +185,6 @@ public class EmployeeController {
             log.error("Error updating user: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Update failed: " + e.getMessage()));
-        }
-    }
-
-    @PutMapping("/{id}/toggle-status")
-    public ResponseEntity<Map<String, String>> toggleUserStatus(@PathVariable Long id, @RequestBody Map<String, Boolean> statusRequest) {
-        log.info("Attempting to toggle status for user ID: {}", id);
-        log.info("Status request: {}", statusRequest);
-
-        try {
-            Optional<UserEntity> optionalUser = userService.findById(id);
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "User not found with ID: " + id));
-            }
-
-            UserEntity user = optionalUser.get();
-
-            Boolean newStatus = statusRequest.get("active");
-            if (newStatus == null) {
-                newStatus = statusRequest.get("isActive");
-            }
-            if (newStatus == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("error", "Missing 'active' or 'isActive' field in request"));
-            }
-
-            log.info("Changing user {} status from {} to {}",
-                    user.getEmail(), user.isActive(), newStatus);
-
-            user.setActive(newStatus);
-            UserEntity updatedUser = userService.save(user);
-
-            String action = newStatus ? "activated" : "archived";
-            log.info("User {} successfully {}", user.getEmail(), action);
-
-            return ResponseEntity.ok(Map.of(
-                    "message", "User status updated successfully",
-                    "id", id.toString(),
-                    "email", updatedUser.getEmail(),
-                    "newStatus", newStatus.toString(),
-                    "action", action
-            ));
-
-        } catch (Exception e) {
-            log.error("Error toggling user status: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Status update failed: " + e.getMessage()));
         }
     }
 

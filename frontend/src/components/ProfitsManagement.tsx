@@ -3,29 +3,26 @@ import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import {formatCurrency} from "../utils/common"
 
 const PROFIT_TYPES = [
- // 🍎 Sprzedaż owoców
- { value: 'APPLE_SALE', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
- { value: 'PEAR_SALE', label: 'Sprzedaż gruszek', icon: '🍐', color: 'bg-green-50 text-green-700 border-green-200' },
- { value: 'CHERRY_SALE', label: 'Sprzedaż czereśni/wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
- { value: 'PLUM_SALE', label: 'Sprzedaż śliwek', icon: '🫐', color: 'bg-purple-50 text-purple-700 border-purple-200' },
- { value: 'PEACH_SALE', label: 'Sprzedaż brzoskwiń', icon: '🍑', color: 'bg-orange-50 text-orange-700 border-orange-200' },
- { value: 'OTHER_FRUIT_SALE', label: 'Sprzedaż innych owoców', icon: '🥝', color: 'bg-green-50 text-green-700 border-green-200' },
  
- // 🏪 Kanały sprzedaży
- { value: 'WHOLESALE', label: 'Sprzedaż hurtowa', icon: '🏭', color: 'bg-blue-50 text-blue-700 border-blue-200' },
- { value: 'RETAIL', label: 'Sprzedaż detaliczna', icon: '🏪', color: 'bg-blue-50 text-blue-700 border-blue-200' },
- { value: 'EXPORT', label: 'Eksport', icon: '🌍', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
- { value: 'ONLINE_SALE', label: 'Sprzedaż online', icon: '💻', color: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+    { value: 'SPRZEDAZ_JABLEK', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
+ { value: 'SPRZEDAZ_GRUSZEK', label: 'Sprzedaż gruszek', icon: '🍐', color: 'bg-green-50 text-green-700 border-green-200' },
+ { value: 'SPRZEDAZ_WISNI', label: 'Sprzedaż czereśni/wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
+ { value: 'SPRZEDAZ_SLIW', label: 'Sprzedaż śliwek', icon: '🫐', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+ { value: 'SPRZEDAZ_BRSKWIN', label: 'Sprzedaż brzoskwiń', icon: '🍑', color: 'bg-orange-50 text-orange-700 border-orange-200' },
+ { value: 'SPRZEDAZ_INNYCH_OWOCOW', label: 'Sprzedaż innych owoców', icon: '🥝', color: 'bg-green-50 text-green-700 border-green-200' },
  
- // 💰 Inne przychody
- { value: 'SUBSIDY', label: 'Dotacje / Dopłaty', icon: '🏛️', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
- { value: 'COMPENSATION', label: 'Odszkodowania / Ubezpieczenia', icon: '🛡️', color: 'bg-amber-50 text-amber-700 border-amber-200' },
- { value: 'EQUIPMENT_SALE', label: 'Sprzedaż sprzętu', icon: '🚜', color: 'bg-gray-50 text-gray-700 border-gray-200' },
- { value: 'SERVICES', label: 'Usługi rolnicze dla innych', icon: '🤝', color: 'bg-teal-50 text-teal-700 border-teal-200' },
- { value: 'RENT', label: 'Wynajem ziemi/sprzętu', icon: '🏡', color: 'bg-purple-50 text-purple-700 border-purple-200' },
- { value: 'OTHER', label: 'Inne przychody', icon: '💵', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+ { value: 'SPRZEDAZ_HURTOWA', label: 'Sprzedaż hurtowa', icon: '🏭', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+ { value: 'SPRZEDAZ_DETALICZNA', label: 'Sprzedaż detaliczna', icon: '🏪', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+ { value: 'EKSPORT', label: 'Eksport', icon: '🌍', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+ { value: 'SPRZEDAZ_ONLINE', label: 'Sprzedaż online', icon: '💻', color: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+ 
+ { value: 'SUBSYDIA', label: 'Dotacje / Dopłaty', icon: '🏛️', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+ { value: 'ODSZKODOWANIE', label: 'Odszkodowania / Ubezpieczenia', icon: '🛡️', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+ { value: 'SPRZEDAZ_SPRZETU', label: 'Sprzedaż sprzętu', icon: '🚜', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+ { value: 'USLUGI', label: 'Usługi rolnicze dla innych', icon: '🤝', color: 'bg-teal-50 text-teal-700 border-teal-200' },
+ { value: 'CZYNSZ', label: 'Wynajem ziemi/sprzętu', icon: '🏡', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+ { value: 'INNE', label: 'Inne przychody', icon: '💵', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
 ];
-
 const PAYMENT_STATUS_OPTIONS = [
     { value: '', label: 'Wszystkie 📋' },
     { value: 'received', label: 'Otrzymane ✅' },
@@ -195,11 +192,9 @@ const ProfitForm = ({ profit, onSave, onCancel, isLoading, sectors }) => {
         id: profit?.purchaseId || null,
         date: profit?.createdAt || today,
         amount: profit?.profit?.toString() || '',
-        // Używamy profit?.kilogramsSold? dla edycji lub pustego stringa/0 dla nowego
         kilogramsSold: profit?.kilogramsSold?.toString() || '', 
         profitType: profit?.profitType || PROFIT_TYPES[0].value,
         description: profit?.description || '',
-        // Domyślnie na TRUE przy tworzeniu nowego
         received: profit ? (profit.received ?? false) : true, 
         sectorId: profit?.sectorDTO?.id?.toString() || '',
     }), [profit, today]);
@@ -230,16 +225,14 @@ const ProfitForm = ({ profit, onSave, onCancel, isLoading, sectors }) => {
         
         if (!formData.date.trim()) newErrors.date = 'Data przychodu jest wymagana';
         
-        if (!formData.amount || isNaN(amountNum) || amountNum <= 0) {
+        if (amountNum < 0) {
             newErrors.amount = 'Kwota musi być dodatnią liczbą';
         }
         
-        // Walidacja kilogramów (jeśli wpisano wartość, musi być >= 0)
         if (formData.kilogramsSold && isNaN(kgNum) || kgNum < 0) {
             newErrors.kilogramsSold = 'Ilość musi być liczbą nieujemną';
         }
         
-        if (!formData.description.trim()) newErrors.description = 'Opis jest wymagany';
         if (!formData.profitType) newErrors.profitType = 'Typ przychodu jest wymagany';
         
         setErrors(newErrors);
@@ -252,12 +245,10 @@ const ProfitForm = ({ profit, onSave, onCancel, isLoading, sectors }) => {
             const submitData = {
                 ...formData,
                 profit: Number(formData.amount),
-                // Dodajemy pole kilogramsSold jako liczbę lub null jeśli puste
                 kilogramsSold: formData.kilogramsSold ? Number(formData.kilogramsSold) : null, 
                 createdAt: formData.date,
                 sectorDTO: formData.sectorId ? { id: Number(formData.sectorId) } : null
             };
-            // Usuwamy pomocnicze klucze, z których stworzyliśmy pola dla API
             delete submitData.amount;
             delete submitData.date;
             delete submitData.sectorId;
@@ -277,7 +268,7 @@ const ProfitForm = ({ profit, onSave, onCancel, isLoading, sectors }) => {
             />
 
             <InputField 
-                label="Kwota Przychodu (PLN)" name="amount" type="number" required 
+                label="Kwota Przychodu (PLN)" name="amount" type="number" 
                 value={formData.amount} error={errors.amount}
                 handleChange={handleChange} isLoading={isLoading}
                 step="0.01" min="0.01"
@@ -340,22 +331,20 @@ const ProfitForm = ({ profit, onSave, onCancel, isLoading, sectors }) => {
             </div>
 
             <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                    Opis Przychodu *
-                </label>
-                <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows="3"
-                    className={`w-full px-3 py-2 ${errors.description ? 'border-red-500' : 'border-gray-300'} border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors`}
-                    disabled={isLoading}
-                />
-                {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
-            </div>
-            
-            
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                Opis Przychodu
+            </label>
+            <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows="3"
+                className={`w-full px-3 py-2 ${errors.description ? 'border-red-500' : 'border-gray-300'} border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors`}
+                disabled={isLoading}
+            />
+            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+            </div>
             <div className="flex items-center pt-2">
                 <input
                     type="checkbox"
@@ -405,91 +394,98 @@ const getProfitTypeDetails = (type) => {
 };
 
 const ProfitCard = ({ profit, onEdit, onDelete, sectors }) => {
-    const typeDetails = getProfitTypeDetails(profit.profitType);
-    const isReceived = profit.received;
-    const profitDate = new Date(profit.createdAt).toLocaleDateString('pl-PL');
-    const assignedSector = profit.sectorDTO || null;
+    const typeDetails = getProfitTypeDetails(profit.profitType);
+    const isReceived = profit.received;
+    const profitDate = new Date(profit.createdAt).toLocaleDateString('pl-PL');
+    const assignedSector = profit.sectorDTO || null;
 
-    // NOWA LOGIKA: Obliczenie ceny za kg
     const kilograms = profit.kilogramsSold;
     const isSoldByWeight = kilograms && kilograms > 0;
     const pricePerKg = isSoldByWeight 
         ? (profit.profit / kilograms).toFixed(2) 
         : null;
  
-    return (
-        <div className={`bg-white border-2 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 ${isReceived ? 'border-green-300' : 'border-amber-300'}`}>
-            <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl ${typeDetails.color.split(' ')[0]} border ${typeDetails.color.split(' ')[2]}`}>
-                        {typeDetails.icon}
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-800">
-                             {formatCurrency(profit.profit)} PLN
-                        </h3>
-                        <p className="text-sm text-gray-500">{profitDate}</p>
-                    </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                    <button
-                        onClick={() => onEdit(profit)}
-                        className="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors text-base"
-                        title="Edytuj"
-                    >
-                        ✏️
-                    </button>
-                    <button
-                        onClick={() => onDelete(profit.purchaseId)}
-                        className="p-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors text-base"
-                        title="Usuń"
-                    >
-                        🗑️
-                    </button>
-                </div>
-            </div>
+    return (
+        <div className={`bg-white border-2 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 ${isReceived ? 'border-green-300' : 'border-amber-300'}`}>
+            <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl ${typeDetails.color.split(' ')[0]} border ${typeDetails.color.split(' ')[2]}`}>
+                        {typeDetails.icon}
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-800">
+                             {formatCurrency(profit.profit)} PLN
+                        </h3>
+                        <p className="text-sm text-gray-500">{profitDate}</p>
+                    </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                    <button
+                        onClick={() => onEdit(profit)}
+                        className="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors text-base"
+                        title="Edytuj"
+                    >
+                        ✏️
+                    </button>
+                    <button
+                        onClick={() => onDelete(profit.purchaseId)}
+                        className="p-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors text-base"
+                        title="Usuń"
+                    >
+                        🗑️
+                    </button>
+                </div>
+            </div>
 
-            <div className="mb-4 space-x-2">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${typeDetails.color}`}>
-                    {typeDetails.label}
-                </span>
-                {isReceived ? (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                        Otrzymano
-                    </span>
-                ) : (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                        Oczekujące
-                    </span>
-                )}
-            </div>
+            <div className="mb-4 space-x-2">
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${typeDetails.color}`}>
+                    {typeDetails.label}
+                </span>
+                {isReceived ? (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        Otrzymano
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                        Oczekujące
+                    </span>
+                )}
+            </div>
             
             {isSoldByWeight && (
                 <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-xs text-yellow-800 font-medium space-x-2">
-                        <span>⚖️ Sprzedano: <strong>{kilograms.toFixed(0)} kg</strong></span>
+                        <span>⚖️ Sprzedano: <strong>{kilograms.toFixed(2)} kg</strong></span>
                         <span className="text-gray-500">|</span>
                         <span>💸 Cena/kg: <strong>{pricePerKg} PLN</strong></span>
                     </p>
                 </div>
             )}
 
-            {assignedSector && (
-                <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-xs text-blue-600 font-medium">
-                        Sektor: {assignedSector.description || `Sektor ${assignedSector.id}`}
-                        {assignedSector.plantType && ` (${assignedSector.plantType})`}
-                    </p>
-                </div>
-            )}
+            {!isReceived && (
+                <div className="mb-3 p-2 bg-amber-50 border border-amber-300 rounded-lg">
+                    <p className="text-xs text-amber-800 font-medium">
+                        ⏳ Czekamy na płatność
+                    </p>
+                </div>
+            )}
 
-            <div className="pt-4 border-t border-gray-100">
-                <p className="text-sm font-medium text-gray-500 uppercase mb-1">Opis</p>
-                <p className="text-base text-gray-900 line-clamp-2">{profit.description || 'Brak opisu.'}</p>
-            </div>
-        </div>
-    );
+            {assignedSector && (
+                <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-600 font-medium">
+                        📍 Sektor: {assignedSector.description || `Sektor ${assignedSector.id}`}
+                        {assignedSector.plantType && ` (${assignedSector.plantType})`}
+                    </p>
+                </div>
+            )}
+
+            <div className="pt-4 border-t border-gray-100">
+                <p className="text-sm font-medium text-gray-500 uppercase mb-1">Opis</p>
+                <p className="text-base text-gray-900 line-clamp-2">{profit.description || 'Brak opisu.'}</p>
+            </div>
+        </div>
+    );
 };
 
 const StatCard = ({ label, color, amount }) => {

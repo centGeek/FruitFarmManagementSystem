@@ -14,7 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -24,7 +23,7 @@ public class SecurityConfig {
     private final OrchardDetailsService orchardDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final CorsConfig corsConfig;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter; // Dodano
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {

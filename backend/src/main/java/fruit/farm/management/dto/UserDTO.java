@@ -1,11 +1,11 @@
 package fruit.farm.management.dto;
 
-import fruit.farm.management.entity.UserEntity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDTO {
 
     private long id;
@@ -38,11 +39,8 @@ public class UserDTO {
     @Email(message = "Numer telefonu musi byc poprawny")
     private String phoneNumber;
 
-    @NotBlank(message = "Hasło jest wymagane")
-    @Size(min = 6, message = "Hasło musi mieć minimum 6 znaków")
     private String password;
 
-    @NotBlank(message = "Potwierdzenie hasła jest wymagane")
     private String confirmPassword;
 
     private boolean isActive;
@@ -50,4 +48,19 @@ public class UserDTO {
     private CoordinateDTO coordinateDTO;
 
     private String localityName;
+
+    public UserDTO(long id, String name, String surname, String email, LocalDate creationDate,
+                   String nickname, String phoneNumber, boolean isActive,
+                   CoordinateDTO coordinateDTO, String localityName) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.creationDate = creationDate;
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+        this.isActive = isActive;
+        this.coordinateDTO = coordinateDTO;
+        this.localityName = localityName;
+    }
 }

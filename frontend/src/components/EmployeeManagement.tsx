@@ -68,7 +68,7 @@ const Modal = ({ isOpen, onClose, title, children, headerColor = 'bg-green-50' }
     );
 };
 
-const InputField = React.memo(({ label, name, type = 'text', required = false, isPassword = false, error, isLoading, showPassword, setShowPassword, handleChange, value, ...props }) => (
+const InputField = React.memo(({ label, name, type = 'text', required = false, error, isLoading, handleChange, value, ...props }) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
             {label} {required && '*'}
@@ -76,7 +76,6 @@ const InputField = React.memo(({ label, name, type = 'text', required = false, i
         <div className="relative">
             <input
                 id={name}
-                type={isPassword && showPassword ? "text" : type}
                 name={name}
                 onChange={handleChange}
                 className={`w-full px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'} border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors`}
@@ -84,16 +83,6 @@ const InputField = React.memo(({ label, name, type = 'text', required = false, i
                 value={value}
                 {...props}
             />
-            {isPassword && (
-                <button
-                    type="button"
-                    onClick={() => setShowPassword(prev => !prev)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
-                    aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
-                >
-                    {showPassword ? "🙈" : "👁️"}
-                </button>
-            )}
         </div>
         {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
@@ -107,14 +96,11 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
         nickname: employee?.nickname || '',
         phoneNumber: employee?.phoneNumber || '',
         email: employee?.email || '',
-        date: employee?.creationDate || '', 
-        password: '',
-        confirmPassword: '',
+        date: employee?.creationDate || '',
         active: employee?.active ?? true
     }), [employee]);
 
     const [formData, setFormData] = useState(initialState);
-    const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
@@ -141,20 +127,6 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
         if (!formData.email.trim()) newErrors.email = 'Email jest wymagany';
         else if (!/\S+@\S+\.\S/.test(formData.email)) newErrors.email = 'Nieprawidłowy format email';
         
-        if (!isUpdating || formData.password) {
-            if (!isUpdating && !formData.password.trim()) {
-                newErrors.password = 'Hasło jest wymagane dla nowego pracownika';
-            } else if (formData.password.length > 0 && formData.password.length < 6) {
-                newErrors.password = 'Hasło musi mieć co najmniej 6 znaków';
-            }
-        }
-        
-        if (!isUpdating || formData.password) {
-            if (formData.password !== formData.confirmPassword) {
-                newErrors.confirmPassword = 'Hasła nie są zgodne';
-            }
-        }
-        
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     }, [formData, isUpdating]);
@@ -162,13 +134,6 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
     const handleSubmit = useCallback(() => {
         if (validate()) {
             const submitData = { ...formData };
-            
-            if (isUpdating && !submitData.password) {
-                delete submitData.password;
-                delete submitData.confirmPassword;
-            } else if (!isUpdating) {
-                submitData.confirmPassword = submitData.confirmPassword || submitData.password;
-            }
             
             onSave(submitData);
         }
@@ -203,30 +168,6 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
                 />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <InputField
-                    label={isUpdating ? 'Nowe hasło (pozostaw puste aby nie zmieniać)' : 'Hasło'}
-                    name="password"
-                    type="password"
-                    isPassword
-                    required={!isUpdating}
-                    value={formData.password}
-                    error={errors.password}
-                    handleChange={handleChange} isLoading={isLoading}
-                    showPassword={showPassword} setShowPassword={setShowPassword}
-                />
-                
-                {(!isUpdating || formData.password) && (
-                    <InputField
-                        label="Potwierdź hasło"
-                        name="confirmPassword"
-                        type="password"
-                        value={formData.confirmPassword}
-                        error={errors.confirmPassword}
-                        handleChange={handleChange} isLoading={isLoading}
-                    />
-                )}
-            </div>
             
             <div className="flex items-center pt-2">
                 <input
@@ -738,7 +679,7 @@ const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsSave }) 
             }
         } catch (err) {
             console.error('Błąd pobierania detali pracy:', err);
-            setError('Nie udało się pobrać detali pracy. Dodaj sposób rozliczania i stawkę');
+            setError('Dodaj sposób rozliczania i stawkę');
         } finally {
             setIsLoadingWorkDetails(false);
         }

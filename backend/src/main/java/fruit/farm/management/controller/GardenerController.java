@@ -9,6 +9,7 @@ import fruit.farm.management.exception.NotFoundException;
 import fruit.farm.management.mapper.CoordinateMapper;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.CoordinateRepository;
+import fruit.farm.management.repository.UserCredentialsRepository;
 import fruit.farm.management.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,11 +92,7 @@ public class GardenerController {
             existingGardener.setCoordinateEntity(coordinateEntity);
             existingGardener.setLocalityName(userDTO.getLocalityName());
 
-//            if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-//                userService.updatePassword(existingGardener, userDTO.getPassword());
-//            }
-
-            userService.update(existingGardener);
+            userService.update(existingGardener, userDTO.getPassword());
             log.info("Gardener profile updated successfully for ID: {}", gardenerId);
 
             return ResponseEntity.ok(Map.of("message", "Profil został zaktualizowany pomyślnie!"));
