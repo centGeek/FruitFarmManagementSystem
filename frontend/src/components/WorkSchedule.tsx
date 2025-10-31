@@ -87,7 +87,7 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
         sectorId: '',
         workType: '',
         description: '',
-        isPaidHourly: emp.isPaidHourly !== false
+        isPaidHourly: emp.workDetails?.isPaidHourly !== false
     }))
 );
 
@@ -98,7 +98,7 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
     const handleSubmit = () => {
     const valid = entries.filter(e => {
         const hasHours = e.hours && parseFloat(e.hours) > 0;
-        if (e.isPaidHourly) {
+        if (e.employee.workDetails?.isPaidHourly) {
             return hasHours;
         } else {
             const hasKg = e.kilogramsPicked && parseFloat(e.kilogramsPicked) > 0;
@@ -117,12 +117,12 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
     const totalHours = useMemo(() => entries.reduce((sum, e) => sum + (parseFloat(e.hours) || 0), 0), [entries]);
     const totalKilograms = useMemo(() => entries.reduce((sum, e) => sum + (parseFloat(e.kilogramsPicked) || 0), 0), [entries]);
     const filledCount = useMemo(() => entries.filter(e => {
-        if (e.isPaidHourly) {
-            return e.hours && parseFloat(e.hours) > 0;
-        } else {
-            return e.kilogramsPicked && parseFloat(e.kilogramsPicked) > 0;
-        }
-    }).length, [entries]);
+    if (e.employee.workDetails?.isPaidHourly) {
+        return e.hours && parseFloat(e.hours) > 0;
+    } else {
+        return e.kilogramsPicked && parseFloat(e.kilogramsPicked) > 0;
+    }
+}).length, [entries]);
 
     return (
         <div className="space-y-4">
@@ -180,32 +180,32 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
                                     {entry.employee.nickname && <p className="text-xs text-gray-500 italic">"{entry.employee.nickname}"</p>}
                                 </div>
 
-                                {entry.isPaidHourly ? (
-                                    <div className="md:col-span-2">
-                                        <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
-                                        <input type="number" step="0.5" min="0" max="24" value={entry.hours}
-                                            onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
-                                            placeholder="8" />
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="md:col-span-1">
-                                            <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
-                                            <input type="number" step="0.5" min="0" max="24" value={entry.hours}
-                                                onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
-                                                placeholder="8" />
-                                        </div>
-                                        <div className="md:col-span-1">
-                                            <label className="text-xs text-gray-500 mb-1 block">Kilogramy *</label>
-                                            <input type="number" step="0.1" min="0" value={entry.kilogramsPicked}
-                                                onChange={(e) => updateEntry(entry.employeeId, 'kilogramsPicked', e.target.value)}
-                                                className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-lg font-bold" 
-                                                placeholder="50" />
-                                        </div>
-                                    </>
-                                )}
+                                {entry.employee.workDetails?.isPaidHourly ? (
+    <div className="md:col-span-2">
+        <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
+        <input type="number" step="0.5" min="0" max="24" value={entry.hours}
+            onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
+            placeholder="8" />
+    </div>
+) : (
+    <>
+        <div className="md:col-span-1">
+            <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
+            <input type="number" step="0.5" min="0" max="24" value={entry.hours}
+                onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
+                placeholder="8" />
+        </div>
+        <div className="md:col-span-1">
+            <label className="text-xs text-gray-500 mb-1 block">Kilogramy *</label>
+            <input type="number" step="0.1" min="0" value={entry.kilogramsPicked}
+                onChange={(e) => updateEntry(entry.employeeId, 'kilogramsPicked', e.target.value)}
+                className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-lg font-bold" 
+                placeholder="50" />
+        </div>
+    </>
+)}
 
                                 <div className="md:col-span-3">
                                     <label className="text-xs text-gray-500 mb-1 block">Sektor</label>
@@ -760,31 +760,56 @@ export default function WorkEntryManagement() {
     }, []);
 
     const fetchEmployees = useCallback(async () => {
-        console.log('[FETCH] Rozpoczynam pobieranie pracowników');
-        try {
-            const headers = getAuthHeaders();
-            const response = await fetch(`${BACKEND_URL}/api/users/active`, {
-                method: 'GET',
-                headers: headers,
-            });
+    console.log('[FETCH] Rozpoczynam pobieranie pracowników');
+    try {
+        const headers = getAuthHeaders();
+        const response = await fetch(`${BACKEND_URL}/api/users/active`, {
+            method: 'GET',
+            headers: headers,
+        });
 
-            if (response.ok) {
-                const employeesData = await response.json();
-                console.log('[FETCH] ✅ Pracownicy:', employeesData);
-                setEmployees(employeesData);
-            } else {
-                const errorText = await response.text();
-                console.error(`[FETCH] ❌ Błąd HTTP dla pracowników: ${response.status}`, errorText);
-                setAlert({ type: 'error', message: `Błąd ładowania pracowników: ${response.status}` });
-                setEmployees([]);
-            }
-        } catch (error) {
-            console.error('[FETCH] ❌ Błąd połączenia dla pracowników:', error);
-            setAlert({ type: 'error', message: 'Błąd połączenia z serwerem podczas ładowania pracowników.' });
+        if (response.ok) {
+            const employeesData = await response.json();
+            console.log('[FETCH] ✅ Pracownicy:', employeesData);
+            
+            // Pobierz workDetails dla każdego pracownika
+            const employeesWithDetails = await Promise.all(
+                employeesData.map(async (emp) => {
+                    try {
+                        const detailsResponse = await fetch(
+                            `${BACKEND_URL}/api/work-details/user/${emp.id}/latest`,
+                            { method: 'GET', headers: headers }
+                        );
+                        
+                        if (detailsResponse.ok) {
+                            const workDetails = await detailsResponse.json();
+                            console.log(`[FETCH] ✅ WorkDetails dla ${emp.name}:`, workDetails);
+                            return { ...emp, workDetails };
+                        } else {
+                            console.warn(`[FETCH] ⚠️ Brak workDetails dla ${emp.name}`);
+                            return { ...emp, workDetails: null };
+                        }
+                    } catch (error) {
+                        console.error(`[FETCH] ❌ Błąd workDetails dla ${emp.name}:`, error);
+                        return { ...emp, workDetails: null };
+                    }
+                })
+            );
+            
+            console.log('[FETCH] ✅ Pracownicy z workDetails:', employeesWithDetails);
+            setEmployees(employeesWithDetails);
+        } else {
+            const errorText = await response.text();
+            console.error(`[FETCH] ❌ Błąd HTTP dla pracowników: ${response.status}`, errorText);
+            setAlert({ type: 'error', message: `Błąd ładowania pracowników: ${response.status}` });
             setEmployees([]);
         }
-    }, []);
-
+    } catch (error) {
+        console.error('[FETCH] ❌ Błąd połączenia dla pracowników:', error);
+        setAlert({ type: 'error', message: 'Błąd połączenia z serwerem podczas ładowania pracowników.' });
+        setEmployees([]);
+    }
+}, []);
     const fetchSectors = useCallback(async () => {
         await fetchData(setSectors, '/api/sectors', 'sektorów');
     }, [fetchData]);
@@ -938,7 +963,7 @@ export default function WorkEntryManagement() {
             description: entry.description || '',
             duration: parseFloat(entry.hours) || 0,
             daySalary: 0,
-            kilogramsPicked: !entry.isPaidHourly ? parseFloat(entry.kilogramsPicked || 0) : 0,
+            kilogramsPicked: !entry.employee.workDetails?.isPaidHourly ? parseFloat(entry.kilogramsPicked || 0) : 0,
             isPaid: false,
         };
         });
