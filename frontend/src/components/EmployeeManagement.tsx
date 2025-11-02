@@ -152,7 +152,7 @@ const EmployeeForm = ({ employee, onSave, onCancel, isLoading }) => {
             </div>
 
             <InputField 
-                label="Pseudonim" name="nickname" required value={formData.nickname} error={errors.nickname}
+                label="Nazwa użytkownika" name="nickname" required value={formData.nickname} error={errors.nickname}
                 handleChange={handleChange} isLoading={isLoading}
             />
 

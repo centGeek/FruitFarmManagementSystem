@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, User, Lock, Apple, Leaf, BarChart3, Users, MapPin, Bell } from 'lucide-react';
 import { BACKEND_URL} from "../utils/apiConfigs";
 
-const GOOGLE_CLIENT_ID = "756765730426-ph1sg4bqiaajlb3b77olcrv6043rb2u0.apps.googleusercontent.com";
-
 const Alert = ({ type, message }) => {
   if (!message) return null;
   const colors = {
@@ -93,89 +91,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Google Auth Setup
-  useEffect(() => {
-    const loadGoogleAuth = () => {
-      if (window.google?.accounts) {
-        initializeGoogleAuth();
-        return;
-      }
-      
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        const checkReady = () => {
-          if (window.google?.accounts?.id) {
-            initializeGoogleAuth();
-          } else {
-            setTimeout(checkReady, 100);
-          }
-        };
-        checkReady();
-      };
-      document.head.appendChild(script);
-    };
-
-    const initializeGoogleAuth = () => {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleGoogleResponse
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById("google-signin-button"),
-          { theme: "outline", size: "large", text: "continue_with", width: 400 }
-        );
-      } catch (err) {
-        console.error('Google Auth initialization error:', err);
-      }
-    };
-
-    loadGoogleAuth();
-  }, []);
-
-  // Google Login Handler
-  const handleGoogleResponse = async (response) => {
-    if (!response.credential) {
-      setError('Brak tokena Google');
-      return;
-    }
-
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          idToken: response.credential,
-          clientId: GOOGLE_CLIENT_ID
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.token) {
-        handleLoginSuccess(
-          data.token,
-          data.nickname || 'google-user@example.com',
-          'google',
-          formData.rememberMe
-        );
-      } else {
-        setError(data.message || 'Błąd logowania Google');
-      }
-    } catch (err) {
-      setError('Podano błędne dane logowania.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -257,10 +172,6 @@ export default function LoginPage() {
             {/* Error Alert */}
             <Alert type="error" message={error} />
 
-            {/* Google Sign In */}
-            <div className="mb-6">
-              <div id="google-signin-button"></div>
-            </div>
 
             {/* Divider */}
             <div className="relative my-8">
@@ -308,9 +219,6 @@ export default function LoginPage() {
                     Zapamiętaj mnie
                   </label>
                 </div>
-                <a href="#" className="text-sm text-green-600 hover:text-green-500 font-medium">
-                  Zapomniałeś hasła?
-                </a>
               </div>
 
               <button

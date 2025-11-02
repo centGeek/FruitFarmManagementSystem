@@ -165,7 +165,7 @@ export default function ProfitAnalysis() {
         });
 
         expenses.forEach(expense => {
-            const year = new Date(expense.purchaseDate).getFullYear();
+            const year = new Date(expense.createdAt).getFullYear();
             if (!yearData[year]) {
                 yearData[year] = { year, przychody: 0, wydatki: 0 };
             }
@@ -205,7 +205,7 @@ export default function ProfitAnalysis() {
 
         expenses.forEach(expense => {
             if (expense.sectorDTO) {
-                const year = new Date(expense.purchaseDate).getFullYear();
+                const year = new Date(expense.createdAt).getFullYear();
                 const sectorId = expense.sectorDTO.id;
                 const key = `${sectorId}-${year}`;
                 
@@ -254,7 +254,7 @@ export default function ProfitAnalysis() {
 
         expenses.forEach(expense => {
             if (expense.sectorDTO) {
-                const year = new Date(expense.purchaseDate).getFullYear();
+                const year = new Date(expense.createdAt).getFullYear();
                 const sectorId = expense.sectorDTO.id;
                 
                 if (!yearSectorData[year]) yearSectorData[year] = {};
@@ -301,7 +301,7 @@ export default function ProfitAnalysis() {
     const availableYears = useMemo(() => {
         const years = new Set();
         [...profits, ...expenses].forEach(item => {
-            const date = item.createdAt || item.purchaseDate;
+            const date = item.createdAt;
             if (date) {
                 years.add(new Date(date).getFullYear());
             }

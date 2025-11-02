@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Eye, EyeOff, User, Lock, Apple, Leaf, BarChart3, Users, MapPin, Bell, Phone, UserCheck } from 'lucide-react';
+import { Eye, EyeOff, User, Lock, Apple, Leaf, MapPin, Phone, UserCheck } from 'lucide-react';
 import { BACKEND_URL} from "../utils/apiConfigs";
 import BasicMap from './BasicMap';
 import LocationSearch from './LocationSearch';
 import L from 'leaflet';
+
+// --- KOMPONENTY POMOCNICZE ---
 
 const Alert = React.memo(({ type, message }) => {
     if (!message) return null;
@@ -83,9 +85,7 @@ const handleRegistrationSuccess = (token, email) => {
     window.location.href = '/home';
 };
 
-// ---------------------------
-// GŁÓWNY KOMPONENT REGISTERPAGE
-// ---------------------------
+// --- GŁÓWNY KOMPONENT REGISTERPAGE ---
 
 export default function RegisterPage() {
     const defaultCenter = useMemo(() => [52.2297, 21.0122], []); // Warszawa (Centralna Polska)
@@ -268,6 +268,8 @@ export default function RegisterPage() {
         }
     };
 
+    // --- RENDER ---
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 flex items-center justify-center p-4">
             {/* Decorative Elements */}
@@ -275,11 +277,12 @@ export default function RegisterPage() {
             <div className="absolute top-40 right-32 text-lime-200 animate-bounce"><Leaf size={24} /></div>
             <div className="absolute bottom-32 left-16 text-emerald-200 animate-pulse"><Leaf size={28} /></div>
 
-            <div className="w-full max-w-6xl flex bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden">
-                {/* Left Side - Registration Form */}
-                <div className="w-full lg:w-1/2 p-8 lg:p-12">
+            {/* Kontener formularza: maksymalna szerokość i centrowanie */}
+            <div className="w-full max-w-lg bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden">
+                <div className="p-8 lg:p-12">
                     <div className="max-w-md mx-auto">
                         
+                        {/* Nagłówek */}
                         <div className="text-center mb-8">
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg">
                                 <Apple className="w-8 h-8 text-white" />
@@ -288,20 +291,20 @@ export default function RegisterPage() {
                             <p className="text-gray-600">Utwórz konto i zacznij zarządzać swoim sadem</p>
                         </div>
 
-                        {/* Alerts */}
+                        {/* Alerty */}
                         <Alert type="error" message={generalError} />
                         <Alert type="success" message={success} />
 
-                        {/* Registration Form */}
+                        {/* Formularz Rejestracyjny */}
                         <div className="space-y-5">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <TextInput id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="Imię *" icon={User} disabled={isLoading} error={errors.name}/>
                                 <TextInput id="surname" name="surname" value={formData.surname} onChange={handleInputChange} placeholder="Nazwisko *" icon={UserCheck} disabled={isLoading} error={errors.surname}/>
                             </div>
 
-                            <TextInput id="nickname" name="nickname" required value={formData.nickname} onChange={handleInputChange} placeholder="Nazwa użytkownika*" icon={User} disabled={isLoading}/>
+                            <TextInput id="nickname" name="nickname" value={formData.nickname} onChange={handleInputChange} placeholder="Nazwa użytkownika (opcjonalna)" icon={User} disabled={isLoading}/>
                             <TextInput id="phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Numer telefonu (opcjonalny)" icon={Phone} disabled={isLoading}/>
-                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="Adres email" icon={User} disabled={isLoading} error={errors.email}/>
+                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="Adres email *" icon={User} disabled={isLoading} error={errors.email}/>
 
                             <div className="pt-2">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
@@ -320,7 +323,6 @@ export default function RegisterPage() {
                                     </div>
                                 )}
                                 
-
                                 {/* Mapa: Użycie BasicMap z przekazaniem state do kontroli widoku i markera */}
                                 <div className="rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0" style={{ height: '250px' }}>
                                     <BasicMap
@@ -385,50 +387,6 @@ export default function RegisterPage() {
                                 </a>
                             </p>
                         </div>
-                    </div>
-                </div>
-
-                {/* Right Side - Features Showcase */}
-                <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-emerald-700 p-12 flex-col justify-center text-white">
-                    <h2 className="text-4xl font-bold mb-6">Rozpocznij profesjonalne zarządzanie sadem</h2>
-                    <p className="text-green-100 text-lg mb-8 leading-relaxed">
-                        Dołącz do tysięcy sadowników, którzy już wykorzystują OrchardManager do optymalizacji swojego gospodarstwa.
-                    </p>
-                    
-                    <div className="space-y-6">
-                        {[
-                            { icon: MapPin, title: 'Mapowanie działek', desc: 'Wizualizuj i organizuj swoje uprawy na interaktywnej mapie' },
-                            { icon: Users, title: 'Zarządzanie zespołem', desc: 'Koordynuj pracę wszystkich pracowników w jednym miejscu' },
-                            { icon: BarChart3, title: 'Raporty finansowe', desc: 'Analizuj koszty, przychody i rentowność w czasie rzeczywistym' },
-                            { icon: Bell, title: 'Smart powiadomienia', desc: 'Otrzymuj alerty o warunkach pogodowych i terminach prac' }
-                        ].map((feature, idx) => (
-                            <div key={idx} className="flex items-center space-x-4">
-                                <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                    <feature.icon className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-lg">{feature.title}</h3>
-                                    <p className="text-green-100 text-sm">{feature.desc}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="mt-12 p-6 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/20">
-                        <div className="flex items-center mb-4">
-                            <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                    <div key={i} className="w-5 h-5 text-yellow-400 fill-current">⭐</div>
-                                ))}
-                            </div>
-                            <span className="ml-2 text-sm text-green-100">5.0/5 (127 opinii)</span>
-                        </div>
-                        <p className="text-sm text-green-100 italic mb-3">
-                            "System bardzo intuicyjny i funkcjonalny. Zaoszczędziliśmy mnóstwo czasu na rejestracji placy i koordynacji prac sezonowych."
-                        </p>
-                        <p className="text-white font-medium">
-                            — Anna Kowalska, Sad Grójecki
-                        </p>
                     </div>
                 </div>
             </div>

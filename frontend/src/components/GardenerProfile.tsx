@@ -365,7 +365,7 @@ export default function GardenerProfile() {
                             <InputField label="Numer Telefonu (opcjonalnie)" name="phoneNumber" value={profileData.phoneNumber} onChange={handleChange} error={errors.phoneNumber} isLoading={isSaving} placeholder="+48 123 456 789"/>
                         </div>
                         <div className="mt-6">
-                            <InputField label="Pseudonim (obowiązkowo)" name="nickname" required value={profileData.nickname} onChange={handleChange} isLoading={isSaving} placeholder="Twój pseudonim"/>
+                            <InputField label="Nazwa użytkownika (obowiązkowo)" name="nickname" required value={profileData.nickname} onChange={handleChange} isLoading={isSaving} placeholder="Twój pseudonim"/>
                         </div>
                     </div>
 
