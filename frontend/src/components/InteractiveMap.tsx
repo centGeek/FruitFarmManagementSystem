@@ -8,22 +8,32 @@ import BasicMap from './BasicMap';
 
 
 const CROP_TYPES = [
-    { 
-        value: 'JABŁOŃ', 
-        label: '🍎 Jabłonie',
-        varieties: [
-            { value: 'GOLDEN_DELICIOUS', label: 'Golden Delicious' },
-            { value: 'RED_DELICIOUS', label: 'Red Delicious' },
-            { value: 'GALA', label: 'Gala' },
-            { value: 'CHAMPION', label: 'Champion' },
-            { value: 'IDARED', label: 'Idared' },
-            { value: 'LIGOL', label: 'Ligol' },
-            { value: 'SZAMPION', label: 'Szampion' },
-            { value: 'JONAGOLD', label: 'Jonagold' },
-            { value: 'GLOSTER', label: 'Gloster' },
-            { value: 'INNA', label: 'Inna odmiana' }
-        ]
-    },
+    {
+    value: 'JABŁOŃ', 
+    label: '🍎 Jabłonie',
+    varieties: [
+        { value: 'IDARED', label: 'Idared' },
+        { value: 'LIGOL', label: 'Ligol' },
+        { value: 'SZAMPION', label: 'Szampion' },
+        { value: 'JONAGOLD', label: 'Jonagold' },
+        { value: 'GLOSTER', label: 'Gloster' },
+        { value: 'GALA', label: 'Gala' },
+        { value: 'GOLDEN_DELICIOUS', label: 'Golden Delicious' },
+        { value: 'RED_DELICIOUS', label: 'Red Delicious' },
+        { value: 'PRINCE', label: 'Princ' },
+        { value: 'ELSTAR', label: 'Elstar' },
+        { value: 'MUTSU', label: 'Mutsu' },
+        { value: 'ALWA', label: 'Alwa' },
+        { value: 'MELODIA', label: 'Melodia' },
+        { value: 'GALMAC', label: 'Galmac' },
+        { value: 'PAPIEROWKA', label: 'Papierówka' },
+        { value: 'LOBO', label: 'Lobo' },
+        { value: 'TOPAZ', label: 'Topaz' },
+        { value: 'RUBINOLA', label: 'Rubinola' },
+        { value: 'PINOVA', label: 'Pinova' },
+        { value: 'INNA', label: 'Inna odmiana' }
+    ]
+  },
     { 
         value: 'GRUSZA',
         label: '🍐 Grusze',

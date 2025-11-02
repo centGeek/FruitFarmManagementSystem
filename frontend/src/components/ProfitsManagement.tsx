@@ -4,7 +4,7 @@ import {formatCurrency} from "../utils/common"
 
 const PROFIT_TYPES = [
  
-    { value: 'SPRZEDAZ_JABLEK', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
+ { value: 'SPRZEDAZ_JABLEK', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
  { value: 'SPRZEDAZ_GRUSZEK', label: 'Sprzedaż gruszek', icon: '🍐', color: 'bg-green-50 text-green-700 border-green-200' },
  { value: 'SPRZEDAZ_WISNI', label: 'Sprzedaż wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
  { value: 'SPRZEDAZ_CZERESNI', label: 'Sprzedaż czereśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200'},

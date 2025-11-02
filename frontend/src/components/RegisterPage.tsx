@@ -202,7 +202,6 @@ export default function RegisterPage() {
 
         if (!formData.name.trim()) newErrors.name = 'Imię jest wymagane';
         if (!formData.surname.trim()) newErrors.surname = 'Nazwisko jest wymagane';
-        if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Podaj prawidłowy email';
         if (formData.password.length < 6) newErrors.password = 'Hasło min. 6 znaków';
         if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Hasła nie są identyczne';
 
@@ -300,11 +299,10 @@ export default function RegisterPage() {
                                 <TextInput id="surname" name="surname" value={formData.surname} onChange={handleInputChange} placeholder="Nazwisko *" icon={UserCheck} disabled={isLoading} error={errors.surname}/>
                             </div>
 
-                            <TextInput id="nickname" name="nickname" value={formData.nickname} onChange={handleInputChange} placeholder="Pseudonim (opcjonalne)" icon={User} disabled={isLoading}/>
+                            <TextInput id="nickname" name="nickname" required value={formData.nickname} onChange={handleInputChange} placeholder="Nazwa użytkownika*" icon={User} disabled={isLoading}/>
                             <TextInput id="phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Numer telefonu (opcjonalny)" icon={Phone} disabled={isLoading}/>
-                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="Adres email *" icon={User} disabled={isLoading} error={errors.email}/>
+                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="Adres email" icon={User} disabled={isLoading} error={errors.email}/>
 
-                            {/* --- MAP SECTION START --- */}
                             <div className="pt-2">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
                                     <MapPin className="w-5 h-5 mr-2 text-green-600" /> Ustaw swoją lokalizację *

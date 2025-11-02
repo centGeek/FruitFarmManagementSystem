@@ -116,7 +116,7 @@ public class WorkScheduleService {
 
         existingEntry.setDaySalary(salary);
 
-        if (request.getSector().getId() != null) {
+        if (request.getSector() != null) {
             SectorEntity sector = sectorService.findById(request.getSector().getId())
                     .orElseThrow(() -> new RuntimeException("Sector not found"));
             existingEntry.setSector(sector);

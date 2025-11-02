@@ -11,6 +11,7 @@ import ProfitsManagement from './components/ProfitsManagement'
 import WorkSchedule from './components/WorkSchedule'
 import WeatherNotifications from './components/WeatherNotifications'
 import GardenerProfile from './components/GardenerProfile'
+import AnalysisPage from './components/AnalysisPage'
 
 
 function App() {
@@ -244,7 +245,7 @@ function App() {
           path="/analyse"
           element={
             <ProtectedRoute allowedRoles={["Gardener"]}>
-              TODO - cała analiza
+              <AnalysisPage/>
             </ProtectedRoute>
           }
         />
