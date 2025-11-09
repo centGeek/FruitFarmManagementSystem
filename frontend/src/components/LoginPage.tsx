@@ -1,22 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, User, Lock, Apple, Leaf, BarChart3, Users, MapPin, Bell } from 'lucide-react';
 import { BACKEND_URL} from "../utils/apiConfigs";
+import { Alert} from "../utils/common";
 
-const Alert = ({ type, message }) => {
-  if (!message) return null;
-  const colors = {
-    error: 'bg-red-100 border-red-400 text-red-700',
-    success: 'bg-green-100 border-green-400 text-green-700'
-  };
-  return (
-    <div className={`mb-6 p-4 border rounded-xl ${colors[type]}`}>
-      <div className="flex items-center">
-        <div className={`w-2 h-2 rounded-full mr-2 ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`}></div>
-        {message}
-      </div>
-    </div>
-  );
-};
 
 const TextInput = ({ id, name, value, onChange, placeholder, icon: Icon, type = "text", disabled }) => (
   <div>

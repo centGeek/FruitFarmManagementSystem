@@ -1,27 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Eye, EyeOff, User, Lock, Apple, Leaf, MapPin, Phone, UserCheck } from 'lucide-react';
 import { BACKEND_URL} from "../utils/apiConfigs";
-import BasicMap from './BasicMap';
-import LocationSearch from './LocationSearch';
+import { Alert} from "../utils/common";
+import BasicMap from '../utils/BasicMap';
+import LocationSearch from '../utils/LocationSearch';
 import L from 'leaflet';
 
-// --- KOMPONENTY POMOCNICZE ---
-
-const Alert = React.memo(({ type, message }) => {
-    if (!message) return null;
-    const colors = {
-        error: 'bg-red-100 border-red-400 text-red-700',
-        success: 'bg-green-100 border-green-400 text-green-700'
-    };
-    return (
-        <div className={`mb-6 p-4 border rounded-xl ${colors[type]}`}>
-            <div className="flex items-center">
-                <div className={`w-2 h-2 rounded-full mr-2 ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                {message}
-            </div>
-        </div>
-    );
-});
 
 const TextInput = React.memo(({ id, name, value, onChange, placeholder, icon: Icon, type = "text", disabled, error }) => (
     <div>
@@ -121,11 +105,6 @@ export default function RegisterPage() {
     const [generalError, setGeneralError] = useState('');
     const [success, setSuccess] = useState('');
 
-    // --- MAP LOGIC ---
-
-    /**
-     * Funkcja wywoływana po wyszukaniu lokalizacji (np. z LocationSearch).
-     */
     const handleLocationSelect = useCallback((location) => {
         const locality = location.address.city || location.address.town || location.address.village || location.name.split(',')[0] || 'Nieustawiona';
         
@@ -302,9 +281,9 @@ export default function RegisterPage() {
                                 <TextInput id="surname" name="surname" value={formData.surname} onChange={handleInputChange} placeholder="Nazwisko *" icon={UserCheck} disabled={isLoading} error={errors.surname}/>
                             </div>
 
-                            <TextInput id="nickname" name="nickname" value={formData.nickname} onChange={handleInputChange} placeholder="Nazwa użytkownika (opcjonalna)" icon={User} disabled={isLoading}/>
+                            <TextInput id="nickname" name="nickname" value={formData.nickname} onChange={handleInputChange} placeholder="Nazwa użytkownika *" icon={User} disabled={isLoading}/>
                             <TextInput id="phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Numer telefonu (opcjonalny)" icon={Phone} disabled={isLoading}/>
-                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="Adres email *" icon={User} disabled={isLoading} error={errors.email}/>
+                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="Adres email (opcjonalny)" icon={User} disabled={isLoading} error={errors.email}/>
 
                             <div className="pt-2">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">

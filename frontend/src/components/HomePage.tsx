@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
+import { Alert } from "../utils/common";
+
 
 
 const NOTIFICATION_TYPES = {
@@ -9,33 +11,6 @@ const NOTIFICATION_TYPES = {
   SECTOR: { label: 'Sektor', icon: '🗺️', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
   ALERT: { label: 'Alert', icon: '⚠️', color: 'bg-red-50 text-red-700 border-red-200' },
   SYSTEM: { label: 'System', icon: '⚙️', color: 'bg-gray-50 text-gray-700 border-gray-200' },
-};
-
-const Alert = ({ type, message, onClose }) => {
-  if (!message) return null;
-  const colors = useMemo(() => ({
-    error: 'bg-red-50 border-red-300 text-red-700',
-    success: 'bg-green-50 border-green-300 text-green-700',
-    warning: 'bg-amber-50 border-amber-300 text-amber-700'
-  }), []);
-  
-  return (
-    <div className={`mb-4 p-4 border rounded-xl ${colors[type]} flex items-center justify-between shadow-sm`} role="alert">
-      <div className="flex items-center">
-        <div className={`w-2 h-2 rounded-full mr-2 ${type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-        <p className="font-medium">{message}</p>
-      </div>
-      {onClose && (
-        <button 
-          onClick={onClose} 
-          className="text-gray-500 hover:text-gray-700 p-1 transition-colors text-lg"
-          aria-label="Zamknij alert"
-        >
-          ❌
-        </button>
-      )}
-    </div>
-  );
 };
 
 const LoadingState = () => (

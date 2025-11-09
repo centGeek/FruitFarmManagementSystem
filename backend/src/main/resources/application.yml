@@ -23,7 +23,6 @@ spring:
     clean-disabled: true
     placeholder-replacement: false
     mixed: false
-
 server:
   port: 8091
 

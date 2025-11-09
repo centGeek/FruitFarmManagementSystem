@@ -39,7 +39,6 @@ public class ExpenseController {
     private final ExpenseRepository expenseRepository;
     private final UserService userService;
     private final SectorService sectorService;
-    private final WorkEntryRepository workEntryRepository;
     private final WorkScheduleService workScheduleService;
 
     @PostMapping

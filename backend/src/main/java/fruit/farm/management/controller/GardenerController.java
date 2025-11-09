@@ -85,6 +85,7 @@ public class GardenerController {
                     CoordinateMapper.mapToEntity(userDTO.getCoordinateDTO(), null));
 
             existingGardener.setCoordinateEntity(coordinateEntity);
+            existingGardener.setLocalityName(userDTO.getLocalityName());
 
             userService.update(existingGardener, userDTO);
             log.info("Gardener profile updated successfully for ID: {}", gardenerId);

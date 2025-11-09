@@ -5,25 +5,31 @@ import { Trash2, Layers, X, Search, MapPin, Loader, Check, AlertCircle, Edit3 } 
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import { CROP_TYPES} from "../utils/common";
 
-import LocationSearch from './LocationSearch';
-import BasicMap from './BasicMap';
-
-
+import LocationSearch from '../utils/LocationSearch';
+import BasicMap from '../utils/BasicMap';
 
 
 const sortPointsClockwise = (points) => {
-  if (points.length !== 4) return points;
+    if (points.length !== 4) return points;
 
-  const centroid = points.reduce((acc, p) => ({
-    lat: acc.lat + p.lat / points.length,
-    lng: acc.lng + p.lng / points.length
-  }), { lat: 0, lng: 0 });
+    const centroid = points.reduce((acc, p) => ({
+        lat: acc.lat + p.lat / points.length,
+        lng: acc.lng + p.lng / points.length
+    }), { lat: 0, lng: 0 });
 
-  return points.sort((a, b) => {
-    const angleA = Math.atan2(a.lat - centroid.lat, a.lng - centroid.lng);
-    const angleB = Math.atan2(b.lat - centroid.lat, b.lng - centroid.lng);
-    return angleA - angleB;
-  });
+    const topPoints = points.filter(p => p.lat >= centroid.lat);
+    const bottomPoints = points.filter(p => p.lat < centroid.lat);
+
+    topPoints.sort((a, b) => a.lng - b.lng); 
+    
+    bottomPoints.sort((a, b) => b.lng - a.lng); 
+
+    return [
+        topPoints[0],
+        topPoints[1],
+        bottomPoints[0],
+        bottomPoints[1]
+    ];
 };
 
 const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdit }) => {
