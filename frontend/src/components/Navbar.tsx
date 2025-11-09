@@ -1,4 +1,89 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+function WeatherWidget() {
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const getWeatherIcon = (code) => {
+    if (code === 0) return '☀️'; // Czyste niebo
+    if (code >= 1 && code <= 3) return '⛅'; // Głównie czysto, częściowo pochmurno, pochmurno
+    if (code >= 4 && code <= 48) return '☁️'; // Mgła i osady mgły
+    if (code >= 51 && code <= 67) return '🌧️'; // Deszcz
+    if (code >= 71 && code <= 77) return '🌨️'; // Śnieg
+    if (code >= 80 && code <= 99) return '⛈️'; // Ulewy i burze
+    return '🌤️'; // Domyślny
+  };
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const lat = 51.7592;
+        const lon = 19.4560;
+        
+        const response = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=Europe/Warsaw`
+        );
+        
+        if (!response.ok) {
+            throw new Error(`Błąd HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data?.current?.temperature_2m !== undefined && data?.current?.weather_code !== undefined) {
+            setWeather({
+              temp: Math.round(data.current.temperature_2m),
+              code: data.current.weather_code
+            });
+        } else {
+            throw new Error('Niekompletne dane z API.');
+        }
+
+      } catch (error) {
+        console.error('Błąd pobierania pogody:', error);
+        setWeather(null); // Zapewnia, że widżet się nie wyświetli po zakończeniu ładowania
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWeather();
+    // Odświeżanie co 10 minut (600000 ms)
+    const interval = setInterval(fetchWeather, 600000); 
+    return () => clearInterval(interval);
+  }, []);
+
+  // Wprowadzony stały kontener, który zawsze rezerwuje miejsce
+  // min-w-[70px] i h-8 zapobiegają przeskakiwaniu układu
+  return (
+    <div className="flex items-center justify-center min-w-[70px] h-8"> 
+      {/* 1. Wyświetlanie animacji ładowania */}
+      {loading && (
+        <div className="px-4 py-2 bg-white/10 rounded-lg backdrop-blur-sm">
+          <div className="animate-pulse flex items-center gap-2">
+            <div className="w-6 h-6 bg-white/20 rounded"></div>
+            <div className="w-12 h-4 bg-white/20 rounded"></div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Wyświetlanie widżetu z danymi, jeśli ładowanie zakończone i dane są dostępne */}
+      {!loading && weather && (
+        <div className="px-3 py-1.5 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-all duration-300">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xl" role="img" aria-label="weather-icon">
+              {getWeatherIcon(weather.code)}
+            </span>
+            <span className="text-base font-bold leading-none">{weather.temp}°C</span>
+          </div>
+        </div>
+      )}
+      
+      {/* 3. Jeśli nie ma pogody i nie ładuje się, kontener min-w-[70px] pozostaje pusty, rezerwując przestrzeń. */}
+    </div>
+  );
+}
 
 function GardenerNavbar({ onLogout }) {
   const navigate = useNavigate();
@@ -12,7 +97,7 @@ function GardenerNavbar({ onLogout }) {
     { name: "Przychody", path: "/profits" },
     { name: "Notyfikacje pogodowe", path: "/weather" },
     { name: "Analiza", path: "/analyse" },
-    { name: "Edytuj profil", path: "/gardener-profile" },
+    { name: "Edytuj profil", path: "/gardener-profile" }, // To jest element, który już nie powinien przeskakiwać
   ];
 
   const handleLogoClick = () => {
@@ -20,7 +105,7 @@ function GardenerNavbar({ onLogout }) {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-600 text-white shadow-xl">
+    <nav className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-600 text-white shadow-xl sticky top-0 z-50">
       <div className="max-w-[1600px] mx-auto px-6 py-2.5">
         <div className="flex justify-between items-center gap-4">
           <div 
@@ -49,9 +134,37 @@ function GardenerNavbar({ onLogout }) {
             ))}
           </div>
           
+          <div className="flex items-center gap-3">
+            <WeatherWidget /> 
+            <button
+              onClick={onLogout}
+              className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-green-600"
+            >
+              Wyloguj
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+
+
+export default function Navbar({ onLogout, userRole }) {
+  
+  if (userRole === "Gardener") {
+    return <GardenerNavbar onLogout={onLogout} />;
+  } 
+  
+  return (
+    <nav className="bg-gray-700 text-white shadow-xl sticky top-0 z-50">
+      <div className="max-w-[1600px] mx-auto px-6 py-4">
+        <div className="flex justify-between items-center">
+          <div className="text-xl font-bold">Farm Management</div>
           <button
             onClick={onLogout}
-            className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-green-600"
+            className="px-6 py-2.5 bg-red-500 hover:bg-red-600 rounded-lg font-semibold text-sm shadow-lg transition-all duration-300"
           >
             Wyloguj
           </button>
@@ -61,89 +174,4 @@ function GardenerNavbar({ onLogout }) {
   );
 }
 
-function AdminNavbar({ onLogout }) {
-  const navigate = useNavigate();
-  
-  const tabs = [
-    { name: "Dashboard", path: "/admin/dashboard" },
-    { name: "Użytkownicy", path: "/admin/users" },
-    { name: "Raporty", path: "/admin/reports" },
-    { name: "Ustawienia", path: "/admin/settings" },
-    { name: "Analityka", path: "/admin/analytics" },
-    { name: "Systemy", path: "/admin/systems" }
-  ];
-
-  const handleLogoClick = () => {
-    navigate("/home");
-  };
-
-  return (
-    <nav className="bg-gradient-to-r from-gray-900 via-black to-gray-800 text-white shadow-xl">
-      <div className="max-w-[1600px] mx-auto px-6 py-2.5">
-        <div className="flex justify-between items-center gap-4">
-          <div 
-            className="text-xl font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center gap-2"
-            onClick={handleLogoClick}
-          >
-            <span className="text-2xl">👑</span>
-            <span>Admin Panel</span>
-          </div>
-          
-          <div className="flex gap-2 flex-wrap justify-center flex-1">
-            {tabs.map((tab) => (
-              <NavLink
-                key={tab.path}
-                to={tab.path}
-                className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg font-medium text-sm tracking-wide transition-all duration-300 transform whitespace-nowrap ${
-                    isActive
-                      ? "bg-white text-gray-900 shadow-md scale-105"
-                      : "hover:bg-white/20 hover:scale-105 active:scale-95"
-                  }`
-                }
-              >
-                {tab.name}
-              </NavLink>
-            ))}
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-xs font-semibold border border-yellow-500/30">
-              Admin Mode
-            </span>
-            <button
-              onClick={onLogout}
-              className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-black"
-            >
-              Wyloguj
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-}
-
-export default function Navbar({ onLogout, userRole }) {
-  if (userRole === "Admin") {
-    return <AdminNavbar onLogout={onLogout} />;
-  } else if (userRole === "Gardener") {
-    return <GardenerNavbar onLogout={onLogout} />;
-  } else {
-    return (
-      <nav className="bg-gray-700 text-white shadow-xl">
-        <div className="max-w-[1600px] mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="text-xl font-bold">Farm Management</div>
-            <button
-              onClick={onLogout}
-              className="px-6 py-2.5 bg-red-500 hover:bg-red-600 rounded-lg font-semibold text-sm shadow-lg transition-all duration-300"
-            >
-              Wyloguj
-            </button>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-}
+export { WeatherWidget, GardenerNavbar };

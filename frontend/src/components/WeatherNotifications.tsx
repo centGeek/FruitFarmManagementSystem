@@ -3,6 +3,7 @@ import { Cloud, CloudRain, Sun, Wind, Droplets, Bell, BellOff, Plus, Trash2, Loa
 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import { Link } from "react-router-dom";
+import {type NotificationRule, type ForecastAlert, type OpenMeteoCoordinates } from "../utils/common";
 
 
 interface CurrentWeather {
@@ -15,16 +16,6 @@ interface CurrentWeather {
     location: string;
 }
 
-interface NotificationRule {
-    id?: number;
-    backendId?: number;
-    weatherNotificationType: string;
-    threshold: number;
-    daysAhead: number;
-    enabled: boolean;
-    description?: string;
-}
-
 interface CoordinateDTO {
     latitude: number;
     longitude: number;
@@ -35,21 +26,6 @@ interface UserLocationDTO {
     coordinateDTO: CoordinateDTO;
     locationName: string;
 }
-
-interface OpenMeteoCoordinates {
-    lat: number;
-    lon: number;
-}
-
-interface ForecastAlert {
-    notificationId: number;
-    type: string;
-    message: string;
-    date: string;
-    value: number;
-    threshold: number;
-}
-
 
 const NOTIFICATION_TYPES = [
     { 

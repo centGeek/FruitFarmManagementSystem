@@ -116,3 +116,86 @@ export const CROP_TYPES = [
         ]
     }
 ];
+
+export interface CoordinateDTO {
+  latitude: number;
+  longitude: number;
+}
+
+export interface UserLocationDTO {
+  userId: number;
+  coordinateDTO: CoordinateDTO;
+  locationName: string;
+}
+
+export interface OpenMeteoCoordinates {
+  lat: number;
+  lon: number;
+}
+
+export interface NotificationRule {
+  id?: number;
+  backendId?: number;
+  weatherNotificationType: string;
+  threshold: number;
+  daysAhead: number;
+  enabled: boolean;
+  description?: string;
+}
+
+export interface ForecastAlert {
+  notificationId: number;
+  type: string;
+  message: string;
+  date: string;
+  value: number;
+  threshold: number;
+}
+
+// ========== CONSTANTS ==========
+
+export const NOTIFICATION_TYPES = [
+  { 
+    value: 'FROST_WARNING', 
+    label: '🧊 Ostrzeżenie o przymrozku',
+    description: 'Powiadom gdy temperatura spadnie poniżej',
+    unit: '°C',
+    defaultThreshold: 2
+  },
+  { 
+    value: 'TEMP_LOW', 
+    label: '❄️ Niska temperatura',
+    description: 'Powiadom gdy temperatura spadnie poniżej',
+    unit: '°C',
+    defaultThreshold: 5
+  },
+  { 
+    value: 'TEMP_HIGH', 
+    label: '🌡️ Wysoka temperatura',
+    description: 'Powiadom gdy temperatura przekroczy',
+    unit: '°C',
+    defaultThreshold: 30
+  },
+  { 
+    value: 'RAIN_FORECAST', 
+    label: '🌧️ Prognoza opadów',
+    description: 'Powiadom o opadach deszczu powyżej',
+    unit: '% prawdopodobieństwa',
+    defaultThreshold: 70
+  },
+  { 
+    value: 'STRONG_WIND', 
+    label: '💨 Silny wiatr',
+    description: 'Powiadom gdy wiatr przekroczy',
+    unit: 'km/h',
+    defaultThreshold: 40
+  }
+];
+
+export const DAYS_AHEAD_OPTIONS = [
+  { value: 1, label: 'Za 1 dzień' },
+  { value: 2, label: 'Za 2 dni' },
+  { value: 3, label: 'Za 3 dni' },
+  { value: 5, label: 'Za 5 dni' },
+  { value: 7, label: 'Za 7 dni' }
+];
