@@ -6,6 +6,7 @@ import fruit.farm.management.entity.ProfitEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.ProfitMapper;
 import fruit.farm.management.repository.ProfitRepository;
+import fruit.farm.management.service.ProfitService;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
 import jakarta.validation.Valid;
@@ -29,7 +30,7 @@ import java.util.Map;
 @Slf4j
 public class ProfitController {
 
-    private final ProfitRepository profitRepository;
+    private final ProfitService profitService;
     private final UserService userService;
     private final SectorService sectorService;
 
@@ -45,7 +46,7 @@ public class ProfitController {
 
         try {
             ProfitEntity profitEntity = ProfitMapper.mapToEntity(profitDto, userEntity);
-            ProfitDTO createdProfit = profitRepository.addProfit(profitEntity);
+            ProfitDTO createdProfit = profitService.addProfit(profitEntity);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdProfit);
         } catch (Exception e) {
             log.error("Error creating profit: {}", e.getMessage(), e);
@@ -64,7 +65,7 @@ public class ProfitController {
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-            Page<ProfitDTO> profitPage = profitRepository.getAllProfitsByGardenerPaginated(
+            Page<ProfitDTO> profitPage = profitService.getAllProfitsByGardenerPaginated(
                     user.getId(),
                     pageable
             );
@@ -86,7 +87,7 @@ public class ProfitController {
     @GetMapping("/{id}")
     public ResponseEntity<ProfitDTO> getProfitById(@PathVariable Long id) {
         try {
-            ProfitDTO profit = profitRepository.getProfitById(id);
+            ProfitDTO profit = profitService.getProfitById(id);
             return ResponseEntity.ok(profit);
         } catch (ResponseStatusException e) {
             throw e;
@@ -105,7 +106,7 @@ public class ProfitController {
         log.info("Updating profit ID: {} for User ID: {}", id, user.getId());
 
         try {
-            ProfitDTO updatedProfit = profitRepository.updateProfit(id, profitDto, user);
+            ProfitDTO updatedProfit = profitService.updateProfit(id, profitDto, user);
             return ResponseEntity.ok(updatedProfit);
         } catch (ResponseStatusException e) {
             throw e;
@@ -121,7 +122,7 @@ public class ProfitController {
         log.info("Deleting profit ID: {} for User ID: {}", id, user.getId());
 
         try {
-            profitRepository.deleteProfit(id, user);
+            profitService.deleteProfit(id, user);
             return ResponseEntity.noContent().build();
         } catch (ResponseStatusException e) {
             throw e;

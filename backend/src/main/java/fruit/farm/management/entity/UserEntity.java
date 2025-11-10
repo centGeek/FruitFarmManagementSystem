@@ -10,7 +10,6 @@ import java.time.LocalDate;
 @Entity(name = "user_profile")
 @Getter
 @Setter
-@ToString
 public class UserEntity {
 
     @Id
@@ -72,5 +71,23 @@ public class UserEntity {
         this.coordinateEntity = coordinateEntity;
         this.localityName = localityName;
         this.credentials = credentials;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("UserEntity{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", surname='").append(surname).append('\'');
+        sb.append(", nickname='").append(nickname).append('\'');
+        sb.append(", phoneNumber='").append(phoneNumber).append('\'');
+        sb.append(", email='").append(email).append('\'');
+        sb.append(", creationDate=").append(creationDate);
+        sb.append(", role=").append(role);
+        sb.append(", isActive=").append(isActive);
+        sb.append(", gardener=").append(gardener);
+        sb.append(", coordinateEntity=").append(coordinateEntity);
+        sb.append(", localityName='").append(localityName).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

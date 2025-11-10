@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface NotificationJpaRepository extends JpaRepository<NotificationEntity, Long> {
 
-    @Query("Select ne from NotificationEntity ne where ne.userEntity.id =:userId order by ne.createdAt desc")
+    @Query("Select ne from NotificationEntity ne where ne.userEntity.id =:userId order by ne.createdAt desc limit 50")
     List<NotificationEntity> findAllByOrderByCreatedAtDesc(@Param("userId") long userId);
 
     List<NotificationEntity> findByUserEntityIdOrderByCreatedAtDesc(Long userId);

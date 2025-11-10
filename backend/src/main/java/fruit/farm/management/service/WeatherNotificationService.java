@@ -71,7 +71,7 @@ public class WeatherNotificationService {
         entity.setWeatherNotificationType(dto.getWeatherNotificationType());
         entity.setThreshold(dto.getThreshold());
         entity.setEnabled(true);
-        entity.setDaysAhead(5);
+        entity.setDaysAhead(dto.getDaysAhead());
 
         WeatherNotificationEntity saved = notificationRepository.save(entity);
         log.info("Notification created with ID: {}", saved.getId());

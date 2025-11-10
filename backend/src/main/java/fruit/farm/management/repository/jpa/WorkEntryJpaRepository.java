@@ -33,7 +33,7 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
     @Query("SELECT w FROM WorkEntryEntity w WHERE " +
             "(:year IS NULL OR YEAR(w.workDate) = :year) AND " +
             "(:month IS NULL OR MONTH(w.workDate) = :month) AND " +
-            "(:sectorId IS NULL OR w.sector.sectorId = :sectorId) AND" +
+            "((:sectorId IS NULL AND w.sector IS NULL) OR (:sectorId IS NOT NULL AND w.sector.id = :sectorId)) AND " +
             "(w.user.gardener.id = :userId)")
     List<WorkEntryEntity> findAllExpensesByGivenDate(
             @Param("year") Integer year,
@@ -41,7 +41,6 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
             @Param("sectorId") Long sectorId,
             @Param("userId") Long userId
     );
-
     @Query("SELECT w FROM WorkEntryEntity w WHERE " +
             "(:year IS NULL OR YEAR(w.workDate) = :year) AND " +
             "(:month IS NULL OR MONTH(w.workDate) = :month) AND " +

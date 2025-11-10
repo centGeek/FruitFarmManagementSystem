@@ -21,7 +21,7 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     @Transactional
-    public void addUserNotification(NotificationDTO notificationDTO, long userId, UserEntity gardener) {
+    public void addUserNotification(NotificationDTO notificationDTO, UserEntity gardener) {
 
         notificationDTO.setNotificationType(NotificationType.USER);
         addNotification(notificationDTO, gardener);
@@ -33,13 +33,21 @@ public class NotificationService {
         addNotification(notificationDTO, gardener);
     }
     @Transactional
-    public void addWorkEntriesNotification(NotificationDTO notificationDTO, long userId, UserEntity gardener) {
+    public void addProfitNotification(NotificationDTO notificationDTO, UserEntity gardener) {
 
-        notificationDTO.setNotificationType(NotificationType.WORK_ENTRY);
+        notificationDTO.setNotificationType(NotificationType.PROFIT);
+        addNotification(notificationDTO, gardener);
+    }
+
+    @Transactional
+    public void addExpenseNotification(NotificationDTO notificationDTO, UserEntity gardener) {
+
+        notificationDTO.setNotificationType(NotificationType.EXPENSE);
         addNotification(notificationDTO, gardener);
     }
 
     private void addNotification(NotificationDTO notificationDTO,  UserEntity gardener) {
+
         notificationDTO.setCreatedAt(LocalDateTime.now());
         NotificationEntity notificationEntity = NotificationMapper.mapToEntity(notificationDTO, gardener);
         notificationEntity.getUserEntity().setId(gardener.getId());

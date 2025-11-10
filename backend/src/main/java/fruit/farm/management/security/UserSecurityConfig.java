@@ -1,5 +1,6 @@
 package fruit.farm.management.security;
 
+import fruit.farm.management.config.OrchardDetailsService;
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.repository.UserRepository;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class UserSecurityConfig implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final OrchardDetailsService orchardDetailsService;
 
     @Override
     @Transactional
@@ -31,25 +33,10 @@ public class UserSecurityConfig implements UserDetailsService {
 
         SimpleGrantedAuthority authorities = getUserAuthority(user.get().getRole());
 
-        return buildUserForAuthentication(user.get(), List.of(authorities));
+        return orchardDetailsService.buildUserForAuthentication(user.get(), List.of(authorities));
     }
 
     private SimpleGrantedAuthority getUserAuthority(RoleEntity roleEntity) {
         return new SimpleGrantedAuthority(roleEntity.getRoleName());
-    }
-
-    private UserDetails buildUserForAuthentication(
-            UserEntity user,
-            List<SimpleGrantedAuthority> authorities
-    ) {
-        return new org.springframework.security.core.userdetails.User(
-                user.getNickname(),
-                user.getCredentials().getPasswordHash(),
-                user.isActive(),
-                true,
-                true,
-                true,
-                authorities
-        );
     }
 }

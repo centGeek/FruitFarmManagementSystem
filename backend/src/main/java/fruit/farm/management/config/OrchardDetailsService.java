@@ -70,14 +70,14 @@ public class OrchardDetailsService implements UserDetailsService {
     }
 
 
-    private UserDetails buildUserForAuthentication(
+    public UserDetails buildUserForAuthentication(
             UserEntity user,
             List<SimpleGrantedAuthority> authorities
     ) {
         return new org.springframework.security.core.userdetails.User(
                 user.getNickname(),
                 user.getCredentials().getPasswordHash(),
-                user.isActive(),
+                true,
                 true,
                 true,
                 true,

@@ -2,44 +2,44 @@ package fruit.farm.management.entity;
 
 public enum ProductType {
     // 🌱 Produkcja i pielęgnacja sadu
-    PESTICIDES,
-    FERTILIZERS,
-    PLANTING,
-    IRRIGATION,
-    ELECTRICITY,
-    WATER,
-    SUPPORT_MATERIALS,
-    PROTECTIVE_NETS,
+    ŚRODKI_OCHRONY_ROŚLIN,
+    NAWOZY,
+    SADZENIE,
+    NAWADNIANIE,
+    ENERGIA_ELEKTRYCZNA,
+    WODA,
+    MATERIAŁY_POMOCNICZE,
+    SIATKI_OCHRONNE,
 
     // 🧰 Sprzęt i eksploatacja
-    MACHINE,
-    REPAIRS,
-    FUEL,
-    INSURANCE,
+    MASZYNY,
+    NAPRAWY,
+    PALIWO,
+    UBEZPIECZENIE,
 
     // 👨‍🌾 Praca i usługi
-    LABOUR,
-    ACCOMMODATION,
-    AGRI_SERVICES,
+    PRACA,
+    ZAKWATEROWANIE,
+    USŁUGI_ROLNICZE,
     TRANSPORT,
-    TRAINING,
+    SZKOLENIA,
 
     // 🍎 Zbiory i sprzedaż
-    PACKAGING,
-    COLD_STORAGE,
+    OPAKOWANIA,
+    CHŁODNIA,
     MARKETING,
-    OFFICE,
+    BIURO,
 
     // 🏗️ Inwestycje i infrastruktura
-    RENOVATIONS,
-    INFRASTRUCTURE,
-    TECH_UPGRADES,
+    REMONTY,
+    INFRASTRUKTURA,
+    MODERNIZACJE_TECHNICZNE,
 
     // 💸 Podatki i administracja
-    TAXES,
-    ACCOUNTING,
+    PODATKI,
+    KSIĘGOWOŚĆ,
 
     // 🪙 Inne
-    OTHER_SUPPLIES,
-    OTHER
+    INNE_MATERIAŁY,
+    INNE
 }

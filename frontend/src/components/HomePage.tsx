@@ -12,8 +12,8 @@ const NOTIFICATION_TYPES = {
   USER: { label: 'Użytkownik', icon: '👤', color: 'bg-purple-50 text-purple-700 border-purple-200' },
   WORK_ENTRY: { label: 'Wpis pracy', icon: '📝', color: 'bg-green-50 text-green-700 border-green-200' },
   SECTOR: { label: 'Sektor', icon: '🗺️', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  ALERT: { label: 'Alert', icon: '⚠️', color: 'bg-red-50 text-red-700 border-red-200' },
-  SYSTEM: { label: 'System', icon: '⚙️', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+  PROFIT: { label: 'Zysk', icon: '💰', color: 'bg-green-50 text-green-700 border-green-200' },
+  EXPENSE: { label: 'Wydatek', icon: '💸', color: 'bg-red-50 text-red-700 border-red-200' },
 };
 
 // Komponenty pomocnicze

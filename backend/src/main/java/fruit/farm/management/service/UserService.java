@@ -102,7 +102,7 @@ public class UserService {
                 .message("Dodano pracownika: " + user.getName() + " " + user.getSurname())
                 .createdAt(LocalDateTime.now())
                 .userDTO(UserMapper.mapFromEntity(savedUser))
-                .build(), savedUser.getId(), loggedInUserId);
+                .build(), loggedInUserId);
 
         return savedUser;
     }
@@ -164,7 +164,7 @@ public class UserService {
                 .message("Zaktualizowano dane pracownika: " + userRequest.getName() + " " + userRequest.getSurname())
                 .createdAt(LocalDateTime.now())
                 .userDTO(UserMapper.mapFromEntity(savedUser))
-                .build(), savedUser.getId(), loggedInUserId);
+                .build(), loggedInUserId);
         return savedUser;
     }
 

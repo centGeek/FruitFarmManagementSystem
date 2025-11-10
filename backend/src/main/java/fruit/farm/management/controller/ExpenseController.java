@@ -5,10 +5,8 @@ import fruit.farm.management.dto.SectorDTO;
 import fruit.farm.management.dto.SectorLaborCostDTO;
 import fruit.farm.management.entity.ExpenseEntity;
 import fruit.farm.management.entity.UserEntity;
-import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.mapper.ExpenseMapper;
-import fruit.farm.management.repository.ExpenseRepository;
-import fruit.farm.management.repository.WorkEntryRepository;
+import fruit.farm.management.service.ExpenseService;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
 import fruit.farm.management.service.WorkScheduleService;
@@ -24,10 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -36,7 +31,7 @@ import java.util.Map;
 @Slf4j
 public class ExpenseController {
 
-    private final ExpenseRepository expenseRepository;
+    private final ExpenseService expenseService;
     private final UserService userService;
     private final SectorService sectorService;
     private final WorkScheduleService workScheduleService;
@@ -53,7 +48,7 @@ public class ExpenseController {
 
         try {
             ExpenseEntity expenseEntity = ExpenseMapper.mapToEntity(expenseDto, userEntity);
-            ExpenseDTO createdExpense = expenseRepository.addExpense(expenseEntity);
+            ExpenseDTO createdExpense = expenseService.addExpense(expenseEntity);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdExpense);
         } catch (Exception e) {
             log.error("Error creating expense: {}", e.getMessage(), e);
@@ -72,7 +67,7 @@ public class ExpenseController {
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-            Page<ExpenseDTO> expensePage = expenseRepository.getAllExpensesByGardenerPaginated(
+            Page<ExpenseDTO> expensePage = expenseService.getAllExpensesByGardenerPaginated(
                     user.getId(),
                     pageable
             );
@@ -94,7 +89,7 @@ public class ExpenseController {
     @GetMapping("/{id}")
     public ResponseEntity<ExpenseDTO> getExpenseById(@PathVariable Long id) {
         try {
-            ExpenseDTO expense = expenseRepository.getExpenseById(id);
+            ExpenseDTO expense = expenseService.getExpenseById(id);
             return ResponseEntity.ok(expense);
         } catch (ResponseStatusException e) {
             throw e;
@@ -113,7 +108,7 @@ public class ExpenseController {
         log.info("Updating expense ID: {} for User ID: {}", id, user.getId());
 
         try {
-            ExpenseDTO updatedExpense = expenseRepository.updateExpense(id, expenseDto, user);
+            ExpenseDTO updatedExpense = expenseService.updateExpense(id, expenseDto, user);
             return ResponseEntity.ok(updatedExpense);
         } catch (ResponseStatusException e) {
             throw e;
@@ -129,7 +124,7 @@ public class ExpenseController {
         log.info("Deleting expense ID: {} for User ID: {}", id, user.getId());
 
         try {
-            expenseRepository.deleteExpense(id, user);
+            expenseService.deleteExpense(id, user);
             return ResponseEntity.noContent().build();
         } catch (ResponseStatusException e) {
             throw e;

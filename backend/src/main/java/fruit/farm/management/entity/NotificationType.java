@@ -1,11 +1,10 @@
 package fruit.farm.management.entity;
 
 public enum NotificationType {
-    WEATHER,
     USER,
-    WORK_ENTRY,
+    EXPENSE,
     SECTOR,
     ALERT,
-    SYSTEM
+    PROFIT
 
 }

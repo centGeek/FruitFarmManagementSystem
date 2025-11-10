@@ -27,6 +27,7 @@ public class UserRepository {
     }
 
     public void delete(UserEntity userEntity) {
+        userEntity.setActive(true);
         userJpaRepository.delete(userEntity);
     }
 

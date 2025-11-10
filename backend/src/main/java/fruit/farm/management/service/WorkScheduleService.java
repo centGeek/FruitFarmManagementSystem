@@ -137,12 +137,13 @@ public class WorkScheduleService {
     public SectorLaborCostDTO calculateSectorLaborCosts(Long sectorId, Long userId, Integer year, Integer month) {
 
         List<WorkEntryEntity> entries = workEntryRepository.findAllExpensesByGivenDate(year, month, sectorId, userId);
-
-        String sectorName = sectorId != null
-                ? sectorService.findById(sectorId)
-                .map(s -> s.getDescription() != null ? s.getDescription() : "Sektor " + s.getSectorId())
-                .orElse("Wszystkie sektory")
-                : "Wszystkie sektory";
+        String sectorName = "Wszystkie sektory";
+        if (sectorId != null) {
+            Optional<SectorEntity> byId = sectorService.findById(sectorId);
+            if (byId.isPresent()) {
+                sectorName = byId.get().getDescription();
+            }
+        }
         if (entries.isEmpty()) {
             return null;
         }
