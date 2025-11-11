@@ -6,6 +6,7 @@ import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.mapper.WorkEntryMapper;
 import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.repository.WorkEntryRepository;
+import fruit.farm.management.service.UserService;
 import fruit.farm.management.service.WorkScheduleService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ public class WorkEntryController {
 
     private WorkEntryRepository workEntryRepository;
     private WorkScheduleService workScheduleService;
-    private UserRepository userRepository;
+    private UserService userService;
 
     @GetMapping("/week")
     public ResponseEntity<List<WorkEntryDto>> getWorkEntriesForWeek(
@@ -42,7 +43,7 @@ public class WorkEntryController {
             String loggedWithNickname = authentication.getName();
             log.info("Logged user: {} - fetching entries from {} to {}", loggedWithNickname, startDate, endDate);
 
-            UserEntity gardener = userRepository.findByNickname(loggedWithNickname)
+            UserEntity gardener = userService.findByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<WorkEntryEntity> entries = workEntryRepository
@@ -93,7 +94,7 @@ public class WorkEntryController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
-            UserEntity gardener = userRepository.findByNickname(loggedWithNickname)
+            UserEntity gardener = userService.findByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<WorkEntryEntity> savedEntries = workScheduleService.createWorkSchedule(requests, gardener);
@@ -263,7 +264,7 @@ public class WorkEntryController {
         log.info("Attempting to mark all unpaid entries as paid for user ID: {}", userId);
 
         try {
-            UserEntity employee = userRepository.findById(userId)
+            UserEntity employee = userService.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + userId));
 
             int count = workScheduleService.payAllUnpaidEntries(employee);
@@ -292,7 +293,7 @@ public class WorkEntryController {
          log.info("Attempting to mark all unpaid entries in the current month as paid for user ID: {}", userId);
 
         try {
-            UserEntity employee = userRepository.findById(userId)
+            UserEntity employee = userService.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + userId));
 
             int count = workScheduleService.payAllUnpaidEntriesForCurrentMonth(employee);

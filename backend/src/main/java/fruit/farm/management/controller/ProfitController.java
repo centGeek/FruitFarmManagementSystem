@@ -5,7 +5,6 @@ import fruit.farm.management.dto.SectorDTO;
 import fruit.farm.management.entity.ProfitEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.ProfitMapper;
-import fruit.farm.management.repository.ProfitRepository;
 import fruit.farm.management.service.ProfitService;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;

@@ -450,13 +450,11 @@ const WeatherNotifications: React.FC = () => {
 
         const data = await response.json();
         
-        // DODAJ CONSOLE.LOG ŻEBY ZOBACZYĆ CO PRZYCHODZI Z BACKENDU
-        console.log('Dane z backendu:', data);
         
         const mappedNotifications: NotificationRule[] = data.map((item: any) => ({
             id: Date.now() + Math.random(),
             backendId: item.id,
-            weatherNotificationType: item.weatherNotificationType, // <-- TO JEST undefined
+            weatherNotificationType: item.weatherNotificationType,
             threshold: item.threshold,
             daysAhead: item.daysAhead || 1,
             enabled: item.enabled,

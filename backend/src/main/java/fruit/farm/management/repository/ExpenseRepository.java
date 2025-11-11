@@ -23,7 +23,7 @@ public class ExpenseRepository {
     private final ExpenseJpaRepository expenseJpaRepository;
 
     public ExpenseDTO addExpense(ExpenseEntity expenseEntity) {
-        expenseEntity.setCreatedAt(LocalDate.now());
+
         ExpenseEntity saved = expenseJpaRepository.save(expenseEntity);
         return ExpenseMapper.mapFromEntity(saved);
     }
@@ -53,6 +53,7 @@ public class ExpenseRepository {
         existing.setExpenseCost(expenseDto.getAmount());
         existing.setDescription(expenseDto.getDescription());
         existing.setPaid(expenseDto.isPaid());
+        existing.setCreatedAt(expenseDto.getCreatedAt());
 
         ExpenseEntity updated = expenseJpaRepository.save(existing);
         return ExpenseMapper.mapFromEntity(updated);

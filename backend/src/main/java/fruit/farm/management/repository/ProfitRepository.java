@@ -29,7 +29,7 @@ public class ProfitRepository {
     private final SectorRepository sectorRepository;
 
     public ProfitDTO addProfit(ProfitEntity profitEntity) {
-        profitEntity.setCreatedAt(LocalDate.now());
+
         ProfitEntity saved = profitJpaRepository.save(profitEntity);
         return ProfitMapper.mapFromEntity(saved);
     }

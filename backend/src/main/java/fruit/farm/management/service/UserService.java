@@ -88,6 +88,14 @@ public class UserService {
     public UserEntity save(UserEntity user) {
         Optional<WorkDetailsEntity> workDetailsEntity = workDetailsService.getLatestWorkDetailsByGardener(user.getGardener().getId());
 
+        log.info("User registration data received:");
+        log.info("Name: {}", user.getName());
+        log.info("Surname: {}", user.getSurname());
+        log.info("Nickname: {}", user.getNickname());
+        log.info("Phone: {}", user.getPhoneNumber());
+        log.info("Nickname: {}", user.getNickname());
+        log.info("IsActive: {}", user.isActive());
+
         UserEntity savedUser = userRepository.save(user);
         if (workDetailsEntity.isPresent()) {
             WorkDetailsEntity workDetails = workDetailsEntity.get();
@@ -123,14 +131,7 @@ public class UserService {
             }
         }
 
-        log.info("User update data received:");
-        log.info("ID: {}", userRequest.getId());
-        log.info("Name: {}", userRequest.getName());
-        log.info("Surname: {}", userRequest.getSurname());
-        log.info("Nickname: {}", userRequest.getNickname());
-        log.info("Phone: {}", userRequest.getPhoneNumber());
-        log.info("Nickname: {}", userRequest.getNickname());
-        log.info("IsActive: {}", userRequest.isActive());
+        log.info("User update data received:" + userRequest);
 
         if (userRequest.getName() != null) {
             existingUser.setName(userRequest.getName());
@@ -158,18 +159,28 @@ public class UserService {
             userCredentialsRepository.update(new UserCredentialsEntity(savedUser, userRequest.getPassword()));
         }
         UserEntity loggedInUserId = this.getLoggedUser();
-
+        String title;
+        String message;
+        if (savedUser.getGardener() != null) {
+            title = "Zaktualizowano dane pracownika";
+            message = "Zaktualizowano dane pracownika: " + userRequest.getName() + " " + userRequest.getSurname();
+        } else {
+            title = "Zaktualizowałeś swoje dane";
+            message = "Twoje dane zostały prawidłowo zaktualizowane";
+        }
         notificationService.addUserNotification(NotificationDTO.builder()
-                .title("Zaktualizowano dane pracownika!")
-                .message("Zaktualizowano dane pracownika: " + userRequest.getName() + " " + userRequest.getSurname())
+                .title(title)
+                .message(message)
                 .createdAt(LocalDateTime.now())
                 .userDTO(UserMapper.mapFromEntity(savedUser))
                 .build(), loggedInUserId);
+
         return savedUser;
     }
 
     @Transactional
     public UserEntity registerUser(UserDTO request) {
+
         Optional<UserEntity> existingUser = this.findByNickname(request.getNickname().toLowerCase());
         if (existingUser.isPresent()) {
             throw new NicknameAlreadyExistsException("Użytkownik z tą nazwą użytkownika już istnieje");

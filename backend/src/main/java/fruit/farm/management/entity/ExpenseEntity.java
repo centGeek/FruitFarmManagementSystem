@@ -44,11 +44,12 @@ public class ExpenseEntity {
     @JoinColumn(name = "sector_id")
     private SectorEntity sectorEntity;
 
-    public ExpenseEntity(ProductType productType, BigDecimal expenseCost, String description, UserEntity userEntity,
+    public ExpenseEntity(ProductType productType, BigDecimal expenseCost, String description, LocalDate createdAt, UserEntity userEntity,
                          boolean isPaid, SectorEntity sectorEntity) {
         this.productType = productType;
         this.expenseCost = expenseCost;
         this.description = description;
+        this.createdAt = createdAt;
         this.userEntity = userEntity;
         this.isPaid = isPaid;
         this.sectorEntity = sectorEntity;

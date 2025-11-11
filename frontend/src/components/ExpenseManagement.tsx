@@ -236,7 +236,7 @@ const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }) => {
             const submitData = {
                 ...formData,
                 amount: Number(formData.amount),
-                date: formData.date,
+                createdAt: formData.date,
                 sectorDTO: formData.sectorId ? { id: Number(formData.sectorId) } : null
             };
             delete submitData.sectorId;

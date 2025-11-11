@@ -10,7 +10,6 @@ import lombok.Setter;
 @Getter
 public class CoordinateDTO {
 
-    // Getters and Setters
     @NotNull(message = "Szerokość geograficzna jest wymagana")
     @DecimalMin(value = "-90.0", message = "Szerokość geograficzna musi być >= -90")
     @DecimalMax(value = "90.0", message = "Szerokość geograficzna musi być <= 90")

@@ -1,20 +1,16 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.UserCredentialsDTO;
 import fruit.farm.management.dto.UserDTO;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.exception.NicknameAlreadyExistsException;
-import fruit.farm.management.mapper.UserCredentialsMapper;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -29,7 +25,6 @@ import java.util.Optional;
 public class EmployeeController {
 
     private UserService userService;
-    private PasswordEncoder passwordEncoder;
 
     @GetMapping
     public ResponseEntity<List<UserDTO>> fetchListOfEmployees(@RequestParam(required = false) String status) {
@@ -104,13 +99,6 @@ public class EmployeeController {
             UserEntity gardener = userService.findByNickname(loggedInNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            log.info("User registration data received:");
-            log.info("Name: {}", userRequest.getName());
-            log.info("Surname: {}", userRequest.getSurname());
-            log.info("Nickname: {}", userRequest.getNickname());
-            log.info("Phone: {}", userRequest.getPhoneNumber());
-            log.info("Nickname: {}", userRequest.getNickname());
-            log.info("IsActive: {}", userRequest.isActive());
 
             UserEntity userEntity = UserMapper.mapToEntity(userRequest, gardener);
             userEntity.setCreationDate(LocalDate.now());

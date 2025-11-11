@@ -3,10 +3,9 @@ import { AlertCircle, Loader } from 'lucide-react';
 import { Link } from "react-router-dom";
 
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
-import {type NotificationRule, type ForecastAlert, type OpenMeteoCoordinates } from "../utils/common";
+import {type NotificationRule, type ForecastAlert, type Alert, type OpenMeteoCoordinates } from "../utils/common";
 
 
-// Typy powiadomień
 const NOTIFICATION_TYPES = {
   WEATHER: { label: 'Pogoda', icon: '🌤️', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   USER: { label: 'Użytkownik', icon: '👤', color: 'bg-purple-50 text-purple-700 border-purple-200' },
@@ -16,15 +15,6 @@ const NOTIFICATION_TYPES = {
   EXPENSE: { label: 'Wydatek', icon: '💸', color: 'bg-red-50 text-red-700 border-red-200' },
 };
 
-// Komponenty pomocnicze
-const Alert = ({ type, message, onClose }) => (
-  <div className={`mb-4 p-4 rounded-lg ${type === 'error' ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'}`}>
-    <div className="flex justify-between items-center">
-      <span className={type === 'error' ? 'text-red-800' : 'text-green-800'}>{message}</span>
-      <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
-    </div>
-  </div>
-);
 
 const LoadingState = () => (
   <div className="text-center py-16">
@@ -394,9 +384,7 @@ export default function NotificationDashboard() {
           <Alert type={alert.type} message={alert.message} onClose={closeAlert} />
         )}
 
-        {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Main Notifications (2/3 width) */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-5">
@@ -404,13 +392,6 @@ export default function NotificationDashboard() {
                   <span className="mr-2">📬</span>
                   Ostatnie aktualności
                 </h2>
-                <button
-                  onClick={fetchNotifications}
-                  className="px-3 md:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-sm flex items-center space-x-2 text-sm md:text-base"
-                >
-                  <span>🔄</span>
-                  <span className="hidden sm:inline">Odśwież</span>
-                </button>
               </div>
               
               {isLoading ? (

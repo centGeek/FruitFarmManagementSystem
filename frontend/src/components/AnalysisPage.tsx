@@ -84,10 +84,9 @@ export default function ProfitAnalysis() {
     const [alert, setAlert] = useState({ type: '', message: '' });
     const [selectedYear, setSelectedYear] = useState('all');
     const [selectedMonth, setSelectedMonth] = useState('');
-    const [chartType, setChartType] = useState('pie');
+    const [chartType, setChartType] = useState('pieTypes');
     const [dataType, setDataType] = useState('revenue');
     const [sectorLaborCosts, setSectorLaborCosts] = useState([]);
-    const [advancesSum, setAdvancesSum] = useState(null);
     const [selectedProfitType, setSelectedProfitType] = useState(null);
 
     const fetchSectorLaborCosts = useCallback(async () => {
@@ -107,7 +106,20 @@ export default function ProfitAnalysis() {
                 });
                 
                 if (response.ok) {
-                    const data = await response.json();
+
+                    const responseText = await response.text()
+                    if (!responseText) {
+                        return {
+                            sectorId: sector.id,
+                            totalCost: 0,
+                            paidCost: 0,
+                            unpaidCost: 0,
+                            totalEntries: 0,
+                            paidEntries: 0,
+                            unpaidEntries: 0,
+                        }
+                    }
+                    const data = JSON.parse(responseText);
                     return {
                         sectorId: sector.id,
                         totalCost: data.sectorLaborCost || 0,
@@ -819,7 +831,7 @@ export default function ProfitAnalysis() {
                         color="red"
                     />
                     <StatCard
-                        title="Zysk Netto"
+                        title="Zysk"
                         value={`${formatCurrency(overallStats.netProfit)} PLN`}
                         subtitle={overallStats.netProfit >= 0 ? '✅ Dodatni' : '⚠️ Ujemny'}
                         icon="📈"
@@ -851,8 +863,8 @@ export default function ProfitAnalysis() {
                                 onChange={(e) => setChartType(e.target.value)}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             >
-                                <option value="pie">📊 Wykres kołowy (sektory)</option>
                                 <option value="pieTypes">🔖 Wykres kołowy (typy)</option>
+                                <option value="pie">📊 Wykres kołowy (sektory)</option>
                                 <option value="table">📋 Tabela z marżami</option>
                                 <option value="treemap">🗺️ Mapa drzewa (sektory)</option>
                                 <option value="yearly">📈 Analiza rok do roku</option>
@@ -876,7 +888,6 @@ export default function ProfitAnalysis() {
                             </select>
                         </div>
 
-                        {/* Miesiąc */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Miesiąc 📆
@@ -892,7 +903,6 @@ export default function ProfitAnalysis() {
                             </select>
                         </div>
 
-                        {/* Typ danych (tylko dla wykresu kołowego) */}
                         {(chartType === 'pie' || chartType === 'pieTypes' || chartType === 'treemap') && (  
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -911,7 +921,6 @@ export default function ProfitAnalysis() {
                     </div>
                 </div>
 
-                {/* Wykres kołowy */}
                 {chartType === 'pie' && (
                     pieChartData.length > 0 ? (
                         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8">
@@ -959,273 +968,270 @@ export default function ProfitAnalysis() {
                         </div>
                     )
                 )}
-{/* Wykres kołowy według typów */}
-{/* Wykres kołowy według typów */}
-{chartType === 'pieTypes' && (
-    pieChartTypeData.length > 0 ? (
-        <div className="space-y-8">
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                        <span className="mr-3">🔖</span>
-                        Rozkład {dataType === 'revenue' ? 'Przychodów' : dataType === 'expenses' ? 'Kosztów' : 'Zysków'} według Typów
-                        {selectedYear !== 'all' && ` - Rok ${selectedYear}`}
-                        {selectedMonth && ` - ${MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label}`}
-                    </h2>
-                    {selectedProfitType && (
-                        <button
-                            onClick={() => setSelectedProfitType(null)}
-                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors text-sm font-medium"
-                        >
-                            ✖ Zamknij widok szczegółów
-                        </button>
-                    )}
-                </div>
-                <p className="text-gray-600 mb-4 text-sm">
-                    💡 <strong>Wskazówka:</strong> Kliknij na segment sprzedaży owoców lub kosztów pracowniczych, aby zobaczyć szczegóły
-                </p>
-                
-                <div className={`grid ${selectedProfitType ? 'grid-cols-2' : 'grid-cols-1'} gap-8`}>
-                    {/* Główny wykres typów */}
-                    <div>
-                        <ResponsiveContainer width="100%" height={500}>
-                            <PieChart>
-                                <Pie
-                                    data={pieChartTypeData}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    animationDuration={900}
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={180}
-                                    label={pieChartTypeData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
-                                    labelLine={false}
-                                    onClick={handlePieClick}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    {pieChartTypeData.map((entry, index) => (
-                                        <Cell 
-                                            key={`cell-${index}`} 
-                                            fill={COLORS[index % COLORS.length]}
-                                            opacity={selectedProfitType && selectedProfitType !== entry.name ? 0.3 : 1}
-                                        />
-                                    ))}
-                                </Pie>
-                                <Tooltip content={<PieTooltip />} />
-                                <Legend 
-                                    verticalAlign="bottom" 
-                                    height={36}
-                                    wrapperStyle={{ fontSize: '14px', fontWeight: '600' }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                    {/* Wykres odmian */}
-                    {/* Wykres odmian dla owoców */}
-                    {selectedProfitType && !selectedProfitType.includes('Koszty pracownicze') && varietyChartData.length > 0 && (
-                        <div className="border-l-4 border-blue-500 pl-8">
-                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                                <span className="mr-2">🍎</span>
-                                Rozkład odmian: {selectedProfitType}
-                            </h3>
-                            <ResponsiveContainer width="100%" height={500}>
-                                <PieChart>
-                                    <Pie
-                                        data={varietyChartData}
-                                        dataKey="value"
-                                        nameKey="name"
-                                        animationDuration={900}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={180}
-                                        label={varietyChartData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
-                                        labelLine={false}
-                                    >
-                                        {varietyChartData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip content={<VarietyTooltip />} />
-                                    <Legend 
-                                        verticalAlign="bottom" 
-                                        height={36}
-                                        wrapperStyle={{ fontSize: '12px', fontWeight: '600' }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    )}
-
-                    {/* Wykres kosztów pracowniczych według sektorów */}
-                    {selectedProfitType && selectedProfitType.includes('Koszty pracownicze') && (
-                        <div className="border-l-4 border-purple-500 pl-8">
-                            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                                <span className="mr-2">👥</span>
-                                Rozkład kosztów pracowniczych według sektorów
-                            </h3>
-                            {(() => {
-                                // Przygotuj dane kosztów pracowniczych według sektorów
-                                const laborBySectorData = [];
-                                let totalGeneralLabor = 0;
-                                
-                                if (sectorLaborCosts && Object.keys(sectorLaborCosts).length > 0) {
-                                    Object.values(sectorLaborCosts).forEach(laborCost => {
-                                        const cost = Number(laborCost.totalCost || 0);
-                                        if (cost > 0) {
-                                            const sector = sectors.find(s => s.id === laborCost.sectorId);
-                                            if (sector) {
-                                                laborBySectorData.push({
-                                                    name: sector.description || `Sektor ${sector.id}`,
-                                                    value: cost,
-                                                    entries: laborCost.totalEntries || 0,
-                                                    paidCost: laborCost.paidCost || 0,
-                                                    unpaidCost: laborCost.unpaidCost || 0
-                                                });
-                                            } else {
-                                                totalGeneralLabor += cost;
-                                            }
-                                        }
-                                    });
-                                }
-                                
-                                if (totalGeneralLabor > 0) {
-                                    laborBySectorData.push({
-                                        name: 'Ogólne (poza sektorami)',
-                                        value: totalGeneralLabor,
-                                        entries: 0,
-                                        paidCost: 0,
-                                        unpaidCost: 0
-                                    });
-                                }
-                                
-                                const LaborTooltip = ({ active, payload }) => {
-                                    if (active && payload && payload.length) {
-                                        const data = payload[0].payload;
-                                        return (
-                                            <div className="bg-white p-4 border border-gray-300 rounded-lg shadow-lg">
-                                                <p className="font-bold text-gray-800 mb-2">{data.name}</p>
-                                                <p className="text-sm font-medium text-purple-600">
-                                                    Koszt całkowity: {formatCurrency(data.value)} PLN
-                                                </p>
-                                                {data.paidCost > 0 && (
-                                                    <p className="text-sm font-medium text-green-600">
-                                                        Wypłacono: {formatCurrency(data.paidCost)} PLN
-                                                    </p>
-                                                )}
-                                                {data.unpaidCost > 0 && (
-                                                    <p className="text-sm font-medium text-amber-600">
-                                                        Do wypłaty: {formatCurrency(data.unpaidCost)} PLN
-                                                    </p>
-                                                )}
-                                                {data.entries > 0 && (
-                                                    <p className="text-sm font-medium text-gray-600">
-                                                        Liczba wpisów: {data.entries}
-                                                    </p>
-                                                )}
-                                                <p className="text-sm font-medium text-gray-600 mt-1">
-                                                    Udział: {data.percent ? data.percent.toFixed(1) : 0}%
-                                                </p>
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                };
-                                
-                                return laborBySectorData.length > 0 ? (
-                                    <ResponsiveContainer width="100%" height={500}>
-                                        <PieChart>
-                                            <Pie
-                                                data={laborBySectorData}
-                                                dataKey="value"
-                                                nameKey="name"
-                                                animationDuration={900}
-                                                cx="50%"
-                                                cy="50%"
-                                                outerRadius={180}
-                                                label={laborBySectorData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
-                                                labelLine={false}
+                    {chartType === 'pieTypes' && (
+                        pieChartTypeData.length > 0 ? (
+                            <div className="space-y-8">
+                                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                                            <span className="mr-3">🔖</span>
+                                            Rozkład {dataType === 'revenue' ? 'Przychodów' : dataType === 'expenses' ? 'Kosztów' : 'Zysków'} według Typów
+                                            {selectedYear !== 'all' && ` - Rok ${selectedYear}`}
+                                            {selectedMonth && ` - ${MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label}`}
+                                        </h2>
+                                        {selectedProfitType && (
+                                            <button
+                                                onClick={() => setSelectedProfitType(null)}
+                                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors text-sm font-medium"
                                             >
-                                                {laborBySectorData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip content={<LaborTooltip />} />
-                                            <Legend 
-                                                verticalAlign="bottom" 
-                                                height={36}
-                                                wrapperStyle={{ fontSize: '12px', fontWeight: '600' }}
-                                            />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                                            👥
-                                        </div>
-                                        <p className="text-gray-600 font-medium">
-                                            Brak danych o kosztach pracowniczych
-                                        </p>
+                                                ✖ Zamknij widok szczegółów
+                                            </button>
+                                        )}
                                     </div>
-                                );
-                            })()}
-                        </div>
-                    )}
+                                    <p className="text-gray-600 mb-4 text-sm">
+                                        💡 <strong>Wskazówka:</strong> Kliknij na segment sprzedaży owoców lub kosztów pracowniczych, aby zobaczyć szczegóły
+                                    </p>
+                                    
+                                    <div className={`grid ${selectedProfitType ? 'grid-cols-2' : 'grid-cols-1'} gap-8`}>
+                                        {/* Główny wykres typów */}
+                                        <div>
+                                            <ResponsiveContainer width="100%" height={500}>
+                                                <PieChart>
+                                                    <Pie
+                                                        data={pieChartTypeData}
+                                                        dataKey="value"
+                                                        nameKey="name"
+                                                        animationDuration={900}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        outerRadius={180}
+                                                        label={pieChartTypeData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
+                                                        labelLine={false}
+                                                        onClick={handlePieClick}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        {pieChartTypeData.map((entry, index) => (
+                                                            <Cell 
+                                                                key={`cell-${index}`} 
+                                                                fill={COLORS[index % COLORS.length]}
+                                                                opacity={selectedProfitType && selectedProfitType !== entry.name ? 0.3 : 1}
+                                                            />
+                                                        ))}
+                                                    </Pie>
+                                                    <Tooltip content={<PieTooltip />} />
+                                                    <Legend 
+                                                        verticalAlign="bottom" 
+                                                        height={36}
+                                                        wrapperStyle={{ fontSize: '14px', fontWeight: '600' }}
+                                                    />
+                                                </PieChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                        {/* Wykres odmian */}
+                                        {/* Wykres odmian dla owoców */}
+                                        {selectedProfitType && !selectedProfitType.includes('Koszty pracownicze') && varietyChartData.length > 0 && (
+                                            <div className="border-l-4 border-blue-500 pl-8">
+                                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                                    <span className="mr-2">🍎</span>
+                                                    Rozkład odmian: {selectedProfitType}
+                                                </h3>
+                                                <ResponsiveContainer width="100%" height={500}>
+                                                    <PieChart>
+                                                        <Pie
+                                                            data={varietyChartData}
+                                                            dataKey="value"
+                                                            nameKey="name"
+                                                            animationDuration={900}
+                                                            cx="50%"
+                                                            cy="50%"
+                                                            outerRadius={180}
+                                                            label={varietyChartData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
+                                                            labelLine={false}
+                                                        >
+                                                            {varietyChartData.map((entry, index) => (
+                                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                            ))}
+                                                        </Pie>
+                                                        <Tooltip content={<VarietyTooltip />} />
+                                                        <Legend 
+                                                            verticalAlign="bottom" 
+                                                            height={36}
+                                                            wrapperStyle={{ fontSize: '12px', fontWeight: '600' }}
+                                                        />
+                                                    </PieChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        )}
 
-                    {selectedProfitType && !selectedProfitType.includes('Koszty pracownicze') && varietyChartData.length === 0 && (
-                        <div className="border-l-4 border-gray-300 pl-8 flex items-center justify-center">
-                            <div className="text-center">
-                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                                    🍎
+                                        {/* Wykres kosztów pracowniczych według sektorów */}
+                                        {selectedProfitType && selectedProfitType.includes('Koszty pracownicze') && (
+                                            <div className="border-l-4 border-purple-500 pl-8">
+                                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                                    <span className="mr-2">👥</span>
+                                                    Rozkład kosztów pracowniczych według sektorów
+                                                </h3>
+                                                {(() => {
+                                                    // Przygotuj dane kosztów pracowniczych według sektorów
+                                                    const laborBySectorData = [];
+                                                    let totalGeneralLabor = 0;
+                                                    
+                                                    if (sectorLaborCosts && Object.keys(sectorLaborCosts).length > 0) {
+                                                        Object.values(sectorLaborCosts).forEach(laborCost => {
+                                                            const cost = Number(laborCost.totalCost || 0);
+                                                            if (cost > 0) {
+                                                                const sector = sectors.find(s => s.id === laborCost.sectorId);
+                                                                if (sector) {
+                                                                    laborBySectorData.push({
+                                                                        name: sector.description || `Sektor ${sector.id}`,
+                                                                        value: cost,
+                                                                        entries: laborCost.totalEntries || 0,
+                                                                        paidCost: laborCost.paidCost || 0,
+                                                                        unpaidCost: laborCost.unpaidCost || 0
+                                                                    });
+                                                                } else {
+                                                                    totalGeneralLabor += cost;
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                    
+                                                    if (totalGeneralLabor > 0) {
+                                                        laborBySectorData.push({
+                                                            name: 'Ogólne (poza sektorami)',
+                                                            value: totalGeneralLabor,
+                                                            entries: 0,
+                                                            paidCost: 0,
+                                                            unpaidCost: 0
+                                                        });
+                                                    }
+                                                    
+                                                    const LaborTooltip = ({ active, payload }) => {
+                                                        if (active && payload && payload.length) {
+                                                            const data = payload[0].payload;
+                                                            return (
+                                                                <div className="bg-white p-4 border border-gray-300 rounded-lg shadow-lg">
+                                                                    <p className="font-bold text-gray-800 mb-2">{data.name}</p>
+                                                                    <p className="text-sm font-medium text-purple-600">
+                                                                        Koszt całkowity: {formatCurrency(data.value)} PLN
+                                                                    </p>
+                                                                    {data.paidCost > 0 && (
+                                                                        <p className="text-sm font-medium text-green-600">
+                                                                            Wypłacono: {formatCurrency(data.paidCost)} PLN
+                                                                        </p>
+                                                                    )}
+                                                                    {data.unpaidCost > 0 && (
+                                                                        <p className="text-sm font-medium text-amber-600">
+                                                                            Do wypłaty: {formatCurrency(data.unpaidCost)} PLN
+                                                                        </p>
+                                                                    )}
+                                                                    {data.entries > 0 && (
+                                                                        <p className="text-sm font-medium text-gray-600">
+                                                                            Liczba wpisów: {data.entries}
+                                                                        </p>
+                                                                    )}
+                                                                    <p className="text-sm font-medium text-gray-600 mt-1">
+                                                                        Udział: {data.percent ? data.percent.toFixed(1) : 0}%
+                                                                    </p>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    };
+                                                    
+                                                    return laborBySectorData.length > 0 ? (
+                                                        <ResponsiveContainer width="100%" height={500}>
+                                                            <PieChart>
+                                                                <Pie
+                                                                    data={laborBySectorData}
+                                                                    dataKey="value"
+                                                                    nameKey="name"
+                                                                    animationDuration={900}
+                                                                    cx="50%"
+                                                                    cy="50%"
+                                                                    outerRadius={180}
+                                                                    label={laborBySectorData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
+                                                                    labelLine={false}
+                                                                >
+                                                                    {laborBySectorData.map((entry, index) => (
+                                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                                    ))}
+                                                                </Pie>
+                                                                <Tooltip content={<LaborTooltip />} />
+                                                                <Legend 
+                                                                    verticalAlign="bottom" 
+                                                                    height={36}
+                                                                    wrapperStyle={{ fontSize: '12px', fontWeight: '600' }}
+                                                                />
+                                                            </PieChart>
+                                                        </ResponsiveContainer>
+                                                    ) : (
+                                                        <div className="text-center py-8">
+                                                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                                                                👥
+                                                            </div>
+                                                            <p className="text-gray-600 font-medium">
+                                                                Brak danych o kosztach pracowniczych
+                                                            </p>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                        )}
+
+                                        {selectedProfitType && !selectedProfitType.includes('Koszty pracownicze') && varietyChartData.length === 0 && (
+                                            <div className="border-l-4 border-gray-300 pl-8 flex items-center justify-center">
+                                                <div className="text-center">
+                                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                                                        🍎
+                                                    </div>
+                                                    <p className="text-gray-600 font-medium">
+                                                        Brak danych o odmianach dla<br/>{selectedProfitType}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <p className="text-gray-600 font-medium">
-                                    Brak danych o odmianach dla<br/>{selectedProfitType}
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8 text-center">
+                                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">
+                                    📊
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-3">Brak Wykresu</h3>
+                                <p className="text-gray-500">
+                                    Brak danych dla wybranego okresu i filtrów.
                                 </p>
                             </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    ) : (
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8 text-center">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">
-                📊
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Brak Wykresu</h3>
-            <p className="text-gray-500">
-                Brak danych dla wybranego okresu i filtrów.
-            </p>
-        </div>
-    )
-)}
-                {/* Tabela z marżami */}
-                {chartType === 'table' && (
-                    tableData.length > 0 ? (
-                        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                                <span className="mr-3">📋</span>
-                                Tabela Rentowności Sektorów
-                                {selectedYear !== 'all' && ` - Rok ${selectedYear}`}
-                                {selectedMonth && ` - ${MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label}`}
-                            </h2>
-                            <div className="overflow-x-auto">
-                               <table className="w-full">
-    <thead>
-        <tr className="border-b-2 border-gray-300">
-            <th className="text-left py-4 px-4 font-bold text-gray-700">Pozycja</th>
-            <th className="text-left py-4 px-4 font-bold text-gray-700">Sektor</th>
-            <th className="text-right py-4 px-4 font-bold text-gray-700">Przychody</th>
-            <th className="text-right py-4 px-4 font-bold text-gray-700">Koszty</th>
-            <th className="text-right py-4 px-4 font-bold text-gray-700">W tym: Koszty pracy</th>
-            <th className="text-right py-4 px-4 font-bold text-gray-700">Zysk</th>
-            <th className="text-right py-4 px-4 font-bold text-gray-700">Marża</th>
-        </tr>
-    </thead>
-    <tbody>
-        {tableData.map((row, index) => {
-            const sector = sectors.find(s => 
-                (s.description || `Sektor ${s.id}`) === row.name
-            );
+                        )
+                )}
+            {chartType === 'table' && (
+                tableData.length > 0 ? (
+                    <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                            <span className="mr-3">📋</span>
+                            Tabela Rentowności Sektorów
+                            {selectedYear !== 'all' && ` - Rok ${selectedYear}`}
+                            {selectedMonth && ` - ${MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label}`}
+                        </h2>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+            <thead>
+                <tr className="border-b-2 border-gray-300">
+                    <th className="text-left py-4 px-4 font-bold text-gray-700">Pozycja</th>
+                    <th className="text-left py-4 px-4 font-bold text-gray-700">Sektor</th>
+                    <th className="text-right py-4 px-4 font-bold text-gray-700">Przychody</th>
+                    <th className="text-right py-4 px-4 font-bold text-gray-700">Koszty</th>
+                    <th className="text-right py-4 px-4 font-bold text-gray-700">W tym: Koszty pracy</th>
+                    <th className="text-right py-4 px-4 font-bold text-gray-700">Zysk</th>
+                    <th className="text-right py-4 px-4 font-bold text-gray-700">Marża</th>
+                </tr>
+            </thead>
+            <tbody>
+            {tableData.map((row, index) => {
+                const sector = sectors.find(s => 
+                    (s.description || `Sektor ${s.id}`) === row.name
+                );
 
             const laborKey = row.name === 'Brak sektoru' ? 'no-sector' : sector?.id;
 
