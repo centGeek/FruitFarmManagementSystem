@@ -916,7 +916,7 @@ export default function ProfitAnalysis() {
                                         cx="50%"
                                         cy="50%"
                                         outerRadius={180}
-                                        label={pieChartData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
+                                        label={false}
                                         labelLine={false}
                                     >
                                         {pieChartData.map((entry, index) => (
@@ -981,7 +981,7 @@ export default function ProfitAnalysis() {
                                                         cx="50%"
                                                         cy="50%"
                                                         outerRadius={180}
-                                                        label={pieChartTypeData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
+                                                        label={false}
                                                         labelLine={false}
                                                         onClick={handlePieClick}
                                                         style={{ cursor: 'pointer' }}
@@ -1021,7 +1021,7 @@ export default function ProfitAnalysis() {
                                                             cx="50%"
                                                             cy="50%"
                                                             outerRadius={180}
-                                                            label={varietyChartData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
+                                                            label={false}
                                                             labelLine={false}
                                                         >
                                                             {varietyChartData.map((entry, index) => (
@@ -1125,7 +1125,7 @@ export default function ProfitAnalysis() {
                                                                     cx="50%"
                                                                     cy="50%"
                                                                     outerRadius={180}
-                                                                    label={laborBySectorData.length > 1 ? ({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%` : false}
+                                                                    label={false}
                                                                     labelLine={false}
                                                                 >
                                                                     {laborBySectorData.map((entry, index) => (

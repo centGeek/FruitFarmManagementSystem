@@ -3,14 +3,20 @@ import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import {formatCurrency, Alert} from "../utils/common"
 
 const PROFIT_TYPES = [
- 
- { value: 'SPRZEDAZ_JABLEK', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
- { value: 'SPRZEDAZ_GRUSZEK', label: 'Sprzedaż gruszek', icon: '🍐', color: 'bg-green-50 text-green-700 border-green-200' },
- { value: 'SPRZEDAZ_WISNI', label: 'Sprzedaż wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
- { value: 'SPRZEDAZ_CZERESNI', label: 'Sprzedaż czereśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200'},
- { value: 'SPRZEDAZ_SLIW', label: 'Sprzedaż śliwek', icon: '🫐', color: 'bg-purple-50 text-purple-700 border-purple-200' },
- { value: 'SPRZEDAZ_BRSKWIN', label: 'Sprzedaż brzoskwiń', icon: '🍑', color: 'bg-orange-50 text-orange-700 border-orange-200' },
- { value: 'SPRZEDAZ_INNYCH_OWOCOW', label: 'Sprzedaż innych owoców', icon: '🥝', color: 'bg-green-50 text-green-700 border-green-200' },
+  // Sprzedaż owoców
+  { value: 'SPRZEDAZ_JABLEK', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
+  { value: 'SPRZEDAZ_GRUSZEK', label: 'Sprzedaż gruszek', icon: '🍐', color: 'bg-green-50 text-green-700 border-green-200' },
+  { value: 'SPRZEDAZ_WISNI', label: 'Sprzedaż wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
+  { value: 'SPRZEDAZ_CZERESNI', label: 'Sprzedaż czereśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
+  { value: 'SPRZEDAZ_SLIW', label: 'Sprzedaż śliwek', icon: '🟣', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'SPRZEDAZ_MALIN', label: 'Sprzedaż malin', icon: '🍓', color: 'bg-pink-50 text-pink-700 border-pink-200' },
+  { value: 'SPRZEDAZ_TRUSKAWEK', label: 'Sprzedaż truskawek', icon: '🍓', color: 'bg-pink-50 text-pink-700 border-pink-200' },
+  { value: 'SPRZEDAZ_PORZECZEK_CZARNYCH', label: 'Sprzedaż czarnych porzeczek', icon: '🫐', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'SPRZEDAZ_PORZECZEK_CZERWONYCH', label: 'Sprzedaż czerwonych porzeczek', icon: '🟥', color: 'bg-red-50 text-red-700 border-red-200' },
+  { value: 'SPRZEDAZ_AGRESTU', label: 'Sprzedaż agrestu', icon: '🟢', color: 'bg-green-50 text-green-700 border-green-200' },
+  { value: 'SPRZEDAZ_BOROWEK', label: 'Sprzedaż borówek', icon: '🫐', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { value: 'SPRZEDAZ_JEZYN', label: 'Sprzedaż jeżyn', icon: '🟣', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'SPRZEDAZ_ARONII', label: 'Sprzedaż aronii', icon: '⚫', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
  
  { value: 'SPRZEDAZ_HURTOWA', label: 'Sprzedaż hurtowa', icon: '🏭', color: 'bg-blue-50 text-blue-700 border-blue-200' },
  { value: 'SPRZEDAZ_DETALICZNA', label: 'Sprzedaż detaliczna', icon: '🏪', color: 'bg-blue-50 text-blue-700 border-blue-200' },
