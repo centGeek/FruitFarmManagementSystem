@@ -56,22 +56,7 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
 
   if (!isOpen) return null;
 
-  const calculateArea = (corners) => {
-    if (!corners || corners.length < 3) return 0;
-    
-    let area = 0;
-    const n = corners.length;
-    for (let i = 0; i < n; i++) {
-      const j = (i + 1) % n;
-      area += corners[i][0] * corners[j][1];
-      area -= corners[j][0] * corners[i][1];
-    }
-    return Math.abs(area / 2) * 111000 * 111000;
-  };
-
-  const areaInM2 = calculateArea(editedSector.corners);
-  const areaInHa = (areaInM2 / 10000).toFixed(2);
-
+  
   const handleInputChange = (field, value) => {
     setEditedSector(prev => {
       const updated = {
@@ -214,20 +199,6 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
               </div>
             )}
 
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-800 mb-3">Parametry geometryczne</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-white p-3 rounded border">
-                  <div className="text-gray-600">Powierzchnia</div>
-                  <div className="text-xl font-bold text-gray-900">~{areaInHa} ha</div>
-                </div>
-                <div className="bg-white p-3 rounded border">
-                  <div className="text-gray-600">Punkty GPS</div>
-                  <div className="text-xl font-bold text-gray-900">{editedSector.corners.length}</div>
-                </div>
-              </div>
-            </div>
-
             <details className="bg-gray-50 rounded-lg border">
               <summary className="p-4 cursor-pointer font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
                 Współrzędne GPS (kliknij aby rozwinąć)
@@ -249,7 +220,7 @@ const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm, onEdi
                 <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-amber-800">
                   <p className="font-medium mb-1">Sprawdź dane przed wysłaniem</p>
-                  <p>Sektor zostanie zapisany w systemie i wysłany na serwer.</p>
+                  <p>Sektor zostanie zapisany w systemie.</p>
                 </div>
               </div>
             </div>
@@ -374,7 +345,7 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
 
   const finishDrawing = async (points) => {
     if (points.length < 3) {
-      alert('Wymagane co najmniej 3 punkty, aby zamknąć wielokąt.');
+      alert('Wymagane co najmniej 4 punkty');
       cancelDrawing();
       return;
     }
@@ -440,10 +411,10 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     }
     
     onSectorsChange([...sectors, finalSector]);
-    alert('Sektor został pomyślnie dodany i zsynchronizowany z serwerem!');
+    alert('Sektor został pomyślnie dodany!');
   } catch (error) {
     console.error('Błąd podczas wysyłania sektora do backendu:', error);
-    if (window.confirm('Nie udało się wysłać danych sektora do serwera. Czy chcesz zapisać sektor tylko lokalnie?')) {
+    if (window.confirm('Nie udało się zapisać sektora')) {
       onSectorsChange([...sectors, editedSectorData]);
     }
   }
@@ -527,7 +498,7 @@ const updateCornerPosition = async (sectorIndex, cornerIndex, newLatLng) => {
   onSectorsChange(updatedSectors);
 };
 
-  const handleMapClick = useCallback((e) => {
+const handleMapClick = useCallback((e) => {
     if (drawingMode !== 'polygon') return;
 
     const clickPoint = e.latlng;
@@ -1325,8 +1296,7 @@ const handleSaveEditedSector = async (editedSector) => {
     <div className="text-amber-800">Rodzaje odmian</div>
   </div>
 </div>
-      </div>
-
+</div>
       <div className="mb-6 rounded-lg overflow-hidden shadow-lg">
         <InteractiveMap 
           sectors={sectors}

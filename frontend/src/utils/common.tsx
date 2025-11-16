@@ -29,93 +29,182 @@
 }); 
 
 export const CROP_TYPES = [
-    {
-    value: 'JABŁOŃ', 
+  {
+    value: 'JABŁOŃ',
     label: '🍎 Jabłonie',
     varieties: [
-        { value: 'IDARED', label: 'Idared' },
-        { value: 'LIGOL', label: 'Ligol' },
-        { value: 'SZAMPION', label: 'Szampion' },
-        { value: 'JONAGOLD', label: 'Jonagold' },
-        { value: 'GLOSTER', label: 'Gloster' },
-        { value: 'GALA', label: 'Gala' },
-        { value: 'GOLDEN_DELICIOUS', label: 'Golden Delicious' },
-        { value: 'RED_DELICIOUS', label: 'Red Delicious' },
-        { value: 'PRINCE', label: 'Princ' },
-        { value: 'ELSTAR', label: 'Elstar' },
-        { value: 'MUTSU', label: 'Mutsu' },
-        { value: 'ALWA', label: 'Alwa' },
-        { value: 'MELODIA', label: 'Melodia' },
-        { value: 'GALMAC', label: 'Galmac' },
-        { value: 'PAPIEROWKA', label: 'Papierówka' },
-        { value: 'LOBO', label: 'Lobo' },
-        { value: 'TOPAZ', label: 'Topaz' },
-        { value: 'RUBINOLA', label: 'Rubinola' },
-        { value: 'PINOVA', label: 'Pinova' },
-        { value: 'INNA', label: 'Inna odmiana' }
+      // pełna lista z backendu skrócona do popularnych,
+      // bo pełną i tak pobierzesz dynamicznie
+      { value: 'GOLDEN_DELICIOUS', label: 'Golden Delicious' },
+      { value: 'RED_DELICIOUS', label: 'Red Delicious' },
+      { value: 'GALA', label: 'Gala' },
+      { value: 'FUJI', label: 'Fuji' },
+      { value: 'LIGOL', label: 'Ligol' },
+      { value: 'SZAMPION', label: 'Szampion' },
+      { value: 'JONAGOLD', label: 'Jonagold' },
+      { value: 'HONEYCRISP', label: 'Honeycrisp' },
+      { value: 'IDARED', label: 'Idared' },
+      { value: 'OTHER', label: 'Inna odmiana' }
     ]
   },
-    { 
-        value: 'GRUSZA',
-        label: '🍐 Grusze',
-        varieties: [
-            { value: 'CONFERENCE', label: 'Conference' },
-            { value: 'WILLIAMS', label: 'Williams' },
-            { value: 'LUKASOWKA', label: 'Łukasówka' },
-            { value: 'FAWORYTKA', label: 'Faworytka' },
-            { value: 'BONKRETA', label: 'Bonkreta' },
-            { value: 'INNA', label: 'Inna odmiana' }
-        ]
-    },
-    { 
-        value: 'ŚLIWA',
-        label: '🟣 Śliwy',
-        varieties: [
-            { value: 'WEGIERSKA', label: 'Węgierka' },
-            { value: 'RENKLODA', label: 'Renkloda' },
-            { value: 'ELENA', label: 'Elena' },
-            { value: 'PRESIDENT', label: 'President' },
-            { value: 'CACANSKA', label: 'Čačanska' },
-            { value: 'INNA', label: 'Inna odmiana' }
-        ]
-    },
-    { 
-        value: 'WIŚNIA',
-        label: '🍒 Wiśnie',
-        varieties: [
-            { value: 'LUTOWKA', label: 'Łutówka' }, 
-            { value: 'NEFRIS', label: 'Nefris' },
-            { value: 'DEBRECENI', label: 'Debreceni' },
-            { value: 'KELLERIS', label: 'Kelleris' },
-            { value: 'INNA', label: 'Inna odmiana' }
-        ]
-    },
-    { 
-        value: 'CZEREŚNIA',
-        label: '🍒 Czereśnie',
-        varieties: [
-            { value: 'BURLAT', label: 'Burlat' },
-            { value: 'KORDIA', label: 'Kordia' },
-            { value: 'REGINA', label: 'Regina' },
-            { value: 'LAPINS', label: 'Lapins' },
-            { value: 'VAN', label: 'Van' },
-            { value: 'SUMMIT', label: 'Summit' },
-            { value: 'INNA', label: 'Inna odmiana' }
-        ]
-    },
-    { 
-        value: 'MALINA',
-        label: '🍓 Maliny',
-        varieties: [
-            { value: 'POLKA', label: 'Polka' },
-            { value: 'POLANA', label: 'Polana' },
-            { value: 'LASZKA', label: 'Laszka' },
-            { value: 'GLEN_AMPLE', label: 'Glen Ample' },
-            { value: 'TULAMEEN', label: 'Tulameen' },
-            { value: 'INNA', label: 'Inna odmiana' }
-        ]
-    }
+
+  {
+    value: 'GRUSZA',
+    label: '🍐 Grusze',
+    varieties: [
+      { value: 'KONFERENCJA', label: 'Konferencja' },
+      { value: 'WILLIAMS', label: 'Williams' },
+      { value: 'BOSC', label: 'Bosc' },
+      { value: 'FAWORYTKA', label: 'Faworytka' },
+      { value: 'COMICE', label: 'Comice' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'WIŚNIA',
+    label: '🍒 Wiśnie',
+    varieties: [
+      { value: 'BURLAT', label: 'Burlat' },
+      { value: 'KELLERIS', label: 'Kelleris' },
+      { value: 'MONTMORENCY', label: 'Montmorency' },
+      { value: 'NORTHSTAR', label: 'Northstar' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'ŚLIWA',
+    label: '🟣 Śliwy',
+    varieties: [
+      { value: 'WEGIERSKA', label: 'Węgierka' },
+      { value: 'RENKLODA', label: 'Renkloda' },
+      { value: 'ELENA', label: 'Elena' },
+      { value: 'PRESIDENT', label: 'President' },
+      { value: 'OPAL', label: 'Opal' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'CZEREŚNIA',
+    label: '🍒 Czereśnie',
+    varieties: [
+      { value: 'BURLAT', label: 'Burlat' },
+      { value: 'KORDIA', label: 'Kordia' },
+      { value: 'REGINA', label: 'Regina' },
+      { value: 'LAPINS', label: 'Lapins' },
+      { value: 'SUMMIT', label: 'Summit' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'MALINA',
+    label: '🍓 Maliny',
+    varieties: [
+      { value: 'POLKA', label: 'Polka' },
+      { value: 'POLANA', label: 'Polana' },
+      { value: 'GLEN_AMPLE', label: 'Glen Ample' },
+      { value: 'LASZKA', label: 'Laszka' },
+      { value: 'TULAMEEN', label: 'Tulameen' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  /* --- NOWE UPRAWY --- */
+
+  {
+    value: 'TRUSKAWKA',
+    label: '🍓 Truskawki',
+    varieties: [
+      { value: 'HONEOYE', label: 'Honeoye' },
+      { value: 'ELSANTA', label: 'Elsanta' },
+      { value: 'ALBA', label: 'Alba' },
+      { value: 'CLERY', label: 'Clery' },
+      { value: 'ROXANA', label: 'Roxana' },
+      { value: 'MARMOLADA', label: 'Marmolada' },
+      { value: 'SENGA_SENGANA', label: 'Senga Sengana' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'BLACKCURRANT',
+    label: '🖤 Porzeczka czarna',
+    varieties: [
+      { value: 'TITANIA', label: 'Titania' },
+      { value: 'BEN_LOMOND', label: 'Ben Lomond' },
+      { value: 'BEN_NEVIS', label: 'Ben Nevis' },
+      { value: 'TISEL', label: 'Tisel' },
+      { value: 'TIBEN', label: 'Tiben' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'REDCURRANT',
+    label: '🔴 Porzeczka czerwona',
+    varieties: [
+      { value: 'ROVADA', label: 'Rovada' },
+      { value: 'JONKER_VAN_TETS', label: 'Jonker van Tets' },
+      { value: 'HOLLANDE', label: 'Hollande' },
+      { value: 'RED_LAKE', label: 'Red Lake' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'GOOSEBERRY',
+    label: '🟢 Agrest',
+    varieties: [
+      { value: 'INVICTA', label: 'Invicta' },
+      { value: 'HINNONMAKI_RED', label: 'Hinnonmäki Red' },
+      { value: 'HINNONMAKI_YELLOW', label: 'Hinnonmäki Yellow' },
+      { value: 'CAPTIVATOR', label: 'Captivator' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'BLUEBERRY',
+    label: '🔵 Borówka',
+    varieties: [
+      { value: 'DUKE', label: 'Duke' },
+      { value: 'BLUECROP', label: 'Bluecrop' },
+      { value: 'CHANDLER', label: 'Chandler' },
+      { value: 'LEGACY', label: 'Legacy' },
+      { value: 'SPARTAN', label: 'Spartan' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'BLACKBERRY',
+    label: '⚫ Jeżyna',
+    varieties: [
+      { value: 'LOCH_NESS', label: 'Loch Ness' },
+      { value: 'THORNFREE', label: 'Thornfree' },
+      { value: 'NAVAHO', label: 'Navaho' },
+      { value: 'BLACK_SATIN', label: 'Black Satin' },
+      { value: 'CHESTER', label: 'Chester' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  },
+
+  {
+    value: 'ARONIA',
+    label: '🫐 Aronia',
+    varieties: [
+      { value: 'NERO', label: 'Nero' },
+      { value: 'VIKING', label: 'Viking' },
+      { value: 'GALICJANKA', label: 'Galicjanka' },
+      { value: 'HUGIN', label: 'Hugin' },
+      { value: 'OTHER', label: 'Inna odmiana' }
+    ]
+  }
 ];
+
 
 export interface CoordinateDTO {
   latitude: number;

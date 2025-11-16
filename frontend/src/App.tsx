@@ -121,14 +121,8 @@ function App() {
     }
     
     if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-      // Przekieruj do odpowiedniej domyślnej strony na podstawie roli
-      if (userRole === "Admin") {
-        return <Navigate to="/admin/dashboard" replace />;
-      } else if (userRole === "Gardener") {
-        return <Navigate to="/home" replace />;
+      return <Navigate to="/home" replace />;    
       }
-      return <Navigate to="/" replace />;
-    }
     
     return children;
   };
@@ -248,57 +242,7 @@ function App() {
               <AnalysisPage/>
             </ProtectedRoute>
           }
-        />
-
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["Admin"]}>
-              <div>Admin Dashboard</div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <ProtectedRoute allowedRoles={["Admin"]}>
-              <div>Users Management</div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/reports"
-          element={
-            <ProtectedRoute allowedRoles={["Admin"]}>
-              <div>Reports Page</div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/settings"
-          element={
-            <ProtectedRoute allowedRoles={["Admin"]}>
-              <div>Settings Page</div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/analytics"
-          element={
-            <ProtectedRoute allowedRoles={["Admin"]}>
-              <div>Analytics Page</div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/systems"
-          element={
-            <ProtectedRoute allowedRoles={["Admin"]}>
-              <div>Systems Page</div>
-            </ProtectedRoute>
-          }
-        />
-        
+        />        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

@@ -609,32 +609,102 @@ const fetchSectors = useCallback(() => {
     
     try {
         const params = new URLSearchParams();
-        
-        if (selectedSectorId) {
+
+        // Jeśli wybrany konkretny sektor - pobierz tylko dla niego
+        if (selectedSectorId && selectedSectorId !== '') {
             params.append('sectorId', selectedSectorId);
-        }
-        
-        if (selectedYear) params.append('year', selectedYear);
-        if (selectedMonth) params.append('month', selectedMonth);
-        
-        const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
-        console.log('📡 [LABOR] URL:', url);
-        
-        const response = await fetch(url, { 
-            method: 'GET', 
-            headers: getAuthHeaders() 
-        });
-        
-        console.log('📨 [LABOR] Response:', response.status);
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ [LABOR] Data:', data);
-            setSectorLaborCosts(data);
+            
+            if (selectedYear) params.append('year', selectedYear);
+            if (selectedMonth) params.append('month', selectedMonth);
+            
+            const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
+            console.log('📡 [LABOR] URL (konkretny sektor):', url);
+            
+            const response = await fetch(url, { 
+                method: 'GET', 
+                headers: getAuthHeaders() 
+            });
+            
+            console.log('📨 [LABOR] Response:', response.status);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ [LABOR] Data:', data);
+                setSectorLaborCosts(data);
+            } else {
+                const errorText = await response.text();
+                console.error('❌ [LABOR] Error:', response.status, errorText);
+                setSectorLaborCosts(null);
+            }
         } else {
-            const errorText = await response.text();
-            console.error('❌ [LABOR] Error:', response.status, errorText);
-            setSectorLaborCosts(null);
+            // Jeśli "Wszystkie sektory" - sumuj wszystkie
+            console.log('📊 [LABOR] Sumowanie wszystkich sektorów + bez sektora');
+            
+            // Pobierz listę wszystkich sektorów
+            const sectorsListResponse = await fetch(`${BACKEND_URL}/api/sectors`, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+            
+            if (!sectorsListResponse.ok) {
+                throw new Error('Nie można pobrać listy sektorów');
+            }
+            
+            const sectorsList = await sectorsListResponse.json();
+            console.log('📋 [LABOR] Lista sektorów:', sectorsList);
+            
+            // Tablica do przechowania wszystkich obietnic zapytań
+            const fetchPromises = [];
+            
+            // Zapytanie dla wpisów BEZ sektora
+            const paramsNoSector = new URLSearchParams();
+            if (selectedYear) paramsNoSector.append('year', selectedYear);
+            if (selectedMonth) paramsNoSector.append('month', selectedMonth);
+            
+            fetchPromises.push(
+                fetch(`${BACKEND_URL}/api/expenses/sector-labor-costs?${paramsNoSector}`, {
+                    method: 'GET',
+                    headers: getAuthHeaders()
+                }).then(r => r.json())
+            );
+            
+            // Zapytania dla każdego sektora osobno
+            sectorsList.forEach(sector => {
+                const paramsSector = new URLSearchParams();
+                paramsSector.append('sectorId', sector.id);
+                if (selectedYear) paramsSector.append('year', selectedYear);
+                if (selectedMonth) paramsSector.append('month', selectedMonth);
+                
+                fetchPromises.push(
+                    fetch(`${BACKEND_URL}/api/expenses/sector-labor-costs?${paramsSector}`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    }).then(r => r.json())
+                );
+            });
+            
+            // Czekaj na wszystkie odpowiedzi
+            const results = await Promise.all(fetchPromises);
+            console.log('✅ [LABOR] Wszystkie wyniki:', results);
+            
+            // Sumuj wszystkie koszty
+            const totalLaborCost = results.reduce((sum, r) => sum + (r.sectorLaborCost || 0), 0);
+            const totalPaidCost = results.reduce((sum, r) => sum + (r.paidLaborCost || 0), 0);
+            const totalUnpaidCost = results.reduce((sum, r) => sum + (r.unpaidLaborCost || 0), 0);
+            const totalPaidEntries = results.reduce((sum, r) => sum + (r.paidEntries || 0), 0);
+            const totalUnpaidEntries = results.reduce((sum, r) => sum + (r.unpaidEntries || 0), 0);
+            
+            const aggregatedData = {
+                sectorName: '',
+                sectorLaborCost: totalLaborCost,
+                paidLaborCost: totalPaidCost,
+                unpaidLaborCost: totalUnpaidCost,
+                paidEntries: totalPaidEntries,
+                unpaidEntries: totalUnpaidEntries
+            };
+            
+            console.log('📊 [LABOR] Zagregowane dane:', aggregatedData);
+            setSectorLaborCosts(aggregatedData);
         }
     } catch (error) {
         console.error('❌ [LABOR] Exception:', error);
@@ -721,6 +791,7 @@ const filteredExpenses = useMemo(() => {
     }
 
     if (selectedSectorId) {
+        // Konkretny sektor
         list = list.filter(exp => exp.sectorDTO?.id === Number(selectedSectorId));
     }
 
@@ -774,10 +845,8 @@ if (searchTerm) {
     }, [filteredExpenses]);
 
     const selectedSectorName = useMemo(() => {
-        if (!selectedSectorId) return null;
-        const sector = sectors.find(s => s.id === Number(selectedSectorId));
-        return sector ? (sector.description || `Sektor ${sector.id}`) : null;
-    }, [selectedSectorId, sectors]);
+    if (!selectedSectorId) return null;
+}, [selectedSectorId, sectors]);
     
 
     const hasActiveFilters = selectedType || selectedPaymentStatus || selectedSectorId || selectedYear || selectedMonth || searchTerm;
@@ -1068,7 +1137,6 @@ if (searchTerm) {
                                         ))}
                                     </select>
                                 </div>
-
                                 <div className="space-y-2">
                                     <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
                                         Status płatności
@@ -1083,7 +1151,6 @@ if (searchTerm) {
                                         ))}
                                     </select>
                                 </div>
-
                                 <div className="space-y-2">
                                     <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
                                         Sektor 🗺️
@@ -1102,7 +1169,6 @@ if (searchTerm) {
                                         ))}
                                     </select>
                                 </div>
-
                                 <div className="space-y-2">
                                     <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">
                                         Rok 📅

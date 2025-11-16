@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import {type NotificationRule, type ForecastAlert, type Alert, type OpenMeteoCoordinates } from "../utils/common";
 
-
 const NOTIFICATION_TYPES = {
   WEATHER: { label: 'Pogoda', icon: '🌤️', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   USER: { label: 'Użytkownik', icon: '👤', color: 'bg-purple-50 text-purple-700 border-purple-200' },
@@ -14,7 +13,6 @@ const NOTIFICATION_TYPES = {
   PROFIT: { label: 'Zysk', icon: '💰', color: 'bg-green-50 text-green-700 border-green-200' },
   EXPENSE: { label: 'Wydatek', icon: '💸', color: 'bg-red-50 text-red-700 border-red-200' },
 };
-
 
 const LoadingState = () => (
   <div className="text-center py-16">
@@ -150,7 +148,6 @@ export default function NotificationDashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '' });
   
-  // Weather alerts state
   const [forecastAlerts, setForecastAlerts] = useState([]);
   const [isCheckingAlerts, setIsCheckingAlerts] = useState(false);
   const [weatherError, setWeatherError] = useState(null);
@@ -369,7 +366,6 @@ export default function NotificationDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 md:p-6 font-sans">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <header className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 flex items-center">
             <span className="text-indigo-600 mr-3">🔔</span>
@@ -411,7 +407,6 @@ export default function NotificationDashboard() {
             </div>
           </div>
 
-          {/* Right Column - Weather Alerts Sidebar (1/3 width) */}
           <div className="lg:col-span-1 lg:-mt-20">
             <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl shadow-xl p-4 md:p-5 border border-orange-200 lg:sticky lg:top-2">
               <div className="flex items-center gap-2 mb-4">
@@ -458,35 +453,14 @@ export default function NotificationDashboard() {
                 <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 text-center">
                   <div className="text-4xl md:text-5xl mb-3">☀️</div>
                   <p className="text-gray-700 font-medium mb-1 text-sm md:text-base">Brak ostrzeżeń</p>
-                  <p className="text-gray-600 text-xs md:text-sm">Brak niespodzianek. Możesz skonfigurować alerty pogodowe w{" "} <Link
-                                    to="/weather"
-                                    className="font-bold underline text-red-800 hover:text-red-900"
-                                >
-                                    Notyfikacjach Powodowych
-                                </Link></p>
+                  <p className="text-gray-600 text-xs md:text-sm">Brak niespodzianek. Możesz skonfigurować alerty pogodowe w{" "} 
+                    <Link to="/weather" className="font-bold underline text-red-800 hover:text-red-900" > Notyfikacjach Powodowych </Link></p>
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.3);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(234, 88, 12, 0.5);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(234, 88, 12, 0.7);
-        }
-      `}</style>
     </div>
   );
 }
