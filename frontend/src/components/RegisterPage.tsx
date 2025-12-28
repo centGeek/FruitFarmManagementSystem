@@ -5,6 +5,7 @@ import { Alert} from "../utils/common";
 import BasicMap from '../utils/BasicMap';
 import LocationSearch from '../utils/LocationSearch';
 import L from 'leaflet';
+import { authFetch } from '../utils/authFetch';
 
 
 const TextInput = React.memo(({ id, name, value, onChange, placeholder, icon: Icon, type = "text", disabled, error }) => (
@@ -205,7 +206,7 @@ export default function RegisterPage() {
         setSuccess('');
 
         try {
-            const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
+            const res = await authFetch(`${BACKEND_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',

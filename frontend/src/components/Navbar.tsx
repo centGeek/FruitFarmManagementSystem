@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
+import { authFetch } from "../utils/authFetch";
 
 function WeatherWidget() {
   const [weather, setWeather] = useState(null);
@@ -21,7 +22,7 @@ function WeatherWidget() {
   useEffect(() => {
     const fetchCoordinates = async () => {
       try {
-        const response = await fetch(`${BACKEND_URL}/api/gardener/location`, {
+        const response = await authFetch(`${BACKEND_URL}/api/gardener/location`, {
           method: 'GET',
           headers: getAuthHeaders(),
         });
@@ -56,7 +57,7 @@ function WeatherWidget() {
 
     const fetchWeather = async () => {
       try {
-        const response = await fetch(
+        const response = await authFetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${coordinates.lat}&longitude=${coordinates.lon}&current=temperature_2m,weather_code&timezone=Europe/Warsaw`
         );
         

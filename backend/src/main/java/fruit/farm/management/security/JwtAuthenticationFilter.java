@@ -1,13 +1,13 @@
-// ===== 1. JWT AUTHORIZATION FILTER =====
-
 package fruit.farm.management.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,54 +26,67 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        String token = extractTokenFromRequest(request);
+        try {
+            // WAŻNE: Pobierz token z COOKIE, nie z headera!
+            String token = getTokenFromCookies(request);
 
-        if (token != null) {
-            try {
-                if (jwtService.validateToken(token)) {
-                    String nickname = jwtService.getNicknameFromToken(token);
-                    List<String> roles = jwtService.getRolesFromToken(token);
+            if (token != null && jwtService.validateToken(token)) {
+                String nickname = jwtService.getNicknameFromToken(token);
+                List<String> roles = jwtService.getRolesFromToken(token);
 
-                    log.debug("Valid token for user: {}, roles: {}", nickname, roles);
+                log.debug("Valid token for user: {}, roles: {}", nickname, roles);
 
-                    List<SimpleGrantedAuthority> authorities = roles.stream()
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList());
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
 
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(nickname, null, authorities);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(nickname, null, authorities);
 
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                    log.debug("Authentication set successfully for user: {}", nickname);
-                } else {
-                    log.warn("Invalid JWT token");
-                }
-            } catch (Exception e) {
-                log.error("Error processing JWT token: {}", e.getMessage());
-                SecurityContextHolder.clearContext();
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("Authentication set successfully for user: {}", nickname);
+            } else if (token != null) {
+                log.debug("Invalid or expired token");
+            } else {
+                log.debug("No token found in cookies");
             }
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // Token wygasł - pozwól kontynuować (frontend dostanie 401 i odświeży)
+            log.debug("JWT token expired: {}", e.getMessage());
+        } catch (Exception e) {
+            log.warn("JWT authentication error: {}", e.getMessage());
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private String extractTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+    /**
+     * Pobiera access token z cookies
+     */
+    private String getTokenFromCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())) {
+                    log.debug("Found accessToken cookie");
+                    return cookie.getValue();
+                }
+            }
         }
+        log.debug("No accessToken cookie found");
         return null;
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Nie filtruj endpointów autoryzacyjnych
         return path.startsWith("/api/auth/");
     }
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import {formatCurrency, Alert} from "../utils/common"
+import { authFetch } from '../utils/authFetch';
 
 
 const EXPENSE_TYPES = [
@@ -506,7 +507,7 @@ useEffect(() => {
     
     try {
         while (currentPage < totalPages) {
-            const response = await fetch(
+            const response = await authFetch(
                 `${BACKEND_URL}/api/expenses?page=${currentPage}&size=100`,
                 { method: 'GET', headers: getAuthHeaders() }
             );
@@ -532,16 +533,14 @@ const fetchData = useCallback(async (setter, endpoint, entityName) => {
         const headers = getAuthHeaders();
         console.log(`[FETCH] Headers dla ${entityName}:`, headers);
         
-        const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+        const response = await authFetch(`${BACKEND_URL}${endpoint}`, {
             method: 'GET',
             headers: headers,
         });
 
-        console.log(`[FETCH] Odpowiedź serwera dla ${entityName} - Status: ${response.status} ${response.statusText}`);
 
         if (response.ok) {
             const data = await response.json();
-            console.log(`[FETCH] ✅ Załadowano ${entityName}:`, data);
             setter(Array.isArray(data) ? data : []);
         } else {
             const errorText = await response.text();
@@ -578,7 +577,7 @@ const fetchSectors = useCallback(() => {
         const method = isUpdate ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await authFetch(endpoint, {
                 method,
                 headers: getAuthHeaders(),
                 body: JSON.stringify(expenseData),
@@ -620,7 +619,7 @@ const fetchSectors = useCallback(() => {
             const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
             console.log('📡 [LABOR] URL (konkretny sektor):', url);
             
-            const response = await fetch(url, { 
+            const response = await authFetch(url, { 
                 method: 'GET', 
                 headers: getAuthHeaders() 
             });
@@ -641,7 +640,7 @@ const fetchSectors = useCallback(() => {
             console.log('📊 [LABOR] Sumowanie wszystkich sektorów + bez sektora');
             
             // Pobierz listę wszystkich sektorów
-            const sectorsListResponse = await fetch(`${BACKEND_URL}/api/sectors`, {
+            const sectorsListResponse = await authFetch(`${BACKEND_URL}/api/sectors`, {
                 method: 'GET',
                 headers: getAuthHeaders()
             });
@@ -662,7 +661,7 @@ const fetchSectors = useCallback(() => {
             if (selectedMonth) paramsNoSector.append('month', selectedMonth);
             
             fetchPromises.push(
-                fetch(`${BACKEND_URL}/api/expenses/sector-labor-costs?${paramsNoSector}`, {
+                authFetch(`${BACKEND_URL}/api/expenses/sector-labor-costs?${paramsNoSector}`, {
                     method: 'GET',
                     headers: getAuthHeaders()
                 }).then(r => r.json())
@@ -676,7 +675,7 @@ const fetchSectors = useCallback(() => {
                 if (selectedMonth) paramsSector.append('month', selectedMonth);
                 
                 fetchPromises.push(
-                    fetch(`${BACKEND_URL}/api/expenses/sector-labor-costs?${paramsSector}`, {
+                    authFetch(`${BACKEND_URL}/api/expenses/sector-labor-costs?${paramsSector}`, {
                         method: 'GET',
                         headers: getAuthHeaders()
                     }).then(r => r.json())
@@ -713,7 +712,7 @@ const fetchSectors = useCallback(() => {
         setIsLoadingLaborCosts(false);
     }
     try {
-    const advancesResponse = await fetch(`${BACKEND_URL}/api/advances/user/sum-unsettled`, { 
+    const advancesResponse = await authFetch(`${BACKEND_URL}/api/advances/user/sum-unsettled`, { 
         method: 'GET', 
         headers: getAuthHeaders() 
     });
@@ -747,7 +746,7 @@ useEffect(() => {
         closeAlert();
         
         try {
-            const response = await fetch(`${BACKEND_URL}/api/expenses/${expenseId}`, {
+            const response = await authFetch(`${BACKEND_URL}/api/expenses/${expenseId}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders(),
             });

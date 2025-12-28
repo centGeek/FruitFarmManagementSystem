@@ -4,6 +4,8 @@ import 'leaflet/dist/leaflet.css';
 import { Trash2, Layers, X, Search, MapPin, Loader, Check, AlertCircle, Edit3 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import { CROP_TYPES} from "../utils/common";
+import { authFetch } from '../utils/authFetch';
+
 
 import LocationSearch from '../utils/LocationSearch';
 import BasicMap from '../utils/BasicMap';
@@ -380,7 +382,7 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     
     console.log('Wysyłanie danych do backendu:', backendData);
     
-    const response = await fetch(`${BACKEND_URL}/api/sectors`, {
+    const response = await authFetch(`${BACKEND_URL}/api/sectors`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(backendData)
@@ -479,7 +481,7 @@ const updateCornerPosition = async (sectorIndex, cornerIndex, newLatLng) => {
         coordinates: coordinatesDTO
       };
 
-      const response = await fetch(`${BACKEND_URL}/api/sectors/${updatedSectors[sectorIndex].backendId}`, {
+      const response = await authFetch(`${BACKEND_URL}/api/sectors/${updatedSectors[sectorIndex].backendId}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(sectorData)
@@ -1141,7 +1143,7 @@ const OrchardMapSystem = () => {
     setLoadError(null);
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/sectors`, {
+      const response = await authFetch(`${BACKEND_URL}/api/sectors`, {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -1204,7 +1206,7 @@ const handleSaveEditedSector = async (editedSector) => {
 
     console.log('Aktualizacja sektora w backendzie:', backendData);
 
-    const response = await fetch(`${BACKEND_URL}/api/sectors/${editedSector.backendId}`, {
+    const response = await authFetch(`${BACKEND_URL}/api/sectors/${editedSector.backendId}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(backendData)

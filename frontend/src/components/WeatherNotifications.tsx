@@ -4,6 +4,7 @@ import { Cloud, CloudRain, Sun, Wind, Droplets, Bell, BellOff, Plus, Trash2, Loa
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import { Link } from "react-router-dom";
 import {type NotificationRule, type ForecastAlert, type OpenMeteoCoordinates } from "../utils/common";
+import { authFetch } from '../utils/authFetch';
 
 
 interface CurrentWeather {
@@ -367,7 +368,7 @@ const WeatherNotifications: React.FC = () => {
         setWeatherError(null);
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/gardener/location`, {
+            const response = await authFetch(`${BACKEND_URL}/api/gardener/location`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
             });
@@ -439,7 +440,7 @@ const WeatherNotifications: React.FC = () => {
     const loadNotifications = useCallback(async () => {
     setIsLoadingNotifications(true);
     try {
-        const response = await fetch(`${BACKEND_URL}/api/weather-notifications`, {
+        const response = await authFetch(`${BACKEND_URL}/api/weather-notifications`, {
             method: 'GET',
             headers: getAuthHeaders()
         });
@@ -612,13 +613,13 @@ const checkWeatherAlerts = useCallback(async (coords: OpenMeteoCoordinates, rule
 
             let response;
             if (rule.backendId) {
-                response = await fetch(`${BACKEND_URL}/api/weather-notifications/${rule.backendId}`, {
+                response = await authFetch(`${BACKEND_URL}/api/weather-notifications/${rule.backendId}`, {
                     method: 'PUT',
                     headers: getAuthHeaders(),
                     body: JSON.stringify(backendData)
                 });
             } else {
-                response = await fetch(`${BACKEND_URL}/api/weather-notifications`, {
+                response = await authFetch(`${BACKEND_URL}/api/weather-notifications`, {
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify(backendData)
@@ -645,7 +646,7 @@ const checkWeatherAlerts = useCallback(async (coords: OpenMeteoCoordinates, rule
         if (!notification || !notification.backendId) return;
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/weather-notifications/${notification.backendId}/toggle`, {
+            const response = await authFetch(`${BACKEND_URL}/api/weather-notifications/${notification.backendId}/toggle`, {
                 method: 'PATCH',
                 headers: getAuthHeaders()
             });
@@ -670,7 +671,7 @@ const checkWeatherAlerts = useCallback(async (coords: OpenMeteoCoordinates, rule
         if (!notification || !notification.backendId) return;
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/weather-notifications/${notification.backendId}`, {
+            const response = await authFetch(`${BACKEND_URL}/api/weather-notifications/${notification.backendId}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import {Alert} from "../utils/common"; 
+import { authFetch } from '../utils/authFetch';
 
 const Modal = ({ isOpen, onClose, title, children, headerColor = 'bg-green-50' }) => {
     if (!isOpen) return null;
@@ -374,7 +375,7 @@ const AdvancePaySection = ({ employee, onAdvanceSave }) => {
         setError('');
         
         try {
-            const response = await fetch(`${BACKEND_URL}/api/advances/user/${employee.id}/unsettled`, {
+            const response = await authFetch(`${BACKEND_URL}/api/advances/user/${employee.id}/unsettled`, {
                 headers: getAuthHeaders()
             });
             
@@ -415,7 +416,7 @@ const AdvancePaySection = ({ employee, onAdvanceSave }) => {
 
         setIsSaving(true);
         try {
-            const response = await fetch(`${BACKEND_URL}/api/advances`, {
+            const response = await authFetch(`${BACKEND_URL}/api/advances`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify(payload)
@@ -446,7 +447,7 @@ const AdvancePaySection = ({ employee, onAdvanceSave }) => {
         setIsPayingOff(true);
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/advances/user/${employee.id}`, {
+            const response = await authFetch(`${BACKEND_URL}/api/advances/user/${employee.id}`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
             });
@@ -629,7 +630,7 @@ const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsSave }) 
         setPayPerKilogram('');
         
         try {
-            const response = await fetch(`${BACKEND_URL}/api/work-details/user/${employee.id}/latest`, {
+            const response = await authFetch(`${BACKEND_URL}/api/work-details/user/${employee.id}/latest`, {
                 headers: getAuthHeaders()
             });
             
@@ -692,7 +693,7 @@ const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsSave }) 
 
         setIsLoadingWorkDetails(true);
         try {
-            const response = await fetch(`${BACKEND_URL}/api/work-details`, {
+            const response = await authFetch(`${BACKEND_URL}/api/work-details`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify(payload)
@@ -938,7 +939,7 @@ export default function EmployeeManagement() {
         const endpoint = showArchived ? '/api/users/archived' : '/api/users/active';
         
         try {
-            const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+            const response = await authFetch(`${BACKEND_URL}${endpoint}`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
             });
@@ -960,7 +961,7 @@ export default function EmployeeManagement() {
 
     const fetchAllEmployeesForStats = useCallback(async () => {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/users`, {
+            const response = await authFetch(`${BACKEND_URL}/api/users`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
             });
@@ -1012,7 +1013,7 @@ export default function EmployeeManagement() {
         const method = isUpdate ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await authFetch(endpoint, {
                 method,
                 headers: getAuthHeaders(),
                 body: JSON.stringify(employeeData),
@@ -1043,7 +1044,7 @@ export default function EmployeeManagement() {
         const endpoint = `${BACKEND_URL}/api/users/${employeeId}/toggle-status`;
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await authFetch(endpoint, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
                 body: JSON.stringify({ active: newStatus }),

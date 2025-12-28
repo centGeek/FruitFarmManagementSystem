@@ -3,6 +3,8 @@ import { AlertCircle, Loader } from 'lucide-react';
 import { Link } from "react-router-dom";
 
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
+import { authFetch } from "../utils/authFetch";
+
 import {type NotificationRule, type ForecastAlert, type Alert, type OpenMeteoCoordinates } from "../utils/common";
 
 const NOTIFICATION_TYPES = {
@@ -158,7 +160,7 @@ export default function NotificationDashboard() {
   const fetchNotifications = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/notification`, {
+      const response = await authFetch(`${BACKEND_URL}/api/notification`, {
         method: 'GET',
         headers: getAuthHeaders(),
       });
@@ -190,7 +192,7 @@ export default function NotificationDashboard() {
   
   const loadWeatherNotifications = useCallback(async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/weather-notifications`, {
+      const response = await authFetch(`${BACKEND_URL}/api/weather-notifications`, {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -317,7 +319,7 @@ export default function NotificationDashboard() {
    const fetchGardenerLocation = useCallback(async () => {
     setWeatherError(null);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/gardener/location`, {
+      const response = await authFetch(`${BACKEND_URL}/api/gardener/location`, {
         method: 'GET',
         headers: getAuthHeaders(),
       });

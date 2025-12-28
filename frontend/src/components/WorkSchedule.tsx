@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Calendar, Clock, Users, DollarSign, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, X, Loader2 } from 'lucide-react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import { Alert } from "../utils/common";
+import { authFetch } from "../utils/authFetch";
+
 
 import ErrorPage from './ErrorPage'; 
 
@@ -736,7 +738,7 @@ export default function WorkEntryManagement() {
         try {
             const headers = getAuthHeaders();
             
-            const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+            const response = await authFetch(`${BACKEND_URL}${endpoint}`, {
                 method: 'GET',
                 headers: headers,
             });
@@ -765,7 +767,7 @@ export default function WorkEntryManagement() {
     console.log('[FETCH] Rozpoczynam pobieranie pracowników');
     try {
         const headers = getAuthHeaders();
-        const response = await fetch(`${BACKEND_URL}/api/users/active`, {
+        const response = await authFetch(`${BACKEND_URL}/api/users/active`, {
             method: 'GET',
             headers: headers,
         });
@@ -778,7 +780,7 @@ export default function WorkEntryManagement() {
             const employeesWithDetails = await Promise.all(
                 employeesData.map(async (emp) => {
                     try {
-                        const detailsResponse = await fetch(
+                        const detailsResponse = await authFetch(
                             `${BACKEND_URL}/api/work-details/user/${emp.id}/latest`,
                             { method: 'GET', headers: headers }
                         );
@@ -819,7 +821,7 @@ export default function WorkEntryManagement() {
     const fetchUnsettledAdvances = useCallback(async (userId) => {
         try {
             const headers = getAuthHeaders();
-            const response = await fetch(`${BACKEND_URL}/api/advances/user/${userId}/unsettled`, {
+            const response = await authFetch(`${BACKEND_URL}/api/advances/user/${userId}/unsettled`, {
                 method: 'GET',
                 headers: headers,
             });
@@ -870,7 +872,7 @@ export default function WorkEntryManagement() {
             console.log(`[FETCH] Pobieranie wpisów od ${startDateStr} do ${endDateStr}`);
             
             const headers = getAuthHeaders();
-            const response = await fetch(
+            const response = await authFetch(
                 `${BACKEND_URL}/api/work-entries/week?startDate=${startDateStr}&endDate=${endDateStr}`, 
                 {
                     method: 'GET',
@@ -973,7 +975,7 @@ export default function WorkEntryManagement() {
 
         try {
             const headers = getAuthHeaders();
-            const response = await fetch(`${BACKEND_URL}/api/work-entries`, {
+            const response = await authFetch(`${BACKEND_URL}/api/work-entries`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(entriesToSend),
@@ -1033,7 +1035,7 @@ export default function WorkEntryManagement() {
             console.log("📤 Wysyłam dane do API (Z USEREM):", JSON.stringify(entryToSend, null, 2));
             
             const headers = getAuthHeaders();
-            const response = await fetch(`${BACKEND_URL}/api/work-entries/${updatedEntry.entryId}`, {
+            const response = await authFetch(`${BACKEND_URL}/api/work-entries/${updatedEntry.entryId}`, {
                 method: 'PUT',
                 headers: headers,
                 body: JSON.stringify(entryToSend),
@@ -1077,7 +1079,7 @@ export default function WorkEntryManagement() {
         
         try {
             const headers = getAuthHeaders();
-            const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}`, {
+            const response = await authFetch(`${BACKEND_URL}/api/work-entries/${entryId}`, {
                 method: 'DELETE',
                 headers: headers,
             });
@@ -1136,7 +1138,7 @@ export default function WorkEntryManagement() {
 
     try {
         const headers = getAuthHeaders();
-        const response = await fetch(`${BACKEND_URL}/api/work-entries/${entryId}/paid`, {
+        const response = await authFetch(`${BACKEND_URL}/api/work-entries/${entryId}/paid`, {
             method: 'PATCH',
             headers: headers,
             body: JSON.stringify({ isPaid: newPaidStatus }),
@@ -1181,7 +1183,7 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
     try {
         const headers = getAuthHeaders();
         // Endpoint do płacenia za wszystko (i rozliczania zaliczek)
-        const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-all-and-settle`, { 
+        const response = await authFetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-all-and-settle`, { 
             method: 'PATCH',
             headers: headers,
         });
@@ -1245,7 +1247,7 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
     const fetchUnpaidEntriesForEmployee = useCallback(async (userId) => {
         try {
             const headers = getAuthHeaders();
-            const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/unpaid`, {
+            const response = await authFetch(`${BACKEND_URL}/api/work-entries/user/${userId}/unpaid`, {
                 method: 'GET',
                 headers: headers,
             });
@@ -1346,7 +1348,7 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
         try {
             const headers = getAuthHeaders();
             // Endpoint do płacenia za miesiąc (i rozliczania zaliczek)
-            const response = await fetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-month-and-settle`, { 
+            const response = await authFetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-month-and-settle`, { 
                 method: 'PATCH',
                 headers: headers,
             });
@@ -1439,7 +1441,7 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
 
         try {
             const headers = getAuthHeaders();
-            const response = await fetch(`${BACKEND_URL}/api/advances`, {
+            const response = await authFetch(`${BACKEND_URL}/api/advances`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify({ 

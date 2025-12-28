@@ -4,6 +4,7 @@ import BasicMap from '../utils/BasicMap';
 import LocationSearch from '../utils/LocationSearch';
 import {Alert} from '../utils/common';
 import { MapPin } from 'lucide-react';
+import { authFetch } from '../utils/authFetch';
 
 const InputField = React.memo(({ label, name, type = 'text', required = false, isPassword = false, error, isLoading, showPassword, setShowPassword, value, onChange, placeholder, disabled = false }) => (
     <div>
@@ -81,7 +82,7 @@ export default function GardenerProfile() {
         closeAlert();
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/gardener`, {
+            const response = await authFetch(`${BACKEND_URL}/api/gardener`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
             });
@@ -235,7 +236,7 @@ export default function GardenerProfile() {
         };
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/gardener`, {
+            const response = await authFetch(`${BACKEND_URL}/api/gardener`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
                 body: JSON.stringify(payload),

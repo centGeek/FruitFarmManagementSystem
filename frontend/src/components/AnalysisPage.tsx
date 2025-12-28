@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { LineChart, Line, PieChart, Pie, Treemap, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
+import { authFetch} from "../utils/authFetch";
+
 import { formatCurrency, Alert } from "../utils/common";
 
 const MONTH_OPTIONS = [
@@ -77,7 +79,7 @@ export default function ProfitAnalysis() {
             const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
             
             try {
-                const response = await fetch(url, { 
+                const response = await authFetch(url, { 
                     method: 'GET', 
                     headers: getAuthHeaders() 
                 });
@@ -119,7 +121,7 @@ export default function ProfitAnalysis() {
 
             const url = `${BACKEND_URL}/api/expenses/sector-labor-costs`; 
             try {
-                const response = await fetch(url, {
+                const response = await authFetch(url, {
                     method: 'GET',
                     headers: getAuthHeaders()
                 });
@@ -194,7 +196,7 @@ export default function ProfitAnalysis() {
         
         try {
             while (currentPage < totalPages) {
-                const response = await fetch(
+                const response = await authFetch(
                     `${BACKEND_URL}/api/profits?page=${currentPage}&size=100`,
                     { method: 'GET', headers: getAuthHeaders() }
                 );
@@ -219,7 +221,7 @@ export default function ProfitAnalysis() {
         
         try {
             while (currentPage < totalPages) {
-                const response = await fetch(
+                const response = await authFetch(
                     `${BACKEND_URL}/api/expenses?page=${currentPage}&size=100`,
                     { method: 'GET', headers: getAuthHeaders() }
                 );
@@ -239,7 +241,7 @@ export default function ProfitAnalysis() {
 
     const fetchSectors = async () => {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/sectors`, {
+            const response = await authFetch(`${BACKEND_URL}/api/sectors`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
             });

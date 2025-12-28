@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import {formatCurrency, Alert} from "../utils/common"
+import { authFetch } from '../utils/authFetch';
 
 const PROFIT_TYPES = [
   // Sprzedaż owoców
@@ -522,7 +523,7 @@ export default function ProfitManagement() {
         
         try {
             while (currentPage < totalPages) {
-                const response = await fetch(
+                const response = await authFetch(
                     `${BACKEND_URL}/api/profits?page=${currentPage}&size=100`,
                     { method: 'GET', headers: getAuthHeaders() }
                 );
@@ -545,7 +546,7 @@ export default function ProfitManagement() {
 
     const fetchSectors = useCallback(async () => {
         try {
-            const response = await fetch(`${BACKEND_URL}/api/sectors`, {
+            const response = await authFetch(`${BACKEND_URL}/api/sectors`, {
                 method: 'GET',
                 headers: getAuthHeaders(),
             });
@@ -577,7 +578,7 @@ export default function ProfitManagement() {
         const method = isUpdate ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await authFetch(endpoint, {
                 method,
                 headers: getAuthHeaders(),
                 body: JSON.stringify(profitData),
@@ -603,7 +604,7 @@ export default function ProfitManagement() {
         closeAlert();
         
         try {
-            const response = await fetch(`${BACKEND_URL}/api/profits/${profitId}`, {
+            const response = await authFetch(`${BACKEND_URL}/api/profits/${profitId}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders(),
             });

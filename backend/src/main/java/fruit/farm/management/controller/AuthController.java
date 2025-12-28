@@ -15,11 +15,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,7 +40,7 @@ public class AuthController {
 
         User user = (User) authentication.getPrincipal();
         Optional<UserEntity> userByNickname = userService.findByNickname(user.getUsername());
-        String token = jwtService.generateToken(
+        String token = jwtService.generateAccessToken(
                 userByNickname.get().getId(),
                 user.getUsername(),
                 user.getAuthorities()
@@ -51,11 +49,26 @@ public class AuthController {
                         .collect(Collectors.toList())
         );
 
-        Cookie cookie = new Cookie("token", token);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600);
+        String refreshToken = jwtService.generateRefreshToken(
+                userByNickname.get().getId(),
+                user.getUsername(), user.getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList())
+        );
 
+        Cookie cookie = new Cookie("accessToken", token);
+        cookie.setPath("/");
+        cookie.setMaxAge(3600
+        );
         response.addCookie(cookie);
+
+        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(7 * 24 * 60 * 60);
+        refreshCookie.setHttpOnly(true);
+
+        response.addCookie(refreshCookie);
 
         return ResponseEntity.ok(new AuthResponse(token, request.getNickname()));
     }
@@ -69,7 +82,7 @@ public class AuthController {
             );
 
             User user = (User) authentication.getPrincipal();
-            String token = jwtService.generateToken(
+            String token = jwtService.generateAccessToken(
                     savedUser.getId(),
                     user.getUsername(),
                     user.getAuthorities()
@@ -77,7 +90,7 @@ public class AuthController {
                             .map(GrantedAuthority::getAuthority)
                             .collect(Collectors.toList())
             );
-            Cookie cookie = new Cookie("token", token);
+            Cookie cookie = new Cookie("accessToken", token);
             cookie.setPath("/");
             cookie.setMaxAge(3600);
             response.addCookie(cookie);
@@ -93,13 +106,41 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
 
-        Cookie cookie = new Cookie("token", null);
+        Cookie cookie = new Cookie("accessToken", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         response.addCookie(cookie);
 
         return ResponseEntity.ok("Successfully logged out");
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@CookieValue(value = "refreshToken", required = false) String refreshToken,
+                                     HttpServletResponse response) {
+
+        if (refreshToken == null || !jwtService.validateToken(refreshToken) || !jwtService.isRefreshToken(refreshToken)) {
+            return ResponseEntity.status(401).body("Invalid or missing refresh token");
+        }
+
+        Long userId = jwtService.getIdFromToken(refreshToken);
+        String nickname = jwtService.getNicknameFromToken(refreshToken);
+        UserEntity user = userService.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String newAccessToken = jwtService.generateAccessToken(
+                user.getId(),
+                user.getNickname(),
+                List.of(user.getRole().getRoleName())
+        );
+
+        Cookie cookie = new Cookie("accessToken", newAccessToken);
+        cookie.setPath("/");
+        cookie.setMaxAge(15 * 60);
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(new AuthResponse(newAccessToken, nickname));
+    }
+
 
     @Data
     public static class AuthRequest {
