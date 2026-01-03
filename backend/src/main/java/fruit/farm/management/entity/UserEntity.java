@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "user_profile")
+@Entity(name = "user_profile_entity")
 @Getter
 @Setter
 public class UserEntity {

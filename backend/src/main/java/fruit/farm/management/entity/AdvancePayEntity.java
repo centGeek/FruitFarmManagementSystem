@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "advance_pay")
+@Table(name = "advance_pay_entity")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

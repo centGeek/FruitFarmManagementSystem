@@ -8,7 +8,7 @@ CREATE TABLE expense_entity
     is_paid      BOOLEAN        NOT NULL,
     user_id      BIGINT         NOT NULL,
     sector_id    BIGINT,
-    CONSTRAINT fk_expense_user FOREIGN KEY (user_id) REFERENCES user_profile (user_id),
+    CONSTRAINT fk_expense_user FOREIGN KEY (user_id) REFERENCES user_profile_entity (user_id),
     CONSTRAINT fk_expense_sector FOREIGN KEY (sector_id) REFERENCES sector_entity (sector_id) ON DELETE CASCADE
 
 );

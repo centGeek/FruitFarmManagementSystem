@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "user_credentials")
+@Entity(name = "user_credentials_entity")
 @Getter
 @Setter
 @ToString

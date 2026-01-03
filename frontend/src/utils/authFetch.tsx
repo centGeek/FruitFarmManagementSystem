@@ -16,14 +16,13 @@ const refreshAccessToken = async () => {
   try {
     const res = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
       method: 'POST',
-      credentials: 'include', // wysyła ciasteczka
+      credentials: 'include',
     });
 
     if (!res.ok) {
       throw new Error('Refresh failed');
     }
 
-    // backend ustawia nowe ciasteczko accessToken, nie musimy niczego zwracać
     return true;
   } catch (error) {
     console.error("Nie udało się odświeżyć tokenu:", error);

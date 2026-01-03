@@ -38,6 +38,7 @@ public class SectorService {
         sector.setUserEntity(userEntity);
         sector.setVariety(sectorDTO.getVariety());
         sector.setCoordinates(CoordinateMapper.mapToEntities(sectorDTO.getCoordinates(), sector));
+        sector.setIsActive(true);
 
         SectorEntity savedSector = sectorRepository.save(sector);
         notificationService.addSectorNotification(NotificationDTO.builder()
@@ -59,6 +60,7 @@ public class SectorService {
         sector.setDescription(sectorDTO.getDescription());
         sector.setPlantType(sectorDTO.getPlantType());
         sector.setVariety(sectorDTO.getVariety());
+        sector.setIsActive(sectorDTO.getIsActive());
 
         List<CoordinateEntity> coordsBefore = sector.getCoordinates();
         List<CoordinateEntity> coordsAfter = new ArrayList<>();
@@ -82,8 +84,14 @@ public class SectorService {
         return convertToDTO(sector);
     }
 
-    public List<SectorDTO> getAllSectorsByUserId(long userId) {
-        return sectorRepository.findAllByUserId(userId).stream()
+    public List<SectorDTO> getAllActiveSectorsByUserId(long userId) {
+        return sectorRepository.findAllActiveByUserId(userId).stream()
+                .map(this::convertToDTO)
+                .toList();
+    }
+
+    public List<SectorDTO> getAllArchivedSectorsByUserId(long userId) {
+        return sectorRepository.findAllArchivedByUserId(userId).stream()
                 .map(this::convertToDTO)
                 .toList();
     }
@@ -96,7 +104,7 @@ public class SectorService {
         dto.setPlantType(sector.getPlantType());
         dto.setVariety(sector.getVariety());
         dto.setCreatedAt(sector.getCreatedAt());
-        ;
+
         return dto;
     }
 

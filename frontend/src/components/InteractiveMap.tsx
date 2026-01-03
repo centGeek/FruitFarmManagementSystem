@@ -818,7 +818,7 @@ if (drawingMode === 'polygon' && drawingPoints.length > 0) {
   </div>
   );
 }
-const EditSectorModal = ({ isOpen, onClose, sectorData, onSave }) => {
+const EditSectorModal = ({ isOpen, onClose, sectorData, onSave, onArchive }) => {
   const [editedSector, setEditedSector] = useState({
     id: null,
     backendId: null,
@@ -988,26 +988,43 @@ const EditSectorModal = ({ isOpen, onClose, sectorData, onSave }) => {
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3">
+            {/* Przycisk archiwizacji - osobno na górze */}
             <button
-              onClick={onClose}
+              onClick={() => {
+                if (onArchive) {
+                  onArchive(sectorData);
+                }
+              }}
               disabled={isLoading}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="w-full px-4 py-3 border-2 border-red-300 text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
             >
-              Anuluj
+              <Trash2 className="w-4 h-4" />
+              Archiwizuj sektor
             </button>
-            <button
-              onClick={handleSave}
-              disabled={isLoading || !editedSector.name.trim()}
-              className="flex-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 font-medium shadow-lg"
-            >
-              {isLoading ? (
-                <Loader className="w-4 h-4 animate-spin" />
-              ) : (
-                <Check className="w-4 h-4" />
-              )}
-              {isLoading ? 'Zapisywanie...' : 'Zapisz zmiany'}
-            </button>
+
+            {/* Przyciski Anuluj i Zapisz */}
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                disabled={isLoading}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Anuluj
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isLoading || !editedSector.name.trim()}
+                className="flex-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 font-medium shadow-lg"
+              >
+                {isLoading ? (
+                  <Loader className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" />
+                )}
+                {isLoading ? 'Zapisywanie...' : 'Zapisz zmiany'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1015,8 +1032,9 @@ const EditSectorModal = ({ isOpen, onClose, sectorData, onSave }) => {
   );
 };
 
-const SectorsList = ({ sectors, onRefresh, isLoading, onEditSector }) => {
-    if (sectors.length === 0) {
+const SectorsList = ({ sectors, archivedSectors, onRefresh, isLoading, onEditSector, onActivateSector }) => {
+    // Jeśli nie ma żadnych sektorów (ani aktywnych ani zarchiwizowanych)
+    if (sectors.length === 0 && archivedSectors.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-lg">
         <div className="flex justify-center gap-4 mb-4">
@@ -1042,60 +1060,54 @@ const SectorsList = ({ sectors, onRefresh, isLoading, onEditSector }) => {
     );
   }
 
-  return (
-  <div className="bg-white rounded-lg shadow-lg p-6">
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-2xl font-semibold">Zdefiniowane sektory</h2>
-      <button
-        onClick={onRefresh}
-        disabled={isLoading}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-        title="Odśwież dane z serwera"
-      >
-        <Loader className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-        Odśwież
-      </button>
-    </div>
-
-    <div className="grid gap-4">
-      {sectors.map((sector) => {
-        const cropTypeData = CROP_TYPES.find(c => c.value === sector.cropType);
-        const varietyData = cropTypeData?.varieties.find(v => v.value === sector.variety);
-        
-        return (
-          <div key={sector.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nazwa sektora
-                </label>
-                <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
-                  {sector.name}
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rodzaj uprawy
-                </label>
-                <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
-                  {cropTypeData ? cropTypeData.label : (sector.cropType || 'Nie określono')}
-                </div>
-              </div>
+  // Funkcja pomocnicza do renderowania jednej karty sektora
+  const renderSectorCard = (sector, isActive = false) => {
+    const cropTypeData = CROP_TYPES.find(c => c.value === sector.cropType);
+    const varietyData = cropTypeData?.varieties.find(v => v.value === sector.variety);
+    
+    return (
+      <div key={sector.id} className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${isActive ? 'border-gray-300 bg-gray-50 opacity-75' : 'border-gray-200'}`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nazwa sektora {isActive && <span className="text-gray-500">(Zarchiwizowany)</span>}
+            </label>
+            <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
+              {sector.name}
             </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Rodzaj uprawy
+            </label>
+            <div className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-800">
+              {cropTypeData ? cropTypeData.label : (sector.cropType || 'Nie określono')}
+            </div>
+          </div>
+        </div>
 
-            {sector.variety && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Odmiana
-                </label>
-                <div className="block text-sm font-medium text-gray-700 mb-1">
-                  🌱 {varietyData ? varietyData.label : sector.variety}
-                </div>
-              </div>
-            )}
+        {sector.variety && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Odmiana
+            </label>
+            <div className="block text-sm font-medium text-gray-700 mb-1">
+              🌱 {varietyData ? varietyData.label : sector.variety}
+            </div>
+          </div>
+        )}
 
-            <div className="mt-4 flex items-center justify-between gap-4">
+        <div className="mt-4 flex items-center justify-between gap-4">
+          {isActive ? (
+            <button
+              onClick={() => onActivateSector(sector)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+            >
+              <Check className="w-4 h-4" />
+              Aktywuj ponownie
+            </button>
+          ) : (
             <button
               onClick={() => onEditSector(sector)}
               className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
@@ -1103,46 +1115,84 @@ const SectorsList = ({ sectors, onRefresh, isLoading, onEditSector }) => {
               <Edit3 className="w-4 h-4" />
               Edytuj sektor
             </button>
+          )}
 
-            {sector.corners && sector.corners.length > 0 && (
-              <details className="text-xs">
-                <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  Współrzędne GPS
-                </summary>
-                <div className="absolute right-0 mt-2 bg-white p-3 rounded-lg border border-gray-200 shadow-lg z-10 max-h-40 overflow-y-auto min-w-64">
-                  <div className="space-y-1 font-mono text-xs">
-                    {sector.corners.map((corner, idx) => (
-                      <div key={idx} className="flex justify-between gap-4">
-                        <span className="text-gray-600">Punkt {idx + 1}:</span>
-                        <span className="text-gray-800">
-                          {corner[0].toFixed(6)}, {corner[1].toFixed(6)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+          {sector.corners && sector.corners.length > 0 && (
+            <details className="text-xs">
+              <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                <MapPin className="w-4 h-4" />
+                Współrzędne GPS
+              </summary>
+              <div className="absolute right-0 mt-2 bg-white p-3 rounded-lg border border-gray-200 shadow-lg z-10 max-h-40 overflow-y-auto min-w-64">
+                <div className="space-y-1 font-mono text-xs">
+                  {sector.corners.map((corner, idx) => (
+                    <div key={idx} className="flex justify-between gap-4">
+                      <span className="text-gray-600">Punkt {idx + 1}:</span>
+                      <span className="text-gray-800">
+                        {corner[0].toFixed(6)}, {corner[1].toFixed(6)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              </details>
-            )}
+              </div>
+            </details>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Główny return komponentu
+  return (
+    <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-semibold">Zdefiniowane sektory</h2>
+        <button
+          onClick={onRefresh}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          title="Odśwież dane z serwera"
+        >
+          <Loader className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Odśwież
+        </button>
+      </div>
+
+      {/* SEKCJA 1: Aktywne sektory */}
+      {sectors.length > 0 && (
+        <div className="grid gap-4 mb-6">
+          {sectors.map((sector) => renderSectorCard(sector, false))}
+        </div>
+      )}
+
+      {/* SEKCJA 2: Zarchiwizowane sektory (NOWA SEKCJA) */}
+      {archivedSectors.length > 0 && (
+        <div className="mt-8 pt-6 border-t border-gray-300">
+          <h3 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-gray-500" />
+            Sektory zarchiwizowane ({archivedSectors.length})
+          </h3>
+          <div className="grid gap-4">
+            {archivedSectors.map((sector) => renderSectorCard(sector, true))}
           </div>
-          </div>
-        );
-      })}
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
 };
 
 const OrchardMapSystem = () => {
   const [sectors, setSectors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [archivedSectors, setArchivedSectors] = useState([]);
   const [editSectorModal, setEditSectorModal] = useState({ isOpen: false, sectorData: null });
   const loadSectorsFromBackend = useCallback(async () => {
     setIsLoading(true);
     setLoadError(null);
     
     try {
+      // CZĘŚĆ 1: Ładuj aktywne sektory (TO JUŻ BYŁO)
       const response = await authFetch(`${BACKEND_URL}/api/sectors`, {
         method: 'GET',
         headers: getAuthHeaders()
@@ -1168,6 +1218,30 @@ const OrchardMapSystem = () => {
       }));
 
       setSectors(mappedSectors);
+
+      const archivedResponse = await authFetch(`${BACKEND_URL}/api/sectors/archived`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+
+      if (archivedResponse.ok) {
+        const archivedBackendSectors = await archivedResponse.json();
+        console.log('Załadowano zarchiwizowane sektory:', archivedBackendSectors);
+
+        const mappedArchivedSectors = archivedBackendSectors.map(sector => ({
+          id: Date.now() + Math.random(),
+          backendId: sector.id,
+          name: sector.description || `Sektor ${sector.id}`,
+          cropType: sector.plantType || '',
+          variety: sector.variety || '',
+          corners: sector.coordinates?.map(coord => [
+            coord.latitude,
+            coord.longitude
+          ]) || []
+        }));
+
+        setArchivedSectors(mappedArchivedSectors.reverse());
+      }
       
     } catch (error) {
       console.error('❌ Błąd podczas ładowania sektorów:', error);
@@ -1231,6 +1305,104 @@ const handleSaveEditedSector = async (editedSector) => {
   } catch (error) {
     console.error('Błąd podczas aktualizacji sektora:', error);
     alert(`Nie udało się zaktualizować sektora: ${error.message}`);
+  }
+};
+
+const handleActivateSector = async (sector) => {
+    try {
+        if (!sector.backendId) {
+            alert('Brak ID backendu - nie można aktywować tego sektora');
+            return;
+        }
+
+        const coordinatesDTO = sector.corners.map(corner => ({
+            latitude: corner[0],
+            longitude: corner[1]
+        }));
+
+        const backendData = {
+            id: sector.backendId,
+            description: sector.name,
+            plantType: sector.cropType || null,
+            variety: sector.variety || null,
+            coordinates: coordinatesDTO,
+            isActive: true
+        };
+
+        console.log('Aktywacja sektora w backendzie:', backendData);
+
+        const response = await authFetch(`${BACKEND_URL}/api/sectors/${sector.backendId}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(backendData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        console.log('Sektor aktywowany w backendzie');
+
+        // Przeładuj listy sektorów
+        await loadSectorsFromBackend();
+        alert('Sektor został pomyślnie aktywowany!');
+        
+    } catch (error) {
+        console.error('Błąd podczas aktywacji sektora:', error);
+        alert(`Nie udało się aktywować sektora: ${error.message}`);
+    }
+};
+
+const handleArchiveSector = async (sector) => {
+  if (!window.confirm(`Czy na pewno chcesz zarchiwizować sektor "${sector.name}"?`)) {
+    return;
+  }
+
+  try {
+    if (!sector.backendId) {
+      alert('Brak ID backendu - nie można zarchiwizować tego sektora');
+      return;
+    }
+
+    const coordinatesDTO = sector.corners.map(corner => ({
+      latitude: corner[0],
+      longitude: corner[1]
+    }));
+
+    const backendData = {
+      id: sector.backendId,
+      description: sector.name,
+      plantType: sector.cropType || null,
+      variety: sector.variety || null,
+      coordinates: coordinatesDTO,
+      isActive: false
+    };
+
+    console.log('Archiwizacja sektora w backendzie:', backendData);
+
+    const response = await authFetch(`${BACKEND_URL}/api/sectors/${sector.backendId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(backendData)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    console.log('Sektor zarchiwizowany w backendzie');
+
+    // Zamknij modal edycji jeśli jest otwarty
+    setEditSectorModal({ isOpen: false, sectorData: null });
+
+    // Przeładuj listy sektorów
+    await loadSectorsFromBackend();
+    
+  } catch (error) {
+    console.error('Błąd podczas archiwizacji sektora:', error);
+    alert(`Nie udało się zarchiwizować sektora: ${error.message}`);
   }
 };
 
@@ -1308,10 +1480,12 @@ const handleSaveEditedSector = async (editedSector) => {
 
       <SectorsList 
         sectors={sectors}
+        archivedSectors={archivedSectors}
         onSectorsChange={setSectors}
         onRefresh={loadSectorsFromBackend}
         isLoading={isLoading}
         onEditSector={handleEditSector}
+        onActivateSector={handleActivateSector}
       />
 
       <EditSectorModal
@@ -1319,6 +1493,7 @@ const handleSaveEditedSector = async (editedSector) => {
         onClose={() => setEditSectorModal({ isOpen: false, sectorData: null })}
         sectorData={editSectorModal.sectorData}
         onSave={handleSaveEditedSector}
+        onArchive={handleArchiveSector}
       />
     </div>
   );

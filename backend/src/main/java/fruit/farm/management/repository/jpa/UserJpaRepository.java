@@ -13,35 +13,35 @@ import java.util.Optional;
 public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
 
     @Query("""
-            select usr from user_profile usr where usr.nickname =:nickname
+            select usr from user_profile_entity usr where usr.nickname =:nickname
              """)
     Optional<UserEntity> findByNickname(@Param("nickname") String nickname);
 
     @Query("""
-            select usr from user_profile usr where usr.role.roleName =:roleName
+            select usr from user_profile_entity usr where usr.role.roleName =:roleName
              """)
     List<UserEntity> getAllUsersByRoleName(@Param("roleName") String roleName);
 
 
     @Query("""
-            select usr from user_profile usr where usr.isActive = false
+            select usr from user_profile_entity usr where usr.isActive = false
             and usr.role.roleName = "Employee" and usr.gardener.id =:gardenerId
              """)
     List<UserEntity> getAllArchivedEmployees(@Param("gardenerId") long gardenerId);
 
     @Query("""
-            select usr from user_profile usr where usr.isActive = true
+            select usr from user_profile_entity usr where usr.isActive = true
             and usr.role.roleName = "Employee" and usr.gardener.id =:gardenerId
              """)
     List<UserEntity> getAllActiveEmployees(@Param("gardenerId") long gardenerId);
 
     @Query("""
-            select usr from user_profile usr
+            select usr from user_profile_entity usr
              """)
     List<UserEntity> getAll();
 
     @Query("""
-            select usr from user_profile usr where usr.role.roleName = "Employee"
+            select usr from user_profile_entity usr where usr.role.roleName = "Employee"
             and usr.gardener.id =:gardenerId
              """)
     List<UserEntity> getAllEmployees(@Param("gardenerId") long gardenerId);

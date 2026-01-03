@@ -32,6 +32,8 @@ public class SectorDTO {
 
     private LocalDate createdAt;
 
+    private Boolean isActive;
+
     public SectorDTO() {}
 
     public SectorDTO(String description, PlantType plantType, String variety, List<CoordinateDTO> coordinates) {
@@ -42,13 +44,14 @@ public class SectorDTO {
     }
 
     public SectorDTO(Long id, String description, PlantType plantType, String variety,
-                     List<CoordinateDTO> coordinates, LocalDate createdAt) {
+                     List<CoordinateDTO> coordinates, LocalDate createdAt, boolean isActive) {
         this.id = id;
         this.description = description;
         this.plantType = plantType;
         this.coordinates = coordinates;
         this.createdAt = createdAt;
         this.variety = variety;
+        this.isActive = isActive;
     }
 
     @Override

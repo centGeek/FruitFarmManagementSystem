@@ -1,6 +1,5 @@
 package fruit.farm.management.security;
 
-import fruit.farm.management.config.OrchardDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

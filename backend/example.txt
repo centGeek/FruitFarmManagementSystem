@@ -1,0 +1,33 @@
+ const filteredEmployees = useMemo(() => {
+    let list = employees;
+    if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        list = list.filter(emp =>
+            (emp.name?.toLowerCase().includes(term)) ||
+            (emp.surname?.toLowerCase().includes(term)) ||
+            (emp.nickname?.toLowerCase().includes(term)) ||
+            (emp.email?.toLowerCase().includes(term)) ||
+            (emp.phoneNumber?.includes(term))
+        );
+    }
+    return list;
+}, [employees, searchTerm]);
+
+
+
+
+const handlePageChange = useCallback((newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+        setCurrentPage(newPage);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}, [totalPages]);
+
+export const Alert = React.memo(({ type, message, onClose }) => {
+    // Komponent wyświetla komunikat alertu.
+    // Renderowany jest tylko, gdy istnieje treść wiadomości.
+    // Kolory alertu są dobierane na podstawie typu komunikatu.
+    // React.memo zapobiega ponownemu renderowaniu, jeśli propsy się nie zmienią.
+});
+
+

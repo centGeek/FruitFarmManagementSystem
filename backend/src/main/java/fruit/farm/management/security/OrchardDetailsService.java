@@ -1,4 +1,4 @@
-package fruit.farm.management.config;
+package fruit.farm.management.security;
 
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.UserEntity;

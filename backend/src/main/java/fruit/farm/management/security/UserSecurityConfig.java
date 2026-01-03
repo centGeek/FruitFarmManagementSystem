@@ -1,6 +1,5 @@
 package fruit.farm.management.security;
 
-import fruit.farm.management.config.OrchardDetailsService;
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.repository.UserRepository;

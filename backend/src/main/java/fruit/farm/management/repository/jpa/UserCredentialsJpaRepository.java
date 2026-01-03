@@ -12,7 +12,7 @@ public interface UserCredentialsJpaRepository extends JpaRepository<UserCredenti
 
     @Modifying
     @Transactional
-    @Query("UPDATE user_credentials uc SET uc.passwordHash = :passwordHash WHERE uc.user.id = :userId")
+    @Query("UPDATE user_credentials_entity uc SET uc.passwordHash = :passwordHash WHERE uc.user.id = :userId")
     void update(@Param("userId") long userId, @Param("passwordHash") String passwordHash
     );
 }

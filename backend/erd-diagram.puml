@@ -1,54 +1,153 @@
 @startuml
-
-class UserEntity {
-    -Long id
-    -String name
-    -String surname
-    -String nickname
-    -String phoneNumber
-    -String email
-    -String password
-    -boolean active
+skinparam linetype ortho 
+entity role_entity {
+    role_id : serial <<PK>>
+    --
+    role_name : varchar(64)
 }
 
-class RoleEntity {
-    -Long id
-    -String roleName
-    -String description
+class user_profile_entity {
+    user_id : serial <<PK>>
+    --
+    name : varchar(64)
+    surname : varchar(64)
+    nickname : varchar(64)
+    phone_number : varchar(64)
+    email : varchar(255)
+    creation_date : date
+    role_id : int <<FK>>
+    is_active : boolean
+    gardener_id : int <<FK>>
+    coordinate_id : int
+    locality_name : varchar(64)
 }
 
-class ProductEntity {
-    -Long id
-    -String name
-    -ProductType type
-    -LocalDate purchaseDate
-    -Double price
-    -int userId
+entity user_credentials_entity {
+    credential_id : serial <<PK>>
+    --
+    user_id : int <<FK>>
+    password_hash : varchar(255)
 }
 
-class WeatherAlert {
-    -Long id
-    -String title
-    -String description
-    -LocalDateTime alertDate
-    -boolean read
-    -String location
+entity sector_entity {
+    sector_id : serial <<PK>>
+    --
+    plant_type : varchar(50)
+    plant_variety : varchar(50)
+    description : text
+    created_at : date
+    user_id : serial <<FK>>
+    is_active : boolean
 }
 
-enum ProductType {
-    TRACTOR
-    SPRAYING
-    FUEL
-    FRUIT_TREES
-    ELECTRICITY
-    WATER
-    OTHER
+entity expense_entity {
+    expense_id : serial <<PK>>
+    --
+    product_type : varchar(50)
+    expense_cost : decimal(19,2)
+    description : text
+    created_at : date
+    is_paid : boolean
+    user_id : serial <<FK>>
+    sector_id : serial <<FK>>
 }
 
+entity coordinate_entity {
+    coordinate_id : serial <<PK>>
+    --
+    latitude : double precision
+    longitude : double precision
+    sector_id : serial <<FK>>
+}
 
-UserEntity --> RoleEntity : "many-to-one"
-UserEntity "1" --> "*" ProductEntity : "owns"
-UserEntity "1" --> "*" WeatherAlert : "receives"
-ProductEntity --> ProductType : "enum"
+entity profit_entity {
+    purchase_id : serial <<PK>>
+    --
+    profit_type : varchar(50)
+    kilograms_sold : numeric(10,2)
+    profit : numeric(15,2)
+    description : text
+    created_at : date
+    received : boolean
+    user_id : serial <<FK>>
+    sector_id : serial <<FK>>
+}
+
+entity work_entry_entity {
+    entry_id : serial <<PK>>
+    --
+    user_id : int <<FK>>
+    sector_id : int <<FK>>
+    work_date : date
+    duration : int
+    work_type : text
+    description : text
+    created_at : timestamp
+    day_salary : numeric(10,2)
+    kilograms_picked : int
+    is_paid : boolean
+}
+
+entity notifications_entity {
+    id : serial <<PK>>
+    --
+    notification_type : varchar(50)
+    title : varchar(100)
+    message : varchar(2000)
+    created_at : timestamp
+    user_id : int <<FK>>
+}
+
+entity work_details_entity {
+    id : serial <<PK>>
+    --
+    is_paid_hourly : boolean
+    hourly_pay : numeric(10,2)
+    pay_per_kilogram : numeric(10,2)
+    created_at : timestamp
+    user_id : serial <<FK>>
+}
+
+entity weather_notifications_entity {
+    id : serial <<PK>>
+    --
+    user_id : serial <<FK>>
+    weather_notification_type : varchar(50)
+    threshold : double precision
+    days_ahead : int
+    enabled : boolean
+    created_at : timestamp
+    updated_at : timestamp
+    last_triggered_at : timestamp
+}
+
+entity advance_pay_entity {
+    id : bigserial <<PK>>
+    --
+    user_id : serial <<FK>>
+    amount : numeric(10,2)
+    description : varchar(500)
+    created_at : timestamp
+    is_settled : boolean
+}
+
+role_entity ||--o{ user_profile_entity : "role_id"
+
+user_profile_entity "1" o--o{ user_profile_entity : "gardener_id"
+
+user_profile_entity ||--|| user_credentials_entity : "user_id"
+user_profile_entity ||--o{ sector_entity : "user_id"
+user_profile_entity ||--o{ expense_entity : "user_id"
+user_profile_entity ||--o{ profit_entity : "user_id"
+user_profile_entity ||--o{ work_entry_entity : "user_id"
+user_profile_entity ||--o{ notifications_entity : "user_id"
+user_profile_entity ||--o{ work_details_entity : "user_id"
+user_profile_entity ||--o{ weather_notifications_entity : "user_id"
+user_profile_entity ||--o{ advance_pay_entity : "user_id"
+
+sector_entity ||--o{ expense_entity : "sector_id"
+sector_entity ||--o{ coordinate_entity : "sector_id"
+sector_entity ||--o{ profit_entity : "sector_id"
+sector_entity ||--o{ work_entry_entity : "sector_id"
 
 @enduml

@@ -1,4 +1,4 @@
-CREATE TABLE user_profile
+CREATE TABLE user_profile_entity
 (
     user_id       SERIAL PRIMARY KEY,
     name          VARCHAR(64) NOT NULL,
@@ -14,16 +14,16 @@ CREATE TABLE user_profile
     locality_name VARCHAR(64),
     CONSTRAINT fk_role
         FOREIGN KEY (role_id)
-            REFERENCES role (role_id)
+            REFERENCES role_entity (role_id)
 );
 
-CREATE TABLE user_credentials
+CREATE TABLE user_credentials_entity
 (
     credential_id SERIAL PRIMARY KEY,
     user_id       INT          NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     CONSTRAINT fk_user
         FOREIGN KEY (user_id)
-            REFERENCES user_profile (user_id)
+            REFERENCES user_profile_entity (user_id)
             ON DELETE CASCADE
 );

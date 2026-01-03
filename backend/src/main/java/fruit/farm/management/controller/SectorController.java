@@ -26,7 +26,6 @@ public class SectorController {
     public ResponseEntity<SectorDTO> createSector(@Valid @RequestBody SectorDTO sectorDTO) {
 
         try {
-            sectorDTO.setId(System.currentTimeMillis());
             SectorDTO sector = sectorService.createSector(sectorDTO, userService.getLoggedUser());
             log.info("Sector created with ID: {} and description: {}", sector.getId(), sector.getDescription());
             return ResponseEntity.status(HttpStatus.CREATED).body(sectorDTO);
@@ -54,7 +53,7 @@ public class SectorController {
         List<SectorDTO> sectorDTOS;
         try {
                 Long currentUserId = userService.getLoggedUser().getId();
-            sectorDTOS = sectorService.getAllSectorsByUserId(currentUserId);
+            sectorDTOS = sectorService.getAllActiveSectorsByUserId(currentUserId);
         } catch (Exception e) {
             log.error("Error getting all sectors", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -62,33 +61,17 @@ public class SectorController {
         return ResponseEntity.ok(sectorDTOS);
     }
 
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteSector(@PathVariable Long id) {
-//        log.info("Received DELETE request for sector ID: {}", id);
-//
-//        try {
-//            log.info("Sector deleted (mock): {}", id);
-//            return ResponseEntity.noContent().build();
-//        } catch (Exception e) {
-//            log.error("Error deleting sector", e);
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        }
-//    }
+    @GetMapping("/archived")
+    public ResponseEntity<List<SectorDTO>> getAllArchivedSectorsByUserId() {
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<SectorDTO> getSector(@PathVariable Long id) {
-//        log.info("Received GET request for sector ID: {}", id);
-//
-//        try {
-//            sectorService.getAllSectors()
-//            SectorDTO mockSector = new SectorDTO();
-//            mockSector.setId(id);
-//            mockSector.setDescription("Mock Sector");
-//            return ResponseEntity.ok(mockSector);
-//
-//        } catch (Exception e) {
-//            log.error("Error getting sector", e);
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
+        List<SectorDTO> sectorDTOS;
+        try {
+                Long currentUserId = userService.getLoggedUser().getId();
+            sectorDTOS = sectorService.getAllArchivedSectorsByUserId(currentUserId);
+        } catch (Exception e) {
+            log.error("Error getting all sectors", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.ok(sectorDTOS);
+    }
 }

@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface RoleJpaRepository extends JpaRepository<RoleEntity, Long> {
 
     @Query("""
-            select r from role r where r.roleName =:roleName
+            select r from role_entity r where r.roleName =:roleName
              """)
     Optional<RoleEntity> findByRoleName(@Param("roleName") String roleName);
 }

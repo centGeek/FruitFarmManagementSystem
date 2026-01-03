@@ -11,7 +11,7 @@ CREATE TABLE profit_entity
     sector_id      BIGINT,
     CONSTRAINT fk_profit_user
         FOREIGN KEY (user_id)
-            REFERENCES user_profile (user_id)
+            REFERENCES user_profile_entity (user_id)
             ON DELETE SET NULL,
     CONSTRAINT fk_profit_sector
         FOREIGN KEY (sector_id)

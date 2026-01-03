@@ -59,8 +59,8 @@ public class AuthController {
 
         Cookie cookie = new Cookie("accessToken", token);
         cookie.setPath("/");
-        cookie.setMaxAge(3600
-        );
+        cookie.setMaxAge(3600);
+        cookie.setHttpOnly(true);
         response.addCookie(cookie);
 
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
@@ -110,6 +110,11 @@ public class AuthController {
         cookie.setMaxAge(0);
         cookie.setPath("/");
         response.addCookie(cookie);
+
+        Cookie refreshToken = new Cookie("refreshToken", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(refreshToken);
 
         return ResponseEntity.ok("Successfully logged out");
     }

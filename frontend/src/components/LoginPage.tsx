@@ -190,23 +190,6 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="rememberMe"
-                    name="rememberMe"
-                    type="checkbox"
-                    checked={formData.rememberMe}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                    disabled={isLoading}
-                  />
-                  <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-700">
-                    Zapamiętaj mnie
-                  </label>
-                </div>
-              </div>
-
               <button
                 type="button"
                 onClick={handleSubmit}
@@ -260,15 +243,6 @@ export default function LoginPage() {
                 </div>
               </div>
             ))}
-          </div>
-          
-          <div className="mt-12 p-6 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/20">
-            <p className="text-sm text-green-100 italic">
-              "OrchardManager zwiększył efektywność naszego gospodarstwa o 35% dzięki lepszemu planowaniu i monitorowaniu procesów."
-            </p>
-            <p className="text-white font-medium mt-2">
-              — Jacek Centkowski, Gospodarstwo Sadownicze Lutkówka
-            </p>
           </div>
         </div>
       </div>

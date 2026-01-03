@@ -6,5 +6,6 @@ CREATE TABLE sector_entity
     description TEXT,
     created_at  DATE,
     user_id     BIGINT,
-    CONSTRAINT fk_sector_user FOREIGN KEY (user_id) REFERENCES user_profile (user_id)
+    is_active   BOOLEAN NOT NULL,
+    CONSTRAINT fk_sector_user FOREIGN KEY (user_id) REFERENCES user_profile_entity (user_id)
 );

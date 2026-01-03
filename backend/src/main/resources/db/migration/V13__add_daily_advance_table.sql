@@ -1,6 +1,6 @@
-CREATE TABLE advance_pay
+CREATE TABLE advance_pay_entity
 (
-    id          BIGSERIAL PRIMARY KEY,
+    id          serial PRIMARY KEY,
     user_id     BIGINT         NOT NULL,
     amount      NUMERIC(10, 2) NOT NULL,
     description VARCHAR(500),
@@ -9,5 +9,5 @@ CREATE TABLE advance_pay
 
     CONSTRAINT fk_advance_pay_user
         FOREIGN KEY (user_id)
-            REFERENCES user_profile (user_id)
+            REFERENCES user_profile_entity (user_id)
 );

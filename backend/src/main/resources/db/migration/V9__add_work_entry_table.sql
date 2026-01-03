@@ -1,4 +1,4 @@
-CREATE TABLE work_entry
+CREATE TABLE work_entry_entity
 (
     entry_id         SERIAL PRIMARY KEY,
     user_id          INT  NOT NULL,
@@ -9,13 +9,13 @@ CREATE TABLE work_entry
     description      TEXT,
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     day_salary       NUMERIC(10, 2),
-    kilograms_picked BIGINT,
+    kilograms_picked int,
     is_paid          boolean   DEFAULT FALSE,
 
 
     CONSTRAINT fk_entry_user
         FOREIGN KEY (user_id)
-            REFERENCES user_profile (user_id),
+            REFERENCES user_profile_entity (user_id),
 
     CONSTRAINT fk_entry_sector
         FOREIGN KEY (sector_id)

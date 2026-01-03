@@ -10,11 +10,12 @@ public class SectorMapper {
 
     public static SectorEntity mapFromDTO(SectorDTO sectorDTO, UserDTO userDTO) {
         return new SectorEntity(sectorDTO.getId(), sectorDTO.getPlantType(), sectorDTO.getVariety(), sectorDTO.getDescription(),
-                sectorDTO.getCreatedAt(), CoordinateMapper.mapToEntities(sectorDTO.getCoordinates(), null),
+                sectorDTO.getCreatedAt(), sectorDTO.getIsActive(), CoordinateMapper.mapToEntities(sectorDTO.getCoordinates(), null),
                 UserMapper.mapToEntity(userDTO, null));
     }
     public static SectorDTO mapToDTO(SectorEntity sectorEntity) {
         return new SectorDTO(sectorEntity.getSectorId(), sectorEntity.getDescription(), sectorEntity.getPlantType(),
-                sectorEntity.getVariety(), CoordinateMapper.mapFromEntities(sectorEntity.getCoordinates(), null), sectorEntity.getCreatedAt());
+                sectorEntity.getVariety(), CoordinateMapper.mapFromEntities(sectorEntity.getCoordinates(),
+                null), sectorEntity.getCreatedAt(), sectorEntity.getIsActive());
     }
 }

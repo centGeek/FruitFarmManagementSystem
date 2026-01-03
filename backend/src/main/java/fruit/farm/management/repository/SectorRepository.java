@@ -5,7 +5,6 @@ import fruit.farm.management.repository.jpa.SelectorJpaRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +30,11 @@ public class SectorRepository {
         return sectorJpaRepository.findAll();
     }
 
-    public List<SectorEntity> findAllByUserId(long userId) {
-        return sectorJpaRepository.findAllByUserId(userId);
+    public List<SectorEntity> findAllActiveByUserId(long userId) {
+        return sectorJpaRepository.findAllActiveByUserId(userId);
+    }
+
+    public List<SectorEntity> findAllArchivedByUserId(long userId) {
+        return sectorJpaRepository.findAllArchivedByUserId(userId);
     }
 }

@@ -197,4 +197,43 @@ public class EmployeeController {
                     .body(Map.of("error", "Failed to get user: " + e.getMessage()));
         }
     }
+
+    @PutMapping("/{id}/toggle-status")
+    public ResponseEntity<Map<String, String>> toggleUserStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, Boolean> statusRequest) {
+        log.info("Attempting to toggle status for user with ID: {}", id);
+        try {
+            Optional<UserEntity> optionalUser = userService.findById(id);
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "User not found with ID: " + id));
+            }
+
+            UserEntity user = optionalUser.get();
+            Boolean newStatus = statusRequest.get("active");
+
+            if (newStatus == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Active status is required"));
+            }
+
+            user.setActive(newStatus);
+            UserEntity updatedUser = userService.save(user);
+
+            String action = newStatus ? "activated" : "archived";
+            log.info("User {} {} successfully", user.getNickname(), action);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "User status updated successfully",
+                    "id", id.toString(),
+                    "nickname", updatedUser.getNickname(),
+                    "active", newStatus.toString()
+            ));
+        } catch (Exception e) {
+            log.error("Error toggling user status: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Status update failed: " + e.getMessage()));
+        }
+    }
 }

@@ -33,6 +33,9 @@ public class SectorEntity {
     @Column(name = "created_at")
     private LocalDate createdAt;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     @OneToMany(mappedBy = "sector", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CoordinateEntity> coordinates;
 
