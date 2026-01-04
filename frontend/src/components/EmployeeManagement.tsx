@@ -990,10 +990,7 @@ export default function EmployeeManagement() {
                 (emp.surname?.toLowerCase().includes(term)) ||
                 (emp.nickname?.toLowerCase().includes(term)) ||
                 (emp.email?.toLowerCase().includes(term)) ||
-                (emp.phoneNumber?.includes(term)) ||
-                (emp.role?.name?.toLowerCase().includes(term)) ||
-                (emp.role?.roleName?.toLowerCase().includes(term)) ||
-                (emp.id?.toString().includes(term))
+                (emp.phoneNumber?.includes(term))
             );
         }
         return list;

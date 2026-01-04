@@ -293,12 +293,10 @@ export default function ProfitAnalysis() {
         return Array.from(years).sort((a, b) => b - a);
     }, [profits, expenses]);
 
-    // Statystyki ogólne
     const overallStats = useMemo(() => {
         let filteredProfits = profits;
         let filteredExpenses = expenses;
 
-        // Filtrowanie po roku
         if (selectedYear !== 'all') {
             const year = parseInt(selectedYear);
             filteredProfits = filteredProfits.filter(p => 
@@ -309,7 +307,6 @@ export default function ProfitAnalysis() {
             );
         }
 
-        // Filtrowanie po miesiącu
         if (selectedMonth) {
             const month = parseInt(selectedMonth);
             filteredProfits = filteredProfits.filter(p => 
@@ -323,7 +320,6 @@ export default function ProfitAnalysis() {
         const totalProfits = filteredProfits.reduce((sum, p) => sum + Number(p.profit), 0);
         const totalExpenses = filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
-        // Dodaj koszty pracownicze ze wszystkich sektorów
         const laborCosts = sectorLaborCosts && Object.keys(sectorLaborCosts).length > 0
             ? Object.values(sectorLaborCosts).reduce((sum, sector) => sum + Number(sector.totalCost || 0), 0)
             : 0;
@@ -341,7 +337,6 @@ export default function ProfitAnalysis() {
         };
     }, [profits, expenses, selectedYear, selectedMonth, sectorLaborCosts]);
 
-    // Dane dla wykresów kołowych
     const pieChartData = useMemo(() => {
         const sectorData = {};
         let noSectorRevenue = 0;
@@ -391,19 +386,13 @@ export default function ProfitAnalysis() {
             }
         });
 
-        // Dodaj koszty pracownicze do wydatków (proporcjonalnie lub całość do "Brak sektoru")
-        // Dodaj koszty pracownicze do wydatków właściwego sektora
-        // Dodaj koszty pracownicze dla każdego sektora
         if (sectorLaborCosts && Object.keys(sectorLaborCosts).length > 0) {
     Object.values(sectorLaborCosts).forEach(laborCost => {
         const cost = Number(laborCost.totalCost || 0);
         if (cost > 0) {
-            // Znajdź sektor w sectors array po ID
             const sector = sectors.find(s => s.id === laborCost.sectorId);
             if (sector) {
                 const sectorName = sector.description || `Sektor ${sector.id}`;
-                
-                // Znajdź sektor w sectorData po nazwie
                 const targetSector = Object.values(sectorData).find(
                     s => s.name === sectorName
                 );
@@ -1005,7 +994,6 @@ export default function ProfitAnalysis() {
                                                 </PieChart>
                                             </ResponsiveContainer>
                                         </div>
-                                        {/* Wykres odmian */}
                                         {/* Wykres odmian dla owoców */}
                                         {selectedProfitType && !selectedProfitType.includes('Koszty pracownicze') && varietyChartData.length > 0 && (
                                             <div className="border-l-4 border-blue-500 pl-8">

@@ -117,39 +117,41 @@ const getWeatherFromCode = (code: number): { description: string; icon: JSX.Elem
 
 const CurrentWeatherCard: React.FC<{ weather: CurrentWeather }> = ({ weather }) => {
     return (
-        <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-xl p-8 text-white">
-            <div className="flex items-center justify-between mb-6">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-lg p-5 text-white">
+            <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h2 className="text-3xl font-bold mb-2">{weather.location}</h2>
-                    <p className="text-blue-100 text-lg capitalize">{weather.description}</p>
-                    <p className="text-blue-200 text-sm mt-1">Aktualna pogoda • Open-Meteo</p>
+                    <h2 className="text-xl font-bold mb-1">{weather.location}</h2>
+                    <p className="text-blue-100 text-sm capitalize">{weather.description}</p>
+                    <p className="text-blue-200 text-xs mt-0.5">Aktualna pogoda • Open-Meteo</p>
                 </div>
-                {weather.icon}
+                <div className="scale-75">
+                    {weather.icon}
+                </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
-                <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                    <div className="text-5xl font-bold mb-2">{Math.round(weather.temp)}°C</div>
-                    <div className="text-blue-100">Temperatura</div>
+            <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                    <div className="text-3xl font-bold mb-1">{Math.round(weather.temp)}°C</div>
+                    <div className="text-blue-100 text-sm">Temperatura</div>
                 </div>
-                <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                    <div className="text-5xl font-bold mb-2">{Math.round(weather.feels_like)}°C</div>
-                    <div className="text-blue-100">Odczuwalna</div>
+                <div className="bg-white bg-opacity-20 rounded-lg p-3">
+                    <div className="text-3xl font-bold mb-1">{Math.round(weather.feels_like)}°C</div>
+                    <div className="text-blue-100 text-sm">Odczuwalna</div>
                 </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="flex items-center gap-3 bg-white bg-opacity-10 rounded-lg p-3">
-                    <Droplets className="w-6 h-6" />
+            <div className="grid grid-cols-2 gap-3 mt-3">
+               <div className="flex items-center gap-2 bg-white bg-opacity-10 rounded-lg p-2">
+                    <Droplets className="w-5 h-5" />
                     <div>
-                        <div className="text-2xl font-bold">{weather.humidity}%</div>
-                        <div className="text-sm text-blue-100">Wilgotność</div>
+                        <div className="text-xl font-bold">{weather.humidity}%</div>
+                        <div className="text-xs text-blue-100">Wilgotność</div>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 bg-white bg-opacity-10 rounded-lg p-3">
-                    <Wind className="w-6 h-6" />
+                <div className="flex items-center gap-2 bg-white bg-opacity-10 rounded-lg p-2">
+                    <Wind className="w-5 h-5" />
                     <div>
-                        <div className="text-2xl font-bold">{Math.round(weather.wind_speed)} km/h</div>
-                        <div className="text-sm text-blue-100">Wiatr</div>
+                        <div className="text-xl font-bold">{Math.round(weather.wind_speed)} km/h</div>
+                        <div className="text-xs text-blue-100">Wiatr</div>
                     </div>
                 </div>
             </div>
@@ -762,7 +764,6 @@ const handleEditClick = (notification: NotificationRule) => {
                 </div>
             )}
 
-            {/* Sekcja alertów pogodowych */}
             {isCheckingAlerts ? (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-6">
                     <div className="flex items-center justify-center gap-3">

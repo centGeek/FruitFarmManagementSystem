@@ -16,9 +16,9 @@ public class WorkEntryMapper {
         if (entity.getUser() != null) {
             userDto = UserMapper.mapFromEntity(entity.getUser());
         }
-
         SectorDTO sectorDto = null;
         if (entity.getSector() != null) {
+
             sectorDto = SectorMapper.mapToDTO(entity.getSector());
         }
 

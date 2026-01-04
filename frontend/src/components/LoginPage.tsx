@@ -137,16 +137,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 flex items-center justify-center p-4">
-      {/* Decorative Elements */}
       <div className="absolute top-20 left-20 text-green-200 animate-pulse"><Apple size={32} /></div>
       <div className="absolute top-40 right-32 text-lime-200 animate-bounce"><Leaf size={24} /></div>
       <div className="absolute bottom-32 left-16 text-emerald-200 animate-pulse"><Leaf size={28} /></div>
 
       <div className="w-full max-w-6xl flex bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden">
-        {/* Left Side - Login Form */}
         <div className="w-full lg:w-1/2 p-8 lg:p-12">
           <div className="max-w-md mx-auto">
-            {/* Header */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg">
                 <Apple className="w-8 h-8 text-white" />
@@ -155,11 +152,8 @@ export default function LoginPage() {
               <p className="text-gray-600">System zarządzania gospodarstwem sadowniczym</p>
             </div>
 
-            {/* Error Alert */}
             <Alert type="error" message={error} />
 
-
-            {/* Divider */}
             <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
@@ -169,7 +163,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Login Form */}
             <div className="space-y-5">
               <TextInput
                 id="nickname"
@@ -207,7 +200,6 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Register Link */}
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
                 Nie masz konta?{' '}
@@ -219,7 +211,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right Side - Features Showcase */}
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-emerald-700 p-12 flex-col justify-center text-white">
           <h2 className="text-4xl font-bold mb-6">Zarządzaj swoim sadem profesjonalnie</h2>
           <p className="text-green-100 text-lg mb-8 leading-relaxed">

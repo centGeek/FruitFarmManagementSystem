@@ -181,34 +181,32 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
                                     <p className="font-bold text-gray-900">{entry.employee.name} {entry.employee.surname}</p>
                                     {entry.employee.nickname && <p className="text-xs text-gray-500 italic">"{entry.employee.nickname}"</p>}
                                 </div>
-
                                 {entry.employee.workDetails?.isPaidHourly ? (
-    <div className="md:col-span-2">
-        <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
-        <input type="number" step="0.5" min="0" max="24" value={entry.hours}
-            onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
-            placeholder="8" />
-    </div>
-) : (
-    <>
-        <div className="md:col-span-1">
-            <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
-            <input type="number" step="0.5" min="0" max="24" value={entry.hours}
-                onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
-                placeholder="8" />
-        </div>
-        <div className="md:col-span-1">
-            <label className="text-xs text-gray-500 mb-1 block">Kilogramy *</label>
-            <input type="number" step="0.1" min="0" value={entry.kilogramsPicked}
-                onChange={(e) => updateEntry(entry.employeeId, 'kilogramsPicked', e.target.value)}
-                className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-lg font-bold" 
-                placeholder="50" />
-        </div>
-    </>
-)}
-
+                                    <div className="md:col-span-2">
+                                        <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
+                                        <input type="number" step="0.5" min="0" max="24" value={entry.hours}
+                                            onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
+                                            placeholder="8" />
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="md:col-span-1">
+                                            <label className="text-xs text-gray-500 mb-1 block">Godziny *</label>
+                                            <input type="number" step="0.5" min="0" max="24" value={entry.hours}
+                                                onChange={(e) => updateEntry(entry.employeeId, 'hours', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold" 
+                                                placeholder="8" />
+                                        </div>
+                                        <div className="md:col-span-1">
+                                            <label className="text-xs text-gray-500 mb-1 block">Kilogramy *</label>
+                                            <input type="number" step="0.1" min="0" value={entry.kilogramsPicked}
+                                                onChange={(e) => updateEntry(entry.employeeId, 'kilogramsPicked', e.target.value)}
+                                                className="w-full px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-lg font-bold" 
+                                                placeholder="50" />
+                                        </div>
+                                    </>
+                                )}
                                 <div className="md:col-span-3">
                                     <label className="text-xs text-gray-500 mb-1 block">Sektor</label>
                                     <select value={entry.sectorId} onChange={(e) => updateEntry(entry.employeeId, 'sectorId', e.target.value)}
@@ -229,7 +227,6 @@ const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLoading }
                                     </select>
                                 </div>
                             </div>
-
                             {(entry.hours || entry.kilogramsPicked) && (
                                 <div className="mt-3 pt-3 border-t border-gray-100">
                                     <input type="text" value={entry.description} 
@@ -407,7 +404,6 @@ const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onTogglePaid, cur
     );
 };
 
-// ZAKTUALIZOWANY KOMPONENT: AdvancePayModal
 const AdvancePayModal = ({ isOpen, onClose, employee, onConfirm, isLoading }) => {
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
@@ -492,7 +488,6 @@ const AdvancePayModal = ({ isOpen, onClose, employee, onConfirm, isLoading }) =>
     );
 };
 
-// ZAKTUALIZOWANY KOMPONENT: EventDetailsModal
 const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePaid, onOpenPayAllModal, onOpenPayAllMonthModal, onOpenAdvancePayModal }) => {
     if (!entry) return null;
 
@@ -573,7 +568,6 @@ const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePaid, onO
                             </button>
                         </div>
                     </div>
-                    {/* ZAKTUALIZOWANY BLOK PRZYCISKÓW MASOWEJ PŁATNOŚCI */}
                 <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
                     <p className="text-xs font-medium text-gray-500 uppercase">Szybkie płatności dla pracownika:</p>
                     <div className="grid grid-cols-2 gap-2">
@@ -776,7 +770,6 @@ export default function WorkEntryManagement() {
             const employeesData = await response.json();
             console.log('[FETCH] ✅ Pracownicy:', employeesData);
             
-            // Pobierz workDetails dla każdego pracownika
             const employeesWithDetails = await Promise.all(
                 employeesData.map(async (emp) => {
                     try {
@@ -1182,7 +1175,6 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
 
     try {
         const headers = getAuthHeaders();
-        // Endpoint do płacenia za wszystko (i rozliczania zaliczek)
         const response = await authFetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-all-and-settle`, { 
             method: 'PATCH',
             headers: headers,
@@ -1266,7 +1258,6 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
         }
     }, []);
 
-    // ZAKTUALIZOWANA LOGIKA: Obliczanie kwoty do zapłaty z uwzględnieniem zaliczek
     const employeeEntriesForPayment = useMemo(() => {
         if (!selectedEmployeeForPayment) return { entries: [], totalGrossAmount: 0, advances: [], netAmount: 0 };
         
@@ -1333,7 +1324,7 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
         setSelectedEmployeeForPayment(null);
         setPaymentModalType('all');
         setUnpaidEntriesForPayment([]);
-        setUnsettledAdvances([]); // ZEROWANIE ZALICZEK
+        setUnsettledAdvances([]);
     };
 
     const handleCloseAdvancePayModal = () => {
@@ -1347,7 +1338,6 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
 
         try {
             const headers = getAuthHeaders();
-            // Endpoint do płacenia za miesiąc (i rozliczania zaliczek)
             const response = await authFetch(`${BACKEND_URL}/api/work-entries/user/${userId}/pay-month-and-settle`, { 
                 method: 'PATCH',
                 headers: headers,
@@ -1383,7 +1373,6 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
         }
     }, [closeAlert, fetchWorkEntries, parseApiError]);
 
-    // ZAKTUALIZOWANA FUNKCJA: Otwieranie Modalu Płatności - Pobieranie Zaliczek
     const handleOpenPayAllModal = useCallback((employeeId) => {
         const employee = employees.find(e => e.id === Number(employeeId));
         if (employee) {
@@ -1392,13 +1381,12 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
             setIsPayAllModalOpen(true);
             setSelectedEntry(null);
             fetchUnpaidEntriesForEmployee(employee.id);
-            fetchUnsettledAdvances(employee.id); // POBIERZ ZALICZKI
+            fetchUnsettledAdvances(employee.id);
         } else {
             setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
         }
     }, [employees, fetchUnpaidEntriesForEmployee, fetchUnsettledAdvances]);
 
-    // ZAKTUALIZOWANA FUNKCJA: Otwieranie Modalu Płatności za miesiąc - Pobieranie Zaliczek
     const handleOpenPayAllMonthModal = useCallback((employeeId) => {
         const employee = employees.find(e => e.id === Number(employeeId));
         if (employee) {
@@ -1434,7 +1422,6 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
         }
     }, [employees]);
 
-    // ZAKTUALIZOWANA FUNKCJA: Potwierdzenie Wypłaty Zaliczki (API CALL) - DODANIE ODŚWIEŻANIA ZALICZEK
     const handleConfirmAdvancePayment = useCallback(async (userId, amount, description) => {
         setIsLoading(true);
         closeAlert();
@@ -1459,7 +1446,6 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
                     type: 'success',
                     message: `✅ Pomyślnie zapisano zaliczkę ${amount.toFixed(2)} zł dla pracownika.`,
                 });
-                // Odświeżamy listę zaliczek, aby była gotowa, jeśli użytkownik od razu otworzy modal płatności.
                 fetchUnsettledAdvances(userId);
                 
             } else {
@@ -1730,7 +1716,6 @@ const handlePayAllForEmployee = useCallback(async (userId) => {
                     isLoading={isLoading}
                 />
 
-                {/* KOMPONENT MODALU ZALICZKI */}
                 <AdvancePayModal
                     isOpen={isAdvancePayModalOpen}
                     onClose={handleCloseAdvancePayModal}

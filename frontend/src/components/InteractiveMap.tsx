@@ -409,7 +409,7 @@ const InteractiveMap = ({ sectors, onSectorsChange }) => {
     console.log('Sektor wysłany do backendu:', result);
     const finalSector = { ...editedSectorData };
     if (result && result.id) {
-      finalSector.backendId = result.id;
+      finalSector.id = result.id;
     }
     
     onSectorsChange([...sectors, finalSector]);
@@ -466,7 +466,7 @@ const updateCornerPosition = async (sectorIndex, cornerIndex, newLatLng) => {
   const updatedSectors = [...sectors];
   updatedSectors[sectorIndex].corners[cornerIndex] = [newLatLng.lat, newLatLng.lng];
   
-  if (updatedSectors[sectorIndex].backendId) {
+  if (updatedSectors[sectorIndex].id) {
     try {
       const coordinatesDTO = updatedSectors[sectorIndex].corners.map(corner => ({
         latitude: corner[0],
@@ -474,14 +474,14 @@ const updateCornerPosition = async (sectorIndex, cornerIndex, newLatLng) => {
       }));
 
       const sectorData = {
-        id: updatedSectors[sectorIndex].backendId,
+        id: updatedSectors[sectorIndex].id,
         description: updatedSectors[sectorIndex].name,
         plantType: updatedSectors[sectorIndex].cropType || null,
         variety: updatedSectors[sectorIndex].variety || null,
         coordinates: coordinatesDTO
       };
 
-      const response = await authFetch(`${BACKEND_URL}/api/sectors/${updatedSectors[sectorIndex].backendId}`, {
+      const response = await authFetch(`${BACKEND_URL}/api/sectors/${updatedSectors[sectorIndex].id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(sectorData)
@@ -821,7 +821,6 @@ if (drawingMode === 'polygon' && drawingPoints.length > 0) {
 const EditSectorModal = ({ isOpen, onClose, sectorData, onSave, onArchive }) => {
   const [editedSector, setEditedSector] = useState({
     id: null,
-    backendId: null,
     name: '',
     cropType: '',
     variety: '',
@@ -833,7 +832,6 @@ const EditSectorModal = ({ isOpen, onClose, sectorData, onSave, onArchive }) => 
     if (sectorData && isOpen) {
       setEditedSector({
         id: sectorData.id,
-        backendId: sectorData.backendId,
         name: sectorData.name || '',
         cropType: sectorData.cropType || '',
         variety: sectorData.variety || '',
@@ -1206,8 +1204,7 @@ const OrchardMapSystem = () => {
       console.log('Załadowano sektory z backendu:', backendSectors);
 
       const mappedSectors = backendSectors.map(sector => ({
-        id: Date.now() + Math.random(),
-        backendId: sector.id,
+        id: sector.id,
         name: sector.description || `Sektor ${sector.id}`,
         cropType: sector.plantType || '',
         variety: sector.variety || '',
@@ -1229,8 +1226,7 @@ const OrchardMapSystem = () => {
         console.log('Załadowano zarchiwizowane sektory:', archivedBackendSectors);
 
         const mappedArchivedSectors = archivedBackendSectors.map(sector => ({
-          id: Date.now() + Math.random(),
-          backendId: sector.id,
+          id: sector.id,
           name: sector.description || `Sektor ${sector.id}`,
           cropType: sector.plantType || '',
           variety: sector.variety || '',
@@ -1260,7 +1256,7 @@ const OrchardMapSystem = () => {
 
 const handleSaveEditedSector = async (editedSector) => {
   try {
-    if (!editedSector.backendId) {
+    if (!editedSector.id) {
       alert('Brak ID backendu - nie można edytować tego sektora');
       return;
     }
@@ -1271,7 +1267,7 @@ const handleSaveEditedSector = async (editedSector) => {
     }));
 
     const backendData = {
-      id: editedSector.backendId,
+      id: editedSector.id,
       description: editedSector.name,
       plantType: editedSector.cropType || null,
       variety: editedSector.variety || null,
@@ -1280,7 +1276,7 @@ const handleSaveEditedSector = async (editedSector) => {
 
     console.log('Aktualizacja sektora w backendzie:', backendData);
 
-    const response = await authFetch(`${BACKEND_URL}/api/sectors/${editedSector.backendId}`, {
+    const response = await authFetch(`${BACKEND_URL}/api/sectors/${editedSector.id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(backendData)
@@ -1310,7 +1306,7 @@ const handleSaveEditedSector = async (editedSector) => {
 
 const handleActivateSector = async (sector) => {
     try {
-        if (!sector.backendId) {
+        if (!sector.id) {
             alert('Brak ID backendu - nie można aktywować tego sektora');
             return;
         }
@@ -1321,7 +1317,7 @@ const handleActivateSector = async (sector) => {
         }));
 
         const backendData = {
-            id: sector.backendId,
+            id: sector.id,
             description: sector.name,
             plantType: sector.cropType || null,
             variety: sector.variety || null,
@@ -1331,7 +1327,7 @@ const handleActivateSector = async (sector) => {
 
         console.log('Aktywacja sektora w backendzie:', backendData);
 
-        const response = await authFetch(`${BACKEND_URL}/api/sectors/${sector.backendId}`, {
+        const response = await authFetch(`${BACKEND_URL}/api/sectors/${sector.id}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(backendData)
@@ -1355,12 +1351,10 @@ const handleActivateSector = async (sector) => {
 };
 
 const handleArchiveSector = async (sector) => {
-  if (!window.confirm(`Czy na pewno chcesz zarchiwizować sektor "${sector.name}"?`)) {
-    return;
-  }
+  
 
   try {
-    if (!sector.backendId) {
+    if (!sector.id) {
       alert('Brak ID backendu - nie można zarchiwizować tego sektora');
       return;
     }
@@ -1371,7 +1365,7 @@ const handleArchiveSector = async (sector) => {
     }));
 
     const backendData = {
-      id: sector.backendId,
+      id: sector.id,
       description: sector.name,
       plantType: sector.cropType || null,
       variety: sector.variety || null,
@@ -1381,7 +1375,7 @@ const handleArchiveSector = async (sector) => {
 
     console.log('Archiwizacja sektora w backendzie:', backendData);
 
-    const response = await authFetch(`${BACKEND_URL}/api/sectors/${sector.backendId}`, {
+    const response = await authFetch(`${BACKEND_URL}/api/sectors/${sector.id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(backendData)

@@ -18,7 +18,6 @@ function WeatherWidget() {
     return '🌤️';
   };
 
-  // Pobierz koordynaty z profilu użytkownika
   useEffect(() => {
     const fetchCoordinates = async () => {
       try {

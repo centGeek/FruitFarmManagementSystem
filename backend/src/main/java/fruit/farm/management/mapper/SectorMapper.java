@@ -14,6 +14,9 @@ public class SectorMapper {
                 UserMapper.mapToEntity(userDTO, null));
     }
     public static SectorDTO mapToDTO(SectorEntity sectorEntity) {
+        if(sectorEntity.getIsActive() == null) {
+            sectorEntity.setIsActive(true);
+        }
         return new SectorDTO(sectorEntity.getSectorId(), sectorEntity.getDescription(), sectorEntity.getPlantType(),
                 sectorEntity.getVariety(), CoordinateMapper.mapFromEntities(sectorEntity.getCoordinates(),
                 null), sectorEntity.getCreatedAt(), sectorEntity.getIsActive());
