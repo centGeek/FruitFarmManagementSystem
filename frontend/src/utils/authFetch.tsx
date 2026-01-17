@@ -45,7 +45,6 @@ export const authFetch = async (url, options = {}) => {
         res = await fetch(url, { ...options, credentials: 'include' });
       }
     } else {
-      // jeśli odświeżanie trwa, poczekaj aż się skończy
       await new Promise(resolve => addRefreshSubscriber(resolve));
       res = await fetch(url, { ...options, credentials: 'include' });
     }

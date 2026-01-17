@@ -29,13 +29,7 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(orchardDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder);
-        return authProvider;
-    }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,18 +42,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/debug/**").permitAll()
                         .requestMatchers("/api/users/**").hasAnyAuthority("Gardener")
                         .requestMatchers("/api/expenses/**").hasAnyAuthority("Gardener")
-                        .requestMatchers("/api/sectors/**").hasAnyAuthority("Gardener")
-                        .requestMatchers("/api/work-entries/**").hasAnyAuthority("Gardener")
-                        .requestMatchers("/api/notification/**").hasAnyAuthority("Gardener")
-                        .requestMatchers("/api/work-details/**").hasAnyAuthority("Gardener")
-                        .requestMatchers("/api/weather-notifications/**").hasAnyAuthority("Gardener")
-                        .requestMatchers("/api/gardener/**").hasAnyAuthority("Gardener")
-                        .requestMatchers("/api/advances/**").hasAnyAuthority("Gardener")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
+    }
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(orchardDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
     }
 }

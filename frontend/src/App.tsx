@@ -12,6 +12,7 @@ import WorkSchedule from './components/WorkSchedule'
 import WeatherNotifications from './components/WeatherNotifications'
 import GardenerProfile from './components/GardenerProfile'
 import AnalysisPage from './components/AnalysisPage'
+import { BACKEND_URL} from "./utils/apiConfigs";
 
 
 function App() {
@@ -20,98 +21,48 @@ function App() {
   
   const [isLoading, setIsLoading] = useState(true)
 
-  const extractRoleFromToken = (token) => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.roles?.[0] || null; // Zwróć pierwszą rolę
-    } catch (error) {
-      console.error('Error parsing token:', error);
-      return null;
-    }
-  };
-
-  useEffect(() => {
+useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-        
-        if (!token) {
-          setIsLoggedIn(false);
-          setUserRole(null);
-          setIsLoading(false);
-          return;
-        }
-
-        // Wyciągnij rolę z tokenu przed weryfikacją
-        const role = extractRoleFromToken(token);
-
-        const response = await fetch('/api/auth/verify', {
+        const response = await fetch(`${BACKEND_URL}/api/auth/verify`, {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          credentials: 'include',
         });
 
         if (response.ok) {
+          const data = await response.json();
           setIsLoggedIn(true);
-          setUserRole(role);
+          setUserRole(data.roles[0]);
         } else {
-          // Token nieprawidłowy, usuń go
-          localStorage.removeItem('authToken');
-          sessionStorage.removeItem('authToken');
           setIsLoggedIn(false);
-          setUserRole(null);
         }
       } catch (error) {
-        console.error('Auth verification failed:', error);
+        console.error('Błąd weryfikacji:', error);
         setIsLoggedIn(false);
-        setUserRole(null);
       } finally {
         setIsLoading(false);
       }
     };
-
     checkAuthStatus();
   }, []);
 
-  const handleLogin = () => {
-    // Wyciągnij rolę po zalogowaniu
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-    if (token) {
-      const role = extractRoleFromToken(token);
-      setUserRole(role);
-    }
+  const handleLogin = (role) => {
     setIsLoggedIn(true);
+    setUserRole(role);
   };
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-      
-      if (token) {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Logout request failed:', error);
-    } finally {
-      localStorage.removeItem('authToken');
-      sessionStorage.removeItem('authToken');
-      
-      document.cookie.split(";").forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, "")
-          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
+      await fetch(`${BACKEND_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include'
       });
-      
+    } catch (error) {
+      console.error('Błąd wylogowania:', error);
+    } finally {
       setIsLoggedIn(false);
       setUserRole(null);
+      window.location.href = '/';
     }
   };
 
@@ -160,9 +111,7 @@ function App() {
           path="/register" 
           element={
             isLoggedIn ? (
-              userRole === "Admin" ? (
-                <Navigate to="/admin/dashboard" replace />
-              ) : (
+              (
                 <Navigate to="/home" replace />
               )
             ) : (
@@ -190,7 +139,7 @@ function App() {
         <Route
           path="/expenses"
           element={
-            <ProtectedRoute allowedRoles={["Gardener"]}>
+            <ProtectedRoute allowedRoles={["fdsafd"]}>
               <ExpenseManagement />
             </ProtectedRoute>
           }
@@ -222,7 +171,7 @@ function App() {
         <Route
           path="/employees"
           element={
-            <ProtectedRoute allowedRoles={["Gardener", "Admin"]}>
+            <ProtectedRoute allowedRoles={["Gardener"]}>
               <EmployeeManagement />
             </ProtectedRoute>
           }

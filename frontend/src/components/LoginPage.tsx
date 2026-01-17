@@ -54,15 +54,7 @@ const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disable
   </div>
 );
 
-const handleLoginSuccess = (token, nickname, loginMethod) => {
-  
-  sessionStorage.setItem('authToken', token);
-  localStorage.setItem('user', JSON.stringify({
-    nickname: nickname,
-    loginTime: new Date().toISOString(),
-    loginMethod: loginMethod
-  }));
-  
+const handleLoginSuccess = () => {  
   window.location.href = '/home';
 };
 
@@ -94,39 +86,33 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    setIsLoading(true);
-    setError('');
+  setIsLoading(true);
+  setError('');
 
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // <--- TO JEST KLUCZOWE!
-        body: JSON.stringify({
-          nickname: formData.nickname,
-          password: formData.password
-        }),
-      });
-
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        nickname: formData.nickname,
+        password: formData.password
+      }),
+    });
+    if (res.ok) {
+      handleLoginSuccess();
+    } else {
       const data = await res.json();
-
-      if (res.ok && data.token) {
-        handleLoginSuccess(
-          data.token,
-          formData.nickname.trim().toLowerCase(),
-          'nickname'        );
-      } else {
-        setError(data.message || 'Błąd logowania');
-      }
-    } catch (err) {
-      setError('Nie można połączyć się z serwerem');
-    } finally {
-      setIsLoading(false);
+      setError(data.message || 'Błąd logowania');
     }
-  };
-
+  } catch (err) {
+    setError('Nie można połączyć się z serwerem');
+  } finally {
+    setIsLoading(false);
+  }
+};
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 flex items-center justify-center p-4">
       <div className="absolute top-20 left-20 text-green-200 animate-pulse"><Apple size={32} /></div>

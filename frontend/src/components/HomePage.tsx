@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AlertCircle, Loader } from 'lucide-react';
 import { Link } from "react-router-dom";
 
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import { authFetch } from "../utils/authFetch";
 
-import {type NotificationRule, type ForecastAlert, type Alert, type OpenMeteoCoordinates } from "../utils/common";
 
 const NOTIFICATION_TYPES = {
   WEATHER: { label: 'Pogoda', icon: '🌤️', color: 'bg-blue-50 text-blue-700 border-blue-200' },

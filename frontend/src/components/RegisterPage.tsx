@@ -60,12 +60,10 @@ const PasswordInput = React.memo(({ id, name, value, onChange, showPassword, set
     </div>
 ));
 
-const handleRegistrationSuccess = (token) => {
-    sessionStorage.setItem('authToken', token);
+const handleRegistrationSuccess = () => {
     window.location.href = '/home';
 };
 
-// --- GŁÓWNY KOMPONENT REGISTERPAGE ---
 
 export default function RegisterPage() {
     const defaultCenter = useMemo(() => [52.2297, 21.0122], []); // Warszawa (Centralna Polska)
@@ -73,7 +71,6 @@ export default function RegisterPage() {
 
     const [mapInstance, setMapInstance] = useState(null);
     
-    // Stan do dynamicznej kontroli widoku i centrowania mapy
     const [mapView, setMapView] = useState({
         center: defaultCenter, 
         zoom: 6, // Startowy widok na Polskę
@@ -111,11 +108,10 @@ export default function RegisterPage() {
             localityName: locality,
         }));
         
-        // Aktualizacja stanu mapy w celu wyśrodkowania i zaktualizowania markera w BasicMap
         setMapView(prev => ({ 
             center: [location.lat, location.lon], 
-            zoom: 13, // Zwiększ zoom dla konkretnej miejscowości
-            viewUpdateKey: Date.now() // Wymuś odświeżenie
+            zoom: 13, 
+            viewUpdateKey: Date.now()
         }));
         
         setErrors(prev => ({ ...prev, localityName: '' }));
@@ -223,7 +219,7 @@ export default function RegisterPage() {
 
             if (res.ok) {
                 if (data.token) {
-                    handleRegistrationSuccess(data.token);
+                    handleRegistrationSuccess();
                 } else {
                     setSuccess('Rejestracja zakończona pomyślnie! Sprawdź email w celu aktywacji konta.');
                     setFormData(prev => ({
@@ -241,21 +237,17 @@ export default function RegisterPage() {
         }
     };
 
-    // --- RENDER ---
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 flex items-center justify-center p-4">
-            {/* Decorative Elements */}
             <div className="absolute top-20 left-20 text-green-200 animate-pulse"><Apple size={32} /></div>
             <div className="absolute top-40 right-32 text-lime-200 animate-bounce"><Leaf size={24} /></div>
             <div className="absolute bottom-32 left-16 text-emerald-200 animate-pulse"><Leaf size={28} /></div>
 
-            {/* Kontener formularza: maksymalna szerokość i centrowanie */}
             <div className="w-full max-w-lg bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden">
                 <div className="p-8 lg:p-12">
                     <div className="max-w-md mx-auto">
                         
-                        {/* Nagłówek */}
                         <div className="text-center mb-8">
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg">
                                 <Apple className="w-8 h-8 text-white" />
@@ -296,23 +288,22 @@ export default function RegisterPage() {
                                     </div>
                                 )}
                                 
-                                {/* Mapa: Użycie BasicMap z przekazaniem state do kontroli widoku i markera */}
                                 <div className="rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0" style={{ height: '250px' }}>
                                     <BasicMap
                                         center={mapView.center} // Kontrolowane z mapView state
-                                        zoom={mapView.zoom} // Kontrolowane z mapView state
+                                        zoom={mapView.zoom}
                                         onMapLoad={setMapInstance}
-                                        onMapClick={handleMapClick} // Przekazanie obsługi kliknięcia do BasicMap
+                                        onMapClick={handleMapClick}
                                         style={{ height: '250px', width: '100%' }}
                                         
-                                        // Dynamiczne ustawianie markera na podstawie danych formularza i stanu
+                            
                                         markerPosition={
                                             formData.localityName === initialLocalityMessage 
                                             ? null 
                                             : [formData.latitude, formData.longitude]
                                         }
                                         markerPopupContent={`📍 ${formData.localityName || 'Wybrany punkt'}`}
-                                        viewUpdateKey={mapView.viewUpdateKey} // Wymuszenie centrowania/odświeżenia markera
+                                        viewUpdateKey={mapView.viewUpdateKey} 
                                     />
                                 </div>
 

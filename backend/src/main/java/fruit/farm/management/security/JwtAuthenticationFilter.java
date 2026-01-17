@@ -33,7 +33,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         try {
-            // WAŻNE: Pobierz token z COOKIE, nie z headera!
             String token = getTokenFromCookies(request);
 
             if (token != null && jwtService.validateToken(token)) {
@@ -57,7 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.debug("No token found in cookies");
             }
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            // Token wygasł - pozwól kontynuować (frontend dostanie 401 i odświeży)
             log.debug("JWT token expired: {}", e.getMessage());
         } catch (Exception e) {
             log.warn("JWT authentication error: {}", e.getMessage());
