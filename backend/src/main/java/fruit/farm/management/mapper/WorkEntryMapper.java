@@ -1,7 +1,7 @@
 package fruit.farm.management.mapper;
 
 import fruit.farm.management.dto.SectorDTO;
-import fruit.farm.management.dto.UserDTO;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.WorkEntryEntity;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class WorkEntryMapper {
 
     public static WorkEntryDto mapToDto(WorkEntryEntity entity) {
-        UserDTO userDto = null;
+        UserDto userDto = null;
         if (entity.getUser() != null) {
             userDto = UserMapper.mapFromEntity(entity.getUser());
         }

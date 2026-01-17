@@ -2,8 +2,8 @@ package fruit.farm.management.service;
 
 import fruit.farm.management.dto.NotificationDTO;
 import fruit.farm.management.dto.UserCredentialsDTO;
-import fruit.farm.management.dto.UserDTO;
-import fruit.farm.management.dto.WorkDetailsDTO;
+import fruit.farm.management.dto.UserDto;
+import fruit.farm.management.dto.WorkDetailsDto;
 import fruit.farm.management.entity.*;
 import fruit.farm.management.exception.IncorrectInputFormatException;
 import fruit.farm.management.exception.NicknameAlreadyExistsException;
@@ -61,19 +61,19 @@ public class UserService {
         return userRepository.findByNickname(loggedWithNickname);
     }
 
-    public List<UserDTO> getAllEmployees(Long id) {
+    public List<UserDto> getAllEmployees(Long id) {
 
         return userRepository.getAllEmployees(id).stream()
                 .map(UserMapper::mapFromEntity).toList();
     }
 
-    public List<UserDTO> getAllActiveEmployees(Long id) {
+    public List<UserDto> getAllActiveEmployees(Long id) {
 
         return userRepository.getAllActiveEmployees(id).stream()
                 .map(UserMapper::mapFromEntity).toList();
     }
 
-    public List<UserDTO> getAllArchivedEmployees(Long id) {
+    public List<UserDto> getAllArchivedEmployees(Long id) {
 
         return userRepository.getAllArchivedEmployees(id).stream()
                 .map(UserMapper::mapFromEntity).toList();
@@ -85,34 +85,24 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity save(UserEntity user) {
+    public UserDto addEmployee(UserEntity user) {
         Optional<WorkDetailsEntity> workDetailsEntity = workDetailsService.getLatestWorkDetailsByGardener(user.getGardener().getId());
-
-        log.info("User registration data received:");
-        log.info("Name: {}", user.getName());
-        log.info("Surname: {}", user.getSurname());
-        log.info("Nickname: {}", user.getNickname());
-        log.info("Phone: {}", user.getPhoneNumber());
-        log.info("Nickname: {}", user.getNickname());
-        log.info("IsActive: {}", user.isActive());
-
         UserEntity savedUser = userRepository.save(user);
         if (workDetailsEntity.isPresent()) {
             WorkDetailsEntity workDetails = workDetailsEntity.get();
-            workDetailsService.createWorkDetails(new WorkDetailsDTO(
+            workDetailsService.createWorkDetails(new WorkDetailsDto(
                     workDetails.getIsPaidHourly(), workDetails.getHourlyPay(), workDetails.getPayPerKilogram(),
                     workDetails.getCreatedAt(),
                     UserMapper.mapFromEntity(user)));
         }
-        UserEntity loggedInUserId = this.getLoggedUser();
         notificationService.addUserNotification(NotificationDTO.builder()
                 .title("Dodano nowego pracownika!")
                 .message("Dodano pracownika: " + user.getName() + " " + user.getSurname())
                 .createdAt(LocalDateTime.now())
-                .userDTO(UserMapper.mapFromEntity(savedUser))
-                .build(), loggedInUserId);
+                .userDto(UserMapper.mapFromEntity(savedUser))
+                .build(), this.getLoggedUser());
 
-        return savedUser;
+        return UserMapper.mapFromEntity(savedUser);
     }
 
     @Transactional
@@ -122,7 +112,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity update(UserEntity existingUser, UserDTO userRequest) {
+    public UserDto update(UserEntity existingUser, UserDto userRequest) {
 
         if (userRequest.getNickname() != null && !userRequest.getNickname().equals(existingUser.getNickname())) {
             Optional<UserEntity> userWithNickname = this.findByNickname(userRequest.getNickname());
@@ -172,14 +162,13 @@ public class UserService {
                 .title(title)
                 .message(message)
                 .createdAt(LocalDateTime.now())
-                .userDTO(UserMapper.mapFromEntity(savedUser))
+                .userDto(UserMapper.mapFromEntity(savedUser))
                 .build(), loggedInUserId);
-
-        return savedUser;
+        return UserMapper.mapFromEntity(savedUser);
     }
 
     @Transactional
-    public UserEntity registerUser(UserDTO request) {
+    public UserEntity registerUser(UserDto request) {
 
         Optional<UserEntity> existingUser = this.findByNickname(request.getNickname().toLowerCase());
         if (existingUser.isPresent()) {

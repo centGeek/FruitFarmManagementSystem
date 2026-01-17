@@ -13,24 +13,16 @@ import BasicMap from '../utils/BasicMap';
 
 const sortPointsClockwise = (points) => {
     if (points.length !== 4) return points;
-
-    const centroid = points.reduce((acc, p) => ({
-        lat: acc.lat + p.lat / points.length,
-        lng: acc.lng + p.lng / points.length
-    }), { lat: 0, lng: 0 });
-
+    const centroid = {
+      lat: points.reduce((sum, p) => sum + p.lat, 0) / points.length,
+      lng: points.reduce((sum, p) => sum + p.lng, 0) / points.length
+    };
     const topPoints = points.filter(p => p.lat >= centroid.lat);
     const bottomPoints = points.filter(p => p.lat < centroid.lat);
-
     topPoints.sort((a, b) => a.lng - b.lng); 
-    
     bottomPoints.sort((a, b) => b.lng - a.lng); 
-
     return [
-        topPoints[0],
-        topPoints[1],
-        bottomPoints[0],
-        bottomPoints[1]
+        topPoints[0], topPoints[1], bottomPoints[0], bottomPoints[1]
     ];
 };
 
@@ -579,7 +571,7 @@ if (drawingMode === 'polygon' && drawingPoints.length > 0) {
 
   const sectorsToShow = sectors.filter((_, index) => visibleSectorIndices.includes(index));
 
-  sectorsToShow.forEach((sector, visibleIndex) => {
+  sectorsToShow.forEach((sector) => {
     if (!sector.corners || sector.corners.length === 0) return;
 
     const actualIndex = sectors.indexOf(sector);
@@ -592,13 +584,9 @@ if (drawingMode === 'polygon' && drawingPoints.length > 0) {
       fillOpacity: isBeingEdited ? 0.3 : 0.2
     });
 
-    const cropTypeLabel = sector.cropType 
-      ? CROP_TYPES.find(c => c.value === sector.cropType)?.label || sector.cropType
-      : 'Nie określono';
+    const cropTypeLabel = sector.cropType ? CROP_TYPES.find(c => c.value === sector.cropType)?.label || sector.cropType : 'Nie określono';
 
-    const varietyLabel = sector.variety
-      ? CROP_TYPES.find(c => c.value === sector.cropType)?.varieties.find(v => v.value === sector.variety)?.label || sector.variety
-      : null;
+    const varietyLabel = sector.variety ? CROP_TYPES.find(c => c.value === sector.cropType)?.varieties.find(v => v.value === sector.variety)?.label || sector.variety : null;
 
     polygon.bindPopup(`
       <div style="padding: 12px;">
@@ -630,12 +618,9 @@ if (drawingMode === 'polygon' && drawingPoints.length > 0) {
 
     drawnItems.addLayer(polygon);
 
-    sector.corners.forEach((corner, cornerIndex) => {
-      const isEditable = isBeingEdited;
-      
+    sector.corners.forEach((corner, cornerIndex) => {      
       let marker;
-      
-      if (isEditable) {
+      if (isBeingEdited) {
         const editIcon = L.divIcon({
           className: 'custom-edit-marker',
           html: `<div style="
@@ -667,7 +652,7 @@ if (drawingMode === 'polygon' && drawingPoints.length > 0) {
         });
       }
       
-      if (isEditable) {
+      if (isBeingEdited) {
         marker.on('dragstart', () => {
           setIsDragging(true);
         });
@@ -1186,11 +1171,8 @@ const OrchardMapSystem = () => {
   const [archivedSectors, setArchivedSectors] = useState([]);
   const [editSectorModal, setEditSectorModal] = useState({ isOpen: false, sectorData: null });
   const loadSectorsFromBackend = useCallback(async () => {
-    setIsLoading(true);
-    setLoadError(null);
-    
+    setIsLoading(true);    
     try {
-      // CZĘŚĆ 1: Ładuj aktywne sektory (TO JUŻ BYŁO)
       const response = await authFetch(`${BACKEND_URL}/api/sectors`, {
         method: 'GET',
         headers: getAuthHeaders()

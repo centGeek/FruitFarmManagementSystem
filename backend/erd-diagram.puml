@@ -16,7 +16,7 @@ class user_profile_entity {
     email : varchar(255)
     creation_date : date
     role_id : int <<FK>>
-    is_active : boolean
+    is_active : booleane
     gardener_id : int <<FK>>
     coordinate_id : int
     locality_name : varchar(64)
@@ -108,7 +108,7 @@ entity work_details_entity {
     user_id : serial <<FK>>
 }
 
-entity weather_notifications_entity {
+entity weather_alert_rules_entity {
     id : serial <<PK>>
     --
     user_id : serial <<FK>>
@@ -142,7 +142,7 @@ user_profile_entity ||--o{ profit_entity : "user_id"
 user_profile_entity ||--o{ work_entry_entity : "user_id"
 user_profile_entity ||--o{ notifications_entity : "user_id"
 user_profile_entity ||--o{ work_details_entity : "user_id"
-user_profile_entity ||--o{ weather_notifications_entity : "user_id"
+user_profile_entity ||--o{ weather_alert_rules_entity : "user_id"
 user_profile_entity ||--o{ advance_pay_entity : "user_id"
 
 sector_entity ||--o{ expense_entity : "sector_id"

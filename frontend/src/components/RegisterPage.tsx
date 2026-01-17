@@ -60,13 +60,8 @@ const PasswordInput = React.memo(({ id, name, value, onChange, showPassword, set
     </div>
 ));
 
-const handleRegistrationSuccess = (token, email) => {
+const handleRegistrationSuccess = (token) => {
     sessionStorage.setItem('authToken', token);
-    localStorage.setItem('user', JSON.stringify({
-        email: email,
-        loginTime: new Date().toISOString(),
-        loginMethod: 'registration'
-    }));
     window.location.href = '/home';
 };
 
@@ -176,25 +171,23 @@ export default function RegisterPage() {
         }
     };
 
-    // Form Validation
+    const getFormErrors = (data) => {
+        const errors = {};
+        if (!data.name?.trim()) errors.name = 'Imię jest wymagane';
+        if (!data.surname?.trim()) errors.surname = 'Nazwisko jest wymagane';
+        if (!data.nickname?.trim()) errors.nickname = 'Nazwa użytkownika jest wymagana';
+        if (data.password.length < 6) errors.password = 'Hasło min. 6 znaków';
+        if (data.password !== data.confirmPassword) errors.confirmPassword = 'Hasła nie są identyczne';
+        if (!data.localityName || data.localityName === initialLocalityMessage) errors.localityName = 'Musisz wybrać miejscowość na mapie';
+        return errors;
+    };
     const validateForm = () => {
-        const newErrors = {};
-
-        if (!formData.name.trim()) newErrors.name = 'Imię jest wymagane';
-        if (!formData.surname.trim()) newErrors.surname = 'Nazwisko jest wymagane';
-        if (formData.password.length < 6) newErrors.password = 'Hasło min. 6 znaków';
-        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Hasła nie są identyczne';
-
-        // Walidacja lokalizacji
-        if (formData.localityName === initialLocalityMessage) {
-            newErrors.localityName = 'Musisz wybrać lub kliknąć swoją miejscowość na mapie.';
-        }
-
-        setErrors(newErrors);
-        if (Object.keys(newErrors).length > 0) {
+        const errors = getFormErrors(formData);
+        setErrors(errors);
+        if (Object.keys(errors).length > 0) {
             setGeneralError('Wypełnij poprawnie wszystkie wymagane pola.');
         }
-        return Object.keys(newErrors).length === 0;
+        return Object.keys(errors).length === 0;
     };
 
     // Email Registration Handler
@@ -230,7 +223,7 @@ export default function RegisterPage() {
 
             if (res.ok) {
                 if (data.token) {
-                    handleRegistrationSuccess(data.token, formData.email.trim().toLowerCase());
+                    handleRegistrationSuccess(data.token);
                 } else {
                     setSuccess('Rejestracja zakończona pomyślnie! Sprawdź email w celu aktywacji konta.');
                     setFormData(prev => ({
@@ -267,7 +260,7 @@ export default function RegisterPage() {
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg">
                                 <Apple className="w-8 h-8 text-white" />
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Dołącz do OrchardManager</h1>
+                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Dołącz do Menadżera Sadu</h1>
                             <p className="text-gray-600">Utwórz konto i zacznij zarządzać swoim sadem</p>
                         </div>
 
@@ -318,7 +311,7 @@ export default function RegisterPage() {
                                             ? null 
                                             : [formData.latitude, formData.longitude]
                                         }
-                                        markerPopupContent={`📍 **${formData.localityName || 'Wybrany punkt'}**`}
+                                        markerPopupContent={`📍 ${formData.localityName || 'Wybrany punkt'}`}
                                         viewUpdateKey={mapView.viewUpdateKey} // Wymuszenie centrowania/odświeżenia markera
                                     />
                                 </div>
@@ -329,7 +322,6 @@ export default function RegisterPage() {
                                     disabled={true} error={errors.localityName}
                                 />
                             </div>
-                            {/* --- MAP SECTION END --- */}
                             
                             <PasswordInput
                                 id="password" name="password" value={formData.password} onChange={handleInputChange}

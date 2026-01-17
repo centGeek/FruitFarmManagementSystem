@@ -56,7 +56,7 @@ function WeatherWidget() {
 
     const fetchWeather = async () => {
       try {
-        const response = await authFetch(
+        const response = await fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${coordinates.lat}&longitude=${coordinates.lon}&current=temperature_2m,weather_code&timezone=Europe/Warsaw`
         );
         
@@ -137,7 +137,7 @@ function GardenerNavbar({ onLogout }) {
       <div className="max-w-[1600px] mx-auto px-6 py-2.5">
         <div className="flex justify-between items-center gap-4">
           <div 
-            className="text-xl font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center gap-2"
+            className="text-l font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center gap-2"
             onClick={handleLogoClick}
           >
             <span className="text-2xl">🌱</span>
@@ -190,7 +190,7 @@ export default function Navbar({ onLogout, userRole }) {
           <div className="text-xl font-bold">Farm Management</div>
           <button
             onClick={onLogout}
-            className="px-6 py-2.5 bg-red-500 hover:bg-red-600 rounded-lg font-semibold text-sm shadow-lg transition-all duration-300"
+            className="px-6 py-2.5 bg-red-400 hover:bg-red-600 rounded-lg font-semibold text-sm shadow-lg transition-all duration-300"
           >
             Wyloguj
           </button>

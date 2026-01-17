@@ -31,3 +31,128 @@ export const Alert = React.memo(({ type, message, onClose }) => {
 });
 
 
+const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      nickname: formData.nickname,
+      password: formData.password
+    }),
+});
+const data = await res.json();
+
+
+const enabledRules = rules.filter(r => r.enabled);
+const maxDays = Math.max(...enabledRules.map(r => r.daysAhead));
+const response = await fetch(
+  `https://api.open-meteo.com/v1/forecast?` +
+  `latitude=${coords.lat}&` + `longitude=${coords.lon}&` +
+  `daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&` +
+  `timezone=Europe/Warsaw&` + `forecast_days=${maxDays}`
+);
+if (!response.ok) {
+  throw new Error('Nie udało się pobrać prognozy pogody');
+}
+const data = await response.json();
+enabledRules.forEach(rule => {
+  for (let i = 0; i < rule.daysAhead && i < data.daily.time.length; i++) {
+    const date = data.daily.time[i];
+    let triggered = false;
+    let value = 0;
+    let message = '';
+    switch (rule.weatherNotificationType) {
+      case 'FROST_WARNING':
+        value = data.daily.temperature_2m_min[i];
+        if (value < rule.threshold) {
+          triggered = true;
+          message = `🧊 Ostrzeżenie o przymrozku: ${value.toFixed(1)}°C (próg: ${rule.threshold}°C)`;
+        }
+        break;
+...
+ if (triggered) {
+              alerts.push({
+...
+
+
+
+const sortPointsClockwise = (points) => {
+    if (points.length !== 4) return points;
+    const centroid = {
+      lat: points.reduce((sum, p) => sum + p.lat, 0) / points.length,
+      lng: points.reduce((sum, p) => sum + p.lng, 0) / points.length
+    };
+    const topPoints = points.filter(p => p.lat >= centroid.lat);
+    const bottomPoints = points.filter(p => p.lat < centroid.lat);
+    topPoints.sort((a, b) => a.lng - b.lng);
+    bottomPoints.sort((a, b) => b.lng - a.lng);
+    return [
+        topPoints[0], topPoints[1], bottomPoints[0], bottomPoints[1]
+    ];
+};
+
+
+
+const loadSectorsFromBackend = useCallback(async () => {
+  setIsLoading(true);
+  try {
+    const response = await authFetch(`${BACKEND_URL}/api/sectors`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) throw new Error(`Błąd HTTP: ${response.status}`);
+    const backendSectors = await response.json();
+    // Mapowanie danych: konwersja obiektów współrzędnych na format Leaflet [lat, lng]
+    const mappedSectors = backendSectors.map(sector => ({
+      id: sector.id,
+      name: sector.description || `Sektor ${sector.id}`,
+      cropType: sector.plantType || '',
+      variety: sector.variety || '',
+      corners: sector.coordinates?.map(coord => [
+        coord.latitude,
+        coord.longitude
+      ]) || []
+    }));
+    setSectors(mappedSectors);
+  } catch (error) {
+    console.error('Błąd podczas ładowania danych przestrzennych:', error);
+    setLoadError(error.message);
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
+
+
+sectorsToShow.forEach((sector) => {
+    if (!sector.corners || sector.corners.length === 0) return;
+    const actualIndex = sectors.indexOf(sector);
+    const isBeingEdited = editMode?.sectorIndex === actualIndex;
+    const polygon = L.polygon(sector.corners, {
+      color: isBeingEdited ? '#ff6b00' : (selectedSector === actualIndex ? '#ff0000' : '#3388ff'),
+      weight: isBeingEdited ? 3 : (selectedSector === actualIndex ? 3 : 2),
+      fillColor: isBeingEdited ? '#ff6b00' : '#3388ff',
+      fillOpacity: isBeingEdited ? 0.3 : 0.2
+    });
+    const cropTypeLabel = sector.cropType ? CROP_TYPES.find(c => c.value === sector.cropType)?.label || sector.cropType : 'Nie określono';
+    ...
+    polygon.bindPopup(`
+      <div style="padding: 12px;">
+        <div style="font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 6px;">
+          📍 ${sector.name}
+        </div>
+        <div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">
+          Uprawa: <b> ${cropTypeLabel} </b>
+        </div>
+        ...
+    });
+    drawnItems.addLayer(polygon);
+    sector.corners.forEach((corner, cornerIndex) => {
+        if (isEditable) {
+          // Tworzenie dużego, pomarańczowego uchwytu do przeciągania (24px)
+          marker = L.marker(corner, { icon: editIcon, draggable: true });
+        } else {
+          // Tworzenie małej, niebieskiej kropki podglądu (4px)
+          marker = L.circleMarker(corner, { radius: 4, ... });
+        }
+
+

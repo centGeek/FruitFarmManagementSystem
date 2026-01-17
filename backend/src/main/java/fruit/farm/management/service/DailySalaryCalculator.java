@@ -1,20 +1,20 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.WorkDetailsDTO;
+import fruit.farm.management.dto.WorkDetailsDto;
 import fruit.farm.management.dto.WorkEntryDto;
 
 import java.math.BigDecimal;
 
 public class DailySalaryCalculator {
-
-
-    public static BigDecimal calculateDailySalary(WorkEntryDto workEntryDto, WorkDetailsDTO workDetailsDTO) {
+    public static BigDecimal calculateDailySalary(WorkEntryDto workEntryDto, WorkDetailsDto workDetailsDto) {
         BigDecimal salary;
-        if (workDetailsDTO.getIsPaidHourly()) {
-            salary = BigDecimal.valueOf(workEntryDto.getDuration()).multiply(workDetailsDTO.getHourlyPay());
+        if (workDetailsDto.getIsPaidHourly()) {
+            salary = BigDecimal.valueOf(workEntryDto.getDuration()).multiply(workDetailsDto.getHourlyPay());
         } else {
-            salary = BigDecimal.valueOf(workEntryDto.getKilogramsPicked()).multiply(workDetailsDTO.getPayPerKilogram());
+            salary = BigDecimal.valueOf(workEntryDto.getKilogramsPicked()).multiply(workDetailsDto.getPayPerKilogram());
         }
         return salary;
     }
 }
+
+

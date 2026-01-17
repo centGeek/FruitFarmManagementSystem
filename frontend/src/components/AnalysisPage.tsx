@@ -70,109 +70,127 @@ export default function ProfitAnalysis() {
 
     const fetchSectorLaborCosts = useCallback(async () => {
     try {
-        if (!sectors || sectors.length === 0) return;
+      if (!sectors || sectors.length === 0) {
+        console.log('No sectors available for labor costs');
+        return;
+      }
 
-        const laborCostsPromises = sectors.map(async (sector) => {
-            const params = new URLSearchParams();
-            params.append('sectorId', sector.id);
+      console.log('Fetching labor costs for sectors:', sectors);
+
+      const laborCostsPromises = sectors.map(async (sector) => {
+        const params = new URLSearchParams();
+        params.append('sectorId', sector.id);
+        const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
+
+        try {
+          console.log(`⏳ Making request to: ${url}`);
+          const response = await authFetch(url, {
+            method: 'GET',
+            headers: getAuthHeaders()
+          });
+
+          console.log(`✅ Response received for sector ${sector.id}:`, {
+            status: response.status,
+            ok: response.ok,
+            statusText: response.statusText
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`📊 Labor costs data for sector ${sector.id}:`, data);
             
-            const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
+            return {
+              sectorId: sector.id,
+              totalCost: Number(data.sectorLaborCost || 0),
+              paidCost: Number(data.paidLaborCost || 0),
+              unpaidCost: Number(data.unpaidLaborCost || 0),
+              totalEntries: Number(data.totalEntries || 0),
+              paidEntries: Number(data.paidEntries || 0),
+              unpaidEntries: Number(data.unpaidEntries || 0)
+            };
+          }
+        } catch (error) {
+          console.error(`❌ Error fetching labor costs for sector ${sector.id}:`, error);
+          console.error(`❌ Error details:`, {
+            message: error.message,
+            stack: error.stack
+          });
+        }
+
+        return { sectorId: sector.id, totalCost: 0, totalEntries: 0 };
+      });
+
+      const generalLaborCostPromise = async () => {
+        const url = `${BACKEND_URL}/api/expenses/sector-labor-costs`;
+        
+        console.log(`🔍 Attempting to fetch GENERAL labor costs`);
+        console.log(`📍 URL: ${url}`);
+        
+        try {
+          console.log(`⏳ Making request to: ${url}`);
+          const response = await authFetch(url, {
+            method: 'GET',
+            headers: getAuthHeaders()
+          });
+
+          console.log(`✅ Response for general labor costs:`, {
+            status: response.status,
+            ok: response.ok,
+            statusText: response.statusText
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`📊 General labor costs data:`, data);
             
-            try {
-                const response = await authFetch(url, { 
-                    method: 'GET', 
-                    headers: getAuthHeaders() 
-                });
-                
-                if (response.ok) {
+            return {
+              sectorId: 'no-sector',
+              totalCost: Number(data.sectorLaborCost || 0),
+              paidCost: Number(data.paidLaborCost || 0),
+              unpaidCost: Number(data.unpaidLaborCost || 0),
+              totalEntries: Number(data.totalEntries || 0),
+              paidEntries: Number(data.paidEntries || 0),
+              unpaidEntries: Number(data.unpaidEntries || 0)
+            };
+          }
+        } catch (error) {
+          console.error("❌ Error fetching general labor costs:", error);
+          console.error(`❌ Error details:`, {
+            message: error.message,
+            stack: error.stack
+          });
+        }
 
-                    const responseText = await response.text()
-                    if (!responseText) {
-                        return {
-                            sectorId: sector.id,
-                            totalCost: 0,
-                            paidCost: 0,
-                            unpaidCost: 0,
-                            totalEntries: 0,
-                            paidEntries: 0,
-                            unpaidEntries: 0,
-                        }
-                    }
-                    const data = JSON.parse(responseText);
-                    return {
-                        sectorId: sector.id,
-                        totalCost: data.sectorLaborCost || 0,
-                        paidCost: data.paidLaborCost || 0,
-                        unpaidCost: data.unpaidLaborCost || 0,
-                        totalEntries: data.totalEntries || 0,
-                        paidEntries: data.paidEntries || 0,
-                        unpaidEntries: data.unpaidEntries || 0
-                    };
-                }
-            } catch (error) {
-                console.error(`Error fetching labor costs for sector ${sector.id}:`, error);
-            }
-            return { sectorId: sector.id, totalCost: 0, totalEntries: 0 };
-        });
+        return { sectorId: 'no-sector', totalCost: 0, totalEntries: 0 };
+      };
 
-        
+      const laborCostsResults = await Promise.all([...laborCostsPromises, generalLaborCostPromise()]);
 
-        const generalLaborCostPromise = async () => {
+      const laborCostsMap = laborCostsResults.reduce((acc, item) => {
+        if (item && item.sectorId) {
+          acc[item.sectorId] = item;
+        }
+        return acc;
+      }, {});
 
-            const url = `${BACKEND_URL}/api/expenses/sector-labor-costs`; 
-            try {
-                const response = await authFetch(url, {
-                    method: 'GET',
-                    headers: getAuthHeaders()
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    return {
-                        sectorId: 'no-sector',
-                        totalCost: data.sectorLaborCost || 0,
-                        paidCost: data.paidLaborCost || 0,
-                        unpaidCost: data.unpaidLaborCost || 0,
-                        totalEntries: data.totalEntries || 0,
-                        paidEntries: data.paidEntries || 0,
-                        unpaidEntries: data.unpaidEntries || 0
-                    };
-                }
-            } catch (error) {
-                console.error("Error fetching general labor costs:", error);
-            }
-            return { sectorId: 'no-sector', totalCost: 0, totalEntries: 0 };
-        };
-
-        const laborCostsResults = await Promise.all([...laborCostsPromises, generalLaborCostPromise()]);
-        
-        const laborCostsMap = laborCostsResults.reduce((acc, item) => {
-            if (item && item.sectorId) {
-                acc[item.sectorId] = item;
-            }
-            return acc;
-        }, {});
-        
-        setSectorLaborCosts(laborCostsMap);
-        
+      console.log('Final labor costs map:', laborCostsMap);
+      setSectorLaborCosts(laborCostsMap);
     } catch (error) {
-        console.error('Error fetching sector labor costs:', error);
+      console.error('Error fetching sector labor costs:', error);
+      setAlert({ type: 'error', message: 'Błąd podczas ładowania kosztów pracowniczych' });
     }
-}, [sectors]);
-
-    useEffect(() => {
-        fetchSectorLaborCosts();
-    }, [fetchSectorLaborCosts]);
-
-    useEffect(() => {
-        fetchAllData();
-    }, []);
+  }, [sectors]);
 
     useEffect(() => {
     if (sectors.length > 0) {
         fetchSectorLaborCosts();
     }
 }, [sectors, fetchSectorLaborCosts]);
+
+    useEffect(() => {
+        fetchAllData();
+    }, []);
+
 
     const fetchAllData = async () => {
         setIsLoading(true);
@@ -206,14 +224,23 @@ export default function ProfitAnalysis() {
                     allData = [...allData, ...data.content];
                     totalPages = data.totalPages;
                     currentPage++;
-                } else break;
+                } else {
+                    setAlert({ 
+                        type: 'error', 
+                        message: 'Błąd podczas pobierania przychodów. Spróbuj odświeżyć stronę.' 
+                    });
+                    break;
+                }
             }
             setProfits(allData);
         } catch (error) {
             console.error('Error fetching profits:', error);
+            setAlert({ 
+                type: 'error', 
+                message: 'Nie udało się pobrać danych o przychodach. Sprawdź połączenie z internetem.' 
+            });
         }
     };
-
     const fetchExpenses = async () => {
         let allData = [];
         let currentPage = 0;

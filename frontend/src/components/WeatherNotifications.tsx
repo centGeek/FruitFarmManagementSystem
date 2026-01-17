@@ -482,40 +482,31 @@ const checkWeatherAlerts = useCallback(async (coords: OpenMeteoCoordinates, rule
     const alerts: ForecastAlert[] = [];
 
     try {
-        // Pobierz maksymalną liczbę dni do sprawdzenia
-        const maxDays = Math.max(...rules.filter(r => r.enabled).map(r => r.daysAhead));
-        
+        const enabledRules = rules.filter(r => r.enabled);
+        const maxDays = Math.max(...enabledRules.map(r => r.daysAhead));
+        const response = await fetch(
+          `https://api.open-meteo.com/v1/forecast?` +
+          `latitude=${coords.lat}&` + `longitude=${coords.lon}&` +
+          `daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&` +
+          `timezone=Europe/Warsaw&` +`forecast_days=${maxDays}`
+        );
         console.log('Sprawdzanie alertów dla:', {
             coords,
             maxDays,
             activeRules: rules.filter(r => r.enabled)
         });
-        
-        const response = await fetch(
-            `https://api.open-meteo.com/v1/forecast?` +
-            `latitude=${coords.lat}&` +
-            `longitude=${coords.lon}&` +
-            `daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&` +
-            `timezone=Europe/Warsaw&` +
-            `forecast_days=${maxDays}`
-        );
-
         if (!response.ok) {
-            throw new Error('Nie udało się pobrać prognozy pogody');
+          throw new Error('Nie udało się pobrać prognozy pogody');
         }
 
         const data = await response.json();
-        console.log('Dane prognozy:', data);
         
-        rules.filter(rule => rule.enabled).forEach(rule => {
-            console.log(`Sprawdzanie reguły: ${rule.weatherNotificationType}, próg: ${rule.threshold}, dni: ${rule.daysAhead}`);
-            
-            for (let i = 0; i < rule.daysAhead && i < data.daily.time.length; i++) {
+        enabledRules.forEach(rule => {
+          for (let i = 0; i < rule.daysAhead && i < data.daily.time.length; i++) {
                 const date = data.daily.time[i];
                 let triggered = false;
                 let value = 0;
                 let message = '';
-
                 switch (rule.weatherNotificationType) {
                     case 'FROST_WARNING':
                         value = data.daily.temperature_2m_min[i];

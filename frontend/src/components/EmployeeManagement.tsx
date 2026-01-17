@@ -291,7 +291,7 @@ const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinanceDetails
                     <button
                         onClick={() => onFinanceDetails(employee)}
                         className="p-2 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors text-base"
-                        title="Detale Pracy / Finanse 💼"
+                        title="Detale Pracy 💼"
                         disabled={isProcessing}
                     >
                         💼
@@ -498,7 +498,7 @@ const AdvancePaySection = ({ employee, onAdvanceSave }) => {
 
             <div className="p-4 border rounded-xl shadow-sm bg-gray-50 space-y-4">
                 <h4 className="text-lg font-bold text-gray-800 flex items-center">
-                    ➕ Wypłać pracownikowi Zaliczkę
+                    ➕ Wypłać pracownikowi zaliczkę
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="sm:col-span-2">
@@ -536,7 +536,7 @@ const AdvancePaySection = ({ employee, onAdvanceSave }) => {
                     value={advanceDescription}
                     handleChange={(e) => setAdvanceDescription(e.target.value)} 
                     isLoading={isSaving || isLoading}
-                    placeholder="np. Na paliwo, Na obiad"
+                    placeholder="np. Na jedzenie"
                 />
             </div>
 
@@ -723,7 +723,7 @@ const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsSave }) 
         <Modal 
             isOpen={isOpen} 
             onClose={onClose} 
-            title={<span><span className="mr-2 text-purple-600">💼</span>Detale Pracy i Finanse - {employee.name} {employee.surname}</span>}
+            title={<span><span className="mr-2 text-purple-600">💼</span>Detale Pracy - {employee.name} {employee.surname}</span>}
             headerColor="bg-purple-50"
         >
             <div className="space-y-6">
@@ -733,7 +733,7 @@ const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsSave }) 
                         {employee.nickname && <span className="italic text-blue-700"> "{employee.nickname}"</span>}
                     </p>
                     <p className="text-xs text-blue-700 mt-1">
-                        📧 {employee.email}
+                        {employee.email}
                     </p>
                 </div>
                 
@@ -1025,7 +1025,7 @@ export default function EmployeeManagement() {
                 let errorMessage = response.statusText;
                 const error = await response.json();
                 errorMessage = error.message || error.error || response.statusText; 
-                setAlert({ type: 'error', message: `Błąd zapisu (${response.status}): ${errorMessage}` });
+                setAlert({ type: 'error', message: `${errorMessage}` });
             }
         } catch (error) {
             setAlert({ type: 'error', message: `Błąd sieci: Nie można zapisać danych pracownika. Sprawdź CORS/Token.` });

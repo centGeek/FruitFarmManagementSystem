@@ -46,14 +46,14 @@ public class SectorService {
                 .message("Dodano sektor: " + savedSector.getDescription() +
                         " z uprawą: " + savedSector.getPlantType() + " i odmianą: " + savedSector.getVariety())
                 .createdAt(LocalDateTime.now())
-                .userDTO(UserMapper.mapFromEntity(userEntity))
+                .userDto(UserMapper.mapFromEntity(userEntity))
                 .build(), userEntity);
 
         return convertToDTO(savedSector);
     }
 
 
-    public SectorDTO updateSector(SectorDTO sectorDTO) {
+    public void updateSector(SectorDTO sectorDTO) {
         SectorEntity sector = sectorRepository.findById(sectorDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Sector not found"));
 
@@ -75,7 +75,7 @@ public class SectorService {
 
         sector.setCoordinates(coordsAfter);
         SectorEntity savedSector = sectorRepository.save(sector);
-        return convertToDTO(savedSector);
+        convertToDTO(savedSector);
     }
 
     public SectorDTO getSectorById(Long id) {

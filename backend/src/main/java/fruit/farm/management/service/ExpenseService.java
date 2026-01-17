@@ -31,7 +31,7 @@ public class ExpenseService {
                         .message("Opis wydatku: " + expenseDTO.getDescription() + " typu: " +
                                 expenseEntity.getProductType() + " z wartością: " + expenseDTO.getAmount())
                         .createdAt(LocalDateTime.now())
-                        .userDTO(UserMapper.mapFromEntity(expenseEntity.getUserEntity())).build(),
+                        .userDto(UserMapper.mapFromEntity(expenseEntity.getUserEntity())).build(),
                 expenseEntity.getUserEntity());
         return expenseDTO;
     }

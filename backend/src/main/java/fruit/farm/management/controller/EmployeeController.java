@@ -1,6 +1,6 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.UserDTO;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.exception.NicknameAlreadyExistsException;
 import fruit.farm.management.mapper.UserMapper;
@@ -27,7 +27,7 @@ public class EmployeeController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> fetchListOfEmployees(@RequestParam(required = false) String status) {
+    public ResponseEntity<List<UserDto>> fetchListOfEmployees(@RequestParam(required = false) String status) {
 
         log.info("Getting list of users with status filter: {}", status);
         try {
@@ -37,7 +37,7 @@ public class EmployeeController {
             UserEntity gardener = userService.findByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<UserDTO> users = userService.getAllEmployees(gardener.getId());
+            List<UserDto> users = userService.getAllEmployees(gardener.getId());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
             log.error("Error fetching users: {}", e.getMessage(), e);
@@ -46,7 +46,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<UserDTO>> fetchActiveUsers() {
+    public ResponseEntity<List<UserDto>> fetchActiveUsers() {
 
         log.info("Getting list of active users");
         try {
@@ -55,7 +55,7 @@ public class EmployeeController {
             UserEntity gardener = userService.findByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<UserDTO> users = userService.getAllActiveEmployees(gardener.getId());
+            List<UserDto> users = userService.getAllActiveEmployees(gardener.getId());
             log.info("Found {} active users", users.size());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
@@ -65,7 +65,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/archived")
-    public ResponseEntity<List<UserDTO>> fetchArchivedUsers() {
+    public ResponseEntity<List<UserDto>> fetchArchivedUsers() {
 
         log.info("Getting list of archived users");
         try {
@@ -74,7 +74,7 @@ public class EmployeeController {
             UserEntity gardener = userService.findByNickname(loggedInNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            List<UserDTO> users = userService.getAllArchivedEmployees(gardener.getId());
+            List<UserDto> users = userService.getAllArchivedEmployees(gardener.getId());
             log.info("Found {} archived users", users.size());
             return ResponseEntity.ok(users);
         } catch (Exception e) {
@@ -84,7 +84,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO userRequest) {
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDto userRequest) {
 
         log.info("Attempting to register user with nickname: {}", userRequest.getNickname());
 
@@ -102,7 +102,7 @@ public class EmployeeController {
 
             UserEntity userEntity = UserMapper.mapToEntity(userRequest, gardener);
             userEntity.setCreationDate(LocalDate.now());
-            UserEntity savedUser = userService.save(userEntity);
+            UserDto savedUser = userService.addEmployee(userEntity);
             return ResponseEntity.ok(Map.of(
                     "message", "User registered successfully",
                     "nickname", userRequest.getNickname(),
@@ -117,7 +117,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody UserDTO userRequest) {
+    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody UserDto userRequest) {
         log.info("Attempting to update user with ID: {}", id);
         log.info("Update request body: {}", userRequest);
 
@@ -130,13 +130,13 @@ public class EmployeeController {
 
             UserEntity existingUser = optionalUser.get();
 
-            UserEntity updatedUser = userService.update(existingUser, userRequest);
-            log.info("User updated successfully with ID: {}", updatedUser.getId());
+            UserDto userDTO = userService.update(existingUser, userRequest);
+            log.info("User updated successfully with ID: {}", userDTO.getId());
 
             return ResponseEntity.ok(Map.of(
                     "message", "User updated successfully",
                     "id", id.toString(),
-                    "nickname", updatedUser.getNickname()
+                    "nickname", userDTO.getNickname()
             ));
 
         } catch (Exception e) {
@@ -219,7 +219,7 @@ public class EmployeeController {
             }
 
             user.setActive(newStatus);
-            UserEntity updatedUser = userService.save(user);
+            UserDto updatedUser = userService.addEmployee(user);
 
             String action = newStatus ? "activated" : "archived";
             log.info("User {} {} successfully", user.getNickname(), action);

@@ -19,6 +19,6 @@ public class NotificationMapper {
         return new NotificationEntity(notificationDTO.getId(),
                 notificationDTO.getNotificationType(), notificationDTO.getTitle(),
                 notificationDTO.getMessage(), notificationDTO.getCreatedAt(), UserMapper.mapToEntity(
-                        notificationDTO.getUserDTO(), gardener));
+                        notificationDTO.getUserDto(), gardener));
     }
 }

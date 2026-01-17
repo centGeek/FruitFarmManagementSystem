@@ -1,6 +1,6 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.UserDTO;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.security.JwtService;
 import fruit.farm.management.service.UserService;
@@ -74,26 +74,33 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDTO request, HttpServletResponse response) {
+    public ResponseEntity<?> register(@RequestBody UserDto request, HttpServletResponse response) {
         try {
             UserEntity savedUser = userService.registerUser(request);
+
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword())
             );
 
             User user = (User) authentication.getPrincipal();
-            String token = jwtService.generateAccessToken(
-                    savedUser.getId(),
-                    user.getUsername(),
-                    user.getAuthorities()
-                            .stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toList())
-            );
+            List<String> roles = user.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+
+            String token = jwtService.generateAccessToken(savedUser.getId(), user.getUsername(), roles);
+            String refreshToken = jwtService.generateRefreshToken(savedUser.getId(), user.getUsername(), roles);
+
             Cookie cookie = new Cookie("accessToken", token);
             cookie.setPath("/");
+            cookie.setHttpOnly(true);
             cookie.setMaxAge(3600);
             response.addCookie(cookie);
+
+            Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+            refreshCookie.setPath("/");
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7 dni
+            response.addCookie(refreshCookie);
 
             return ResponseEntity.ok(new AuthResponse(token, request.getNickname()));
 
@@ -105,16 +112,18 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-
+        // Czyścimy Access Token
         Cookie cookie = new Cookie("accessToken", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
+        cookie.setHttpOnly(true);
         response.addCookie(cookie);
 
-        Cookie refreshToken = new Cookie("refreshToken", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(refreshToken);
+        Cookie refreshCookie = new Cookie("refreshToken", null);
+        refreshCookie.setMaxAge(0);
+        refreshCookie.setPath("/");
+        refreshCookie.setHttpOnly(true);
+        response.addCookie(refreshCookie);
 
         return ResponseEntity.ok("Successfully logged out");
     }

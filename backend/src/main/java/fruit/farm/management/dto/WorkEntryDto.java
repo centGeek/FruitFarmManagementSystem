@@ -28,7 +28,7 @@ public class WorkEntryDto {
 
     private LocalDateTime createdAt;
 
-    private UserDTO user;
+    private UserDto user;
 
     private SectorDTO sector;
 

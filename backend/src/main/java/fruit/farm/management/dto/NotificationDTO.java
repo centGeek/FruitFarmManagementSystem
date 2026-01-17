@@ -22,5 +22,5 @@ public class NotificationDTO {
 
     private LocalDateTime createdAt;
 
-    private UserDTO userDTO;
+    private UserDto userDto;
 }

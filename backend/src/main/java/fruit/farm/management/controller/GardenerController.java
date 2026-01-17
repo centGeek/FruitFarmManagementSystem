@@ -1,6 +1,6 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.UserDTO;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.dto.UserLocationDTO;
 import fruit.farm.management.entity.CoordinateEntity;
 import fruit.farm.management.entity.UserEntity;
@@ -38,7 +38,7 @@ public class GardenerController {
     }
 
     @GetMapping
-    public ResponseEntity<UserDTO> getGardenerProfile() {
+    public ResponseEntity<UserDto> getGardenerProfile() {
         log.info("Attempting to fetch profile for logged-in gardener.");
 
         try {
@@ -47,7 +47,7 @@ public class GardenerController {
             UserEntity gardener = userService.findById(gardenerId)
                     .orElseThrow(() -> new NotFoundException("Gardener not found with ID: " + gardenerId));
 
-            UserDTO dto = UserMapper.mapFromEntity(gardener);
+            UserDto dto = UserMapper.mapFromEntity(gardener);
 
             return ResponseEntity.ok(dto);
         } catch (NotFoundException e) {
@@ -60,7 +60,7 @@ public class GardenerController {
     }
     @PutMapping
     public ResponseEntity<Map<String, String>> updateGardenerProfile(
-            @Valid @RequestBody UserDTO userDTO) {
+            @Valid @RequestBody UserDto userDTO) {
 
         log.info("Attempting to update profile for logged-in gardener with nickname: {}", userDTO.getNickname());
 

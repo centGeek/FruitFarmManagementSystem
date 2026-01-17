@@ -1,6 +1,6 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.WorkDetailsDTO;
+import fruit.farm.management.dto.WorkDetailsDto;
 import fruit.farm.management.service.WorkDetailsService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,30 +20,30 @@ public class WorkDetailsController {
     private final WorkDetailsService workDetailsService;
 
     @GetMapping
-    public ResponseEntity<List<WorkDetailsDTO>> getAllWorkDetails() {
+    public ResponseEntity<List<WorkDetailsDto>> getAllWorkDetails() {
 
         return ResponseEntity.ok(workDetailsService.getAllWorkDetails());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<WorkDetailsDTO>> getWorkDetailsByUser(@PathVariable Long userId) {
+    public ResponseEntity<List<WorkDetailsDto>> getWorkDetailsByUser(@PathVariable Long userId) {
 
         return ResponseEntity.ok(workDetailsService.getWorkDetailsByUserId(userId));
     }
 
     @GetMapping("/user/{userId}/latest")
-    public ResponseEntity<WorkDetailsDTO> getLatestWorkDetailsForUser(@PathVariable Long userId) {
+    public ResponseEntity<WorkDetailsDto> getLatestWorkDetailsForUser(@PathVariable Long userId) {
 
-        Optional<WorkDetailsDTO> details = workDetailsService.getLatestWorkDetailsForUser(userId);
+        Optional<WorkDetailsDto> details = workDetailsService.getLatestWorkDetailsForUser(userId);
 
         return details.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @PostMapping
-    public ResponseEntity<WorkDetailsDTO> createWorkDetails(@RequestBody WorkDetailsDTO dto) {
+    public ResponseEntity<WorkDetailsDto> createWorkDetails(@RequestBody WorkDetailsDto dto) {
 
         try {
-            WorkDetailsDTO created = workDetailsService.createWorkDetails(dto);
+            WorkDetailsDto created = workDetailsService.createWorkDetails(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
             log.error("Błąd walidacji: {}", e.getMessage());
@@ -52,13 +52,13 @@ public class WorkDetailsController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<WorkDetailsDTO> updateWorkDetails(
+    public ResponseEntity<WorkDetailsDto> updateWorkDetails(
             @PathVariable Long id,
-            @RequestBody WorkDetailsDTO dto) {
+            @RequestBody WorkDetailsDto dto) {
 
         log.info("PUT /api/work-details/{} - Aktualizacja detali pracy", id);
         try {
-            WorkDetailsDTO updated = workDetailsService.updateWorkDetails(id, dto);
+            WorkDetailsDto updated = workDetailsService.updateWorkDetails(id, dto);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
             log.error("Błąd walidacji: {}", e.getMessage());

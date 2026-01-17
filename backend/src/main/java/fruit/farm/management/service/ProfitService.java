@@ -31,7 +31,7 @@ public class ProfitService {
                         .message("Opis przychodu: " + profitDTO.getDescription() + " typu: " + profitDTO.getProfitType()
                         + " z wartością: " + profitDTO.getProfit())
                         .createdAt(LocalDateTime.now())
-                        .userDTO(UserMapper.mapFromEntity(profitEntity.getUserEntity())).build(),
+                        .userDto(UserMapper.mapFromEntity(profitEntity.getUserEntity())).build(),
                 profitEntity.getUserEntity());
         return profitDTO;
     }

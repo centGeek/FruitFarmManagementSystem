@@ -63,7 +63,7 @@ public class WorkScheduleService {
                     entry.setSector(sector);
                 }
             }
-            Optional<WorkDetailsDTO> latestWorkDetailsForUser = workDetailsService.getLatestWorkDetailsForUserByNickname(
+            Optional<WorkDetailsDto> latestWorkDetailsForUser = workDetailsService.getLatestWorkDetailsForUserByNickname(
                     request.getUser().getNickname());
             BigDecimal salary = latestWorkDetailsForUser
                     .map(workDetailsDTO -> DailySalaryCalculator.calculateDailySalary(request, workDetailsDTO))
@@ -108,7 +108,7 @@ public class WorkScheduleService {
             existingEntry.setWorkType(request.getWorkType());
         }
         existingEntry.setIsPaid(request.getIsPaid());
-        Optional<WorkDetailsDTO> latestWorkDetailsForUserByNickname = workDetailsService
+        Optional<WorkDetailsDto> latestWorkDetailsForUserByNickname = workDetailsService
                 .getLatestWorkDetailsForUserByNickname(request.getUser().getNickname());
         BigDecimal salary = latestWorkDetailsForUserByNickname
                 .map(workDetailsDTO -> DailySalaryCalculator.calculateDailySalary(request, workDetailsDTO))

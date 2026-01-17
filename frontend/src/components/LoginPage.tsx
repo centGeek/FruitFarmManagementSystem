@@ -54,14 +54,9 @@ const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disable
   </div>
 );
 
-const handleLoginSuccess = (token, nickname, loginMethod, rememberMe) => {
-  // Store token
-  if (rememberMe) {
-    localStorage.setItem('authToken', token);
-  } else {
-    sessionStorage.setItem('authToken', token);
-  }
+const handleLoginSuccess = (token, nickname, loginMethod) => {
   
+  sessionStorage.setItem('authToken', token);
   localStorage.setItem('user', JSON.stringify({
     nickname: nickname,
     loginTime: new Date().toISOString(),
@@ -73,7 +68,7 @@ const handleLoginSuccess = (token, nickname, loginMethod, rememberMe) => {
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({nickname: '', password: '', rememberMe: false });
+  const [formData, setFormData] = useState({nickname: '', password: ''});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -108,11 +103,10 @@ export default function LoginPage() {
       const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        credentials: 'include', // <--- TO JEST KLUCZOWE!
         body: JSON.stringify({
-          nickname: formData.nickname.trim().toLowerCase(),
-          password: formData.password,
-          rememberMe: formData.rememberMe
+          nickname: formData.nickname,
+          password: formData.password
         }),
       });
 
@@ -122,9 +116,7 @@ export default function LoginPage() {
         handleLoginSuccess(
           data.token,
           formData.nickname.trim().toLowerCase(),
-          'nickname',
-          formData.rememberMe
-        );
+          'nickname'        );
       } else {
         setError(data.message || 'Błąd logowania');
       }
@@ -148,7 +140,7 @@ export default function LoginPage() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg">
                 <Apple className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">OrchardManager</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">MenadżerSadu</h1>
               <p className="text-gray-600">System zarządzania gospodarstwem sadowniczym</p>
             </div>
 
@@ -213,7 +205,7 @@ export default function LoginPage() {
 
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-emerald-700 p-12 flex-col justify-center text-white">
           <h2 className="text-4xl font-bold mb-6">Zarządzaj swoim sadem profesjonalnie</h2>
-          <p className="text-green-100 text-lg mb-8 leading-relaxed">
+          <p className="text-green-100 text-lg mb-8 leading-Farelaxed">
             Kompleksowy system do zarządzania gospodarstwem sadowniczym z zaawansowanymi narzędziami analizy i optymalizacji.
           </p>
           

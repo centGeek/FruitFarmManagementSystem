@@ -1,6 +1,6 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.WorkDetailsDTO;
+import fruit.farm.management.dto.WorkDetailsDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkDetailsEntity;
 import fruit.farm.management.mapper.WorkDetailsMapper;
@@ -26,33 +26,33 @@ public class WorkDetailsService {
     private final WorkDetailsRepository workDetailsRepository;
     private final UserRepository userRepository;
 
-    public List<WorkDetailsDTO> getAllWorkDetails() {
+    public List<WorkDetailsDto> getAllWorkDetails() {
         return workDetailsRepository.findAll().stream()
                 .map(WorkDetailsMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<WorkDetailsDTO> getWorkDetailsByUserId(Long userId) {
+    public List<WorkDetailsDto> getWorkDetailsByUserId(Long userId) {
         return workDetailsRepository.findByUserEntityId(userId).stream()
                 .map(WorkDetailsMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    public Optional<WorkDetailsDTO> getLatestWorkDetailsForUser(Long userId) {
+    public Optional<WorkDetailsDto> getLatestWorkDetailsForUser(Long userId) {
 
         Optional<WorkDetailsEntity> workDetailsEntity = workDetailsRepository.getLatestWorkDetailsForUserByGardenerId(userId);
         return workDetailsEntity.map(WorkDetailsMapper::mapFromEntity);
     }
 
-    public Optional<WorkDetailsDTO> getLatestWorkDetailsForUserByNickname(String nickname) {
+    public Optional<WorkDetailsDto> getLatestWorkDetailsForUserByNickname(String nickname) {
 
         Optional<WorkDetailsEntity> workDetailsForUserByNickname = workDetailsRepository.getLatestWorkDetailsForUserByNickname(nickname);
         return workDetailsForUserByNickname.map(WorkDetailsMapper::mapFromEntity);
     }
 
     @Transactional
-    public WorkDetailsDTO createWorkDetails(WorkDetailsDTO dto) {
+    public WorkDetailsDto createWorkDetails(WorkDetailsDto dto) {
 
 
         String nickname = dto.getUserDTO().getNickname();
@@ -73,7 +73,7 @@ public class WorkDetailsService {
     }
 
     @Transactional
-    public WorkDetailsDTO updateWorkDetails(Long id, WorkDetailsDTO dto) {
+    public WorkDetailsDto updateWorkDetails(Long id, WorkDetailsDto dto) {
         log.info("Aktualizacja detali pracy ID: {}", id);
 
         WorkDetailsEntity entity = workDetailsRepository.findById(id)
