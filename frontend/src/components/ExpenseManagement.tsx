@@ -374,7 +374,7 @@ const getExpenseTypeDetails = (type: string) => {
 };
 
 
-const ExpenseCard = ({ expense, onEdit, onDelete, sectors }) => {
+const ExpenseCard = ({ expense, onEdit, onDelete}) => {
     const typeDetails = getExpenseTypeDetails(expense.type);
     const isPaid = expense.paid;
     const expenseDate = new Date(expense.createdAt).toLocaleDateString('pl-PL');

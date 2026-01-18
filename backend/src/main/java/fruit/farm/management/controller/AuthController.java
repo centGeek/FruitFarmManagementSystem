@@ -6,9 +6,11 @@ import fruit.farm.management.security.JwtService;
 import fruit.farm.management.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,20 +59,15 @@ public class AuthController {
                         .collect(Collectors.toList())
         );
 
-        Cookie cookie = new Cookie("accessToken", token);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600);
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", token)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(3600)
+                .sameSite("Lax")
+                .build();
 
-        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-        refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(7 * 24 * 60 * 60);
-        refreshCookie.setHttpOnly(true);
-
-        response.addCookie(refreshCookie);
-
-        return ResponseEntity.ok(new AuthResponse(token, request.getNickname()));
+        return getResponseEntity(response, refreshToken, accessCookie);
     }
 
     @PostMapping("/register")
@@ -90,19 +87,11 @@ public class AuthController {
             String token = jwtService.generateAccessToken(savedUser.getId(), user.getUsername(), roles);
             String refreshToken = jwtService.generateRefreshToken(savedUser.getId(), user.getUsername(), roles);
 
-            Cookie cookie = new Cookie("accessToken", token);
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setMaxAge(3600);
-            response.addCookie(cookie);
+            ResponseCookie accessCookie = ResponseCookie.from("accessToken", token)
+                    .httpOnly(true).secure(false).path("/").maxAge(60 * 15)
+                    .sameSite("Lax").build();
 
-            Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-            refreshCookie.setPath("/");
-            refreshCookie.setHttpOnly(true);
-            refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7 dni
-            response.addCookie(refreshCookie);
-
-            return ResponseEntity.ok(new AuthResponse(token, request.getNickname()));
+            return getResponseEntity(response, refreshToken, accessCookie);
 
         } catch (Exception e) {
             log.error("Registration error: ", e);
@@ -110,9 +99,23 @@ public class AuthController {
         }
     }
 
+    @NotNull
+    private ResponseEntity<?> getResponseEntity(HttpServletResponse response, String refreshToken, ResponseCookie accessCookie) {
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax")
+                .build();
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return ResponseEntity.ok("success");
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        // Czyścimy Access Token
         Cookie cookie = new Cookie("accessToken", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
@@ -155,6 +158,31 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(newAccessToken, nickname));
     }
 
+    @GetMapping("/verify")
+    public ResponseEntity<?> verify(@CookieValue(value = "accessToken", required = false) String token) {
+        log.info("User is being validated.");
+        if (token == null || !jwtService.validateToken(token)) {
+            return ResponseEntity.status(401).body(new VerifyResponse(false, null, null));
+        }
+
+        try {
+            String nickname = jwtService.getNicknameFromToken(token);
+            List<String> roles = jwtService.getRolesFromToken(token);
+
+            return ResponseEntity.ok(new VerifyResponse(true, nickname, roles));
+        } catch (Exception e) {
+            log.error("Błąd podczas weryfikacji tokenu: ", e);
+            return ResponseEntity.status(401).body(new VerifyResponse(false, null, null));
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class VerifyResponse {
+        private boolean authenticated;
+        private String nickname;
+        private List<String> roles;
+    }
 
     @Data
     public static class AuthRequest {

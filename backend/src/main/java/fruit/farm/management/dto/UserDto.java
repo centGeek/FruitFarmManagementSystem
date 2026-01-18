@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class UserDto {
 
-    private Long id;
+    private long id;
 
     @NotBlank(message = "Nazwa jest wymagana")
     @Size(min = 2, max = 50, message = "Nazwa musi mieć między 2 a 50 znaków")
@@ -46,6 +46,8 @@ public class UserDto {
     private CoordinateDTO coordinateDTO;
 
     private String localityName;
+
+    private UserDto gardener;
 
     public UserDto(long id, String name, String surname, String email, LocalDate creationDate,
                    String nickname, String phoneNumber, boolean isActive,

@@ -1,6 +1,7 @@
 package fruit.farm.management.service;
 
 import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.NotificationEntity;
 import fruit.farm.management.entity.NotificationType;
 import fruit.farm.management.entity.UserEntity;
@@ -21,32 +22,32 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     @Transactional
-    public void addUserNotification(NotificationDTO notificationDTO, UserEntity gardener) {
+    public void addUserNotification(NotificationDTO notificationDTO, UserDto gardener) {
 
         notificationDTO.setNotificationType(NotificationType.USER);
         addNotification(notificationDTO, gardener);
     }
     @Transactional
-    public void addSectorNotification(NotificationDTO notificationDTO, UserEntity gardener) {
+    public void addSectorNotification(NotificationDTO notificationDTO, UserDto gardener) {
 
         notificationDTO.setNotificationType(NotificationType.SECTOR);
         addNotification(notificationDTO, gardener);
     }
     @Transactional
-    public void addProfitNotification(NotificationDTO notificationDTO, UserEntity gardener) {
+    public void addProfitNotification(NotificationDTO notificationDTO, UserDto gardener) {
 
         notificationDTO.setNotificationType(NotificationType.PROFIT);
         addNotification(notificationDTO, gardener);
     }
 
     @Transactional
-    public void addExpenseNotification(NotificationDTO notificationDTO, UserEntity gardener) {
+    public void addExpenseNotification(NotificationDTO notificationDTO, UserDto gardener) {
 
         notificationDTO.setNotificationType(NotificationType.EXPENSE);
         addNotification(notificationDTO, gardener);
     }
 
-    private void addNotification(NotificationDTO notificationDTO,  UserEntity gardener) {
+    private void addNotification(NotificationDTO notificationDTO,  UserDto gardener) {
 
         notificationDTO.setCreatedAt(LocalDateTime.now());
         NotificationEntity notificationEntity = NotificationMapper.mapToEntity(notificationDTO, gardener);

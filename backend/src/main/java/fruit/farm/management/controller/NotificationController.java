@@ -1,6 +1,7 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.service.NotificationService;
 import fruit.farm.management.service.UserService;
@@ -26,7 +27,7 @@ public class NotificationController {
     public ResponseEntity<List<NotificationDTO>> getAllNotifications() {
 
         log.info("Fetching all notifications");
-        UserEntity loggedUser = userService.getLoggedUser();
+        UserDto loggedUser = userService.getLoggedUser();
         List<NotificationDTO> notifications = notificationService.getAllNotificationsByUserSortedByDate(loggedUser.getId());
         return ResponseEntity.ok(notifications);
     }

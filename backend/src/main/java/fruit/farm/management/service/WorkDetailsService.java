@@ -96,9 +96,9 @@ public class WorkDetailsService {
         workDetailsRepository.deleteById(id);
     }
 
-    public Optional<WorkDetailsEntity> getLatestWorkDetailsByGardener(long id) {
-
-        return workDetailsRepository.getLatestWorkDetailsByGardener(id);
+    public Optional<WorkDetailsDto> getLatestWorkDetailsByGardener(long id) {
+        Optional<WorkDetailsEntity> latestWorkDetailsByGardener = workDetailsRepository.getLatestWorkDetailsByGardener(id);
+        return latestWorkDetailsByGardener.map(WorkDetailsMapper::mapToDTO);
     }
 
 }

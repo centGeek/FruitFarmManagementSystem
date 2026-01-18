@@ -40,15 +40,15 @@ public class UserService {
     private CoordinateRepository coordinateRepository;
     private UserCredentialsRepository userCredentialsRepository;
 
-    public UserEntity getLoggedUser() {
+    public UserDto getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedWithNickname = authentication.getName();
 
-        return userRepository.findByNickname(loggedWithNickname)
+        return UserMapper.mapFromEntity(userRepository.findByNickname(loggedWithNickname)
                 .orElseThrow(() -> {
                     log.error("Logged in user with nickname {} not found in database.", loggedWithNickname);
                     return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Zalogowany użytkownik nie istnieje w bazie danych.");
-                });
+                }));
     }
 
     public Optional<UserEntity> findById(long id) {
@@ -86,10 +86,10 @@ public class UserService {
 
     @Transactional
     public UserDto addEmployee(UserEntity user) {
-        Optional<WorkDetailsEntity> workDetailsEntity = workDetailsService.getLatestWorkDetailsByGardener(user.getGardener().getId());
+        Optional<WorkDetailsDto> workDetailsDto = workDetailsService.getLatestWorkDetailsByGardener(user.getGardener().getId());
         UserEntity savedUser = userRepository.save(user);
-        if (workDetailsEntity.isPresent()) {
-            WorkDetailsEntity workDetails = workDetailsEntity.get();
+        if (workDetailsDto.isPresent()) {
+            WorkDetailsDto workDetails = workDetailsDto.get();
             workDetailsService.createWorkDetails(new WorkDetailsDto(
                     workDetails.getIsPaidHourly(), workDetails.getHourlyPay(), workDetails.getPayPerKilogram(),
                     workDetails.getCreatedAt(),
@@ -148,7 +148,7 @@ public class UserService {
         if (userRequest.getPassword() != null) {
             userCredentialsRepository.update(new UserCredentialsEntity(savedUser, userRequest.getPassword()));
         }
-        UserEntity loggedInUserId = this.getLoggedUser();
+        UserDto loggedInUserId = this.getLoggedUser();
         String title;
         String message;
         if (savedUser.getGardener() != null) {

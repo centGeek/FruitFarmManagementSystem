@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
-public class ProfitDTO {
+public class ProfitDto {
 
     private Long purchaseId;
 

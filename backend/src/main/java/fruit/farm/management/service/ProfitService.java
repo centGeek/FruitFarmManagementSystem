@@ -1,9 +1,10 @@
 package fruit.farm.management.service;
 
 import fruit.farm.management.dto.NotificationDTO;
-import fruit.farm.management.dto.ProfitDTO;
+import fruit.farm.management.dto.ProfitDto;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.ProfitEntity;
-import fruit.farm.management.entity.UserEntity;
+import fruit.farm.management.mapper.ProfitMapper;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.ProfitRepository;
 import lombok.AllArgsConstructor;
@@ -23,40 +24,41 @@ public class ProfitService {
     private final NotificationService notificationService;
 
     @Transactional
-    public ProfitDTO addProfit(ProfitEntity profitEntity) {
+    public ProfitDto addProfit(ProfitDto profitDto, UserDto userDto) {
 
-        ProfitDTO profitDTO = profitRepository.addProfit(profitEntity);
+        ProfitEntity profitEntity = ProfitMapper.mapToEntity(profitDto, userDto);
+        ProfitDto profitDTO = profitRepository.addProfit(profitEntity);
         notificationService.addProfitNotification(NotificationDTO.builder()
                         .title("Dodano nowy przychód!")
                         .message("Opis przychodu: " + profitDTO.getDescription() + " typu: " + profitDTO.getProfitType()
                         + " z wartością: " + profitDTO.getProfit())
                         .createdAt(LocalDateTime.now())
-                        .userDto(UserMapper.mapFromEntity(profitEntity.getUserEntity())).build(),
-                profitEntity.getUserEntity());
+                        .userDto(userDto).build(),
+                userDto);
         return profitDTO;
     }
 
-    public List<ProfitDTO> getAllProfitsByGardener(long userId) {
+    public List<ProfitDto> getAllProfitsByGardener(long userId) {
 
         return profitRepository.getAllProfitsByGardener(userId);
     }
 
-    public ProfitDTO getProfitById(Long id) {
+    public ProfitDto getProfitById(Long id) {
 
         return profitRepository.getProfitById(id);
     }
 
-    public ProfitDTO updateProfit(Long id, ProfitDTO profitDto, UserEntity userEntity) {
+    public ProfitDto updateProfit(Long id, ProfitDto profitDto, UserDto userDto) {
 
-        return profitRepository.updateProfit(id, profitDto, userEntity);
+        return profitRepository.updateProfit(id, profitDto, userDto);
     }
 
-    public void deleteProfit(Long id, UserEntity userEntity) {
+    public void deleteProfit(Long id, UserDto userDto) {
 
-        profitRepository.deleteProfit(id, userEntity);
+        profitRepository.deleteProfit(id, UserMapper.mapToEntity(userDto, null));
     }
 
-    public Page<ProfitDTO> getAllProfitsByGardenerPaginated(Long userId, Pageable pageable) {
+    public Page<ProfitDto> getAllProfitsByGardenerPaginated(Long userId, Pageable pageable) {
 
         return profitRepository.getAllProfitsByGardenerPaginated(userId, pageable);
     }

@@ -3,9 +3,8 @@ package fruit.farm.management.controller;
 import fruit.farm.management.dto.ExpenseDTO;
 import fruit.farm.management.dto.SectorDTO;
 import fruit.farm.management.dto.SectorLaborCostDTO;
-import fruit.farm.management.entity.ExpenseEntity;
-import fruit.farm.management.entity.UserEntity;
-import fruit.farm.management.mapper.ExpenseMapper;
+import fruit.farm.management.dto.UserDto;
+import fruit.farm.management.entity.ProductType;
 import fruit.farm.management.service.ExpenseService;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
@@ -14,16 +13,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -38,8 +37,9 @@ public class ExpenseController {
 
     @PostMapping
     public ResponseEntity<ExpenseDTO> createExpense(@Valid @RequestBody ExpenseDTO expenseDto) {
-        UserEntity userEntity = userService.getLoggedUser();
-        log.info("Creating expense for User ID: {}", userEntity.getId());
+
+        UserDto userDto = userService.getLoggedUser();
+        log.info("Creating expense for User ID: {}", userDto.getId());
 
         if (expenseDto.getSectorDTO() != null) {
             SectorDTO sectorById = sectorService.getSectorById(expenseDto.getSectorDTO().getId());
@@ -47,8 +47,7 @@ public class ExpenseController {
         }
 
         try {
-            ExpenseEntity expenseEntity = ExpenseMapper.mapToEntity(expenseDto, userEntity);
-            ExpenseDTO createdExpense = expenseService.addExpense(expenseEntity);
+            ExpenseDTO createdExpense = expenseService.addExpense(expenseDto, userDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdExpense);
         } catch (Exception e) {
             log.error("Error creating expense: {}", e.getMessage(), e);
@@ -57,37 +56,21 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllExpenses(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "15") int size) {
+    public ResponseEntity<Page<ExpenseResponse>> getExpenses(
 
-        UserEntity user = userService.getLoggedUser();
-        log.info("Fetching expenses for User ID: {} - Page: {}, Size: {}", user.getId(), page, size);
-
-        try {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-            Page<ExpenseDTO> expensePage = expenseService.getAllExpensesByGardenerPaginated(
-                    user.getId(),
-                    pageable
-            );
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("content", expensePage.getContent());
-            response.put("currentPage", expensePage.getNumber());
-            response.put("totalElements", expensePage.getTotalElements());
-            response.put("totalPages", expensePage.getTotalPages());
-            response.put("pageSize", expensePage.getSize());
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("Error fetching expenses for user {}: {}", user.getId(), e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+            @PageableDefault(sort = "expenseId", direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
+        UserDto user = userService.getLoggedUser();
+        log.info("Fetching expenses for User ID: {} - {}", user.getId(), pageable);
+        Page<ExpenseDTO> expensePage = expenseService.getAllPaginatedExpensesByGardener(user.getId(), pageable);
+        Page<ExpenseResponse> result = expensePage.map(dto -> new ExpenseResponse(
+                dto.getId(), dto.getAmount(), dto.getCreatedAt(), dto.getType(), dto.getDescription(),
+                dto.isPaid(), dto.getSectorDTO()));
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ExpenseDTO> getExpenseById(@PathVariable Long id) {
+
         try {
             ExpenseDTO expense = expenseService.getExpenseById(id);
             return ResponseEntity.ok(expense);
@@ -104,7 +87,7 @@ public class ExpenseController {
             @PathVariable Long id,
             @Valid @RequestBody ExpenseDTO expenseDto) {
 
-        UserEntity user = userService.getLoggedUser();
+        UserDto user = userService.getLoggedUser();
         log.info("Updating expense ID: {} for User ID: {}", id, user.getId());
 
         try {
@@ -120,7 +103,8 @@ public class ExpenseController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
-        UserEntity user = userService.getLoggedUser();
+
+        UserDto user = userService.getLoggedUser();
         log.info("Deleting expense ID: {} for User ID: {}", id, user.getId());
 
         try {
@@ -140,7 +124,7 @@ public class ExpenseController {
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month) {
 
-        UserEntity user = userService.getLoggedUser();
+        UserDto user = userService.getLoggedUser();
         log.info("Calculating labor costs for User ID: {}, Sector ID: {}, Year: {}, Month: {}",
                 user.getId(), sectorId, year, month);
 
@@ -154,4 +138,14 @@ public class ExpenseController {
                     "Nie udało się obliczyć kosztów pracy");
         }
     }
+
+    public record ExpenseResponse(
+            Long id,
+            BigDecimal amount,
+            LocalDate createdAt,
+            ProductType type,
+            String description,
+            boolean paid,
+            Object sectorDTO
+    ) {}
 }

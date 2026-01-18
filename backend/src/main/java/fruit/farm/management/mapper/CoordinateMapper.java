@@ -10,6 +10,7 @@ import java.util.List;
 public class CoordinateMapper {
 
     public static CoordinateEntity mapToEntity(CoordinateDTO coordinateDTO, SectorEntity sectorEntity) {
+
         if (coordinateDTO == null) {
             return null;
         }
@@ -17,6 +18,7 @@ public class CoordinateMapper {
     }
 
     public static CoordinateDTO mapFromEntity(CoordinateEntity coordinateEntity) {
+
         if (coordinateEntity == null) {
             return null;
         }

@@ -3,6 +3,7 @@ package fruit.farm.management.service;
 import fruit.farm.management.dto.CoordinateDTO;
 import fruit.farm.management.dto.NotificationDTO;
 import fruit.farm.management.dto.SectorDTO;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.CoordinateEntity;
 import fruit.farm.management.entity.SectorEntity;
 import fruit.farm.management.entity.UserEntity;
@@ -29,13 +30,13 @@ public class SectorService {
 
 
     @Transactional
-    public SectorDTO createSector(SectorDTO sectorDTO, UserEntity userEntity) {
+    public SectorDTO createSector(SectorDTO sectorDTO, UserDto userDto) {
 
         SectorEntity sector = new SectorEntity();
         sector.setDescription(sectorDTO.getDescription());
         sector.setPlantType(sectorDTO.getPlantType());
         sector.setCreatedAt(LocalDate.now());
-        sector.setUserEntity(userEntity);
+        sector.setUserEntity(UserMapper.mapToEntity(userDto, null));
         sector.setVariety(sectorDTO.getVariety());
         sector.setCoordinates(CoordinateMapper.mapToEntities(sectorDTO.getCoordinates(), sector));
         sector.setIsActive(true);
@@ -46,8 +47,8 @@ public class SectorService {
                 .message("Dodano sektor: " + savedSector.getDescription() +
                         " z uprawą: " + savedSector.getPlantType() + " i odmianą: " + savedSector.getVariety())
                 .createdAt(LocalDateTime.now())
-                .userDto(UserMapper.mapFromEntity(userEntity))
-                .build(), userEntity);
+                .userDto(userDto)
+                .build(), userDto);
 
         return convertToDTO(savedSector);
     }

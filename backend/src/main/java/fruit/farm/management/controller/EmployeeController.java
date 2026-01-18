@@ -106,7 +106,7 @@ public class EmployeeController {
             return ResponseEntity.ok(Map.of(
                     "message", "User registered successfully",
                     "nickname", userRequest.getNickname(),
-                    "id", savedUser.getId().toString()
+                    "id", Long.toString(savedUser.getId())
             ));
 
         } catch (Exception e) {
@@ -118,6 +118,7 @@ public class EmployeeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody UserDto userRequest) {
+
         log.info("Attempting to update user with ID: {}", id);
         log.info("Update request body: {}", userRequest);
 
@@ -148,6 +149,7 @@ public class EmployeeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
+
         log.info("Attempting to delete user with ID: {}", id);
 
         try {
@@ -177,6 +179,7 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
+
         log.info("Getting user by ID: {}", id);
 
         try {

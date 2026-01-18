@@ -18,6 +18,7 @@ public class UserRepository {
     private UserJpaRepository userJpaRepository;
 
     public List<UserEntity> getAllExceptLoggedUser() {
+
         Long loggedUserId = getCurrentUserId();
         List<UserEntity> users = userJpaRepository.findAll();
 
@@ -27,11 +28,13 @@ public class UserRepository {
     }
 
     public void delete(UserEntity userEntity) {
+
         userEntity.setActive(true);
         userJpaRepository.delete(userEntity);
     }
 
     public List<UserEntity> getAllUsersByRoleName(String roleName) {
+
         return userJpaRepository.getAllUsersByRoleName(roleName);
     }
 
@@ -46,14 +49,17 @@ public class UserRepository {
     }
 
     public List<UserEntity> getAllActiveEmployees(long gardenerId) {
+
         return userJpaRepository.getAllActiveEmployees(gardenerId);
     }
 
     public List<UserEntity> getAllUsers() {
+
         return userJpaRepository.getAll();
     }
 
     public UserEntity save(UserEntity userEntity) {
+
         return userJpaRepository.save(userEntity);
     }
 
@@ -63,6 +69,7 @@ public class UserRepository {
     }
 
     public Long getCurrentUserId() {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("User not authenticated");
@@ -81,4 +88,5 @@ public class UserRepository {
     public Optional<UserEntity> findById(Long id) {
         return userJpaRepository.findById(id);
     }
+
 }

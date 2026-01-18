@@ -1,10 +1,8 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.ProfitDTO;
+import fruit.farm.management.dto.ProfitDto;
 import fruit.farm.management.dto.SectorDTO;
-import fruit.farm.management.entity.ProfitEntity;
-import fruit.farm.management.entity.UserEntity;
-import fruit.farm.management.mapper.ProfitMapper;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.service.ProfitService;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
@@ -34,9 +32,10 @@ public class ProfitController {
     private final SectorService sectorService;
 
     @PostMapping
-    public ResponseEntity<ProfitDTO> createProfit(@Valid @RequestBody ProfitDTO profitDto) {
-        UserEntity userEntity = userService.getLoggedUser();
-        log.info("Creating profit for User ID: {}", userEntity.getId());
+    public ResponseEntity<ProfitDto> createProfit(@Valid @RequestBody ProfitDto profitDto) {
+
+        UserDto userDto = userService.getLoggedUser();
+        log.info("Creating profit for User ID: {}", userDto.getId());
 
         if(profitDto.getSectorDTO() != null) {
             SectorDTO sectorById = sectorService.getSectorById(profitDto.getSectorDTO().getId());
@@ -44,8 +43,7 @@ public class ProfitController {
         }
 
         try {
-            ProfitEntity profitEntity = ProfitMapper.mapToEntity(profitDto, userEntity);
-            ProfitDTO createdProfit = profitService.addProfit(profitEntity);
+            ProfitDto createdProfit = profitService.addProfit(profitDto, userDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdProfit);
         } catch (Exception e) {
             log.error("Error creating profit: {}", e.getMessage(), e);
@@ -58,13 +56,13 @@ public class ProfitController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
 
-        UserEntity user = userService.getLoggedUser();
+        UserDto user = userService.getLoggedUser();
         log.info("Fetching profits for User ID: {} - Page: {}, Size: {}", user.getId(), page, size);
 
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-            Page<ProfitDTO> profitPage = profitService.getAllProfitsByGardenerPaginated(
+            Page<ProfitDto> profitPage = profitService.getAllProfitsByGardenerPaginated(
                     user.getId(),
                     pageable
             );
@@ -84,9 +82,9 @@ public class ProfitController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProfitDTO> getProfitById(@PathVariable Long id) {
+    public ResponseEntity<ProfitDto> getProfitById(@PathVariable Long id) {
         try {
-            ProfitDTO profit = profitService.getProfitById(id);
+            ProfitDto profit = profitService.getProfitById(id);
             return ResponseEntity.ok(profit);
         } catch (ResponseStatusException e) {
             throw e;
@@ -97,15 +95,15 @@ public class ProfitController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProfitDTO> updateProfit(
+    public ResponseEntity<ProfitDto> updateProfit(
             @PathVariable Long id,
-            @Valid @RequestBody ProfitDTO profitDto) {
+            @Valid @RequestBody ProfitDto profitDto) {
 
-        UserEntity user = userService.getLoggedUser();
+        UserDto user = userService.getLoggedUser();
         log.info("Updating profit ID: {} for User ID: {}", id, user.getId());
 
         try {
-            ProfitDTO updatedProfit = profitService.updateProfit(id, profitDto, user);
+            ProfitDto updatedProfit = profitService.updateProfit(id, profitDto, user);
             return ResponseEntity.ok(updatedProfit);
         } catch (ResponseStatusException e) {
             throw e;
@@ -117,7 +115,7 @@ public class ProfitController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProfit(@PathVariable Long id) {
-        UserEntity user = userService.getLoggedUser();
+        UserDto user = userService.getLoggedUser();
         log.info("Deleting profit ID: {} for User ID: {}", id, user.getId());
 
         try {

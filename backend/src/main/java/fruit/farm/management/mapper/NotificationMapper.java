@@ -1,6 +1,7 @@
 package fruit.farm.management.mapper;
 
 import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.NotificationEntity;
 import fruit.farm.management.entity.UserEntity;
 
@@ -14,11 +15,11 @@ public class NotificationMapper {
                         notificationEntity.getUserEntity()));
     }
 
-    public static NotificationEntity mapToEntity(NotificationDTO notificationDTO, UserEntity gardener) {
+    public static NotificationEntity mapToEntity(NotificationDTO notificationDTO, UserDto gardener) {
 
         return new NotificationEntity(notificationDTO.getId(),
                 notificationDTO.getNotificationType(), notificationDTO.getTitle(),
                 notificationDTO.getMessage(), notificationDTO.getCreatedAt(), UserMapper.mapToEntity(
-                        notificationDTO.getUserDto(), gardener));
+                        notificationDTO.getUserDto(), UserMapper.mapToEntity(gardener, null)));
     }
 }

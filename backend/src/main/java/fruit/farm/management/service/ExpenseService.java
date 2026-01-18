@@ -2,8 +2,9 @@ package fruit.farm.management.service;
 
 import fruit.farm.management.dto.ExpenseDTO;
 import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.ExpenseEntity;
-import fruit.farm.management.entity.UserEntity;
+import fruit.farm.management.mapper.ExpenseMapper;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.ExpenseRepository;
 import lombok.AllArgsConstructor;
@@ -23,16 +24,17 @@ public class ExpenseService {
     private final NotificationService notificationService;
 
     @Transactional
-    public ExpenseDTO addExpense(ExpenseEntity expenseEntity) {
+    public ExpenseDTO addExpense(ExpenseDTO expenseDTO, UserDto userDto) {
 
-        ExpenseDTO expenseDTO = expenseRepository.addExpense(expenseEntity);
+        ExpenseEntity expenseEntity = ExpenseMapper.mapToEntity(expenseDTO, userDto);
+        expenseRepository.addExpense(expenseEntity);
         notificationService.addExpenseNotification(NotificationDTO.builder()
                         .title("Dodano nowy wydatek!")
                         .message("Opis wydatku: " + expenseDTO.getDescription() + " typu: " +
-                                expenseEntity.getProductType() + " z wartością: " + expenseDTO.getAmount())
+                                expenseDTO.getType() + " z wartością: " + expenseDTO.getAmount())
                         .createdAt(LocalDateTime.now())
-                        .userDto(UserMapper.mapFromEntity(expenseEntity.getUserEntity())).build(),
-                expenseEntity.getUserEntity());
+                        .userDto(userDto).build(),
+                userDto);
         return expenseDTO;
     }
 
@@ -46,17 +48,17 @@ public class ExpenseService {
         return expenseRepository.getExpenseById(id);
     }
 
-    public ExpenseDTO updateExpense(Long id, ExpenseDTO expenseDto, UserEntity userEntity) {
+    public ExpenseDTO updateExpense(Long id, ExpenseDTO expenseDto, UserDto userDto) {
 
-        return expenseRepository.updateExpense(id, expenseDto, userEntity);
+        return expenseRepository.updateExpense(id, expenseDto, UserMapper.mapToEntity(userDto, null));
     }
 
-    public void deleteExpense(Long id, UserEntity userEntity) {
+    public void deleteExpense(Long id, UserDto userDto) {
 
-        expenseRepository.deleteExpense(id, userEntity);
+        expenseRepository.deleteExpense(id, UserMapper.mapToEntity(userDto, null));
     }
 
-    public Page<ExpenseDTO> getAllExpensesByGardenerPaginated(Long userId, Pageable pageable) {
+    public Page<ExpenseDTO> getAllPaginatedExpensesByGardener(Long userId, Pageable pageable) {
 
         return expenseRepository.getAllExpensesByGardenerPaginated(userId, pageable);
     }
