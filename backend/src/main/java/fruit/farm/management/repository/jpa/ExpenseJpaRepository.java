@@ -25,7 +25,10 @@ public interface ExpenseJpaRepository extends JpaRepository<ExpenseEntity, Long>
     ExpenseEntity getExpenseById(@Param("expenseId") long expenseId);
 
 
-
-    @Query("SELECT e FROM expense_entity e WHERE e.userEntity.id = :userId ORDER BY e.createdAt DESC")
-    Page<ExpenseEntity> findByUserId(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT e FROM expense_entity e WHERE " +
+            "(:year IS NULL OR YEAR(e.createdAt) = :year) AND " +
+            "(:month IS NULL OR MONTH(e.createdAt) = :month) AND " +
+            "e.userEntity.id = :userId ORDER BY e.createdAt DESC ")
+    Page<ExpenseEntity> findByUserId(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month,
+                                     Pageable pageable);
 }

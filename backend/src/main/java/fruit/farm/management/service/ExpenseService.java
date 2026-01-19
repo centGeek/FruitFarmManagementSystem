@@ -58,8 +58,8 @@ public class ExpenseService {
         expenseRepository.deleteExpense(id, UserMapper.mapToEntity(userDto, null));
     }
 
-    public Page<ExpenseDTO> getAllPaginatedExpensesByGardener(Long userId, Pageable pageable) {
+    public Page<ExpenseDTO> getAllPaginatedExpensesByGardener(Long userId, Integer year, Integer month, Pageable pageable) {
 
-        return expenseRepository.getAllExpensesByGardenerPaginated(userId, pageable);
+        return expenseRepository.getAllExpensesByGardenerPaginated(userId, year, month, pageable);
     }
 }

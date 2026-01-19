@@ -3,6 +3,7 @@ package fruit.farm.management.controller;
 import fruit.farm.management.dto.ProfitDto;
 import fruit.farm.management.dto.SectorDTO;
 import fruit.farm.management.dto.UserDto;
+import fruit.farm.management.entity.ProfitType;
 import fruit.farm.management.service.ProfitService;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
@@ -10,16 +11,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/profits")
@@ -33,11 +34,10 @@ public class ProfitController {
 
     @PostMapping
     public ResponseEntity<ProfitDto> createProfit(@Valid @RequestBody ProfitDto profitDto) {
-
         UserDto userDto = userService.getLoggedUser();
         log.info("Creating profit for User ID: {}", userDto.getId());
 
-        if(profitDto.getSectorDTO() != null) {
+        if (profitDto.getSectorDTO() != null) {
             SectorDTO sectorById = sectorService.getSectorById(profitDto.getSectorDTO().getId());
             profitDto.setSectorDTO(sectorById);
         }
@@ -52,33 +52,28 @@ public class ProfitController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllProfits(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "15") int size) {
+    public ResponseEntity<Page<ProfitResponse>> getAllProfits(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @PageableDefault(sort = "purchaseId", direction = Sort.Direction.DESC, size = 100) Pageable pageable) {
 
         UserDto user = userService.getLoggedUser();
-        log.info("Fetching profits for User ID: {} - Page: {}, Size: {}", user.getId(), page, size);
+        log.info("Fetching profits for User ID: {}, Year: {}, Month: {} - {}",
+                user.getId(), year, month, pageable);
 
-        try {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<ProfitDto> profits = profitService.getAllPaginatedProfitsByGardener(
+                user.getId(), year, month, pageable);
 
-            Page<ProfitDto> profitPage = profitService.getAllProfitsByGardenerPaginated(
-                    user.getId(),
-                    pageable
-            );
+        Page<ProfitResponse> result = profits.map(dto -> new ProfitResponse(
+                dto.getPurchaseId(),
+                dto.getProfit(),
+                dto.getCreatedAt(),
+                dto.getProfitType(),
+                dto.getDescription(),
+                dto.isReceived(),
+                dto.getSectorDTO()));
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("content", profitPage.getContent());
-            response.put("currentPage", profitPage.getNumber());
-            response.put("totalElements", profitPage.getTotalElements());
-            response.put("totalPages", profitPage.getTotalPages());
-            response.put("pageSize", profitPage.getSize());
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("Error fetching profits for user {}: {}", user.getId(), e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
@@ -128,4 +123,14 @@ public class ProfitController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Nie udało się usunąć przychodu");
         }
     }
+
+    public record ProfitResponse(
+            Long purchaseId,
+            BigDecimal profit,
+            LocalDate createdAt,
+            ProfitType profitType,
+            String description,
+            boolean received,
+            SectorDTO sectorDTO
+    ) {}
 }

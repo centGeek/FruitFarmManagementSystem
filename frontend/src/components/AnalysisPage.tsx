@@ -70,126 +70,107 @@ export default function ProfitAnalysis() {
 
     const fetchSectorLaborCosts = useCallback(async () => {
     try {
-      if (!sectors || sectors.length === 0) {
-        console.log('No sectors available for labor costs');
-        return;
-      }
+        if (!sectors || sectors.length === 0) {
+            console.log('No sectors available for labor costs');
+            return;
+        }
 
-      console.log('Fetching labor costs for sectors:', sectors);
+        console.log(`Fetching labor costs for Year: ${selectedYear}, Month: ${selectedMonth}`);
 
-      const laborCostsPromises = sectors.map(async (sector) => {
-        const params = new URLSearchParams();
-        params.append('sectorId', sector.id);
-        const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
-
-        try {
-          console.log(`⏳ Making request to: ${url}`);
-          const response = await authFetch(url, {
-            method: 'GET',
-            headers: getAuthHeaders()
-          });
-
-          console.log(`✅ Response received for sector ${sector.id}:`, {
-            status: response.status,
-            ok: response.ok,
-            statusText: response.statusText
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            console.log(`📊 Labor costs data for sector ${sector.id}:`, data);
+        // 1. Przygotowanie obietnic dla każdego sektora
+        const laborCostsPromises = sectors.map(async (sector) => {
+            const params = new URLSearchParams();
+            params.append('sectorId', sector.id);
             
-            return {
-              sectorId: sector.id,
-              totalCost: Number(data.sectorLaborCost || 0),
-              paidCost: Number(data.paidLaborCost || 0),
-              unpaidCost: Number(data.unpaidLaborCost || 0),
-              totalEntries: Number(data.totalEntries || 0),
-              paidEntries: Number(data.paidEntries || 0),
-              unpaidEntries: Number(data.unpaidEntries || 0)
-            };
-          }
-        } catch (error) {
-          console.error(`❌ Error fetching labor costs for sector ${sector.id}:`, error);
-          console.error(`❌ Error details:`, {
-            message: error.message,
-            stack: error.stack
-          });
-        }
+            // Dodajemy filtry czasowe do zapytania
+            if (selectedYear !== 'all') params.append('year', selectedYear);
+            if (selectedMonth) params.append('month', selectedMonth);
 
-        return { sectorId: sector.id, totalCost: 0, totalEntries: 0 };
-      });
+            const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
 
-      const generalLaborCostPromise = async () => {
-        const url = `${BACKEND_URL}/api/expenses/sector-labor-costs`;
-        
-        console.log(`🔍 Attempting to fetch GENERAL labor costs`);
-        console.log(`📍 URL: ${url}`);
-        
-        try {
-          console.log(`⏳ Making request to: ${url}`);
-          const response = await authFetch(url, {
-            method: 'GET',
-            headers: getAuthHeaders()
-          });
+            try {
+                const response = await authFetch(url, {
+                    method: 'GET',
+                    headers: getAuthHeaders()
+                });
 
-          console.log(`✅ Response for general labor costs:`, {
-            status: response.status,
-            ok: response.ok,
-            statusText: response.statusText
-          });
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        sectorId: sector.id,
+                        totalCost: Number(data.totalCost || 0), // Zmienione na totalCost (zgodnie z DTO w Javie)
+                        paidCost: Number(data.paidCost || 0),
+                        unpaidCost: Number(data.unpaidCost || 0),
+                        totalEntries: Number(data.totalEntries || 0),
+                        paidEntries: Number(data.paidEntries || 0),
+                        unpaidEntries: Number(data.unpaidEntries || 0)
+                    };
+                }
+            } catch (error) {
+                console.error(`❌ Error fetching labor costs for sector ${sector.id}:`, error);
+            }
+            return { sectorId: sector.id, totalCost: 0, totalEntries: 0 };
+        });
 
-          if (response.ok) {
-            const data = await response.json();
-            console.log(`📊 General labor costs data:`, data);
+        // 2. Zapytanie o koszty ogólne (bez konkretnego sektora)
+        const generalLaborCostPromise = async () => {
+            const params = new URLSearchParams();
+            if (selectedYear !== 'all') params.append('year', selectedYear);
+            if (selectedMonth) params.append('month', selectedMonth);
+
+            const url = `${BACKEND_URL}/api/expenses/sector-labor-costs?${params}`;
             
-            return {
-              sectorId: 'no-sector',
-              totalCost: Number(data.sectorLaborCost || 0),
-              paidCost: Number(data.paidLaborCost || 0),
-              unpaidCost: Number(data.unpaidLaborCost || 0),
-              totalEntries: Number(data.totalEntries || 0),
-              paidEntries: Number(data.paidEntries || 0),
-              unpaidEntries: Number(data.unpaidEntries || 0)
-            };
-          }
-        } catch (error) {
-          console.error("❌ Error fetching general labor costs:", error);
-          console.error(`❌ Error details:`, {
-            message: error.message,
-            stack: error.stack
-          });
-        }
+            try {
+                const response = await authFetch(url, {
+                    method: 'GET',
+                    headers: getAuthHeaders()
+                });
 
-        return { sectorId: 'no-sector', totalCost: 0, totalEntries: 0 };
-      };
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        sectorId: 'no-sector',
+                        totalCost: Number(data.totalCost || 0),
+                        paidCost: Number(data.paidCost || 0),
+                        unpaidCost: Number(data.unpaidCost || 0),
+                        totalEntries: Number(data.totalEntries || 0),
+                        paidEntries: Number(data.paidEntries || 0),
+                        unpaidEntries: Number(data.unpaidEntries || 0)
+                    };
+                }
+            } catch (error) {
+                console.error("❌ Error fetching general labor costs:", error);
+            }
+            return { sectorId: 'no-sector', totalCost: 0, totalEntries: 0 };
+        };
 
-      const laborCostsResults = await Promise.all([...laborCostsPromises, generalLaborCostPromise()]);
+        // 3. Wykonanie wszystkich zapytań równolegle
+        const laborCostsResults = await Promise.all([...laborCostsPromises, generalLaborCostPromise()]);
 
-      const laborCostsMap = laborCostsResults.reduce((acc, item) => {
-        if (item && item.sectorId) {
-          acc[item.sectorId] = item;
-        }
-        return acc;
-      }, {});
+        // 4. Budowanie mapy wyników
+        const laborCostsMap = laborCostsResults.reduce((acc, item) => {
+            if (item && item.sectorId) {
+                acc[item.sectorId] = item;
+            }
+            return acc;
+        }, {});
 
-      console.log('Final labor costs map:', laborCostsMap);
-      setSectorLaborCosts(laborCostsMap);
+        setSectorLaborCosts(laborCostsMap);
     } catch (error) {
-      console.error('Error fetching sector labor costs:', error);
-      setAlert({ type: 'error', message: 'Błąd podczas ładowania kosztów pracowniczych' });
+        console.error('Error in fetchSectorLaborCosts:', error);
+        setAlert({ type: 'error', message: 'Błąd podczas odświeżania kosztów pracowniczych' });
     }
-  }, [sectors]);
+}, [sectors, selectedYear, selectedMonth]);
 
     useEffect(() => {
     if (sectors.length > 0) {
         fetchSectorLaborCosts();
     }
-}, [sectors, fetchSectorLaborCosts]);
+}, [sectors, selectedYear, selectedMonth, fetchSectorLaborCosts]);
 
     useEffect(() => {
-        fetchAllData();
-    }, []);
+    fetchAllData();
+}, [selectedYear, selectedMonth]);
 
 
     const fetchAllData = async () => {
@@ -211,26 +192,33 @@ export default function ProfitAnalysis() {
         let allData = [];
         let currentPage = 0;
         let totalPages = 1;
+    
+    try {
+        const params = new URLSearchParams();
+        if (selectedYear !== 'all') params.append('year', selectedYear);
+        if (selectedMonth) params.append('month', selectedMonth);
         
-        try {
-            while (currentPage < totalPages) {
-                const response = await authFetch(
-                    `${BACKEND_URL}/api/profits?page=${currentPage}&size=100`,
-                    { method: 'GET', headers: getAuthHeaders() }
-                );
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    allData = [...allData, ...data.content];
-                    totalPages = data.totalPages;
-                    currentPage++;
-                } else {
-                    setAlert({ 
-                        type: 'error', 
-                        message: 'Błąd podczas pobierania przychodów. Spróbuj odświeżyć stronę.' 
-                    });
-                    break;
-                }
+        while (currentPage < totalPages) {
+            params.set('page', currentPage.toString());
+            params.set('size', '100');
+            
+            const response = await authFetch(
+                `${BACKEND_URL}/api/profits?${params}`,
+                { method: 'GET', headers: getAuthHeaders() }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                allData = [...allData, ...data.content];
+                totalPages = data.totalPages;
+                currentPage++;
+            } else {
+                setAlert({ 
+                    type: 'error', 
+                    message: 'Błąd podczas pobierania przychodów. Spróbuj odświeżyć stronę.' 
+                });
+                break;
+            }
             }
             setProfits(allData);
         } catch (error) {
@@ -242,30 +230,36 @@ export default function ProfitAnalysis() {
         }
     };
     const fetchExpenses = async () => {
-        let allData = [];
-        let currentPage = 0;
-        let totalPages = 1;
+    let allData = [];
+    let currentPage = 0;
+    let totalPages = 1;
+    
+    try {
+        const params = new URLSearchParams();
+        if (selectedYear !== 'all') params.append('year', selectedYear);
+        if (selectedMonth) params.append('month', selectedMonth);
         
-        try {
-            while (currentPage < totalPages) {
-                const response = await authFetch(
-                    `${BACKEND_URL}/api/expenses?page=${currentPage}&size=100`,
-                    { method: 'GET', headers: getAuthHeaders() }
-                );
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    allData = [...allData, ...data.content];
-                    totalPages = data.totalPages;
-                    currentPage++;
-                } else break;
-            }
-            setExpenses(allData);
-        } catch (error) {
-            console.error('Error fetching expenses:', error);
+        while (currentPage < totalPages) {
+            params.set('page', currentPage.toString());
+            params.set('size', '100');
+            
+            const response = await authFetch(
+                `${BACKEND_URL}/api/expenses?${params}`,
+                { method: 'GET', headers: getAuthHeaders() }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                allData = [...allData, ...data.content];
+                totalPages = data.totalPages;
+                currentPage++;
+            } else break;
         }
+        setExpenses(allData);
+    } catch (error) {
+        console.error('Error fetching expenses:', error);
+    }
     };
-
     const fetchSectors = async () => {
         try {
             const response = await authFetch(`${BACKEND_URL}/api/sectors`, {
@@ -321,61 +315,35 @@ export default function ProfitAnalysis() {
     }, [profits, expenses]);
 
     const overallStats = useMemo(() => {
-        let filteredProfits = profits;
-        let filteredExpenses = expenses;
-
-        if (selectedYear !== 'all') {
-            const year = parseInt(selectedYear);
-            filteredProfits = filteredProfits.filter(p => 
-                new Date(p.createdAt).getFullYear() === year
-            );
-            filteredExpenses = filteredExpenses.filter(e => 
-                new Date(e.createdAt).getFullYear() === year
-            );
-        }
-
-        if (selectedMonth) {
-            const month = parseInt(selectedMonth);
-            filteredProfits = filteredProfits.filter(p => 
-                new Date(p.createdAt).getMonth() + 1 === month
-            );
-            filteredExpenses = filteredExpenses.filter(e => 
-                new Date(e.createdAt).getMonth() + 1 === month
-            );
-        }
-
-        const totalProfits = filteredProfits.reduce((sum, p) => sum + Number(p.profit), 0);
-        const totalExpenses = filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-
-        const laborCosts = sectorLaborCosts && Object.keys(sectorLaborCosts).length > 0
-            ? Object.values(sectorLaborCosts).reduce((sum, sector) => sum + Number(sector.totalCost || 0), 0)
-            : 0;
-        const totalExpensesWithLabor = totalExpenses + laborCosts;
         
-        const netProfit = totalProfits - totalExpensesWithLabor;
-        
-        return {
-            totalProfits,
-            totalExpenses: totalExpensesWithLabor,
-            totalExpensesNonLabor: totalExpenses,
-            laborCosts,
-            netProfit,
-            profitMargin: totalProfits > 0 ? ((netProfit / totalProfits) * 100).toFixed(1) : 0
-        };
-    }, [profits, expenses, selectedYear, selectedMonth, sectorLaborCosts]);
+    const totalProfits = profits.reduce((sum, p) => 
+    sum + Number(p.profit || 0), 0);
 
+    const totalExpenses = expenses.reduce((sum, e) => 
+    sum + Number(e.amount || 0), 0);
+
+    const laborCosts = Object.values(sectorLaborCosts || {}).reduce((sum, entry) => 
+        sum + Number(entry.totalCost || 0), 0
+    );
+
+    const totalOutgoings = totalExpenses + laborCosts;
+    const netProfit = totalProfits - totalOutgoings;
+
+    return {
+        totalProfits,
+        totalExpenses: totalOutgoings,
+        totalExpensesNonLabor: totalExpenses,
+        laborCosts,
+        netProfit,
+        profitMargin: totalProfits > 0 ? ((netProfit / totalProfits) * 100).toFixed(1) : 0
+    };
+}, [profits, expenses, selectedYear, selectedMonth, sectorLaborCosts]);
     const pieChartData = useMemo(() => {
         const sectorData = {};
         let noSectorRevenue = 0;
         let noSectorExpenses = 0;
 
         profits.forEach(profit => {
-            if (selectedYear !== 'all' && new Date(profit.createdAt).getFullYear() !== parseInt(selectedYear)) {
-                return;
-            }
-            if (selectedMonth && new Date(profit.createdAt).getMonth() + 1 !== parseInt(selectedMonth)) {
-                return;
-            }
             if (profit.sectorDTO) {
                 const sectorId = profit.sectorDTO.id;
                 if (!sectorData[sectorId]) {
@@ -392,13 +360,7 @@ export default function ProfitAnalysis() {
         });
 
         expenses.forEach(expense => {
-            if (selectedYear !== 'all' && new Date(expense.createdAt).getFullYear() !== parseInt(selectedYear)) {
-                return;
-            }
-            if (selectedMonth && new Date(expense.createdAt).getMonth() + 1 !== parseInt(selectedMonth)) {
-                return;
-            }
-            if (expense.sectorDTO) {
+        if (expense.sectorDTO) {
                 const sectorId = expense.sectorDTO.id;
                 if (!sectorData[sectorId]) {
                     sectorData[sectorId] = {
@@ -469,12 +431,6 @@ export default function ProfitAnalysis() {
         const typeData = {};
 
         profits.forEach(profit => {
-            if (selectedYear !== 'all' && new Date(profit.createdAt).getFullYear() !== parseInt(selectedYear)) {
-                return;
-            }
-            if (selectedMonth && new Date(profit.createdAt).getMonth() + 1 !== parseInt(selectedMonth)) {
-                return;
-            }
             
             const typeName = profit.profitType || 'Nieokreślony';
             if (!typeData[typeName]) {
@@ -484,14 +440,7 @@ export default function ProfitAnalysis() {
         });
 
         expenses.forEach(expense => {
-            if (selectedYear !== 'all' && new Date(expense.createdAt).getFullYear() !== parseInt(selectedYear)) {
-                return;
-            }
-            if (selectedMonth && new Date(expense.createdAt).getMonth() + 1 !== parseInt(selectedMonth)) {
-                return;
-            }
-            
-            const typeName = expense.type || 'Nieokreślony';
+        const typeName = expense.type || 'Nieokreślony';
             if (!typeData[typeName]) {
                 typeData[typeName] = { name: typeName, revenue: 0, expenses: 0 };
             }
@@ -531,12 +480,6 @@ export default function ProfitAnalysis() {
         const varietyData = {};
         
         profits.forEach(profit => {
-            if (selectedYear !== 'all' && new Date(profit.createdAt).getFullYear() !== parseInt(selectedYear)) {
-                return;
-            }
-            if (selectedMonth && new Date(profit.createdAt).getMonth() + 1 !== parseInt(selectedMonth)) {
-                return;
-            }
             
             // Sprawdź czy to wybrany typ sprzedaży
             if (profit.profitType === selectedProfitType && profit.sectorDTO && profit.sectorDTO.variety) {
@@ -563,12 +506,6 @@ export default function ProfitAnalysis() {
         const sectorData = {};
 
         profits.forEach(profit => {
-            if (selectedYear !== 'all' && new Date(profit.createdAt).getFullYear() !== parseInt(selectedYear)) {
-                return;
-            }
-            if (selectedMonth && new Date(profit.createdAt).getMonth() + 1 !== parseInt(selectedMonth)) {
-                return;
-            }
             const sectorId = profit.sectorDTO ? profit.sectorDTO.id : 'no-sector';
             const sectorName = profit.sectorDTO ? (profit.sectorDTO.description || `Sektor ${profit.sectorDTO.id}`) : 'Brak sektoru';
             
@@ -579,13 +516,7 @@ export default function ProfitAnalysis() {
         });
 
         expenses.forEach(expense => {
-            if (selectedYear !== 'all' && new Date(expense.createdAt).getFullYear() !== parseInt(selectedYear)) {
-                return;
-            }
-            if (selectedMonth && new Date(expense.createdAt).getMonth() + 1 !== parseInt(selectedMonth)) {
-                return;
-            }
-            const sectorId = expense.sectorDTO ? expense.sectorDTO.id : 'no-sector';
+        const sectorId = expense.sectorDTO ? expense.sectorDTO.id : 'no-sector';
             const sectorName = expense.sectorDTO ? (expense.sectorDTO.description || `Sektor ${expense.sectorDTO.id}`) : 'Brak sektoru';
             
             if (!sectorData[sectorId]) {

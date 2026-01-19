@@ -72,6 +72,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDto request, HttpServletResponse response) {
+
         try {
             UserEntity savedUser = userService.registerUser(request);
 
@@ -101,6 +102,7 @@ public class AuthController {
 
     @NotNull
     private ResponseEntity<?> getResponseEntity(HttpServletResponse response, String refreshToken, ResponseCookie accessCookie) {
+
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(false)
@@ -116,6 +118,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
+
         Cookie cookie = new Cookie("accessToken", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
@@ -160,6 +163,7 @@ public class AuthController {
 
     @GetMapping("/verify")
     public ResponseEntity<?> verify(@CookieValue(value = "accessToken", required = false) String token) {
+
         log.info("User is being validated.");
         if (token == null || !jwtService.validateToken(token)) {
             return ResponseEntity.status(401).body(new VerifyResponse(false, null, null));
@@ -179,6 +183,7 @@ public class AuthController {
     @Data
     @AllArgsConstructor
     public static class VerifyResponse {
+
         private boolean authenticated;
         private String nickname;
         private List<String> roles;
@@ -186,6 +191,7 @@ public class AuthController {
 
     @Data
     public static class AuthRequest {
+
         private String nickname;
         private String password;
     }
@@ -193,6 +199,7 @@ public class AuthController {
     @Data
     @AllArgsConstructor
     public static class AuthResponse {
+
         private String token;
         private String email;
     }

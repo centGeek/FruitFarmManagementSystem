@@ -99,7 +99,6 @@ public class EmployeeController {
             UserEntity gardener = userService.findByNickname(loggedInNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-
             UserEntity userEntity = UserMapper.mapToEntity(userRequest, gardener);
             userEntity.setCreationDate(LocalDate.now());
             UserDto savedUser = userService.addEmployee(userEntity);
@@ -121,7 +120,6 @@ public class EmployeeController {
 
         log.info("Attempting to update user with ID: {}", id);
         log.info("Update request body: {}", userRequest);
-
         try {
             Optional<UserEntity> optionalUser = userService.findById(id);
             if (optionalUser.isEmpty()) {
@@ -151,7 +149,6 @@ public class EmployeeController {
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
 
         log.info("Attempting to delete user with ID: {}", id);
-
         try {
             Optional<UserEntity> optionalUser = userService.findById(id);
             if (optionalUser.isPresent()) {
@@ -181,7 +178,6 @@ public class EmployeeController {
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
 
         log.info("Getting user by ID: {}", id);
-
         try {
             Optional<UserEntity> optionalUser = userService.findById(id);
             if (optionalUser.isEmpty()) {
@@ -205,6 +201,7 @@ public class EmployeeController {
     public ResponseEntity<Map<String, String>> toggleUserStatus(
             @PathVariable Long id,
             @RequestBody Map<String, Boolean> statusRequest) {
+
         log.info("Attempting to toggle status for user with ID: {}", id);
         try {
             Optional<UserEntity> optionalUser = userService.findById(id);

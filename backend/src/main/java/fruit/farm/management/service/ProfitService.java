@@ -58,8 +58,8 @@ public class ProfitService {
         profitRepository.deleteProfit(id, UserMapper.mapToEntity(userDto, null));
     }
 
-    public Page<ProfitDto> getAllProfitsByGardenerPaginated(Long userId, Pageable pageable) {
+    public Page<ProfitDto> getAllPaginatedProfitsByGardener(Long userId, Integer year, Integer month, Pageable pageable) {
 
-        return profitRepository.getAllProfitsByGardenerPaginated(userId, pageable);
+        return profitRepository.getAllProfitsByGardenerPaginated(userId, year, month, pageable);
     }
 }

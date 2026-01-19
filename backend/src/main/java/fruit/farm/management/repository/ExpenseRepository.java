@@ -70,8 +70,8 @@ public class ExpenseRepository {
         expenseJpaRepository.delete(existing);
     }
 
-    public Page<ExpenseDTO> getAllExpensesByGardenerPaginated(Long userId, Pageable pageable) {
-        Page<ExpenseEntity> page = expenseJpaRepository.findByUserId(userId, pageable);
+    public Page<ExpenseDTO> getAllExpensesByGardenerPaginated(Long userId, Integer year, Integer month, Pageable pageable) {
+        Page<ExpenseEntity> page = expenseJpaRepository.findByUserId(userId, year, month, pageable);
         return page.map(ExpenseMapper::mapFromEntity);
     }
 }

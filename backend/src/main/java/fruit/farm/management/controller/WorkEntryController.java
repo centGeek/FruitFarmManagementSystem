@@ -64,6 +64,7 @@ public class WorkEntryController {
 
         @GetMapping("/user/{userId}/unpaid")
         public ResponseEntity<List<WorkEntryDto>> getUnpaidEntriesByUserId(@PathVariable Long userId) {
+
             List<WorkEntryDto> unpaidEntries = workScheduleService.getUnpaidEntriesByUserId(userId);
             return ResponseEntity.ok(unpaidEntries);
         }
@@ -148,6 +149,7 @@ public class WorkEntryController {
 
     @PatchMapping("/{id}/approval")
     public ResponseEntity<?> toggleApproval(@PathVariable Long id, @RequestBody Map<String, Boolean> approvalRequest) {
+
         log.info("Attempting to toggle approval for work entry ID: {}", id);
         log.info("Approval request: {}", approvalRequest);
 
@@ -191,6 +193,7 @@ public class WorkEntryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteWorkEntry(@PathVariable Long id) {
+
         log.info("Attempting to delete work entry with ID: {}", id);
 
         try {
@@ -218,6 +221,7 @@ public class WorkEntryController {
 
     @PatchMapping("/{id}/paid")
     public ResponseEntity<?> togglePaid(@PathVariable Long id, @RequestBody Map<String, Boolean> paidRequest) {
+
         log.info("Attempting to toggle paid status for work entry ID: {}", id);
         log.info("Paid request: {}", paidRequest);
 
@@ -261,6 +265,7 @@ public class WorkEntryController {
 
     @PatchMapping("/user/{userId}/pay-all-and-settle")
     public ResponseEntity<?> payAllUnpaidForUser(@PathVariable Long userId) {
+
         log.info("Attempting to mark all unpaid entries as paid for user ID: {}", userId);
 
         try {
@@ -290,7 +295,8 @@ public class WorkEntryController {
 
     @PatchMapping("/user/{userId}/pay-month-and-settle")
     public ResponseEntity<?> payAllUnpaidForUserMonth(@PathVariable Long userId) {
-         log.info("Attempting to mark all unpaid entries in the current month as paid for user ID: {}", userId);
+
+        log.info("Attempting to mark all unpaid entries in the current month as paid for user ID: {}", userId);
 
         try {
             UserEntity employee = userService.findById(userId)

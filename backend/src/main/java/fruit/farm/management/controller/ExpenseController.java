@@ -57,11 +57,17 @@ public class ExpenseController {
 
     @GetMapping
     public ResponseEntity<Page<ExpenseResponse>> getExpenses(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @PageableDefault(sort = "expenseId", direction = Sort.Direction.DESC, size = 100) Pageable pageable) {
 
-            @PageableDefault(sort = "expenseId", direction = Sort.Direction.DESC, size = 15) Pageable pageable) {
         UserDto user = userService.getLoggedUser();
-        log.info("Fetching expenses for User ID: {} - {}", user.getId(), pageable);
-        Page<ExpenseDTO> expensePage = expenseService.getAllPaginatedExpensesByGardener(user.getId(), pageable);
+        log.info("Fetching expenses for User ID: {}, Year: {}, Month: {} - {}",
+                user.getId(), year, month, pageable);
+
+        Page<ExpenseDTO> expensePage = expenseService.getAllPaginatedExpensesByGardener(
+                user.getId(), year, month, pageable);
+
         Page<ExpenseResponse> result = expensePage.map(dto -> new ExpenseResponse(
                 dto.getId(), dto.getAmount(), dto.getCreatedAt(), dto.getType(), dto.getDescription(),
                 dto.isPaid(), dto.getSectorDTO()));
@@ -146,6 +152,6 @@ public class ExpenseController {
             ProductType type,
             String description,
             boolean paid,
-            Object sectorDTO
+            SectorDTO sectorDTO
     ) {}
 }

@@ -15,6 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ExceededWorkHoursException.class)
     public ResponseEntity<Map<String, Object>> handleExceededWorkHoursException(ExceededWorkHoursException ex) {
+
         Map<String, Object> errorBody = new HashMap<>();
         errorBody.put("timestamp", LocalDateTime.now());
         errorBody.put("status", HttpStatus.BAD_REQUEST.value());
@@ -25,6 +26,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+
         if (ex instanceof ExceededWorkHoursException) {
             throw ex;
         }

@@ -84,9 +84,9 @@ public class ProfitRepository {
         profitJpaRepository.delete(existing);
     }
 
-    public Page<ProfitDto> getAllProfitsByGardenerPaginated(Long userId, Pageable pageable) {
+    public Page<ProfitDto> getAllProfitsByGardenerPaginated(Long userId, Integer year, Integer month, Pageable pageable) {
 
-        Page<ProfitEntity> page = profitJpaRepository.findByUserId(userId, pageable);
+        Page<ProfitEntity> page = profitJpaRepository.findByUserId(userId, year, month, pageable);
         return page.map(ProfitMapper::mapFromEntity);
     }
 }
