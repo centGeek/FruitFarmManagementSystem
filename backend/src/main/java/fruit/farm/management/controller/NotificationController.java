@@ -1,8 +1,7 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.NotificationDto;
 import fruit.farm.management.dto.UserDto;
-import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.service.NotificationService;
 import fruit.farm.management.service.UserService;
 import lombok.AllArgsConstructor;
@@ -24,19 +23,19 @@ public class NotificationController {
     private NotificationService notificationService;
     private UserService userService;
     @GetMapping
-    public ResponseEntity<List<NotificationDTO>> getAllNotifications() {
+    public ResponseEntity<List<NotificationDto>> getAllNotifications() {
 
         log.info("Fetching all notifications");
         UserDto loggedUser = userService.getLoggedUser();
-        List<NotificationDTO> notifications = notificationService.getAllNotificationsByUserSortedByDate(loggedUser.getId());
+        List<NotificationDto> notifications = notificationService.getAllNotificationsByUserSortedByDate(loggedUser.getId());
         return ResponseEntity.ok(notifications);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<NotificationDTO>> getNotificationsByUser(@PathVariable Long userId) {
+    public ResponseEntity<List<NotificationDto>> getNotificationsByUser(@PathVariable Long userId) {
 
         log.info("Fetching notifications for user with id: {}", userId);
-        List<NotificationDTO> notifications = notificationService.getNotificationsByUserSortedByDate(userId);
+        List<NotificationDto> notifications = notificationService.getNotificationsByUserSortedByDate(userId);
         return ResponseEntity.ok(notifications);
     }
 }

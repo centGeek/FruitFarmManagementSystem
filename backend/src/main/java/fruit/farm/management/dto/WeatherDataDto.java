@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WeatherDataDTO {
+public class WeatherDataDto {
     private Long id;
     private LocalDateTime timestamp;
     private Double temperature;

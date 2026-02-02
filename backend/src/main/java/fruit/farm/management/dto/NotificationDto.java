@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 @Builder
-public class NotificationDTO {
+public class NotificationDto {
 
     private Long id;
 

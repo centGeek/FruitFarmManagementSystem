@@ -1,7 +1,7 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.NotificationDTO;
-import fruit.farm.management.dto.UserCredentialsDTO;
+import fruit.farm.management.dto.NotificationDto;
+import fruit.farm.management.dto.UserCredentialsDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.dto.WorkDetailsDto;
 import fruit.farm.management.entity.*;
@@ -95,7 +95,7 @@ public class UserService {
                     workDetails.getCreatedAt(),
                     UserMapper.mapFromEntity(user)));
         }
-        notificationService.addUserNotification(NotificationDTO.builder()
+        notificationService.addUserNotification(NotificationDto.builder()
                 .title("Dodano nowego pracownika!")
                 .message("Dodano pracownika: " + user.getName() + " " + user.getSurname())
                 .createdAt(LocalDateTime.now())
@@ -158,7 +158,7 @@ public class UserService {
             title = "Zaktualizowałeś swoje dane";
             message = "Twoje dane zostały prawidłowo zaktualizowane";
         }
-        notificationService.addUserNotification(NotificationDTO.builder()
+        notificationService.addUserNotification(NotificationDto.builder()
                 .title(title)
                 .message(message)
                 .createdAt(LocalDateTime.now())
@@ -215,7 +215,7 @@ public class UserService {
         UserEntity savedUser = this.saveGardener(newUser);
 
         UserCredentialsEntity userCredentialsEntity = UserCredentialsMapper.mapToEntity(
-                savedUser, new UserCredentialsDTO(request.getPassword(), request.getConfirmPassword()));
+                savedUser, new UserCredentialsDto(request.getPassword(), request.getConfirmPassword()));
         userCredentialsRepository.save(userCredentialsEntity);
         log.info("New user registered: {}", savedUser.getNickname());
         savedUser.setCredentials(userCredentialsEntity);

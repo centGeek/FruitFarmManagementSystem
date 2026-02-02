@@ -11,7 +11,7 @@ public class UserLocationDTO {
 
     private long userId;
 
-    private CoordinateDTO coordinateDTO;
+    private CoordinateDto coordinateDTO;
 
     private String locationName;
 

@@ -1,7 +1,7 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.AdvancePayDTO;
-import fruit.farm.management.dto.AdvancePaySumDTO;
+import fruit.farm.management.dto.AdvancePayDto;
+import fruit.farm.management.dto.AdvancePaySumDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.service.UserService;
 import fruit.farm.management.service.WorkScheduleService;
@@ -26,7 +26,7 @@ public class AdvancePayController {
     private WorkScheduleService workScheduleService;
 
     @PostMapping
-    public ResponseEntity<?> createAdvance(@RequestBody AdvancePayDTO request) {
+    public ResponseEntity<?> createAdvance(@RequestBody AdvancePayDto request) {
 
         log.info("Received advance request for user ID: {}, amount: {}", request.getUserId(), request.getAmount());
 
@@ -66,13 +66,13 @@ public class AdvancePayController {
     }
 
     @GetMapping("/user/{userId}/unsettled")
-    public ResponseEntity<List<AdvancePayDTO>> getUnsettledAdvancesForEmployee(@PathVariable Long userId) {
+    public ResponseEntity<List<AdvancePayDto>> getUnsettledAdvancesForEmployee(@PathVariable Long userId) {
 
         log.info("Attempting to fetch unsettled advances for employee ID: {}", userId);
 
         try {
 
-            List<AdvancePayDTO> unsettledAdvances = workScheduleService.getUnsettledAdvancesByUserId(userId);
+            List<AdvancePayDto> unsettledAdvances = workScheduleService.getUnsettledAdvancesByUserId(userId);
 
             log.info("Found {} unsettled advance payments for employee {}", unsettledAdvances.size(), userId);
             return ResponseEntity.ok(unsettledAdvances);
@@ -87,12 +87,12 @@ public class AdvancePayController {
     }
 
     @GetMapping("/user/sum-unsettled")
-    public ResponseEntity<AdvancePaySumDTO> getSumUnsettledAdvancesForEmployee() {
+    public ResponseEntity<AdvancePaySumDto> getSumUnsettledAdvancesForEmployee() {
 
         Long userId = userService.getLoggedUser().getId();
         try {
 
-            AdvancePaySumDTO advancePaySumDTO = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
+            AdvancePaySumDto advancePaySumDTO = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
 
             return ResponseEntity.ok(advancePaySumDTO);
 
@@ -106,7 +106,7 @@ public class AdvancePayController {
     }
 
     @PutMapping("/user/{userId}")
-    public ResponseEntity<AdvancePaySumDTO> payOffAllUnsettledAdvancePays(@PathVariable Long userId) {
+    public ResponseEntity<AdvancePaySumDto> payOffAllUnsettledAdvancePays(@PathVariable Long userId) {
 
         log.info("Attempting to pay off all unsettled advances for user ID: {}", userId);
 
@@ -114,7 +114,7 @@ public class AdvancePayController {
 
             workScheduleService.payOffAllUnsettledAdvancePays(userId);
 
-            AdvancePaySumDTO advancePaySumDTO = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
+            AdvancePaySumDto advancePaySumDTO = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
 
             log.info("Successfully paid off advances for user {}. New unsettled sum: {}", userId, advancePaySumDTO.getAmount());
             return ResponseEntity.ok(advancePaySumDTO);

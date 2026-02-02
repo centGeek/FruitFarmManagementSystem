@@ -1,16 +1,16 @@
 package fruit.farm.management.mapper;
 
-import fruit.farm.management.dto.WeatherNotificationDTO;
+import fruit.farm.management.dto.WeatherNotificationDto;
 import fruit.farm.management.entity.WeatherNotificationEntity;
 
 public class WeatherNotificationMapper {
 
-    public static WeatherNotificationDTO mapToDto(WeatherNotificationEntity entity) {
+    public static WeatherNotificationDto mapToDto(WeatherNotificationEntity entity) {
         if (entity == null) {
             return null;
         }
 
-        WeatherNotificationDTO dto = new WeatherNotificationDTO();
+        WeatherNotificationDto dto = new WeatherNotificationDto();
         dto.setId(entity.getId());
         dto.setWeatherNotificationType(entity.getWeatherNotificationType());
         dto.setThreshold(entity.getThreshold());
@@ -24,7 +24,7 @@ public class WeatherNotificationMapper {
         return dto;
     }
 
-    public static WeatherNotificationEntity mapToEntity(WeatherNotificationDTO dto) {
+    public static WeatherNotificationEntity mapToEntity(WeatherNotificationDto dto) {
         if (dto == null) {
             return null;
         }

@@ -1,6 +1,6 @@
 package fruit.farm.management.repository;
 
-import fruit.farm.management.dto.ExpenseDTO;
+import fruit.farm.management.dto.ExpenseDto;
 import fruit.farm.management.entity.ExpenseEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.ExpenseMapper;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,26 +21,26 @@ public class ExpenseRepository {
 
     private final ExpenseJpaRepository expenseJpaRepository;
 
-    public ExpenseDTO addExpense(ExpenseEntity expenseEntity) {
+    public ExpenseDto addExpense(ExpenseEntity expenseEntity) {
 
         ExpenseEntity saved = expenseJpaRepository.save(expenseEntity);
         return ExpenseMapper.mapFromEntity(saved);
     }
 
-    public List<ExpenseDTO> getAllExpensesByGardener(long userId) {
+    public List<ExpenseDto> getAllExpensesByGardener(long userId) {
         return expenseJpaRepository.getAllExpensesByGardener(userId)
                 .stream()
                 .map(ExpenseMapper::mapFromEntity)
                 .collect(Collectors.toList());
     }
 
-    public ExpenseDTO getExpenseById(Long id) {
+    public ExpenseDto getExpenseById(Long id) {
         ExpenseEntity expense = expenseJpaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wydatek nie znaleziony"));
         return ExpenseMapper.mapFromEntity(expense);
     }
 
-    public ExpenseDTO updateExpense(Long id, ExpenseDTO expenseDto, UserEntity userEntity) {
+    public ExpenseDto updateExpense(Long id, ExpenseDto expenseDto, UserEntity userEntity) {
         ExpenseEntity existing = expenseJpaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wydatek nie istnieje"));
 
@@ -70,7 +69,7 @@ public class ExpenseRepository {
         expenseJpaRepository.delete(existing);
     }
 
-    public Page<ExpenseDTO> getAllExpensesByGardenerPaginated(Long userId, Integer year, Integer month, Pageable pageable) {
+    public Page<ExpenseDto> getAllExpensesByGardenerPaginated(Long userId, Integer year, Integer month, Pageable pageable) {
         Page<ExpenseEntity> page = expenseJpaRepository.findByUserId(userId, year, month, pageable);
         return page.map(ExpenseMapper::mapFromEntity);
     }

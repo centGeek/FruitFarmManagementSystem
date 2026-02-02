@@ -1,20 +1,17 @@
 package fruit.farm.management.repository;
 
-import fruit.farm.management.dto.AdvancePayDTO;
+import fruit.farm.management.dto.AdvancePayDto;
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.AdvancePayEntity;
-import fruit.farm.management.entity.ExpenseEntity;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.mapper.AdvancePayMapper;
-import fruit.farm.management.repository.jpa.AdvancePayJpaRepository;
 import fruit.farm.management.repository.jpa.WorkEntryJpaRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -97,14 +94,14 @@ public class WorkEntryRepository {
         return advancePayRepository.save(advance);
     }
 
-    public List<AdvancePayDTO> getUnsettledAdvancesByUserId(Long userId) {
+    public List<AdvancePayDto> getUnsettledAdvancesByUserId(Long userId) {
 
         return workEntryJpaRepository.getUnsettledAdvancesByUserId(userId)
                 .stream()
                 .map(AdvancePayMapper::mapToDTO).toList();
     }
 
-    public List<AdvancePayDTO> getUnsettledAdvancesByGardenerId(Long userId) {
+    public List<AdvancePayDto> getUnsettledAdvancesByGardenerId(Long userId) {
 
         return workEntryJpaRepository.getUnsettledAdvancesByGardenerId(userId)
                 .stream()

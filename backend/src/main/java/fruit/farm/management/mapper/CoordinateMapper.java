@@ -1,6 +1,6 @@
 package fruit.farm.management.mapper;
 
-import fruit.farm.management.dto.CoordinateDTO;
+import fruit.farm.management.dto.CoordinateDto;
 import fruit.farm.management.entity.CoordinateEntity;
 import fruit.farm.management.entity.SectorEntity;
 
@@ -9,7 +9,7 @@ import java.util.List;
 
 public class CoordinateMapper {
 
-    public static CoordinateEntity mapToEntity(CoordinateDTO coordinateDTO, SectorEntity sectorEntity) {
+    public static CoordinateEntity mapToEntity(CoordinateDto coordinateDTO, SectorEntity sectorEntity) {
 
         if (coordinateDTO == null) {
             return null;
@@ -17,29 +17,29 @@ public class CoordinateMapper {
         return new CoordinateEntity(coordinateDTO.getLatitude(), coordinateDTO.getLongitude(), sectorEntity);
     }
 
-    public static CoordinateDTO mapFromEntity(CoordinateEntity coordinateEntity) {
+    public static CoordinateDto mapFromEntity(CoordinateEntity coordinateEntity) {
 
         if (coordinateEntity == null) {
             return null;
         }
-        return new CoordinateDTO(coordinateEntity.getLatitude(), coordinateEntity.getLongitude());
+        return new CoordinateDto(coordinateEntity.getLatitude(), coordinateEntity.getLongitude());
     }
 
-    public static List<CoordinateEntity> mapToEntities(List<CoordinateDTO> coordinateDTOS, SectorEntity sectorEntity) {
+    public static List<CoordinateEntity> mapToEntities(List<CoordinateDto> coordinateDtos, SectorEntity sectorEntity) {
 
         List<CoordinateEntity> coordinateEntities = new ArrayList<>();
-        for (CoordinateDTO coordinateDTO : coordinateDTOS) {
+        for (CoordinateDto coordinateDTO : coordinateDtos) {
            coordinateEntities.add(mapToEntity(coordinateDTO, sectorEntity));
         }
         return coordinateEntities;
     }
 
-    public static List<CoordinateDTO> mapFromEntities(List<CoordinateEntity> coordinateEntities, SectorEntity sectorEntity) {
+    public static List<CoordinateDto> mapFromEntities(List<CoordinateEntity> coordinateEntities, SectorEntity sectorEntity) {
 
-        List<CoordinateDTO> coordinateDTOs = new ArrayList<>();
+        List<CoordinateDto> coordinateDtos = new ArrayList<>();
         for (CoordinateEntity coordinateEntity : coordinateEntities) {
-           coordinateDTOs.add(mapFromEntity(coordinateEntity));
+           coordinateDtos.add(mapFromEntity(coordinateEntity));
         }
-        return coordinateDTOs;
+        return coordinateDtos;
     }
 }

@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class CoordinateDTO {
+public class CoordinateDto {
 
     @NotNull(message = "Szerokość geograficzna jest wymagana")
     @DecimalMin(value = "-90.0", message = "Szerokość geograficzna musi być >= -90")
@@ -21,7 +21,7 @@ public class CoordinateDTO {
     private Double longitude;
 
 
-    public CoordinateDTO(Double latitude, Double longitude) {
+    public CoordinateDto(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -37,7 +37,7 @@ public class CoordinateDTO {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CoordinateDTO that = (CoordinateDTO) o;
+        CoordinateDto that = (CoordinateDto) o;
         return latitude.equals(that.latitude) && longitude.equals(that.longitude);
     }
 

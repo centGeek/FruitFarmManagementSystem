@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserCredentialsDTO {
+public class UserCredentialsDto {
 
     @NotBlank(message = "Hasło jest wymagane")
     @Size(min = 6, message = "Hasło musi mieć minimum 6 znaków")

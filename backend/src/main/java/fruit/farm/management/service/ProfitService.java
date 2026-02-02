@@ -1,6 +1,6 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.NotificationDto;
 import fruit.farm.management.dto.ProfitDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.ProfitEntity;
@@ -28,7 +28,7 @@ public class ProfitService {
 
         ProfitEntity profitEntity = ProfitMapper.mapToEntity(profitDto, userDto);
         ProfitDto profitDTO = profitRepository.addProfit(profitEntity);
-        notificationService.addProfitNotification(NotificationDTO.builder()
+        notificationService.addProfitNotification(NotificationDto.builder()
                         .title("Dodano nowy przychód!")
                         .message("Opis przychodu: " + profitDTO.getDescription() + " typu: " + profitDTO.getProfitType()
                         + " z wartością: " + profitDTO.getProfit())

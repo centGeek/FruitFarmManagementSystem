@@ -1,6 +1,5 @@
 package fruit.farm.management.repository.jpa;
 
-import fruit.farm.management.dto.AdvancePayDTO;
 import fruit.farm.management.entity.AdvancePayEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,9 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 
 @Repository

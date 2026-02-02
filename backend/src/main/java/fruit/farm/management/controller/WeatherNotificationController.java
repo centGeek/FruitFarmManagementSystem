@@ -1,6 +1,6 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.WeatherNotificationDTO;
+import fruit.farm.management.dto.WeatherNotificationDto;
 import fruit.farm.management.service.WeatherNotificationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +23,14 @@ public class WeatherNotificationController {
     private WeatherNotificationService notificationService;
 
     @GetMapping
-    public ResponseEntity<List<WeatherNotificationDTO>> getAllNotifications() {
+    public ResponseEntity<List<WeatherNotificationDto>> getAllNotifications() {
 
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
             log.info("Fetching notifications for user: {}", loggedWithNickname);
 
-            List<WeatherNotificationDTO> notifications = notificationService.getAllNotificationsForUser(loggedWithNickname);
+            List<WeatherNotificationDto> notifications = notificationService.getAllNotificationsForUser(loggedWithNickname);
 
             log.info("Found {} notifications", notifications.size());
             return ResponseEntity.ok(notifications);
@@ -50,7 +50,7 @@ public class WeatherNotificationController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
 
-            Optional<ResponseEntity<WeatherNotificationDTO>> weatherNotificationDTOResponseEntity = notificationService.getNotificationById(id, loggedWithNickname)
+            Optional<ResponseEntity<WeatherNotificationDto>> weatherNotificationDTOResponseEntity = notificationService.getNotificationById(id, loggedWithNickname)
                     .map(ResponseEntity::ok);
             if (weatherNotificationDTOResponseEntity.isPresent()) {
                 return ResponseEntity.ok(weatherNotificationDTOResponseEntity);
@@ -67,7 +67,7 @@ public class WeatherNotificationController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createNotification(@RequestBody WeatherNotificationDTO request) {
+    public ResponseEntity<?> createNotification(@RequestBody WeatherNotificationDto request) {
 
         log.info("Creating notification: {}", request);
 
@@ -75,7 +75,7 @@ public class WeatherNotificationController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
 
-            WeatherNotificationDTO created = notificationService.createNotification(request, loggedWithNickname);
+            WeatherNotificationDto created = notificationService.createNotification(request, loggedWithNickname);
 
             log.info("Notification created successfully with ID: {}", created.getId());
 
@@ -93,7 +93,7 @@ public class WeatherNotificationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateNotification(@PathVariable Long id, @RequestBody WeatherNotificationDTO request) {
+    public ResponseEntity<?> updateNotification(@PathVariable Long id, @RequestBody WeatherNotificationDto request) {
 
         log.info("Updating notification with ID: {}", id);
 
@@ -101,7 +101,7 @@ public class WeatherNotificationController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
 
-            WeatherNotificationDTO updated = notificationService.updateNotification(id, request, loggedWithNickname);
+            WeatherNotificationDto updated = notificationService.updateNotification(id, request, loggedWithNickname);
 
             log.info("Notification updated successfully with ID: {}", id);
 
@@ -126,7 +126,7 @@ public class WeatherNotificationController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
 
-            WeatherNotificationDTO updated = notificationService.toggleNotificationStatus(id, loggedWithNickname);
+            WeatherNotificationDto updated = notificationService.toggleNotificationStatus(id, loggedWithNickname);
 
             log.info("Notification {} status toggled to: {}", id, updated.getEnabled());
 

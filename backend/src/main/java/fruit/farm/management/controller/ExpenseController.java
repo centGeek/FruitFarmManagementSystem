@@ -1,8 +1,8 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.ExpenseDTO;
+import fruit.farm.management.dto.ExpenseDto;
 import fruit.farm.management.dto.SectorDTO;
-import fruit.farm.management.dto.SectorLaborCostDTO;
+import fruit.farm.management.dto.SectorLaborCostDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.ProductType;
 import fruit.farm.management.service.ExpenseService;
@@ -36,7 +36,7 @@ public class ExpenseController {
     private final WorkScheduleService workScheduleService;
 
     @PostMapping
-    public ResponseEntity<ExpenseDTO> createExpense(@Valid @RequestBody ExpenseDTO expenseDto) {
+    public ResponseEntity<ExpenseDto> createExpense(@Valid @RequestBody ExpenseDto expenseDto) {
 
         UserDto userDto = userService.getLoggedUser();
         log.info("Creating expense for User ID: {}", userDto.getId());
@@ -47,7 +47,7 @@ public class ExpenseController {
         }
 
         try {
-            ExpenseDTO createdExpense = expenseService.addExpense(expenseDto, userDto);
+            ExpenseDto createdExpense = expenseService.addExpense(expenseDto, userDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdExpense);
         } catch (Exception e) {
             log.error("Error creating expense: {}", e.getMessage(), e);
@@ -65,7 +65,7 @@ public class ExpenseController {
         log.info("Fetching expenses for User ID: {}, Year: {}, Month: {} - {}",
                 user.getId(), year, month, pageable);
 
-        Page<ExpenseDTO> expensePage = expenseService.getAllPaginatedExpensesByGardener(
+        Page<ExpenseDto> expensePage = expenseService.getAllPaginatedExpensesByGardener(
                 user.getId(), year, month, pageable);
 
         Page<ExpenseResponse> result = expensePage.map(dto -> new ExpenseResponse(
@@ -75,10 +75,10 @@ public class ExpenseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ExpenseDTO> getExpenseById(@PathVariable Long id) {
+    public ResponseEntity<ExpenseDto> getExpenseById(@PathVariable Long id) {
 
         try {
-            ExpenseDTO expense = expenseService.getExpenseById(id);
+            ExpenseDto expense = expenseService.getExpenseById(id);
             return ResponseEntity.ok(expense);
         } catch (ResponseStatusException e) {
             throw e;
@@ -89,15 +89,15 @@ public class ExpenseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ExpenseDTO> updateExpense(
+    public ResponseEntity<ExpenseDto> updateExpense(
             @PathVariable Long id,
-            @Valid @RequestBody ExpenseDTO expenseDto) {
+            @Valid @RequestBody ExpenseDto expenseDto) {
 
         UserDto user = userService.getLoggedUser();
         log.info("Updating expense ID: {} for User ID: {}", id, user.getId());
 
         try {
-            ExpenseDTO updatedExpense = expenseService.updateExpense(id, expenseDto, user);
+            ExpenseDto updatedExpense = expenseService.updateExpense(id, expenseDto, user);
             return ResponseEntity.ok(updatedExpense);
         } catch (ResponseStatusException e) {
             throw e;
@@ -125,7 +125,7 @@ public class ExpenseController {
     }
 
     @GetMapping("/sector-labor-costs")
-    public ResponseEntity<SectorLaborCostDTO> getSectorLaborCosts(
+    public ResponseEntity<SectorLaborCostDto> getSectorLaborCosts(
             @RequestParam(required = false) Long sectorId,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month) {
@@ -135,7 +135,7 @@ public class ExpenseController {
                 user.getId(), sectorId, year, month);
 
         try {
-            SectorLaborCostDTO laborCosts = workScheduleService.calculateSectorLaborCosts(
+            SectorLaborCostDto laborCosts = workScheduleService.calculateSectorLaborCosts(
                     sectorId, user.getId(), year, month);
             return ResponseEntity.ok(laborCosts);
         } catch (Exception e) {

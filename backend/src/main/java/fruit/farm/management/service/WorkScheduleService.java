@@ -134,7 +134,7 @@ public class WorkScheduleService {
         return workEntryRepository.payAllUnpaidEntriesForCurrentMonth(employee.getId());
     }
 
-    public SectorLaborCostDTO calculateSectorLaborCosts(Long sectorId, Long userId, Integer year, Integer month) {
+    public SectorLaborCostDto calculateSectorLaborCosts(Long sectorId, Long userId, Integer year, Integer month) {
 
         List<WorkEntryEntity> entries = workEntryRepository.findAllExpensesByGivenDate(year, month, sectorId, userId);
         String sectorName = "Wszystkie sektory";
@@ -169,7 +169,7 @@ public class WorkScheduleService {
             unpaidCost = Optional.of(BigDecimal.valueOf(0));
         }
 
-        return new SectorLaborCostDTO(
+        return new SectorLaborCostDto(
                 sectorName,
                 totalCost,
                 paidCost.get(),
@@ -191,18 +191,18 @@ public class WorkScheduleService {
         workEntryRepository.saveAdvance(userEntity, amount, description, now);
     }
 
-    public List<AdvancePayDTO> getUnsettledAdvancesByUserId(Long userId) {
+    public List<AdvancePayDto> getUnsettledAdvancesByUserId(Long userId) {
 
         return workEntryRepository.getUnsettledAdvancesByUserId(userId);
     }
 
-    public AdvancePaySumDTO getSumUnsettledAdvancesByUserId(Long userId) {
+    public AdvancePaySumDto getSumUnsettledAdvancesByUserId(Long userId) {
 
         BigDecimal sum = workEntryRepository.getUnsettledAdvancesByGardenerId(userId).stream()
-                .map(AdvancePayDTO::getAmount)
+                .map(AdvancePayDto::getAmount)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return new AdvancePaySumDTO(sum);
+        return new AdvancePaySumDto(sum);
     }
 
     public void payOffAllUnsettledAdvancePays(Long userId) {

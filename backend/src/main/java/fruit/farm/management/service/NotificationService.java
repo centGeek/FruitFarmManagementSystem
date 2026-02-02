@@ -1,10 +1,9 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.NotificationDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.NotificationEntity;
 import fruit.farm.management.entity.NotificationType;
-import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.NotificationMapper;
 import fruit.farm.management.repository.NotificationRepository;
 import lombok.AllArgsConstructor;
@@ -22,32 +21,32 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     @Transactional
-    public void addUserNotification(NotificationDTO notificationDTO, UserDto gardener) {
+    public void addUserNotification(NotificationDto notificationDTO, UserDto gardener) {
 
         notificationDTO.setNotificationType(NotificationType.USER);
         addNotification(notificationDTO, gardener);
     }
     @Transactional
-    public void addSectorNotification(NotificationDTO notificationDTO, UserDto gardener) {
+    public void addSectorNotification(NotificationDto notificationDTO, UserDto gardener) {
 
         notificationDTO.setNotificationType(NotificationType.SECTOR);
         addNotification(notificationDTO, gardener);
     }
     @Transactional
-    public void addProfitNotification(NotificationDTO notificationDTO, UserDto gardener) {
+    public void addProfitNotification(NotificationDto notificationDTO, UserDto gardener) {
 
         notificationDTO.setNotificationType(NotificationType.PROFIT);
         addNotification(notificationDTO, gardener);
     }
 
     @Transactional
-    public void addExpenseNotification(NotificationDTO notificationDTO, UserDto gardener) {
+    public void addExpenseNotification(NotificationDto notificationDTO, UserDto gardener) {
 
         notificationDTO.setNotificationType(NotificationType.EXPENSE);
         addNotification(notificationDTO, gardener);
     }
 
-    private void addNotification(NotificationDTO notificationDTO,  UserDto gardener) {
+    private void addNotification(NotificationDto notificationDTO, UserDto gardener) {
 
         notificationDTO.setCreatedAt(LocalDateTime.now());
         NotificationEntity notificationEntity = NotificationMapper.mapToEntity(notificationDTO, gardener);
@@ -58,7 +57,7 @@ public class NotificationService {
     }
 
 
-    public List<NotificationDTO> getAllNotificationsByUserSortedByDate(long userId) {
+    public List<NotificationDto> getAllNotificationsByUserSortedByDate(long userId) {
 
         List<NotificationEntity> notifications = notificationRepository.findAllByUserByOrderCreatedAtDesc(userId);
         return notifications.stream()
@@ -66,7 +65,7 @@ public class NotificationService {
                 .collect(Collectors.toList());
     }
 
-    public List<NotificationDTO> getNotificationsByUserSortedByDate(Long userId) {
+    public List<NotificationDto> getNotificationsByUserSortedByDate(Long userId) {
 
         List<NotificationEntity> notifications = notificationRepository.findByUserEntityIdOrderByCreatedAtDesc(userId);
         return notifications.stream()

@@ -1,12 +1,11 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.CoordinateDTO;
-import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.CoordinateDto;
+import fruit.farm.management.dto.NotificationDto;
 import fruit.farm.management.dto.SectorDTO;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.CoordinateEntity;
 import fruit.farm.management.entity.SectorEntity;
-import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.mapper.CoordinateMapper;
 import fruit.farm.management.mapper.SectorMapper;
 import fruit.farm.management.mapper.UserMapper;
@@ -42,7 +41,7 @@ public class SectorService {
         sector.setIsActive(true);
 
         SectorEntity savedSector = sectorRepository.save(sector);
-        notificationService.addSectorNotification(NotificationDTO.builder()
+        notificationService.addSectorNotification(NotificationDto.builder()
                 .title("Dodano nowy sektor w gospodarstwie!")
                 .message("Dodano sektor: " + savedSector.getDescription() +
                         " z uprawą: " + savedSector.getPlantType() + " i odmianą: " + savedSector.getVariety())
@@ -127,7 +126,7 @@ public class SectorService {
             existingSector.getCoordinates().clear();
 
 
-            for (CoordinateDTO coordDTO : sectorDTO.getCoordinates()) {
+            for (CoordinateDto coordDTO : sectorDTO.getCoordinates()) {
                 CoordinateEntity coordEntity = new CoordinateEntity();
                 coordEntity.setLatitude(coordDTO.getLatitude());
                 coordEntity.setLongitude(coordDTO.getLongitude());

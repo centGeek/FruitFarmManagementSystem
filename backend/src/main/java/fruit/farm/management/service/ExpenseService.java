@@ -1,7 +1,7 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.ExpenseDTO;
-import fruit.farm.management.dto.NotificationDTO;
+import fruit.farm.management.dto.ExpenseDto;
+import fruit.farm.management.dto.NotificationDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.ExpenseEntity;
 import fruit.farm.management.mapper.ExpenseMapper;
@@ -24,11 +24,11 @@ public class ExpenseService {
     private final NotificationService notificationService;
 
     @Transactional
-    public ExpenseDTO addExpense(ExpenseDTO expenseDTO, UserDto userDto) {
+    public ExpenseDto addExpense(ExpenseDto expenseDTO, UserDto userDto) {
 
         ExpenseEntity expenseEntity = ExpenseMapper.mapToEntity(expenseDTO, userDto);
         expenseRepository.addExpense(expenseEntity);
-        notificationService.addExpenseNotification(NotificationDTO.builder()
+        notificationService.addExpenseNotification(NotificationDto.builder()
                         .title("Dodano nowy wydatek!")
                         .message("Opis wydatku: " + expenseDTO.getDescription() + " typu: " +
                                 expenseDTO.getType() + " z wartością: " + expenseDTO.getAmount())
@@ -38,17 +38,17 @@ public class ExpenseService {
         return expenseDTO;
     }
 
-    public List<ExpenseDTO> getAllExpensesByGardener(long userId) {
+    public List<ExpenseDto> getAllExpensesByGardener(long userId) {
 
         return expenseRepository.getAllExpensesByGardener(userId);
     }
 
-    public ExpenseDTO getExpenseById(Long id) {
+    public ExpenseDto getExpenseById(Long id) {
 
         return expenseRepository.getExpenseById(id);
     }
 
-    public ExpenseDTO updateExpense(Long id, ExpenseDTO expenseDto, UserDto userDto) {
+    public ExpenseDto updateExpense(Long id, ExpenseDto expenseDto, UserDto userDto) {
 
         return expenseRepository.updateExpense(id, expenseDto, UserMapper.mapToEntity(userDto, null));
     }
@@ -58,7 +58,7 @@ public class ExpenseService {
         expenseRepository.deleteExpense(id, UserMapper.mapToEntity(userDto, null));
     }
 
-    public Page<ExpenseDTO> getAllPaginatedExpensesByGardener(Long userId, Integer year, Integer month, Pageable pageable) {
+    public Page<ExpenseDto> getAllPaginatedExpensesByGardener(Long userId, Integer year, Integer month, Pageable pageable) {
 
         return expenseRepository.getAllExpensesByGardenerPaginated(userId, year, month, pageable);
     }

@@ -1,6 +1,6 @@
 package fruit.farm.management.service;
 
-import fruit.farm.management.dto.WeatherNotificationDTO;
+import fruit.farm.management.dto.WeatherNotificationDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WeatherNotificationEntity;
 import fruit.farm.management.mapper.WeatherNotificationMapper;
@@ -26,7 +26,7 @@ public class WeatherNotificationService {
     private UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public List<WeatherNotificationDTO> getAllNotificationsForUser(String userNickname) {
+    public List<WeatherNotificationDto> getAllNotificationsForUser(String userNickname) {
         log.info("Fetching notifications for user: {}", userNickname);
 
         UserEntity user = userRepository.findByNickname(userNickname)
@@ -42,7 +42,7 @@ public class WeatherNotificationService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<WeatherNotificationDTO> getNotificationById(Long id, String userNickname) {
+    public Optional<WeatherNotificationDto> getNotificationById(Long id, String userNickname) {
         log.info("Fetching notification with ID: {} for user: {}", id, userNickname);
 
         UserEntity user = userRepository.findByNickname(userNickname)
@@ -54,7 +54,7 @@ public class WeatherNotificationService {
     }
 
     @Transactional
-    public WeatherNotificationDTO createNotification(WeatherNotificationDTO dto, String userNickname) {
+    public WeatherNotificationDto createNotification(WeatherNotificationDto dto, String userNickname) {
         log.info("Creating notification for user: {}", userNickname);
 
         UserEntity user = userRepository.findByNickname(userNickname)
@@ -80,7 +80,7 @@ public class WeatherNotificationService {
     }
 
     @Transactional
-    public WeatherNotificationDTO updateNotification(Long id, WeatherNotificationDTO dto, String userNickname) {
+    public WeatherNotificationDto updateNotification(Long id, WeatherNotificationDto dto, String userNickname) {
         log.info("Updating notification with ID: {} for user: {}", id, userNickname);
 
         UserEntity user = userRepository.findByNickname(userNickname)
@@ -109,7 +109,7 @@ public class WeatherNotificationService {
     }
 
     @Transactional
-    public WeatherNotificationDTO toggleNotificationStatus(Long id, String userNickname) {
+    public WeatherNotificationDto toggleNotificationStatus(Long id, String userNickname) {
         log.info("Toggling notification status for ID: {}", id);
 
         UserEntity user = userRepository.findByNickname(userNickname)
@@ -148,7 +148,7 @@ public class WeatherNotificationService {
         log.info("Notification {} deleted successfully", id);
     }
     @Transactional(readOnly = true)
-    public List<WeatherNotificationDTO> getAllActiveNotifications() {
+    public List<WeatherNotificationDto> getAllActiveNotifications() {
         log.info("Fetching all active notifications for weather check");
 
         List<WeatherNotificationEntity> notifications = notificationRepository.findAllActiveNotifications();

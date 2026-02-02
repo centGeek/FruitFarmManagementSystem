@@ -43,7 +43,7 @@ public class UserDto {
 
     private boolean isActive;
 
-    private CoordinateDTO coordinateDTO;
+    private CoordinateDto coordinateDTO;
 
     private String localityName;
 
@@ -51,7 +51,7 @@ public class UserDto {
 
     public UserDto(long id, String name, String surname, String email, LocalDate creationDate,
                    String nickname, String phoneNumber, boolean isActive,
-                   CoordinateDTO coordinateDTO, String localityName) {
+                   CoordinateDto coordinateDTO, String localityName) {
         this.id = id;
         this.name = name;
         this.surname = surname;
