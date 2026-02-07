@@ -33,7 +33,7 @@ public class GardenerController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedWithNickname = authentication.getName();
 
-        return userService.findByNickname(loggedWithNickname)
+        return userService.findUserEntityByNickname(loggedWithNickname)
                 .orElseThrow(() -> new NotFoundException("Logged in gardener not found"));
     }
 
@@ -44,7 +44,7 @@ public class GardenerController {
         try {
             Long gardenerId = getGardenerId().getId();
 
-            UserEntity gardener = userService.findById(gardenerId)
+            UserEntity gardener = userService.findUserEntityById(gardenerId)
                     .orElseThrow(() -> new NotFoundException("Gardener not found with ID: " + gardenerId));
 
             UserDto dto = UserMapper.mapFromEntity(gardener);
@@ -73,11 +73,11 @@ public class GardenerController {
 
         try {
             Long gardenerId = getGardenerId().getId();
-            UserEntity existingGardener = userService.findById(gardenerId)
+            UserEntity existingGardener = userService.findUserEntityById(gardenerId)
                     .orElseThrow(() -> new NotFoundException("Gardener not found with ID: " + gardenerId));
 
             if (!userDTO.getNickname().equals(existingGardener.getNickname())) {
-                if (userService.findByNickname(userDTO.getNickname()).isPresent()) {
+                if (userService.findUserEntityByNickname(userDTO.getNickname()).isPresent()) {
                     throw new NicknameAlreadyExistsException("Ta nazwa użytkownika jest już zajęta");
                 }
             }

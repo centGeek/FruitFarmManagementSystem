@@ -1,7 +1,7 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.ProfitDto;
-import fruit.farm.management.dto.SectorDTO;
+import fruit.farm.management.dto.SectorDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.ProfitType;
 import fruit.farm.management.service.ProfitService;
@@ -38,7 +38,7 @@ public class ProfitController {
         log.info("Creating profit for User ID: {}", userDto.getId());
 
         if (profitDto.getSectorDTO() != null) {
-            SectorDTO sectorById = sectorService.getSectorById(profitDto.getSectorDTO().getId());
+            SectorDto sectorById = sectorService.getSectorById(profitDto.getSectorDTO().getId());
             profitDto.setSectorDTO(sectorById);
         }
 
@@ -131,6 +131,6 @@ public class ProfitController {
             ProfitType profitType,
             String description,
             boolean received,
-            SectorDTO sectorDTO
+            SectorDto sectorDTO
     ) {}
 }

@@ -302,7 +302,7 @@ export const useExpenseManagement = () => {
     const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
     const paginatedExpenses = filteredExpenses.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
 
-    const handlePageChange = useCallback((newPage: number) => {
+    const handlePageChange = useCallback((newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
             setCurrentPage(newPage);
             window.scrollTo({ top: 0, behavior: 'smooth' });

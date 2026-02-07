@@ -4,9 +4,13 @@ import fruit.farm.management.dto.NotificationDto;
 import fruit.farm.management.dto.UserCredentialsDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.dto.WorkDetailsDto;
-import fruit.farm.management.entity.*;
+import fruit.farm.management.entity.CoordinateEntity;
+import fruit.farm.management.entity.RoleEntity;
+import fruit.farm.management.entity.UserCredentialsEntity;
+import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.exception.IncorrectInputFormatException;
 import fruit.farm.management.exception.NicknameAlreadyExistsException;
+import fruit.farm.management.exception.NotFoundException;
 import fruit.farm.management.mapper.CoordinateMapper;
 import fruit.farm.management.mapper.UserCredentialsMapper;
 import fruit.farm.management.mapper.UserMapper;
@@ -51,14 +55,33 @@ public class UserService {
                 }));
     }
 
-    public Optional<UserEntity> findById(long id) {
+    public Optional<UserEntity> findUserEntityById(long id) {
 
         return userRepository.findById(id);
     }
 
-    public Optional<UserEntity> findByNickname(String loggedWithNickname) {
+    public Optional<UserDto> findUserById(long id) {
+
+        return Optional.of(UserMapper.mapFromEntity(userRepository.findById(id).get()));
+    }
+
+    public Optional<UserEntity> findUserEntityByNickname(String loggedWithNickname) {
 
         return userRepository.findByNickname(loggedWithNickname);
+    }
+
+    public Optional<UserDto> findUserByNickname(String loggedWithNickname) {
+
+        return Optional.of(UserMapper.mapFromEntity(userRepository.findByNickname(loggedWithNickname).get()));
+    }
+
+    public UserDto findUserNickname(String loggedWithNickname) {
+
+        Optional<UserEntity> byNickname = userRepository.findByNickname(loggedWithNickname);
+        if (byNickname.isEmpty()) {
+            throw new NotFoundException(String.format("User not found for nickname: %s", loggedWithNickname));
+        }
+        return UserMapper.mapFromEntity(byNickname.get());
     }
 
     public List<UserDto> getAllEmployees(Long id) {
@@ -115,7 +138,7 @@ public class UserService {
     public UserDto update(UserEntity existingUser, UserDto userRequest) {
 
         if (userRequest.getNickname() != null && !userRequest.getNickname().equals(existingUser.getNickname())) {
-            Optional<UserEntity> userWithNickname = this.findByNickname(userRequest.getNickname());
+            Optional<UserEntity> userWithNickname = this.findUserEntityByNickname(userRequest.getNickname());
             if (userWithNickname.isPresent() && !userWithNickname.get().getId().equals(existingUser.getId())) {
                 throw new NicknameAlreadyExistsException("Nazwa użytkownika już jest zajęta");
             }
@@ -168,9 +191,9 @@ public class UserService {
     }
 
     @Transactional
-    public UserEntity registerUser(UserDto request) {
+    public UserDto registerUser(UserDto request) {
 
-        Optional<UserEntity> existingUser = this.findByNickname(request.getNickname().toLowerCase());
+        Optional<UserEntity> existingUser = this.findUserEntityByNickname(request.getNickname().toLowerCase());
         if (existingUser.isPresent()) {
             throw new NicknameAlreadyExistsException("Użytkownik z tą nazwą użytkownika już istnieje");
         }
@@ -219,6 +242,6 @@ public class UserService {
         userCredentialsRepository.save(userCredentialsEntity);
         log.info("New user registered: {}", savedUser.getNickname());
         savedUser.setCredentials(userCredentialsEntity);
-        return savedUser;
+        return UserMapper.mapFromEntity(savedUser);
     }
 }

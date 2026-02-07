@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Droplets, Wind, Bell, X, Check, Loader, Thermometer, Calendar, BellOff, Trash2, CloudSnow, CloudRain } from 'lucide-react';
+import { Droplets, Wind, Bell, X, Check, Loader, Thermometer, Calendar, BellOff, Trash2 } from 'lucide-react';
 import type { CurrentWeather, NotificationRule } from './WeatherNotificationsHooks';
-
-export const NOTIFICATION_TYPES = [
-    { value: 'FROST_WARNING', label: '🧊 Ostrzeżenie o przymrozku', description: 'Powiadom gdy temperatura spadnie poniżej', unit: '°C', icon: CloudSnow, defaultThreshold: 2 },
-    { value: 'TEMP_LOW', label: '❄️ Niska temperatura', description: 'Powiadom gdy temperatura spadnie poniżej', unit: '°C', icon: Thermometer, defaultThreshold: 5 },
-    { value: 'TEMP_HIGH', label: '🌡️ Wysoka temperatura', description: 'Powiadom gdy temperatura przekroczy', unit: '°C', icon: Thermometer, defaultThreshold: 30 },
-    { value: 'RAIN_FORECAST', label: '🌧️ Prognoza opadów', description: 'Powiadom o opadach deszczu powyżej', unit: '% prawdopodobieństwa', icon: CloudRain, defaultThreshold: 70 },
-    { value: 'STRONG_WIND', label: '💨 Silny wiatr', description: 'Powiadom gdy wiatr przekroczy', unit: 'km/h', icon: Wind, defaultThreshold: 40 }
-];
+import {NOTIFICATION_TYPES} from '../../utils/common'
 
 export const DAYS_AHEAD_OPTIONS = [
     { value: 1, label: 'Za 1 dzień' }, { value: 2, label: 'Za 2 dni' }, { value: 3, label: 'Za 3 dni' },

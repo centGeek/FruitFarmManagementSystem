@@ -1,6 +1,6 @@
 package fruit.farm.management.mapper;
 
-import fruit.farm.management.dto.SectorDTO;
+import fruit.farm.management.dto.SectorDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.WorkEntryEntity;
@@ -16,7 +16,7 @@ public class WorkEntryMapper {
         if (entity.getUser() != null) {
             userDto = UserMapper.mapFromEntity(entity.getUser());
         }
-        SectorDTO sectorDto = null;
+        SectorDto sectorDto = null;
         if (entity.getSector() != null) {
 
             sectorDto = SectorMapper.mapToDTO(entity.getSector());

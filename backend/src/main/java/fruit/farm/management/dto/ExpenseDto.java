@@ -32,5 +32,5 @@ public class ExpenseDto {
 
     private Long userId;
 
-    private SectorDTO sectorDTO;
+    private SectorDto sectorDTO;
 }

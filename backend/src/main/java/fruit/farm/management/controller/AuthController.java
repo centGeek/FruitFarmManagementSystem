@@ -20,7 +20,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,13 +36,11 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletResponse response) {
 
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword())
-        );
-
+                new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword()));
         User user = (User) authentication.getPrincipal();
-        Optional<UserEntity> userByNickname = userService.findByNickname(user.getUsername());
+        UserDto userByNickname = userService.findUserNickname(user.getUsername());
         String token = jwtService.generateAccessToken(
-                userByNickname.get().getId(),
+                userByNickname.getId(),
                 user.getUsername(),
                 user.getAuthorities()
                         .stream()
@@ -52,7 +49,7 @@ public class AuthController {
         );
 
         String refreshToken = jwtService.generateRefreshToken(
-                userByNickname.get().getId(),
+                userByNickname.getId(),
                 user.getUsername(), user.getAuthorities()
                         .stream()
                         .map(GrantedAuthority::getAuthority)
@@ -74,7 +71,7 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody UserDto request, HttpServletResponse response) {
 
         try {
-            UserEntity savedUser = userService.registerUser(request);
+            UserDto savedUser = userService.registerUser(request);
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword())
@@ -144,7 +141,7 @@ public class AuthController {
 
         Long userId = jwtService.getIdFromToken(refreshToken);
         String nickname = jwtService.getNicknameFromToken(refreshToken);
-        UserEntity user = userService.findById(userId)
+        UserEntity user = userService.findUserEntityById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String newAccessToken = jwtService.generateAccessToken(

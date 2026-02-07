@@ -1,4 +1,6 @@
- const filteredEmployees = useMemo(() => {
+FILE USED FOR THESIS REGARDING SCREENSHOTS
+
+const filteredEmployees = useMemo(() => {
     let list = employees;
     if (searchTerm) {
         const term = searchTerm.toLowerCase();
@@ -45,12 +47,9 @@ const data = await res.json();
 
 const enabledRules = rules.filter(r => r.enabled);
 const maxDays = Math.max(...enabledRules.map(r => r.daysAhead));
-const response = await fetch(
-  `https://api.open-meteo.com/v1/forecast?` +
-  `latitude=${coords.lat}&` + `longitude=${coords.lon}&` +
-  `daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&` +
-  `timezone=Europe/Warsaw&` + `forecast_days=${maxDays}`
-);
+const response = await fetch(`https://api.open-meteo.com/v1/forecast?` +`latitude=${coords.lat}&` +
+`longitude=${coords.lon}&` + `daily=temperature_2m_max,temperature_2m_min,
+precipitation_probability_max,wind_speed_10m_max&timezone=Europe/Warsaw&forecast_days=${maxDays}`);
 if (!response.ok) {
   throw new Error('Nie udało się pobrać prognozy pogody');
 }
@@ -69,11 +68,6 @@ enabledRules.forEach(rule => {
           message = `🧊 Ostrzeżenie o przymrozku: ${value.toFixed(1)}°C (próg: ${rule.threshold}°C)`;
         }
         break;
-...
- if (triggered) {
-              alerts.push({
-...
-
 
 
 const sortPointsClockwise = (points) => {
@@ -127,25 +121,25 @@ sectorsToShow.forEach((sector) => {
     if (!sector.corners || sector.corners.length === 0) return;
     const actualIndex = sectors.indexOf(sector);
     const isBeingEdited = editMode?.sectorIndex === actualIndex;
-    const polygon = L.polygon(sector.corners, {
-      color: isBeingEdited ? '#ff6b00' : (selectedSector === actualIndex ? '#ff0000' : '#3388ff'),
+    const polygon = L.polygon(sector.corners, {color: isBeingEdited ? '#ff6b00' :
+    (selectedSector === actualIndex ? '#ff0000' : '#3388ff'),
       weight: isBeingEdited ? 3 : (selectedSector === actualIndex ? 3 : 2),
       fillColor: isBeingEdited ? '#ff6b00' : '#3388ff',
-      fillOpacity: isBeingEdited ? 0.3 : 0.2
-    });
-    const cropTypeLabel = sector.cropType ? CROP_TYPES.find(c => c.value === sector.cropType)?.label || sector.cropType : 'Nie określono';
+      fillOpacity: isBeingEdited ? 0.3 : 0.2 });
+    const cropTypeLabel = sector.cropType ?CROP_TYPES.find(
+      c => c.value === sector.cropType)?.label || sector.cropType : 'Nie określono';
     ...
     polygon.bindPopup(`
       <div style="padding: 12px;">
-        <div style="font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 6px;">
-          📍 ${sector.name}
-        </div>
-        <div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">
-          Uprawa: <b> ${cropTypeLabel} </b>
-        </div>
+        <div style="font-size: 16px; font-weight:
+        bold; color: #1f2937; margin-bottom: 6px;"> ${sector.name}</div>
+        <div style="font-size: 14px;
+        color: #6b7280; margin-bottom: 4px;">Uprawa: <b> ${cropTypeLabel} </b></div>
         ...
     });
     drawnItems.addLayer(polygon);
+
+
     sector.corners.forEach((corner, cornerIndex) => {
         if (isEditable) {
           // Tworzenie dużego, pomarańczowego uchwytu do przeciągania (24px)
@@ -154,5 +148,145 @@ sectorsToShow.forEach((sector) => {
           // Tworzenie małej, niebieskiej kropki podglądu (4px)
           marker = L.circleMarker(corner, { radius: 4, ... });
         }
+
+
+export const sortPointsClockwise = (points: { lat: number; lng: number }[]) => {
+    if (points.length !== 4) return points;
+    const centroid = {
+        lat: points.reduce((sum, p) => sum + p.lat, 0) / points.length,
+        lng: points.reduce((sum, p) => sum + p.lng, 0) / points.length
+    };
+    const topPoints = points.filter(p => p.lat >= centroid.lat);
+    const bottomPoints = points.filter(p => p.lat < centroid.lat);
+    topPoints.sort((a, b) => a.lng - b.lng);
+    bottomPoints.sort((a, b) => b.lng - a.lng);
+    return [topPoints[0], topPoints[1], bottomPoints[0], bottomPoints[1]];
+};
+
+
+
+
+const overallStats: OverallStats = useMemo(() => {
+    const totalProfits = profits.reduce((sum, p) => sum + Number(p.profit || 0), 0);
+    const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+    const laborCosts = Object.values(sectorLaborCosts || {})
+            .reduce((sum, entry) => sum + Number(entry.totalCost || 0), 0);
+    const totalOutgoings = totalExpenses + laborCosts;
+    const netProfit = totalProfits - totalOutgoings;
+    return {
+        totalProfits, totalExpenses: totalOutgoings, totalExpensesNonLabor: totalExpenses,
+        laborCosts, netProfit,
+        profitMargin: totalProfits > 0 ? ((netProfit / totalProfits) * 100).toFixed(1) : 0
+    };
+}, [profits, expenses, sectorLaborCosts]);
+
+
+const handlePageChange = useCallback((newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+        setCurrentPage(newPage);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}, [totalPages]);
+
+
+@RestController
+@RequestMapping("/api/auth")
+@AllArgsConstructor
+@Slf4j
+public class AuthController {
+
+    private AuthenticationManager authenticationManager;
+    private JwtService jwtService;
+    private UserService userService;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletResponse response) {
+        Authentication authentication = authenticationManager.authenticate(
+             new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword()));
+        User user = (User) authentication.getPrincipal();
+        UserDto userByNickname = userService.findUserNickname(user.getUsername());
+        String token = jwtService.generateAccessToken(
+        ...
+
+
+
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+    .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
+    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
+    .requestMatchers("/api/users/**").hasAnyAuthority("Gardener")
+    ...)
+    .authenticationProvider(authenticationProvider())
+    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    return http.build();
+}
+
+
+
+
+@Transactional
+public UserDto addEmployee(UserEntity user) {
+    Optional<WorkDetailsDto> workDetailsDto = workDetailsService.getLatestWorkDetailsByGardener(
+        user.getGardener().getId());
+    UserEntity savedUser = userRepository.save(user);
+    if (workDetailsDto.isPresent()) {
+        WorkDetailsDto workDetails = workDetailsDto.get();
+        workDetailsService.createWorkDetails(new WorkDetailsDto(workDetails.getIsPaidHourly(),
+            workDetails.getHourlyPay(), workDetails.getPayPerKilogram(),workDetails.getCreatedAt(),
+        UserMapper.mapFromEntity(user)));
+    }
+    notificationService.addUserNotification(NotificationDto.builder()
+            .title("Dodano nowego pracownika!").message("Dodano pracownika: " +
+            user.getName() + " " + user.getSurname()).createdAt(LocalDateTime.now())
+            .userDto(UserMapper.mapFromEntity(savedUser)).build(), this.getLoggedUser());
+    return UserMapper.mapFromEntity(savedUser);
+}
+
+
+
+
+public class UserDto {
+    private long id;
+
+    @NotBlank(message = "Nazwa jest wymagana")
+    @Size(min = 2, max = 50, message = "Nazwa musi mieć między 2 a 50 znaków")
+    private String name;
+
+
+    private String password;
+
+
+public static BigDecimal calculateDailySalary(WorkEntryDto workEntryDto,
+        WorkDetailsDto workDetailsDto) {
+    BigDecimal salary;
+    if (workDetailsDto.getIsPaidHourly()) {
+        salary = BigDecimal.valueOf(workEntryDto.getDuration())
+                .multiply(workDetailsDto.getHourlyPay());
+    } else {
+        salary = BigDecimal.valueOf(workEntryDto.getKilogramsPicked())
+                .multiply(workDetailsDto.getPayPerKilogram());
+    }
+    return salary;
+}
+
+
+@GetMapping
+public ResponseEntity<Page<ExpenseResponse>> getExpenses(
+        @RequestParam(required = false) Integer year,
+        @RequestParam(required = false) Integer month, @PageableDefault(sort = "expenseId",
+        direction = Sort.Direction.DESC, size = 100) Pageable pageable) {
+    UserDto user = userService.getLoggedUser();
+    log.info("Fetching expenses for User ID: {}, Year: {}, Month: {} - {}",
+            user.getId(), year, month, pageable);
+    Page<ExpenseDto> expensePage = expenseService.getAllPaginatedExpensesByGardener(
+            user.getId(), year, month, pageable);
+    Page<ExpenseResponse> result = expensePage.map(dto -> new ExpenseResponse(
+            dto.getId(), dto.getAmount(), dto.getCreatedAt(), dto.getType(),
+            dto.getDescription(), dto.isPaid(), dto.getSectorDTO()));
+    return ResponseEntity.ok(result);
+}
+
 
 

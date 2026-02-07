@@ -36,7 +36,7 @@ public class AdvancePayController {
         }
 
         try {
-            UserEntity employee = userService.findById(request.getUserId())
+            UserEntity employee = userService.findUserEntityById(request.getUserId())
                     .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + request.getUserId()));
 
             workScheduleService.saveAdvance(
@@ -92,9 +92,9 @@ public class AdvancePayController {
         Long userId = userService.getLoggedUser().getId();
         try {
 
-            AdvancePaySumDto advancePaySumDTO = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
+            AdvancePaySumDto advancePaySumDto = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
 
-            return ResponseEntity.ok(advancePaySumDTO);
+            return ResponseEntity.ok(advancePaySumDto);
 
         } catch (RuntimeException e) {
             log.error("Error fetching unsettled advances for user {}: {}", userId, e.getMessage());
@@ -114,10 +114,10 @@ public class AdvancePayController {
 
             workScheduleService.payOffAllUnsettledAdvancePays(userId);
 
-            AdvancePaySumDto advancePaySumDTO = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
+            AdvancePaySumDto advancePaySumDto = workScheduleService.getSumUnsettledAdvancesByUserId(userId);
 
-            log.info("Successfully paid off advances for user {}. New unsettled sum: {}", userId, advancePaySumDTO.getAmount());
-            return ResponseEntity.ok(advancePaySumDTO);
+            log.info("Successfully paid off advances for user {}. New unsettled sum: {}", userId, advancePaySumDto.getAmount());
+            return ResponseEntity.ok(advancePaySumDto);
 
         } catch (RuntimeException e) {
             log.error("Error paying off unsettled advances for user {}: {}", userId, e.getMessage());

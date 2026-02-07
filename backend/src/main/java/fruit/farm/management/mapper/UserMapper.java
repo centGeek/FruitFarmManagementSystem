@@ -11,6 +11,7 @@ public class UserMapper {
 
     public static UserEntity mapToEntity(UserDto userDTO, UserEntity gardener) {
 
+
         return new UserEntity(userDTO.getId(), userDTO.getName(), userDTO.getSurname(), userDTO.getNickname(),
                 userDTO.getPhoneNumber(), userDTO.getEmail(), userDTO.getCreationDate(),
                 new RoleEntity(3, RoleType.EMPLOYEE.getDisplayName()), userDTO.isActive(), gardener,

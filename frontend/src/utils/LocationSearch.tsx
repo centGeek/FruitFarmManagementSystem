@@ -24,7 +24,6 @@ const LocationSearch = ({
     const [isLoading, setIsLoading] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const searchTimeoutRef = useRef(null);
-    // UŻYCIE REF DO BEZPIECZNEGO ZARZĄDZANIA TYMCZASOWYM MARKEREM
     const searchMarkerRef = useRef(null); 
 
     /**
@@ -37,7 +36,6 @@ const LocationSearch = ({
         }
 
         setIsLoading(true);
-        // ... (Kod wyszukiwania jest w porządku)
         try {
             const params = new URLSearchParams({
                 format: 'json',
@@ -84,9 +82,7 @@ const LocationSearch = ({
         }, searchDelay);
     };
 
-    /**
-     * Zaznacza wybraną lokalizację na mapie.
-     */
+ 
     const selectLocation = (location) => {
         // ZABEZPIECZENIE: Sprawdzamy, czy Leaflet jest załadowany i mapa jest dostępna
         if (!map || typeof L === 'undefined') {
@@ -94,7 +90,6 @@ const LocationSearch = ({
              return;
         }
 
-        // 1. Usuń istniejący tymczasowy marker, jeśli istnieje
         if (searchMarkerRef.current && map.hasLayer(searchMarkerRef.current)) {
             map.removeLayer(searchMarkerRef.current);
             searchMarkerRef.current = null;
@@ -157,7 +152,6 @@ const LocationSearch = ({
             }
         }, markerDuration); 
         
-        // 5. Wywołaj callback dla nadrzędnego komponentu
         if (onLocationSelect) {
             onLocationSelect(location);
         }
@@ -169,7 +163,6 @@ const LocationSearch = ({
 
     return (
         <div className="relative mb-4">
-            {/* ... (pozostały kod komponentu LocationSearch jest w porządku) */}
             <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     {isLoading ? (
@@ -183,7 +176,6 @@ const LocationSearch = ({
                     value={query}
                     onChange={handleInputChange}
                     onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                    // Zmieniamy onBlur, aby nie chować sugestii od razu, co pozwala kliknąć przycisk
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     placeholder={placeholder}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md"
@@ -195,8 +187,6 @@ const LocationSearch = ({
                     {suggestions.map((suggestion) => (
                         <button
                             key={suggestion.id}
-                            // Używamy onMouseDown zamiast onClick w celu rozwiązania potencjalnego problemu z onBlur
-                            // (onMouseDown wywoła się przed onBlur inputa)
                             onMouseDown={() => selectLocation(suggestion)}
                             className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
                         >

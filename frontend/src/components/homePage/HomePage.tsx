@@ -1,4 +1,3 @@
-import React from 'react';
 import { AlertCircle, Loader } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { Alert } from "../../utils/common";
@@ -24,7 +23,6 @@ export default function HomePage() {
                 {alert.message && <Alert type={alert.type} message={alert.message} onClose={closeAlert} />}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* LEWA KOLUMNA: POWIADOMIENIA SYSTEMOWE */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 border border-gray-200">
                             <div className="flex items-center justify-between mb-5">
@@ -38,7 +36,6 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* PRAWA KOLUMNA: POGODA */}
                     <div className="lg:col-span-1 lg:-mt-20">
                         <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl shadow-xl p-4 md:p-5 border border-orange-200 lg:sticky lg:top-2">
                             <div className="flex items-center gap-2 mb-4">

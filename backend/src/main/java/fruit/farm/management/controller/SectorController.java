@@ -1,6 +1,6 @@
 package fruit.farm.management.controller;
 
-import fruit.farm.management.dto.SectorDTO;
+import fruit.farm.management.dto.SectorDto;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
 import jakarta.validation.Valid;
@@ -23,10 +23,10 @@ public class SectorController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<SectorDTO> createSector(@Valid @RequestBody SectorDTO sectorDTO) {
+    public ResponseEntity<SectorDto> createSector(@Valid @RequestBody SectorDto sectorDTO) {
 
         try {
-            SectorDTO sector = sectorService.createSector(sectorDTO, userService.getLoggedUser());
+            SectorDto sector = sectorService.createSector(sectorDTO, userService.getLoggedUser());
             log.info("Sector created with ID: {} and description: {}", sector.getId(), sector.getDescription());
             return ResponseEntity.status(HttpStatus.CREATED).body(sectorDTO);
 
@@ -37,41 +37,41 @@ public class SectorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SectorDTO> updateSector(
+    public ResponseEntity<SectorDto> updateSector(
             @PathVariable Long id,
-            @Valid @RequestBody SectorDTO sectorDTO) {
+            @Valid @RequestBody SectorDto sectorDto) {
 
         log.info("Received PUT request to update sector ID: {}", id);
-        sectorDTO.setId(id);
-        sectorService.updateSector(sectorDTO);
+        sectorDto.setId(id);
+        sectorService.updateSector(sectorDto);
 
-        return ResponseEntity.ok(sectorDTO);
+        return ResponseEntity.ok(sectorDto);
     }
 
     @GetMapping()
-    public ResponseEntity<List<SectorDTO>> getAllSectorsByUserId() {
-        List<SectorDTO> sectorDTOS;
+    public ResponseEntity<List<SectorDto>> getAllSectorsByUserId() {
+        List<SectorDto> sectorDtos;
         try {
-                Long currentUserId = userService.getLoggedUser().getId();
-            sectorDTOS = sectorService.getAllActiveSectorsByUserId(currentUserId);
+            Long currentUserId = userService.getLoggedUser().getId();
+            sectorDtos = sectorService.getAllActiveSectorsByUserId(currentUserId);
         } catch (Exception e) {
             log.error("Error getting all sectors", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok(sectorDTOS);
+        return ResponseEntity.ok(sectorDtos);
     }
 
     @GetMapping("/archived")
-    public ResponseEntity<List<SectorDTO>> getAllArchivedSectorsByUserId() {
+    public ResponseEntity<List<SectorDto>> getAllArchivedSectorsByUserId() {
 
-        List<SectorDTO> sectorDTOS;
+        List<SectorDto> sectorDtos;
         try {
-                Long currentUserId = userService.getLoggedUser().getId();
-            sectorDTOS = sectorService.getAllArchivedSectorsByUserId(currentUserId);
+            Long currentUserId = userService.getLoggedUser().getId();
+            sectorDtos = sectorService.getAllArchivedSectorsByUserId(currentUserId);
         } catch (Exception e) {
             log.error("Error getting all sectors", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok(sectorDTOS);
+        return ResponseEntity.ok(sectorDtos);
     }
 }

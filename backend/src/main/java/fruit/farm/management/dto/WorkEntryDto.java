@@ -30,7 +30,7 @@ public class WorkEntryDto {
 
     private UserDto user;
 
-    private SectorDTO sector;
+    private SectorDto sector;
 
     private BigDecimal daySalary;
 

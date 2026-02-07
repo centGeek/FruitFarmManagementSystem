@@ -50,7 +50,8 @@ public class WeatherNotificationController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
 
-            Optional<ResponseEntity<WeatherNotificationDto>> weatherNotificationDTOResponseEntity = notificationService.getNotificationById(id, loggedWithNickname)
+            Optional<ResponseEntity<WeatherNotificationDto>> weatherNotificationDTOResponseEntity = notificationService
+                    .getNotificationById(id, loggedWithNickname)
                     .map(ResponseEntity::ok);
             if (weatherNotificationDTOResponseEntity.isPresent()) {
                 return ResponseEntity.ok(weatherNotificationDTOResponseEntity);

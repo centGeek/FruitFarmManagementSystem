@@ -33,8 +33,8 @@ public class EmployeeController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
-            System.out.println("Logged user:" + loggedWithNickname);
-            UserEntity gardener = userService.findByNickname(loggedWithNickname)
+            log.info("Logged user:" + loggedWithNickname);
+            UserDto gardener = userService.findUserByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<UserDto> users = userService.getAllEmployees(gardener.getId());
@@ -52,7 +52,7 @@ public class EmployeeController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
-            UserEntity gardener = userService.findByNickname(loggedWithNickname)
+            UserDto gardener = userService.findUserByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<UserDto> users = userService.getAllActiveEmployees(gardener.getId());
@@ -71,7 +71,7 @@ public class EmployeeController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInNickname = authentication.getName();
-            UserEntity gardener = userService.findByNickname(loggedInNickname)
+            UserDto gardener = userService.findUserByNickname(loggedInNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<UserDto> users = userService.getAllArchivedEmployees(gardener.getId());
@@ -89,14 +89,14 @@ public class EmployeeController {
         log.info("Attempting to register user with nickname: {}", userRequest.getNickname());
 
         try {
-            Optional<UserEntity> existingUser = userService.findByNickname(userRequest.getNickname());
+            Optional<UserEntity> existingUser = userService.findUserEntityByNickname(userRequest.getNickname());
             if (existingUser.isPresent()) {
                 throw new NicknameAlreadyExistsException ("Użytkownik z tą nazwą użytkownika już istnieje");
             }
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInNickname = authentication.getName();
-            UserEntity gardener = userService.findByNickname(loggedInNickname)
+            UserEntity gardener = userService.findUserEntityByNickname(loggedInNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             UserEntity userEntity = UserMapper.mapToEntity(userRequest, gardener);
@@ -121,7 +121,7 @@ public class EmployeeController {
         log.info("Attempting to update user with ID: {}", id);
         log.info("Update request body: {}", userRequest);
         try {
-            Optional<UserEntity> optionalUser = userService.findById(id);
+            Optional<UserEntity> optionalUser = userService.findUserEntityById(id);
             if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "User not found with ID: " + id));
@@ -150,7 +150,7 @@ public class EmployeeController {
 
         log.info("Attempting to delete user with ID: {}", id);
         try {
-            Optional<UserEntity> optionalUser = userService.findById(id);
+            Optional<UserEntity> optionalUser = userService.findUserEntityById(id);
             if (optionalUser.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "User not found with ID: " + id));
@@ -179,7 +179,7 @@ public class EmployeeController {
 
         log.info("Getting user by ID: {}", id);
         try {
-            Optional<UserEntity> optionalUser = userService.findById(id);
+            Optional<UserEntity> optionalUser = userService.findUserEntityById(id);
             if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "User not found with ID: " + id));
@@ -204,7 +204,7 @@ public class EmployeeController {
 
         log.info("Attempting to toggle status for user with ID: {}", id);
         try {
-            Optional<UserEntity> optionalUser = userService.findById(id);
+            Optional<UserEntity> optionalUser = userService.findUserEntityById(id);
             if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "User not found with ID: " + id));

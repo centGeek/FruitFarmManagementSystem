@@ -1,4 +1,4 @@
- import React, { useState, useEffect, useCallback, useMemo } from 'react';
+ import React, { useMemo } from 'react';
 
  export const formatCurrency = (amount) => {
         return amount.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -33,8 +33,6 @@ export const CROP_TYPES = [
     value: 'JABŁOŃ',
     label: '🍎 Jabłonie',
     varieties: [
-      // pełna lista z backendu skrócona do popularnych,
-      // bo pełną i tak pobierzesz dynamicznie
       { value: 'GOLDEN_DELICIOUS', label: 'Golden Delicious' },
       { value: 'RED_DELICIOUS', label: 'Red Delicious' },
       { value: 'GALA', label: 'Gala' },
@@ -241,7 +239,6 @@ export interface ForecastAlert {
   threshold: number;
 }
 
-// ========== CONSTANTS ==========
 
 export const NOTIFICATION_TYPES = [
   { 

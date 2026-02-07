@@ -12,7 +12,7 @@ const addRefreshSubscriber = (callback) => {
   refreshSubscribers.push(callback);
 };
 
-const refreshAccessToken = async () => {
+const requestBackendToGenerateAccessToken = async () => {
   try {
     const res = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
       method: 'POST',
@@ -37,7 +37,7 @@ export const authFetch = async (url, options = {}) => {
   if (res.status === 403) {
     if (!isRefreshing) {
       isRefreshing = true;
-      const refreshed = await refreshAccessToken();
+      const refreshed = await requestBackendToGenerateAccessToken();
       isRefreshing = false;
 
       if (refreshed) {

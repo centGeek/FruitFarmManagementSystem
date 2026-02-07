@@ -14,7 +14,7 @@ public class SectorLaborCostDto {
 
     private String sectorName;
 
-    @JsonProperty("totalCost") // Mapuje sectorLaborCost na totalCost w JSON
+    @JsonProperty("totalCost")
     private BigDecimal sectorLaborCost;
 
     @JsonProperty("paidCost")

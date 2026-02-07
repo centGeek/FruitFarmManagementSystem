@@ -36,5 +36,5 @@ public class ProfitDto {
 
     private Long userId;
 
-    private SectorDTO sectorDTO;
+    private SectorDto sectorDTO;
 }

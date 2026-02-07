@@ -4,8 +4,6 @@ import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 import { CROP_TYPES } from "../../utils/common";
 
-// --- TYPY ---
-
 export interface Sector {
     id: number | null;
     name: string;
@@ -32,8 +30,6 @@ export interface ConfirmationModalState {
     sectorData: Sector | null;
 }
 
-// --- HELPERY ---
-
 export const sortPointsClockwise = (points: { lat: number; lng: number }[]) => {
     if (points.length !== 4) return points;
     const centroid = {
@@ -46,8 +42,6 @@ export const sortPointsClockwise = (points: { lat: number; lng: number }[]) => {
     bottomPoints.sort((a, b) => b.lng - a.lng);
     return [topPoints[0], topPoints[1], bottomPoints[0], bottomPoints[1]];
 };
-
-// --- HOOK GŁÓWNY ---
 
 export const useOrchardMapSystem = () => {
     const [sectors, setSectors] = useState<Sector[]>([]);
@@ -67,7 +61,7 @@ export const useOrchardMapSystem = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [drawingPoints, setDrawingPoints] = useState<{ lat: number; lng: number }[]>([]);
     const [tempLayer, setTempLayer] = useState<any>(null);
-    const [selectedSector, setSelectedSector] = useState<number | null>(null);
+    const [selectedSector] = useState<number | null>(null);
     const [visibleSectorIndices, setVisibleSectorIndices] = useState<number[]>([]);
     const animationTimeoutRef = useRef<any[]>([]);
 
@@ -109,7 +103,6 @@ export const useOrchardMapSystem = () => {
 
     useEffect(() => { loadSectorsFromBackend(); }, [loadSectorsFromBackend]);
 
-    // Obsługa mapy
     const handleMapLoad = (map: any) => {
         leafletMapRef.current = map;
         setMapInstance(map);
@@ -164,9 +157,6 @@ export const useOrchardMapSystem = () => {
             alert('Sektor został pomyślnie dodany!');
         } catch (error) {
             console.error('Błąd podczas wysyłania sektora:', error);
-            if (window.confirm('Nie udało się zapisać sektora. Dodać lokalnie?')) {
-                setSectors(prev => [...prev, editedSectorData]);
-            }
         }
         setConfirmationModal({ isOpen: false, sectorData: null });
         cancelDrawing();

@@ -22,7 +22,8 @@ const OrchardMapSystem = () => {
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                         <div className="flex items-center gap-3">
                             <Loader className="w-5 h-5 text-blue-600 animate-spin" />
-                            <div><div className="font-semibold text-blue-900">Ładowanie danych...</div><div className="text-sm text-blue-700">Pobieranie sektorów z serwera</div></div>
+                            <div><div className="font-semibold text-blue-900">
+                                Ładowanie danych...</div><div className="text-sm text-blue-700">Pobieranie sektorów z serwera</div></div>
                         </div>
                     </div>
                 )}
@@ -32,17 +33,23 @@ const OrchardMapSystem = () => {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <AlertCircle className="w-5 h-5 text-red-600" />
-                                <div><div className="font-semibold text-red-900">Błąd ładowania danych</div><div className="text-sm text-red-700">{loadError}</div></div>
+                                <div><div className="font-semibold text-red-900">Błąd ładowania danych
+                                </div><div className="text-sm text-red-700">{loadError}</div></div>
                             </div>
-                            <button onClick={loadSectorsFromBackend} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">Spróbuj ponownie</button>
+                            <button onClick={loadSectorsFromBackend} 
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
+                                Spróbuj ponownie</button>
                         </div>
                     </div>
                 )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-blue-50 p-4 rounded-lg"><div className="text-2xl font-bold text-blue-600">{sectors.length}</div><div className="text-blue-800">Zdefiniowane sektory</div></div>
-                    <div className="bg-green-50 p-4 rounded-lg"><div className="text-2xl font-bold text-green-600">{sectors.filter(s => s.cropType).length}</div><div className="text-green-800">Sektory z uprawą</div></div>
-                    <div className="bg-amber-50 p-4 rounded-lg"><div className="text-2xl font-bold text-amber-600">{new Set(sectors.map(s => s.variety).filter(Boolean)).size}</div><div className="text-amber-800">Rodzaje odmian</div></div>
+                    <div className="bg-blue-50 p-4 rounded-lg"><div className="text-2xl font-bold text-blue-600">
+                        {sectors.length}</div><div className="text-blue-800">Zdefiniowane sektory</div></div>
+                    <div className="bg-green-50 p-4 rounded-lg"><div className="text-2xl font-bold text-green-600">
+                        {sectors.filter(s => s.cropType).length}</div><div className="text-green-800">Sektory z uprawą</div></div>
+                    <div className="bg-amber-50 p-4 rounded-lg"><div className="text-2xl font-bold text-amber-600">
+                        {new Set(sectors.map(s => s.variety).filter(Boolean)).size}</div><div className="text-amber-800">Rodzaje odmian</div></div>
                 </div>
             </div>
 

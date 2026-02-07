@@ -5,7 +5,7 @@ import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WeatherNotificationEntity;
 import fruit.farm.management.mapper.WeatherNotificationMapper;
 import fruit.farm.management.repository.UserRepository;
-import fruit.farm.management.repository.jpa.WeatherNotificationJpaRepository;
+import fruit.farm.management.repository.WeatherNotificationRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class WeatherNotificationService {
 
-    private WeatherNotificationJpaRepository notificationRepository;
+    private WeatherNotificationRepository notificationRepository;
     private UserRepository userRepository;
 
     @Transactional(readOnly = true)
@@ -147,6 +147,7 @@ public class WeatherNotificationService {
         notificationRepository.delete(notification);
         log.info("Notification {} deleted successfully", id);
     }
+
     @Transactional(readOnly = true)
     public List<WeatherNotificationDto> getAllActiveNotifications() {
         log.info("Fetching all active notifications for weather check");
@@ -158,19 +159,6 @@ public class WeatherNotificationService {
         return notifications.stream()
                 .map(WeatherNotificationMapper::mapToDto)
                 .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public void updateLastTriggered(Long id) {
-        log.info("Updating last triggered time for notification: {}", id);
-
-        WeatherNotificationEntity notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notification not found with ID: " + id));
-
-        notification.setLastTriggeredAt(LocalDateTime.now());
-        notificationRepository.save(notification);
-
-        log.info("Last triggered time updated for notification {}", id);
     }
 
     @Transactional(readOnly = true)

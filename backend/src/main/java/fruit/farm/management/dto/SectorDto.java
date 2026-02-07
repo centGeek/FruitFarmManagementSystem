@@ -13,7 +13,7 @@ import java.util.List;
 
 @Setter
 @Getter
-public class SectorDTO {
+public class SectorDto {
 
     private Long id;
 
@@ -34,16 +34,16 @@ public class SectorDTO {
 
     private Boolean isActive;
 
-    public SectorDTO() {}
+    public SectorDto() {}
 
-    public SectorDTO(String description, PlantType plantType, String variety, List<CoordinateDto> coordinates) {
+    public SectorDto(String description, PlantType plantType, String variety, List<CoordinateDto> coordinates) {
         this.description = description;
         this.plantType = plantType;
         this.coordinates = coordinates;
         this.variety = variety;
     }
 
-    public SectorDTO(Long id, String description, PlantType plantType, String variety,
+    public SectorDto(Long id, String description, PlantType plantType, String variety,
                      List<CoordinateDto> coordinates, LocalDate createdAt, boolean isActive) {
         this.id = id;
         this.description = description;

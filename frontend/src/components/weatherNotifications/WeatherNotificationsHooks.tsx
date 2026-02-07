@@ -262,8 +262,10 @@ export const useWeatherNotifications = () => {
     };
 
     useEffect(() => { loadNotifications(); fetchGardenerLocation(); }, [loadNotifications, fetchGardenerLocation]);
-    useEffect(() => { if (coordinates && locationName && weatherError === null) fetchCurrentWeather(coordinates, locationName); }, [coordinates, locationName, fetchCurrentWeather, weatherError]);
-    useEffect(() => { if (coordinates && notifications.length > 0 && !isLoadingNotifications) checkWeatherAlerts(coordinates, notifications); }, [coordinates, notifications, isLoadingNotifications, checkWeatherAlerts]);
+    useEffect(() => { if (coordinates && locationName && weatherError === null) 
+        fetchCurrentWeather(coordinates, locationName); }, [coordinates, locationName, fetchCurrentWeather, weatherError]);
+    useEffect(() => { if (coordinates && notifications.length > 0 && !isLoadingNotifications) 
+        checkWeatherAlerts(coordinates, notifications); }, [coordinates, notifications, isLoadingNotifications, checkWeatherAlerts]);
 
     return {
         currentWeather, notifications, isLoadingWeather, isLoadingNotifications, weatherError,

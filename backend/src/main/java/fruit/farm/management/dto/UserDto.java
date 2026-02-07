@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class UserDto {
 
-    private long id;
+    private Long id;
 
     @NotBlank(message = "Nazwa jest wymagana")
     @Size(min = 2, max = 50, message = "Nazwa musi mieć między 2 a 50 znaków")

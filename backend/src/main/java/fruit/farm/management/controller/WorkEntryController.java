@@ -1,10 +1,10 @@
 package fruit.farm.management.controller;
 
+import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.dto.WorkEntryDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
 import fruit.farm.management.mapper.WorkEntryMapper;
-import fruit.farm.management.repository.UserRepository;
 import fruit.farm.management.repository.WorkEntryRepository;
 import fruit.farm.management.service.UserService;
 import fruit.farm.management.service.WorkScheduleService;
@@ -43,7 +43,7 @@ public class WorkEntryController {
             String loggedWithNickname = authentication.getName();
             log.info("Logged user: {} - fetching entries from {} to {}", loggedWithNickname, startDate, endDate);
 
-            UserEntity gardener = userService.findByNickname(loggedWithNickname)
+            UserDto gardener = userService.findUserByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<WorkEntryEntity> entries = workEntryRepository
@@ -62,12 +62,13 @@ public class WorkEntryController {
         }
     }
 
-        @GetMapping("/user/{userId}/unpaid")
-        public ResponseEntity<List<WorkEntryDto>> getUnpaidEntriesByUserId(@PathVariable Long userId) {
+    @GetMapping("/user/{userId}/unpaid")
+    public ResponseEntity<List<WorkEntryDto>> getUnpaidEntriesByUserId(@PathVariable Long userId) {
 
-            List<WorkEntryDto> unpaidEntries = workScheduleService.getUnpaidEntriesByUserId(userId);
-            return ResponseEntity.ok(unpaidEntries);
-        }
+        List<WorkEntryDto> unpaidEntries = workScheduleService.getUnpaidEntriesByUserId(userId);
+        return ResponseEntity.ok(unpaidEntries);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getWorkEntryById(@PathVariable Long id) {
 
@@ -95,7 +96,7 @@ public class WorkEntryController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedWithNickname = authentication.getName();
-            UserEntity gardener = userService.findByNickname(loggedWithNickname)
+            UserEntity gardener = userService.findUserEntityByNickname(loggedWithNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
             List<WorkEntryEntity> savedEntries = workScheduleService.createWorkSchedule(requests, gardener);
@@ -118,6 +119,7 @@ public class WorkEntryController {
                     .body(Map.of("error", "Błąd w rejestracji pracy: " + e.getMessage()));
         }
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateWorkEntry(@PathVariable Long id, @RequestBody WorkEntryDto request) {
 
@@ -269,7 +271,7 @@ public class WorkEntryController {
         log.info("Attempting to mark all unpaid entries as paid for user ID: {}", userId);
 
         try {
-            UserEntity employee = userService.findById(userId)
+            UserEntity employee = userService.findUserEntityById(userId)
                     .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + userId));
 
             int count = workScheduleService.payAllUnpaidEntries(employee);
@@ -299,7 +301,7 @@ public class WorkEntryController {
         log.info("Attempting to mark all unpaid entries in the current month as paid for user ID: {}", userId);
 
         try {
-            UserEntity employee = userService.findById(userId)
+            UserEntity employee = userService.findUserEntityById(userId)
                     .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + userId));
 
             int count = workScheduleService.payAllUnpaidEntriesForCurrentMonth(employee);

@@ -1,7 +1,7 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.ExpenseDto;
-import fruit.farm.management.dto.SectorDTO;
+import fruit.farm.management.dto.SectorDto;
 import fruit.farm.management.dto.SectorLaborCostDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.ProductType;
@@ -42,7 +42,7 @@ public class ExpenseController {
         log.info("Creating expense for User ID: {}", userDto.getId());
 
         if (expenseDto.getSectorDTO() != null) {
-            SectorDTO sectorById = sectorService.getSectorById(expenseDto.getSectorDTO().getId());
+            SectorDto sectorById = sectorService.getSectorById(expenseDto.getSectorDTO().getId());
             expenseDto.setSectorDTO(sectorById);
         }
 
@@ -152,6 +152,6 @@ public class ExpenseController {
             ProductType type,
             String description,
             boolean paid,
-            SectorDTO sectorDTO
+            SectorDto sectorDTO
     ) {}
 }
