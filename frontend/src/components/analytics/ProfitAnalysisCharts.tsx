@@ -120,7 +120,7 @@ export const VarietyPieSection = ({ title, data }: any) => (
         <ResponsiveContainer width="100%" height={500}>
             <PieChart>
                 <Pie data={data} dataKey="value" nameKey="name" animationDuration={900} cx="50%" cy="50%" outerRadius={180} label={false}>
-                    {data.map((index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                    {data.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <Tooltip content={<VarietyTooltip />} />
                 <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px', fontWeight: '600' }} />
@@ -154,7 +154,7 @@ export const LaborPieSection = ({ data, title }: any) => {
             <ResponsiveContainer width="100%" height={500}>
                 <PieChart>
                     <Pie data={data} dataKey="value" nameKey="name" animationDuration={900} cx="50%" cy="50%" outerRadius={180} label={false}>
-                        {data.map((index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                        {data.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                     </Pie>
                     <Tooltip content={<LaborTooltip />} />
                     <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px', fontWeight: '600' }} />

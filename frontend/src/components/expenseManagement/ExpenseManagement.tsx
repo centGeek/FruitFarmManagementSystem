@@ -1,7 +1,6 @@
 import { Alert } from "../../utils/common";
 import { MONTH_OPTIONS } from '../../utils/common';
-import { 
-    useExpenseManagement, EXPENSE_TYPES, PAYMENT_STATUS_OPTIONS, generateYearOptions } from './ExpenseManagementHooks';
+import { useExpenseManagement, EXPENSE_TYPES, PAYMENT_STATUS_OPTIONS, generateYearOptions } from './ExpenseManagementHooks';
 import { StatCard, ExpenseCard, LoadingState, EmptyState, Modal, ExpenseForm, Pagination } from './ExpenseManagementComponents';
 
 export default function ExpenseManagement() {

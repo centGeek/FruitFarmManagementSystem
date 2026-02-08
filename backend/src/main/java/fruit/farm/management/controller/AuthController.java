@@ -6,7 +6,6 @@ import fruit.farm.management.security.JwtService;
 import fruit.farm.management.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -37,88 +36,75 @@ public class AuthController {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword()));
+
+        return performLogin(authentication, response);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody UserDto request, HttpServletResponse response) {
+        try {
+            userService.registerUser(request);
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword())
+            );
+
+            return performLogin(authentication, response);
+
+        } catch (Exception e) {
+            log.error("Registration error: ", e);
+            return ResponseEntity.badRequest().body(new ApiErrorResponse("Błąd podczas rejestracji: " + e.getMessage()));
+        }
+    }
+
+    private ResponseEntity<?> performLogin(Authentication authentication, HttpServletResponse response) {
         User user = (User) authentication.getPrincipal();
+
         UserDto userByNickname = userService.findUserNickname(user.getUsername());
+
+        List<String> roles = user.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
         String token = jwtService.generateAccessToken(
                 userByNickname.getId(),
                 user.getUsername(),
-                user.getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList())
+                roles
         );
 
         String refreshToken = jwtService.generateRefreshToken(
                 userByNickname.getId(),
-                user.getUsername(), user.getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList())
+                user.getUsername(),
+                roles
         );
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", token)
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
-                .maxAge(3600)
+                .maxAge(3600) // 1 godzina
                 .sameSite("Lax")
                 .build();
-
-        return getResponseEntity(response, refreshToken, accessCookie);
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDto request, HttpServletResponse response) {
-
-        try {
-            UserDto savedUser = userService.registerUser(request);
-
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getNickname(), request.getPassword())
-            );
-
-            User user = (User) authentication.getPrincipal();
-            List<String> roles = user.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
-
-            String token = jwtService.generateAccessToken(savedUser.getId(), user.getUsername(), roles);
-            String refreshToken = jwtService.generateRefreshToken(savedUser.getId(), user.getUsername(), roles);
-
-            ResponseCookie accessCookie = ResponseCookie.from("accessToken", token)
-                    .httpOnly(true).secure(false).path("/").maxAge(60 * 15)
-                    .sameSite("Lax").build();
-
-            return getResponseEntity(response, refreshToken, accessCookie);
-
-        } catch (Exception e) {
-            log.error("Registration error: ", e);
-            return ResponseEntity.badRequest().body(new ApiErrorResponse("Błąd podczas rejestracji"));
-        }
-    }
-
-    @NotNull
-    private ResponseEntity<?> getResponseEntity(HttpServletResponse response, String refreshToken, ResponseCookie accessCookie) {
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
-                .maxAge(7 * 24 * 60 * 60)
+                .maxAge(7 * 24 * 60 * 60) // 7 dni
                 .sameSite("Lax")
                 .build();
+
         response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, accessCookie.toString());
         response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-        return ResponseEntity.ok("success");
+        return ResponseEntity.ok(new AuthResponse(token, user.getUsername()));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-
         userService.logout(response);
-
-        return ResponseEntity.ok("Successfully logged out");
+        return ResponseEntity.ok(new ApiErrorResponse("Successfully logged out"));
     }
 
     @PostMapping("/refresh")
@@ -126,7 +112,7 @@ public class AuthController {
                                      HttpServletResponse response) {
 
         if (refreshToken == null || !jwtService.validateToken(refreshToken) || !jwtService.isRefreshToken(refreshToken)) {
-            return ResponseEntity.status(401).body("Invalid or missing refresh token");
+            return ResponseEntity.status(401).body(new ApiErrorResponse("Invalid or missing refresh token"));
         }
 
         Long userId = jwtService.getIdFromToken(refreshToken);
@@ -142,6 +128,7 @@ public class AuthController {
 
         Cookie cookie = new Cookie("accessToken", newAccessToken);
         cookie.setPath("/");
+        cookie.setHttpOnly(true);
         cookie.setMaxAge(15 * 60);
         response.addCookie(cookie);
 
@@ -170,7 +157,6 @@ public class AuthController {
     @Data
     @AllArgsConstructor
     public static class VerifyResponse {
-
         private boolean authenticated;
         private String nickname;
         private List<String> roles;
@@ -178,7 +164,6 @@ public class AuthController {
 
     @Data
     public static class AuthRequest {
-
         private String nickname;
         private String password;
     }
@@ -186,15 +171,13 @@ public class AuthController {
     @Data
     @AllArgsConstructor
     public static class AuthResponse {
-
         private String token;
-        private String email;
+        private String nickname;
     }
 
     @Data
     @AllArgsConstructor
     public static class ApiErrorResponse {
-
         private String message;
     }
 }

@@ -1,19 +1,17 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Eye, EyeOff, User, Lock, Apple, Leaf, MapPin, Phone, UserCheck } from 'lucide-react';
-import { BACKEND_URL} from "../utils/apiConfigs";
-import { Alert} from "../utils/common";
+import React, { useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, User, Lock, Apple, Leaf, MapPin, Phone, UserCheck, Mail } from 'lucide-react';
+import { BACKEND_URL } from "../utils/apiConfigs";
+import { Alert } from "../utils/common";
 import BasicMap from '../utils/BasicMap';
 import LocationSearch from '../utils/LocationSearch';
-import L from 'leaflet';
-import { authFetch } from '../utils/authFetch';
-
 
 const TextInput = React.memo(({ id, name, value, onChange, placeholder, icon: Icon, type = "text", disabled, error }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{placeholder}</label>
         <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon className="h-5 w-5 text-gray-400" />
+                <Icon className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-400'}`} />
             </div>
             <input
                 type={type}
@@ -21,12 +19,12 @@ const TextInput = React.memo(({ id, name, value, onChange, placeholder, icon: Ic
                 name={name}
                 value={value}
                 onChange={onChange}
-                className={`w-full pl-10 pr-4 py-3 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white`}
+                className={`w-full pl-10 pr-4 py-3 border ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white`}
                 placeholder={placeholder}
                 disabled={disabled}
             />
         </div>
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+        {error && <p className="text-red-500 text-xs mt-1 ml-1">{error}</p>}
     </div>
 ));
 
@@ -35,7 +33,7 @@ const PasswordInput = React.memo(({ id, name, value, onChange, showPassword, set
         <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{placeholder}</label>
         <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-gray-400" />
+                <Lock className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-400'}`} />
             </div>
             <input
                 type={showPassword ? "text" : "password"}
@@ -43,37 +41,34 @@ const PasswordInput = React.memo(({ id, name, value, onChange, showPassword, set
                 name={name}
                 value={value}
                 onChange={onChange}
-                className={`w-full pl-10 pr-12 py-3 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white`}
+                className={`w-full pl-10 pr-12 py-3 border ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white`}
                 placeholder={placeholder}
                 disabled={disabled}
             />
             <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
                 disabled={disabled}
             >
-                {showPassword ? <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" /> : <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />}
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
         </div>
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+        {error && <p className="text-red-500 text-xs mt-1 ml-1">{error}</p>}
     </div>
 ));
 
-const handleRegistrationSuccess = () => {
-    window.location.href = '/home';
-};
-
 
 export default function RegisterPage() {
-    const defaultCenter = useMemo(() => [52.2297, 21.0122], []); // Warszawa (Centralna Polska)
+    const navigate = useNavigate();
+    const defaultCenter = useMemo(() => [52.2297, 21.0122], []); // Warszawa
     const initialLocalityMessage = 'Kliknij na mapę lub wyszukaj lokalizację';
 
     const [mapInstance, setMapInstance] = useState(null);
     
     const [mapView, setMapView] = useState({
         center: defaultCenter, 
-        zoom: 6, // Startowy widok na Polskę
+        zoom: 6, 
         viewUpdateKey: Date.now()
     });
     
@@ -108,20 +103,16 @@ export default function RegisterPage() {
             localityName: locality,
         }));
         
-        setMapView(prev => ({ 
+        setMapView({ 
             center: [location.lat, location.lon], 
             zoom: 13, 
             viewUpdateKey: Date.now()
-        }));
+        });
         
         setErrors(prev => ({ ...prev, localityName: '' }));
     }, []);
 
-
-    /**
-     * Funkcja obsługująca KLIKNIĘCIE na mapę w celu ręcznego ustawienia pineski.
-     */
-    const handleMapClick = useCallback((e: L.LeafletMouseEvent) => {
+    const handleMapClick = useCallback((e) => {
         if (!mapInstance) return;
 
         const { lat, lng } = e.latlng;
@@ -134,26 +125,20 @@ export default function RegisterPage() {
             localityName: locality,
         }));
 
-        // Zwiększamy zoom, jeśli jest zbyt mały
         const currentZoom = mapInstance.getZoom();
         const newZoom = currentZoom > 15 ? currentZoom : 15; 
         
-        // Aktualizacja stanu mapy w celu wyśrodkowania i zaktualizowania markera w BasicMap
-        setMapView(prev => ({ 
+        setMapView({ 
             center: [lat, lng], 
             zoom: newZoom, 
             viewUpdateKey: Date.now() 
-        }));
+        });
         
         setErrors(prev => ({ ...prev, localityName: '' }));
         setGeneralError(''); 
         setSuccess('');
-
     }, [mapInstance]);
     
-    // --- END MAP LOGIC ---
-
-    // Form Input Handler
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
@@ -167,26 +152,32 @@ export default function RegisterPage() {
         }
     };
 
-    const getFormErrors = (data) => {
-        const errors = {};
-        if (!data.name?.trim()) errors.name = 'Imię jest wymagane';
-        if (!data.surname?.trim()) errors.surname = 'Nazwisko jest wymagane';
-        if (!data.nickname?.trim()) errors.nickname = 'Nazwa użytkownika jest wymagana';
-        if (data.password.length < 6) errors.password = 'Hasło min. 6 znaków';
-        if (data.password !== data.confirmPassword) errors.confirmPassword = 'Hasła nie są identyczne';
-        if (!data.localityName || data.localityName === initialLocalityMessage) errors.localityName = 'Musisz wybrać miejscowość na mapie';
-        return errors;
-    };
     const validateForm = () => {
-        const errors = getFormErrors(formData);
-        setErrors(errors);
-        if (Object.keys(errors).length > 0) {
-            setGeneralError('Wypełnij poprawnie wszystkie wymagane pola.');
+        const newErrors = {};
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!formData.name?.trim()) newErrors.name = 'Imię jest wymagane';
+        if (!formData.surname?.trim()) newErrors.surname = 'Nazwisko jest wymagane';
+        if (!formData.nickname?.trim()) newErrors.nickname = 'Nazwa użytkownika jest wymagana';
+        
+        if (formData.email && !emailRegex.test(formData.email)) {
+            newErrors.email = 'Nieprawidłowy format email';
         }
-        return Object.keys(errors).length === 0;
+
+        if (formData.password.length < 6) newErrors.password = 'Hasło min. 6 znaków';
+        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Hasła nie są identyczne';
+        
+        if (!formData.localityName || formData.localityName === initialLocalityMessage) {
+            newErrors.localityName = 'Musisz wybrać lokalizację';
+        }
+
+        setErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) {
+            setGeneralError('Popraw błędy w formularzu.');
+        }
+        return Object.keys(newErrors).length === 0;
     };
 
-    // Email Registration Handler
     const handleSubmit = async () => {
         if (!validateForm()) return;
 
@@ -195,16 +186,15 @@ export default function RegisterPage() {
         setSuccess('');
 
         try {
-            const res = await authFetch(`${BACKEND_URL}/api/auth/register`, {
+            const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
                 body: JSON.stringify({
                     name: formData.name.trim(),
                     surname: formData.surname.trim(),
                     nickname: formData.nickname.trim() || null,
                     phoneNumber: formData.phoneNumber.trim() || null,
-                    email: formData.email.trim().toLowerCase(),
+                    email: formData.email.trim().toLowerCase() || null,
                     password: formData.password,
                     coordinateDTO: {
                         latitude: formData.latitude,
@@ -219,24 +209,20 @@ export default function RegisterPage() {
 
             if (res.ok) {
                 if (data.token) {
-                    handleRegistrationSuccess();
+                    navigate('/home');
                 } else {
-                    setSuccess('Rejestracja zakończona pomyślnie! Sprawdź email w celu aktywacji konta.');
-                    setFormData(prev => ({
-                        ...prev,
-                        name: '', surname: '', nickname: '', phoneNumber: '', email: '', password: '', confirmPassword: ''
-                    }));
+                    setSuccess('Rejestracja pomyślna! Możesz się teraz zalogować.');
+                    setTimeout(() => navigate('/login'), 3000);
                 }
             } else {
-                setGeneralError(data.message || 'Błąd rejestracji');
+                setGeneralError(data.message || 'Wystąpił błąd podczas rejestracji.');
             }
         } catch (err) {
-            setGeneralError('Nie można połączyć się z serwerem');
+            setGeneralError('Błąd połączenia z serwerem. Sprawdź internet.');
         } finally {
             setIsLoading(false);
         }
     };
-
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 flex items-center justify-center p-4">
@@ -244,59 +230,49 @@ export default function RegisterPage() {
             <div className="absolute top-40 right-32 text-lime-200 animate-bounce"><Leaf size={24} /></div>
             <div className="absolute bottom-32 left-16 text-emerald-200 animate-pulse"><Leaf size={28} /></div>
 
-            <div className="w-full max-w-lg bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden">
-                <div className="p-8 lg:p-12">
+            <div className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/50">
+                <div className="p-8 lg:p-10">
                     <div className="max-w-md mx-auto">
                         
                         <div className="text-center mb-8">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg">
+                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                                 <Apple className="w-8 h-8 text-white" />
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Dołącz do Menadżera Sadu</h1>
-                            <p className="text-gray-600">Utwórz konto i zacznij zarządzać swoim sadem</p>
+                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Dołącz do nas</h1>
+                            <p className="text-gray-600 text-sm">Zarządzaj swoim sadem w nowoczesny sposób</p>
                         </div>
 
-                        {/* Alerty */}
                         <Alert type="error" message={generalError} />
                         <Alert type="success" message={success} />
 
-                        {/* Formularz Rejestracyjny */}
-                        <div className="space-y-5">
+                        <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <TextInput id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="Imię *" icon={User} disabled={isLoading} error={errors.name}/>
                                 <TextInput id="surname" name="surname" value={formData.surname} onChange={handleInputChange} placeholder="Nazwisko *" icon={UserCheck} disabled={isLoading} error={errors.surname}/>
                             </div>
 
-                            <TextInput id="nickname" name="nickname" value={formData.nickname} onChange={handleInputChange} placeholder="Nazwa użytkownika *" icon={User} disabled={isLoading}/>
-                            <TextInput id="phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Numer telefonu (opcjonalny)" icon={Phone} disabled={isLoading}/>
-                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="Adres email (opcjonalny)" icon={User} disabled={isLoading} error={errors.email}/>
+                            <TextInput id="nickname" name="nickname" value={formData.nickname} onChange={handleInputChange} placeholder="Nazwa użytkownika *" icon={User} disabled={isLoading} error={errors.nickname}/>
+                            <TextInput id="phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Numer telefonu" icon={Phone} disabled={isLoading}/>
+                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="Adres email" icon={Mail} disabled={isLoading} error={errors.email}/>
 
                             <div className="pt-2">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                                    <MapPin className="w-5 h-5 mr-2 text-green-600" /> Ustaw swoją lokalizację 
+                                <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                    <MapPin className="w-4 h-4 mr-2 text-green-600" /> Twoja lokalizacja *
                                 </h3>
-                                <p className="text-xs text-gray-500 mb-3">
-                                    Kliknij na mapę, aby precyzyjnie ustawić pinezkę (np. na swój dom) lub użyj wyszukiwarki.
-                                </p>
                                 
                                 {mapInstance && (
-                                    <div className="mb-4 relative z-10"> 
-                                        <label htmlFor="location-search" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Wyszukaj Miejscowość
-                                        </label>
+                                    <div className="mb-3 relative z-10"> 
                                         <LocationSearch map={mapInstance} onLocationSelect={handleLocationSelect}/>
                                     </div>
                                 )}
                                 
-                                <div className="rounded-xl overflow-hidden shadow-md border border-gray-200 relative z-0" style={{ height: '250px' }}>
+                                <div className={`rounded-xl overflow-hidden shadow-sm border ${errors.localityName ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'} relative z-0`} style={{ height: '250px' }}>
                                     <BasicMap
-                                        center={mapView.center} // Kontrolowane z mapView state
+                                        center={mapView.center}
                                         zoom={mapView.zoom}
                                         onMapLoad={setMapInstance}
                                         onMapClick={handleMapClick}
-                                        style={{ height: '250px', width: '100%' }}
-                                        
-                            
+                                        style={{ height: '100%', width: '100%' }}
                                         markerPosition={
                                             formData.localityName === initialLocalityMessage 
                                             ? null 
@@ -306,12 +282,15 @@ export default function RegisterPage() {
                                         viewUpdateKey={mapView.viewUpdateKey} 
                                     />
                                 </div>
+                                {errors.localityName && <p className="text-red-500 text-xs mt-1">{errors.localityName}</p>}
 
-                                <TextInput
-                                    id="localityName" name="localityName" value={formData.localityName}
-                                    placeholder="Wybrana Miejscowość" icon={MapPin}
-                                    disabled={true} error={errors.localityName}
-                                />
+                                <div className="mt-2">
+                                    <TextInput
+                                        id="localityName" name="localityName" value={formData.localityName}
+                                        placeholder="Wybrana Miejscowość" icon={MapPin}
+                                        disabled={true} 
+                                    />
+                                </div>
                             </div>
                             
                             <PasswordInput
@@ -327,25 +306,25 @@ export default function RegisterPage() {
                             />
 
                             <button
-                                type="button" onClick={handleSubmit} disabled={isLoading}
-                                className="w-full py-3 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:ring-4 focus:ring-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full py-3 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:ring-4 focus:ring-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
                             >
                                 {isLoading ? (
                                     <div className="flex items-center justify-center">
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                        Rejestrowanie...
+                                        Przetwarzanie...
                                     </div>
                                 ) : (
                                     'Utwórz konto'
                                 )}
                             </button>
-                        </div>
+                        </form>
 
-                        {/* Login Link */}
-                        <div className="mt-8 text-center">
+                        <div className="mt-6 text-center">
                             <p className="text-sm text-gray-600">
                                 Masz już konto?{' '}
-                                <a href="/login" className="text-green-600 hover:text-green-500 font-medium">
+                                <a href="/login" className="text-green-600 hover:text-green-500 font-medium transition-colors" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
                                     Zaloguj się
                                 </a>
                             </p>

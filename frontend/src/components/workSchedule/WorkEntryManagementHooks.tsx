@@ -2,8 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from "../../utils/authFetch";
 
-// --- STAŁE I TYPY ---
-
 export const WORK_TYPE_OPTIONS = [
     { value: 'HARVEST', label: '🌾 Zbiory', icon: '🌾' },
     { value: 'WEEDING', label: '🌱 Pielenie', icon: '🌱' },
@@ -24,8 +22,6 @@ export const getWorkTypeIcon = (workType: string) => {
     const option = WORK_TYPE_OPTIONS.find(opt => opt.value === workType);
     return option ? option.icon : '📋';
 };
-
-// --- HOOK ---
 
 export const useWorkEntryManagement = () => {
     const [workEntries, setWorkEntries] = useState<any[]>([]);
@@ -371,8 +367,7 @@ export const useWorkEntryManagement = () => {
         workEntries, employees, sectors, currentDate, setCurrentDate, isModalOpen, setIsModalOpen, selectedEntry, setSelectedEntry,
         bulkAssignDate, setBulkAssignDate, isLoading, alert, setAlert, closeAlert, criticalError, setCriticalError,
         isEditModalOpen, setIsEditModalOpen, editingEntry, setEditingEntry,
-        isPayAllModalOpen, selectedEmployeeForPayment, paymentModalType,
-        isAdvancePayModalOpen, selectedEmployeeForAdvance,
+        isPayAllModalOpen, selectedEmployeeForPayment, paymentModalType, isAdvancePayModalOpen, selectedEmployeeForAdvance,
         stats, employeeEntriesForPayment,
         handleOpenBulkAssignModal: (date: string) => { setBulkAssignDate(date); setSelectedEntry(null); setIsModalOpen(true); },
         handleOpenDetailsModal: setSelectedEntry, handleCloseModal, handleClosePayAllModal, handleCloseAdvancePayModal,

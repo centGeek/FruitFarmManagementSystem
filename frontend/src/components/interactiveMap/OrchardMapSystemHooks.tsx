@@ -43,6 +43,10 @@ export const sortPointsClockwise = (points: { lat: number; lng: number }[]) => {
     return [topPoints[0], topPoints[1], bottomPoints[0], bottomPoints[1]];
 };
 
+const cornersToDTO = (corners: [number, number][]) => {
+    return corners.map(corner => ({ latitude: corner[0], longitude: corner[1] }));
+};
+
 export const useOrchardMapSystem = () => {
     const [sectors, setSectors] = useState<Sector[]>([]);
     const [archivedSectors, setArchivedSectors] = useState<Sector[]>([]);
@@ -51,7 +55,6 @@ export const useOrchardMapSystem = () => {
     const [editSectorModal, setEditSectorModal] = useState<EditSectorModalState>({ isOpen: false, sectorData: null });
     const [confirmationModal, setConfirmationModal] = useState<ConfirmationModalState>({ isOpen: false, sectorData: null });
 
-    // Stan mapy
     const leafletMapRef = useRef<any>(null);
     const drawnItemsRef = useRef<any>(null);
     const editMarkersRef = useRef<any[]>([]);
@@ -61,9 +64,9 @@ export const useOrchardMapSystem = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [drawingPoints, setDrawingPoints] = useState<{ lat: number; lng: number }[]>([]);
     const [tempLayer, setTempLayer] = useState<any>(null);
-    const [selectedSector] = useState<number | null>(null);
     const [visibleSectorIndices, setVisibleSectorIndices] = useState<number[]>([]);
     const animationTimeoutRef = useRef<any[]>([]);
+    const innerTimeoutRef = useRef<any>(null);
 
     const loadSectorsFromBackend = useCallback(async () => {
         setIsLoading(true);
@@ -120,8 +123,12 @@ export const useOrchardMapSystem = () => {
         if (tempLayer && mapInstance) { mapInstance.removeLayer(tempLayer); setTempLayer(null); }
     };
 
-    const finishDrawing = async (points: { lat: number; lng: number }[]) => {
-        if (points.length < 3) { alert('Wymagane co najmniej 4 punkty'); cancelDrawing(); return; }
+    const finishDrawing = useCallback(async (points: { lat: number; lng: number }[]) => {
+        if (points.length < 4) {
+            alert('Wymagane co najmniej 4 punkty'); 
+            cancelDrawing(); 
+            return; 
+        }
         const sortedPoints = sortPointsClockwise(points);
         const newSector: Sector = {
             id: Date.now(),
@@ -131,11 +138,11 @@ export const useOrchardMapSystem = () => {
             variety: ''
         };
         setConfirmationModal({ isOpen: true, sectorData: newSector });
-    };
+    }, [sectors.length]);
 
     const handleSectorConfirm = async (editedSectorData: Sector) => {
         try {
-            const coordinatesDTO = editedSectorData.corners.map(corner => ({ latitude: corner[0], longitude: corner[1] }));
+            const coordinatesDTO = cornersToDTO(editedSectorData.corners);
             const backendData = {
                 description: editedSectorData.name,
                 plantType: editedSectorData.cropType || null,
@@ -157,6 +164,7 @@ export const useOrchardMapSystem = () => {
             alert('Sektor został pomyślnie dodany!');
         } catch (error) {
             console.error('Błąd podczas wysyłania sektora:', error);
+            alert('Nie udało się dodać sektora');
         }
         setConfirmationModal({ isOpen: false, sectorData: null });
         cancelDrawing();
@@ -165,7 +173,7 @@ export const useOrchardMapSystem = () => {
     const handleSaveEditedSector = async (editedSector: Sector) => {
         try {
             if (!editedSector.id) { alert('Brak ID backendu'); return; }
-            const coordinatesDTO = editedSector.corners.map(corner => ({ latitude: corner[0], longitude: corner[1] }));
+            const coordinatesDTO = cornersToDTO(editedSector.corners);
             const backendData = {
                 id: editedSector.id,
                 description: editedSector.name,
@@ -189,7 +197,7 @@ export const useOrchardMapSystem = () => {
     const handleActivateSector = async (sector: Sector) => {
         try {
             if (!sector.id) { alert('Brak ID backendu'); return; }
-            const coordinatesDTO = sector.corners.map(corner => ({ latitude: corner[0], longitude: corner[1] }));
+            const coordinatesDTO = cornersToDTO(sector.corners);
             const backendData = {
                 id: sector.id, description: sector.name, plantType: sector.cropType || null,
                 variety: sector.variety || null, coordinates: coordinatesDTO, isActive: true
@@ -206,7 +214,7 @@ export const useOrchardMapSystem = () => {
     const handleArchiveSector = async (sector: Sector) => {
         try {
             if (!sector.id) { alert('Brak ID backendu'); return; }
-            const coordinatesDTO = sector.corners.map(corner => ({ latitude: corner[0], longitude: corner[1] }));
+            const coordinatesDTO = cornersToDTO(sector.corners);
             const backendData = {
                 id: sector.id, description: sector.name, plantType: sector.cropType || null,
                 variety: sector.variety || null, coordinates: coordinatesDTO, isActive: false
@@ -220,11 +228,11 @@ export const useOrchardMapSystem = () => {
         } catch (error: any) { alert(`Nie udało się zarchiwizować sektora: ${error.message}`); }
     };
 
-    const enableSectorEdit = (sectorIndex: number) => {
+    const enableSectorEdit = useCallback((sectorIndex: number) => {
         if (mapInstance) { mapInstance.closePopup(); mapInstance.dragging.disable(); }
         setEditMode({ sectorIndex, cornerIndex: null });
         setDrawingMode('none');
-    };
+    }, [mapInstance]);
 
     const disableEditMode = () => {
         setEditMode(null);
@@ -237,19 +245,29 @@ export const useOrchardMapSystem = () => {
 
     const updateCornerPosition = async (sectorIndex: number, cornerIndex: number, newLatLng: { lat: number; lng: number }) => {
         const updatedSectors = [...sectors];
+        const previousCorner = updatedSectors[sectorIndex].corners[cornerIndex];
         updatedSectors[sectorIndex].corners[cornerIndex] = [newLatLng.lat, newLatLng.lng];
+        
         if (updatedSectors[sectorIndex].id) {
             try {
-                const coordinatesDTO = updatedSectors[sectorIndex].corners.map(corner => ({ latitude: corner[0], longitude: corner[1] }));
+                const coordinatesDTO = cornersToDTO(updatedSectors[sectorIndex].corners);
                 const sectorData = {
-                    id: updatedSectors[sectorIndex].id, description: updatedSectors[sectorIndex].name,
-                    plantType: updatedSectors[sectorIndex].cropType || null, variety: updatedSectors[sectorIndex].variety || null,
+                    id: updatedSectors[sectorIndex].id, 
+                    description: updatedSectors[sectorIndex].name,
+                    plantType: updatedSectors[sectorIndex].cropType || null, 
+                    variety: updatedSectors[sectorIndex].variety || null,
                     coordinates: coordinatesDTO
                 };
-                await authFetch(`${BACKEND_URL}/api/sectors/${updatedSectors[sectorIndex].id}`, {
+                const response = await authFetch(`${BACKEND_URL}/api/sectors/${updatedSectors[sectorIndex].id}`, {
                     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(sectorData)
                 });
-            } catch (error) { console.error(error); }
+                
+                if (!response.ok) throw new Error('Failed to update');
+            } catch (error) { 
+                console.error('Błąd zapisu pozycji punktu:', error);
+                updatedSectors[sectorIndex].corners[cornerIndex] = previousCorner;
+                alert('Nie udało się zapisać pozycji punktu');
+            }
         }
         setSectors(updatedSectors);
     };
@@ -259,22 +277,47 @@ export const useOrchardMapSystem = () => {
         const clickPoint = e.latlng;
         setDrawingPoints(prevPoints => {
             const newPoints = [...prevPoints, clickPoint];
-            if (newPoints.length === 4) { finishDrawing(newPoints); return []; }
+            if (newPoints.length === 4) { 
+                finishDrawing(newPoints); 
+                return []; 
+            }
             return newPoints;
         });
-    }, [drawingMode, sectors]);
+    }, [drawingMode, finishDrawing]);
 
-    // Efekty mapy
     useEffect(() => {
-        if (sectors.length === 0) { setVisibleSectorIndices([]); return; }
+        // @ts-ignore
+        window.editSectorVertices = enableSectorEdit;
+        
+        return () => {
+            // @ts-ignore
+            delete window.editSectorVertices;
+        };
+    }, [enableSectorEdit]);
+
+    useEffect(() => {
+        if (sectors.length === 0) { 
+            setVisibleSectorIndices([]); 
+            return; 
+        }
+        
         setVisibleSectorIndices([]);
-        if (animationTimeoutRef.current) animationTimeoutRef.current.forEach(t => clearTimeout(t));
+        
+        if (animationTimeoutRef.current) {
+            animationTimeoutRef.current.forEach(t => clearTimeout(t));
+        }
+        if (innerTimeoutRef.current) {
+            clearTimeout(innerTimeoutRef.current);
+        }
+        
         const timeouts: any[] = [];
+        
         sectors.forEach((_, index) => {
             const timeout = setTimeout(() => {
                 setVisibleSectorIndices(prev => [...prev, index]);
+                
                 if (index === sectors.length - 1 && mapInstance && sectors.length > 0) {
-                    setTimeout(() => {
+                    innerTimeoutRef.current = setTimeout(() => {
                         const allCorners = sectors.flatMap(s => s.corners || []);
                         if (allCorners.length > 0) {
                             const bounds = L.latLngBounds(allCorners as any);
@@ -285,8 +328,15 @@ export const useOrchardMapSystem = () => {
             }, 0);
             timeouts.push(timeout);
         });
+        
         animationTimeoutRef.current = timeouts;
-        return () => timeouts.forEach(t => clearTimeout(t));
+        
+        return () => {
+            timeouts.forEach(t => clearTimeout(t));
+            if (innerTimeoutRef.current) {
+                clearTimeout(innerTimeoutRef.current);
+            }
+        };
     }, [sectors.length, mapInstance]);
 
     useEffect(() => {
@@ -320,8 +370,8 @@ export const useOrchardMapSystem = () => {
             const actualIndex = sectors.indexOf(sector);
             const isBeingEdited = editMode?.sectorIndex === actualIndex;
             const polygon = L.polygon(sector.corners, {
-                color: isBeingEdited ? '#ff6b00' : (selectedSector === actualIndex ? '#ff0000' : '#3388ff'),
-                weight: isBeingEdited ? 3 : (selectedSector === actualIndex ? 3 : 2),
+                color: isBeingEdited ? '#ff6b00' : '#3388ff',
+                weight: isBeingEdited ? 3 : 2,
                 fillColor: isBeingEdited ? '#ff6b00' : '#3388ff',
                 fillOpacity: isBeingEdited ? 0.3 : 0.2
             });
@@ -366,10 +416,8 @@ export const useOrchardMapSystem = () => {
             });
         });
 
-        // @ts-ignore
-        window.editSectorVertices = enableSectorEdit;
         map.getContainer().style.cursor = drawingMode !== 'none' ? 'crosshair' : (isDragging ? 'grabbing' : '');
-    }, [sectors, selectedSector, drawingMode, drawingPoints, mapInstance, visibleSectorIndices, editMode, isDragging]);
+    }, [sectors, drawingMode, drawingPoints, mapInstance, visibleSectorIndices, editMode, isDragging, enableSectorEdit]);
 
     useEffect(() => {
         if (!mapInstance) return;

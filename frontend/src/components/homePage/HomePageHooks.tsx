@@ -1,8 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from "../../utils/authFetch";
-
-// --- TYPY ---
 
 export interface Notification {
     id: number;
@@ -30,8 +28,6 @@ export interface NotificationRule {
     description: string;
 }
 
-// --- HOOK ---
-
 export const useHomePage = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +40,6 @@ export const useHomePage = () => {
 
     const closeAlert = useCallback(() => setAlert({ type: '', message: '' }), []);
 
-    // 1. Pobieranie powiadomień ogólnych
     const fetchNotifications = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -68,7 +63,6 @@ export const useHomePage = () => {
         }
     }, []);
 
-    // 2. Pobieranie lokalizacji użytkownika
     const fetchGardenerLocation = useCallback(async () => {
         setWeatherError(null);
         try {
@@ -91,7 +85,6 @@ export const useHomePage = () => {
         }
     }, []);
 
-    // 3. Pobieranie reguł powiadomień pogodowych
     const loadWeatherNotifications = useCallback(async () => {
         try {
             const response = await authFetch(`${BACKEND_URL}/api/weather-notifications`, { method: 'GET', headers: getAuthHeaders() });
@@ -111,7 +104,6 @@ export const useHomePage = () => {
         }
     }, []);
 
-    // 4. Sprawdzanie alertów pogodowych
     const checkWeatherAlerts = useCallback(async (coords: { lat: number; lon: number }, rules: NotificationRule[]) => {
         if (rules.length === 0 || !rules.some(r => r.enabled)) return;
         setIsCheckingAlerts(true);
@@ -169,7 +161,6 @@ export const useHomePage = () => {
         }
     }, []);
 
-    // Efekty inicjalizujące
     useEffect(() => {
         fetchNotifications();
         fetchGardenerLocation();

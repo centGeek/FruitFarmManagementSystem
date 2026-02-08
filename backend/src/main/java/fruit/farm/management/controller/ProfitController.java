@@ -71,6 +71,7 @@ public class ProfitController {
                 dto.getProfitType(),
                 dto.getDescription(),
                 dto.isReceived(),
+                dto.getKilogramsSold(),
                 dto.getSectorDTO()));
 
         return ResponseEntity.ok(result);
@@ -131,6 +132,7 @@ public class ProfitController {
             ProfitType profitType,
             String description,
             boolean received,
+            Long kilogramsSold,
             SectorDto sectorDTO
     ) {}
 }

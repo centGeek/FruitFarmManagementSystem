@@ -149,8 +149,7 @@ export const useWeatherNotifications = () => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             const mappedNotifications: NotificationRule[] = data.map((item: any) => ({
-                id: Date.now() + Math.random(),
-                backendId: item.id,
+                id: item.id,
                 weatherNotificationType: item.weatherNotificationType,
                 threshold: item.threshold,
                 daysAhead: item.daysAhead || 1,

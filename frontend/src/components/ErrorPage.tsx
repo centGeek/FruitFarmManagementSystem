@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AlertCircle, XCircle, Clock, ArrowLeft, Home, RefreshCw, AlertTriangle, Info } from 'lucide-react';
 
 const ErrorPage = ({ error, onGoBack, onGoHome, onRetry }) => {

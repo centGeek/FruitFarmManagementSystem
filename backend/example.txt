@@ -274,8 +274,9 @@ public static BigDecimal calculateDailySalary(WorkEntryDto workEntryDto,
 
 @GetMapping
 public ResponseEntity<Page<ExpenseResponse>> getExpenses(
-        @RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month,
-        @RequestParam(required = false) Long sectorId, @PageableDefault(sort = "expenseId",
+        @RequestParam(required = false) Integer year, @RequestParam(required = false)
+        Integer month, @RequestParam(required = false) Long sectorId,
+        @PageableDefault(sort = "expenseId",
         direction = Sort.Direction.DESC, size = 100) Pageable pageable) {
     UserDto user = userService.getLoggedUser();
     log.info("Fetching expenses for User ID: {}, Year: {}, Month: {} - {}, Sector ID: {}",

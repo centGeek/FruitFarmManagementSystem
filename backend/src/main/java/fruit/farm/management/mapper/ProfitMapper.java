@@ -15,6 +15,7 @@ public class ProfitMapper {
                     profitDTO.getProfit(), profitDTO.getDescription(), profitDTO.getCreatedAt(), profitDTO.isReceived(),
                     userEntity, null);
         }
+
         return new ProfitEntity(profitDTO.getProfitType(), profitDTO.getKilogramsSold(), profitDTO.getProfit(),
                 profitDTO.getDescription(), profitDTO.getCreatedAt(), profitDTO.isReceived(), userEntity,
                 SectorMapper.mapFromDTO(profitDTO.getSectorDTO(), UserMapper.mapFromEntity(userEntity)));

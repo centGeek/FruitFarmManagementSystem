@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { AlertCircle, Loader } from 'lucide-react';
+import { useMemo } from 'react';
+import { AlertCircle } from 'lucide-react';
 import type { Notification, WeatherAlert } from './HomePageHooks';
 
 const NOTIFICATION_TYPES: Record<string, { label: string; icon: string; color: string }> = {

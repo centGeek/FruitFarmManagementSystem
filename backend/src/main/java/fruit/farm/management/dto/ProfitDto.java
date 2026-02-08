@@ -22,7 +22,7 @@ public class ProfitDto {
     private ProfitType profitType;
 
     @NotNull(message = "Sprzedano w kilogramach.")
-    private long kilogramsSold;
+    private Long kilogramsSold;
 
     @NotNull(message = "Kwota wydatku jest wymagana.")
     @DecimalMin(value = "0.01", message = "Kwota musi być większa niż 0.")

@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
-import { MONTH_OPTIONS } from '../../utils/common';
-
 
 export const PROFIT_TYPES = [
 
@@ -38,6 +36,7 @@ export const PAYMENT_STATUS_OPTIONS = [
   { value: 'received', label: 'Otrzymane ✅' },
   { value: 'pending', label: 'Oczekujące ⏳' }
 ];
+
 
 export const getProfitTypeDetails = (type: string) => {
   const profit = PROFIT_TYPES.find(p => p.value === type);

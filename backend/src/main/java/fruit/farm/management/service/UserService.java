@@ -241,7 +241,7 @@ public class UserService {
                 request.getSurname().trim(),
                 request.getNickname() != null ? request.getNickname().trim() : null,
                 request.getPhoneNumber() != null ? request.getPhoneNumber().trim() : null,
-                request.getEmail().toLowerCase().trim(),
+                request.getEmail() != null ? request.getEmail().toLowerCase().trim() : null,
                 LocalDate.now(),
                 defaultRole,
                 true,
