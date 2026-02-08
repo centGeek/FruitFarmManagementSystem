@@ -100,7 +100,6 @@ const LocationSearch = ({
             easeLinearity: 0.25
         });
         
-        // Definicja ikony (pozostawiona bez zmian)
         const customIcon = L.divIcon({
             className: 'custom-search-marker',
             html: `
@@ -140,7 +139,6 @@ const LocationSearch = ({
             `)
             .openPopup();
             
-        // Zapisz referencję do nowego markera
         searchMarkerRef.current = marker;
         
         // Ustaw czasomierz na usunięcie markera

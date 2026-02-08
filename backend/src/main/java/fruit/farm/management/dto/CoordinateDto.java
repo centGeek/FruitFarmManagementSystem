@@ -11,13 +11,9 @@ import lombok.Setter;
 public class CoordinateDto {
 
     @NotNull(message = "Szerokość geograficzna jest wymagana")
-    @DecimalMin(value = "-90.0", message = "Szerokość geograficzna musi być >= -90")
-    @DecimalMax(value = "90.0", message = "Szerokość geograficzna musi być <= 90")
     private Double latitude;
 
     @NotNull(message = "Długość geograficzna jest wymagana")
-    @DecimalMin(value = "-180.0", message = "Długość geograficzna musi być >= -180")
-    @DecimalMax(value = "180.0", message = "Długość geograficzna musi być <= 180")
     private Double longitude;
 
 

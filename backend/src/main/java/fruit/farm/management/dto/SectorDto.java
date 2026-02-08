@@ -26,7 +26,8 @@ public class SectorDto {
     private String variety;
 
     @NotEmpty(message = "Współrzędne są wymagane")
-    @Size(min = 3, message = "Wymagane co najmniej 3 punkty")
+    @Size(min = 4, message = "Wymagane co najmniej 4 punkty")
+    @Size(max = 4, message = "Wymagane co najwięcej 4 punkty")
     @Valid
     private List<CoordinateDto> coordinates;
 

@@ -11,13 +11,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WeatherNotificationDto {
+
     private Long id;
+
     private WeatherNotificationType weatherNotificationType;
+
     private Double threshold;
+
     private Integer daysAhead;
+
     private Boolean enabled;
+
     private String description;
+
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
+
     private LocalDateTime lastTriggeredAt;
 }
