@@ -1,4 +1,3 @@
-import React from 'react';
 import { Loader, AlertCircle } from 'lucide-react';
 import { useOrchardMapSystem } from './OrchardMapSystemHooks';
 import { InteractiveMap, SectorsList, EditSectorModal, SectorConfirmationModal } from './OrchardMapSystemComponents';

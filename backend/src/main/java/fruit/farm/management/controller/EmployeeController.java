@@ -3,8 +3,8 @@ package fruit.farm.management.controller;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.exception.NicknameAlreadyExistsException;
-import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,7 +90,7 @@ public class EmployeeController {
         try {
             Optional<UserEntity> existingUser = userService.findUserEntityByNickname(userRequest.getNickname());
             if (existingUser.isPresent()) {
-                throw new NicknameAlreadyExistsException ("Użytkownik z tą nazwą użytkownika już istnieje");
+                throw new NicknameAlreadyExistsException("Użytkownik z tą nazwą użytkownika już istnieje");
             }
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -99,9 +98,7 @@ public class EmployeeController {
             UserEntity gardener = userService.findUserEntityByNickname(loggedInNickname)
                     .orElseThrow(() -> new RuntimeException("Logged in user not found"));
 
-            UserEntity userEntity = UserMapper.mapToEntity(userRequest, gardener);
-            userEntity.setCreationDate(LocalDate.now());
-            UserDto savedUser = userService.addEmployee(userEntity);
+            UserDto savedUser = userService.addEmployee(userRequest, gardener);
             return ResponseEntity.ok(Map.of(
                     "message", "User registered successfully",
                     "nickname", userRequest.getNickname(),
@@ -116,20 +113,14 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody UserDto userRequest) {
+    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody UserDto userRequest,
+                                                          HttpServletResponse response) {
 
         log.info("Attempting to update user with ID: {}", id);
         log.info("Update request body: {}", userRequest);
         try {
-            Optional<UserEntity> optionalUser = userService.findUserEntityById(id);
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "User not found with ID: " + id));
-            }
 
-            UserEntity existingUser = optionalUser.get();
-
-            UserDto userDTO = userService.update(existingUser, userRequest);
+            UserDto userDTO = userService.update(id, userRequest, response);
             log.info("User updated successfully with ID: {}", userDTO.getId());
 
             return ResponseEntity.ok(Map.of(

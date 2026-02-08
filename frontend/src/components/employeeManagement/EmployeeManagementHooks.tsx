@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
-// --- TYPY ---
 export interface Employee {
     id: number;
     name: string;
@@ -31,7 +30,6 @@ export interface Advance {
     createdAt: string;
 }
 
-// --- HOOK ---
 export const useEmployeeManagement = () => {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [allEmployees, setAllEmployees] = useState<Employee[]>([]);

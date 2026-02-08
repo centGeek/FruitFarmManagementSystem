@@ -110,7 +110,6 @@ export const CROP_TYPES = [
     ]
   },
 
-  /* --- NOWE UPRAWY --- */
 
   {
     value: 'TRUSKAWKA',
@@ -127,8 +126,9 @@ export const CROP_TYPES = [
     ]
   },
 
+
   {
-    value: 'BLACKCURRANT',
+    value: 'PORZECZKA_CZARNA', 
     label: '🖤 Porzeczka czarna',
     varieties: [
       { value: 'TITANIA', label: 'Titania' },
@@ -141,7 +141,7 @@ export const CROP_TYPES = [
   },
 
   {
-    value: 'REDCURRANT',
+    value: 'PORZECZKA_CZERWONA',
     label: '🔴 Porzeczka czerwona',
     varieties: [
       { value: 'ROVADA', label: 'Rovada' },
@@ -153,7 +153,7 @@ export const CROP_TYPES = [
   },
 
   {
-    value: 'GOOSEBERRY',
+    value: 'AGREST',
     label: '🟢 Agrest',
     varieties: [
       { value: 'INVICTA', label: 'Invicta' },
@@ -165,7 +165,7 @@ export const CROP_TYPES = [
   },
 
   {
-    value: 'BLUEBERRY',
+    value: 'BORÓWKA',
     label: '🔵 Borówka',
     varieties: [
       { value: 'DUKE', label: 'Duke' },
@@ -178,7 +178,7 @@ export const CROP_TYPES = [
   },
 
   {
-    value: 'BLACKBERRY',
+    value: 'JEŻYNA',
     label: '⚫ Jeżyna',
     varieties: [
       { value: 'LOCH_NESS', label: 'Loch Ness' },
@@ -202,7 +202,6 @@ export const CROP_TYPES = [
     ]
   }
 ];
-
 
 export interface CoordinateDTO {
   latitude: number;
@@ -284,4 +283,12 @@ export const DAYS_AHEAD_OPTIONS = [
   { value: 3, label: 'Za 3 dni' },
   { value: 5, label: 'Za 5 dni' },
   { value: 7, label: 'Za 7 dni' }
+];
+
+export const MONTH_OPTIONS = [
+  { value: '', label: 'Wszystkie miesiące 📅' },
+  { value: '1', label: 'Styczeń' }, { value: '2', label: 'Luty' }, { value: '3', label: 'Marzec' },
+  { value: '4', label: 'Kwiecień' }, { value: '5', label: 'Maj' }, { value: '6', label: 'Czerwiec' },
+  { value: '7', label: 'Lipiec' }, { value: '8', label: 'Sierpień' }, { value: '9', label: 'Wrzesień' },
+  { value: '10', label: 'Październik' }, { value: '11', label: 'Listopad' }, { value: '12', label: 'Grudzień' }
 ];

@@ -61,8 +61,6 @@ export interface OverallStats {
     profitMargin: string | number;
 }
 
-// --- SEKCJA 2: HOOKI (LOGIKA) ---
-
 export const useFinancialData = (selectedYear: string, selectedMonth: string) => {
     const [profits, setProfits] = useState<FinancialEntry[]>([]);
     const [expenses, setExpenses] = useState<FinancialEntry[]>([]);

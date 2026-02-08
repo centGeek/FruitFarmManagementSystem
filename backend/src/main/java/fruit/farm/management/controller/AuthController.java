@@ -116,17 +116,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
 
-        Cookie cookie = new Cookie("accessToken", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
-
-        Cookie refreshCookie = new Cookie("refreshToken", null);
-        refreshCookie.setMaxAge(0);
-        refreshCookie.setPath("/");
-        refreshCookie.setHttpOnly(true);
-        response.addCookie(refreshCookie);
+        userService.logout(response);
 
         return ResponseEntity.ok("Successfully logged out");
     }
@@ -201,4 +191,10 @@ public class AuthController {
         private String email;
     }
 
+    @Data
+    @AllArgsConstructor
+    public static class ApiErrorResponse {
+
+        private String message;
+    }
 }

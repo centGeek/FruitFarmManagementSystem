@@ -1,10 +1,10 @@
-import React from 'react';
-import { Alert, formatCurrency } from "../../utils/common";
+import { Alert } from "../../utils/common";
+import { MONTH_OPTIONS } from '../../utils/common';
+
 import { 
     useProfitManagement, 
     PROFIT_TYPES, 
-    PAYMENT_STATUS_OPTIONS, 
-    MONTH_OPTIONS, 
+    PAYMENT_STATUS_OPTIONS,
     generateYearOptions 
 } from './ProfitManagementHooks';
 import { 

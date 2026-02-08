@@ -8,8 +8,8 @@ export interface ProfileData {
     nickname: string;
     phoneNumber: string;
     email: string;
-    password: '';
-    confirmPassword: '';
+    password: string;  
+    confirmPassword: string;
     latitude: number;
     longitude: number;
     localityName: string;
@@ -19,7 +19,6 @@ export const useGardenerProfile = () => {
     // Domyślna lokalizacja (Warszawa)
     const defaultCenter = useMemo<[number, number]>(() => [52.2297, 21.0122], []);
     
-    // Stan mapy
     const [mapInstance, setMapInstance] = useState<any>(null);
     const [mapView, setMapView] = useState({
         center: defaultCenter, 
@@ -27,7 +26,6 @@ export const useGardenerProfile = () => {
         viewUpdateKey: Date.now()
     });
 
-    // Stan formularza
     const [profileData, setProfileData] = useState<ProfileData>({
         name: '', surname: '', nickname: '', phoneNumber: '', email: '',
         password: '', confirmPassword: '',
@@ -35,7 +33,6 @@ export const useGardenerProfile = () => {
     });
     const [originalData, setOriginalData] = useState<ProfileData | null>(null);
     
-    // Stan UI
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState<any>({});
     const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +42,6 @@ export const useGardenerProfile = () => {
 
     const closeAlert = useCallback(() => setAlert({ type: '', message: '' }), []);
 
-    // 1. Pobieranie danych profilu
     const fetchProfile = useCallback(async () => {
         setIsLoading(true);
         closeAlert();
@@ -82,7 +78,6 @@ export const useGardenerProfile = () => {
 
     useEffect(() => { fetchProfile(); }, [fetchProfile]);
 
-    // 2. Wykrywanie zmian
     useEffect(() => {
         if (!originalData) return;
         const changed = 
@@ -99,14 +94,12 @@ export const useGardenerProfile = () => {
         setHasChanges(changed);
     }, [profileData, originalData]);
 
-    // 3. Obsługa formularza
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setProfileData(prev => ({ ...prev, [name]: value }));
         if (errors[name]) setErrors((prev: any) => ({ ...prev, [name]: '' }));
     }, [errors]);
     
-    // 4. Obsługa mapy
     const handleLocationSelect = useCallback((location: any) => {
         const locality = location.address.city || location.address.town || location.address.village || location.name.split(',')[0] || 'Nieustawiona';
         setProfileData(prev => ({ ...prev, latitude: location.lat, longitude: location.lon, localityName: locality }));
@@ -115,7 +108,6 @@ export const useGardenerProfile = () => {
         setErrors((prev: any) => ({ ...prev, localityName: '' }));
     }, []);
 
-    // 5. Walidacja
     const validate = useCallback(() => {
         const newErrors: any = {};
         if (!profileData.name.trim()) newErrors.name = 'Imię jest wymagane';
@@ -140,7 +132,6 @@ export const useGardenerProfile = () => {
         return Object.keys(newErrors).length === 0;
     }, [profileData, defaultCenter, originalData]);
 
-    // 6. Zapisywanie
     const handleSave = useCallback(async () => {
         if (!validate()) { setAlert({ type: 'error', message: 'Wystąpiły błędy walidacji.' }); return; }
         setIsSaving(true);
@@ -162,7 +153,7 @@ export const useGardenerProfile = () => {
             if (response.ok) {
                 setAlert({ type: 'success', message: 'Profil został zaktualizowany pomyślnie!' });
                 await fetchProfile();
-                setProfileData(prev => ({ ...prev, password: '' as any, confirmPassword: '' as any }));
+                setProfileData(prev => ({ ...prev, password: '', confirmPassword: '' }));
                 setMapView(prev => ({ ...prev, center: [profileData.latitude, profileData.longitude], zoom: 13, viewUpdateKey: Date.now() }));
             } else {
                 const error = await response.json();
@@ -175,7 +166,6 @@ export const useGardenerProfile = () => {
         }
     }, [profileData, validate, closeAlert, fetchProfile]);
 
-    // 7. Resetowanie
     const handleReset = useCallback(() => {
         if (originalData) {
             setProfileData(originalData);

@@ -10,6 +10,7 @@ import fruit.farm.management.mapper.CoordinateMapper;
 import fruit.farm.management.mapper.UserMapper;
 import fruit.farm.management.repository.CoordinateRepository;
 import fruit.farm.management.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,7 @@ public class GardenerController {
     }
     @PutMapping
     public ResponseEntity<Map<String, String>> updateGardenerProfile(
-            @Valid @RequestBody UserDto userDTO) {
+            @Valid @RequestBody UserDto userDTO, HttpServletResponse response) {
 
         log.info("Attempting to update profile for logged-in gardener with nickname: {}", userDTO.getNickname());
 
@@ -87,7 +88,7 @@ public class GardenerController {
             existingGardener.setCoordinateEntity(coordinateEntity);
             existingGardener.setLocalityName(userDTO.getLocalityName());
 
-            userService.update(existingGardener, userDTO);
+            userService.update(gardenerId, userDTO, response);
             log.info("Gardener profile updated successfully for ID: {}", gardenerId);
 
             return ResponseEntity.ok(Map.of("message", "Profil został zaktualizowany pomyślnie!"));

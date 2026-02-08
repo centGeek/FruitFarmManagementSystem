@@ -274,17 +274,17 @@ public static BigDecimal calculateDailySalary(WorkEntryDto workEntryDto,
 
 @GetMapping
 public ResponseEntity<Page<ExpenseResponse>> getExpenses(
-        @RequestParam(required = false) Integer year,
-        @RequestParam(required = false) Integer month, @PageableDefault(sort = "expenseId",
+        @RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month,
+        @RequestParam(required = false) Long sectorId, @PageableDefault(sort = "expenseId",
         direction = Sort.Direction.DESC, size = 100) Pageable pageable) {
     UserDto user = userService.getLoggedUser();
-    log.info("Fetching expenses for User ID: {}, Year: {}, Month: {} - {}",
-            user.getId(), year, month, pageable);
+    log.info("Fetching expenses for User ID: {}, Year: {}, Month: {} - {}, Sector ID: {}",
+            user.getId(), year, month, pageable, sectorId);
     Page<ExpenseDto> expensePage = expenseService.getAllPaginatedExpensesByGardener(
-            user.getId(), year, month, pageable);
+            user.getId(), year, month, pageable, sectorId);
     Page<ExpenseResponse> result = expensePage.map(dto -> new ExpenseResponse(
-            dto.getId(), dto.getAmount(), dto.getCreatedAt(), dto.getType(),
-            dto.getDescription(), dto.isPaid(), dto.getSectorDTO()));
+            dto.getId(), dto.getAmount(), dto.getCreatedAt(), dto.getType(), dto.getDescription(),
+            dto.isPaid(), dto.getSectorDTO()));
     return ResponseEntity.ok(result);
 }
 

@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
+import { MONTH_OPTIONS } from '../../utils/common';
 
-// --- STAŁE I TYPY ---
 
 export const PROFIT_TYPES = [
-  // Sprzedaż owoców
+
   { value: 'SPRZEDAZ_JABLEK', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
   { value: 'SPRZEDAZ_GRUSZEK', label: 'Sprzedaż gruszek', icon: '🍐', color: 'bg-green-50 text-green-700 border-green-200' },
   { value: 'SPRZEDAZ_WISNI', label: 'Sprzedaż wiśni', icon: '🍒', color: 'bg-red-50 text-red-700 border-red-200' },
@@ -37,14 +37,6 @@ export const PAYMENT_STATUS_OPTIONS = [
   { value: '', label: 'Wszystkie 📋' },
   { value: 'received', label: 'Otrzymane ✅' },
   { value: 'pending', label: 'Oczekujące ⏳' }
-];
-
-export const MONTH_OPTIONS = [
-  { value: '', label: 'Wszystkie miesiące 📅' },
-  { value: '1', label: 'Styczeń' }, { value: '2', label: 'Luty' }, { value: '3', label: 'Marzec' },
-  { value: '4', label: 'Kwiecień' }, { value: '5', label: 'Maj' }, { value: '6', label: 'Czerwiec' },
-  { value: '7', label: 'Lipiec' }, { value: '8', label: 'Sierpień' }, { value: '9', label: 'Wrzesień' },
-  { value: '10', label: 'Październik' }, { value: '11', label: 'Listopad' }, { value: '12', label: 'Grudzień' }
 ];
 
 export const getProfitTypeDetails = (type: string) => {

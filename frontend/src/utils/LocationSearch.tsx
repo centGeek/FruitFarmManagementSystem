@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Search, MapPin, Loader } from 'lucide-react';
 import L from 'leaflet';
 
@@ -84,7 +84,6 @@ const LocationSearch = ({
 
  
     const selectLocation = (location) => {
-        // ZABEZPIECZENIE: Sprawdzamy, czy Leaflet jest załadowany i mapa jest dostępna
         if (!map || typeof L === 'undefined') {
              console.error("Map or Leaflet library not initialized.");
              return;
@@ -126,7 +125,7 @@ const LocationSearch = ({
             iconAnchor: [10, 10]
         });
 
-        // 2. Dodaj nowy marker
+        // Dodaj nowy marker
         const marker = L.marker([location.lat, location.lon], { icon: customIcon })
             .addTo(map)
             .bindPopup(`
@@ -141,10 +140,10 @@ const LocationSearch = ({
             `)
             .openPopup();
             
-        // 3. Zapisz referencję do nowego markera
+        // Zapisz referencję do nowego markera
         searchMarkerRef.current = marker;
         
-        // 4. Ustaw czasomierz na usunięcie markera
+        // Ustaw czasomierz na usunięcie markera
         setTimeout(() => {
             if (searchMarkerRef.current && map.hasLayer(searchMarkerRef.current)) {
                 map.removeLayer(searchMarkerRef.current);

@@ -18,9 +18,12 @@ import fruit.farm.management.repository.CoordinateRepository;
 import fruit.farm.management.repository.RoleRepository;
 import fruit.farm.management.repository.UserCredentialsRepository;
 import fruit.farm.management.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -135,15 +139,21 @@ public class UserService {
     }
 
     @Transactional
-    public UserDto update(UserEntity existingUser, UserDto userRequest) {
+    public UserDto update(Long id, UserDto userRequest, HttpServletResponse response) {
 
+        Optional<UserEntity> optionalUser = this.findUserEntityById(id);
+        if (optionalUser.isEmpty()) {
+            return null;
+        }
+
+        UserEntity existingUser = optionalUser.get();
         if (userRequest.getNickname() != null && !userRequest.getNickname().equals(existingUser.getNickname())) {
             Optional<UserEntity> userWithNickname = this.findUserEntityByNickname(userRequest.getNickname());
             if (userWithNickname.isPresent() && !userWithNickname.get().getId().equals(existingUser.getId())) {
                 throw new NicknameAlreadyExistsException("Nazwa użytkownika już jest zajęta");
             }
         }
-
+        boolean shouldLogout = false;
         log.info("User update data received:" + userRequest);
 
         if (userRequest.getName() != null) {
@@ -152,13 +162,14 @@ public class UserService {
         if (userRequest.getSurname() != null) {
             existingUser.setSurname(userRequest.getSurname());
         }
-        if (userRequest.getNickname() != null) {
-            existingUser.setNickname(userRequest.getNickname());
-        }
+
         if (userRequest.getPhoneNumber() != null) {
             existingUser.setPhoneNumber(userRequest.getPhoneNumber());
         }
         if (userRequest.getNickname() != null) {
+            if(!existingUser.getNickname().equals(userRequest.getNickname())){
+                shouldLogout = true;
+            }
             existingUser.setNickname(userRequest.getNickname());
         }
         if (userRequest.getEmail() != null) {
@@ -171,7 +182,7 @@ public class UserService {
         if (userRequest.getPassword() != null) {
             userCredentialsRepository.update(new UserCredentialsEntity(savedUser, userRequest.getPassword()));
         }
-        UserDto loggedInUserId = this.getLoggedUser();
+
         String title;
         String message;
         if (savedUser.getGardener() != null) {
@@ -181,13 +192,17 @@ public class UserService {
             title = "Zaktualizowałeś swoje dane";
             message = "Twoje dane zostały prawidłowo zaktualizowane";
         }
+        UserDto userDto = UserMapper.mapFromEntity(savedUser);
         notificationService.addUserNotification(NotificationDto.builder()
                 .title(title)
                 .message(message)
                 .createdAt(LocalDateTime.now())
-                .userDto(UserMapper.mapFromEntity(savedUser))
-                .build(), loggedInUserId);
-        return UserMapper.mapFromEntity(savedUser);
+                .userDto(userDto)
+                .build(), userDto);
+        if (shouldLogout) {
+            logout(response);
+        }
+        return userDto;
     }
 
     @Transactional
@@ -243,5 +258,27 @@ public class UserService {
         log.info("New user registered: {}", savedUser.getNickname());
         savedUser.setCredentials(userCredentialsEntity);
         return UserMapper.mapFromEntity(savedUser);
+    }
+
+    @Transactional
+    public UserDto addEmployee(UserDto userRequest, UserEntity gardener) {
+        UserEntity userEntity = UserMapper.mapToEntity(userRequest, gardener);
+        userEntity.setCreationDate(LocalDate.now());
+        return addEmployee(userEntity);
+    }
+
+    public void logout(HttpServletResponse response) {
+
+        Cookie cookie = new Cookie("accessToken", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+
+        Cookie refreshCookie = new Cookie("refreshToken", null);
+        refreshCookie.setMaxAge(0);
+        refreshCookie.setPath("/");
+        refreshCookie.setHttpOnly(true);
+        response.addCookie(refreshCookie);
     }
 }

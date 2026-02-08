@@ -1,4 +1,3 @@
-import React from 'react';
 import { Calendar, Clock, Users, DollarSign } from 'lucide-react';
 import { Alert } from "../../utils/common";
 import { useWorkEntryManagement } from './WorkEntryManagementHooks';
@@ -10,9 +9,9 @@ import ErrorPage from './../ErrorPage';
 
 export default function WorkEntryManagement() {
     const {
-        workEntries, employees, sectors, currentDate, setCurrentDate, isModalOpen, setIsModalOpen, selectedEntry, setSelectedEntry,
-        bulkAssignDate, setBulkAssignDate, isLoading, alert, setAlert, closeAlert, criticalError, setCriticalError,
-        isEditModalOpen, setIsEditModalOpen, editingEntry, setEditingEntry,
+        workEntries, employees, sectors, currentDate, setCurrentDate, isModalOpen, setIsModalOpen, selectedEntry,
+        bulkAssignDate, setBulkAssignDate, isLoading, alert, closeAlert, criticalError, setCriticalError,
+        isEditModalOpen, editingEntry, setEditingEntry,
         isPayAllModalOpen, selectedEmployeeForPayment, paymentModalType,
         isAdvancePayModalOpen, selectedEmployeeForAdvance,
         stats, employeeEntriesForPayment,
@@ -60,7 +59,6 @@ export default function WorkEntryManagement() {
                 {isEditModalOpen && editingEntry && (
                     <Modal isOpen={isEditModalOpen} onClose={() => handleCloseModal()} title={`Edycja wpisu: ${editingEntry.user?.name} ${editingEntry.user?.surname}`} size="large">
                         <div className="space-y-4">
-                            {/* Formularz edycji (skopiowany 1:1 z logiki hooka) - dla uproszczenia tutaj w komponencie rodzica, ale korzystający z handlera hooka */}
                              <div className="grid grid-cols-2 gap-4">
                                 {editingEntry.user?.isPaidHourly !== false ? (
                                     <div><label className="text-sm font-medium text-gray-700 mb-1 block">Godziny</label><input type="number" step="0.5" min="0" max="24" value={editingEntry.duration || ''} onChange={(e) => setEditingEntry((prev: any) => ({ ...prev, duration: parseFloat(e.target.value) }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" /></div>
