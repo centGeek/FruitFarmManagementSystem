@@ -1,6 +1,7 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.exception.ExceededWorkHoursException;
+import fruit.farm.management.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -22,6 +23,17 @@ public class GlobalExceptionHandler {
         errorBody.put("error", "Exceeded Work Hours");
         errorBody.put("message", ex.getMessage());
         return new ResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
+
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", LocalDateTime.now());
+        errorBody.put("status", HttpStatus.NOT_FOUND.value());
+        errorBody.put("error", "Not Found");
+        errorBody.put("message", ex.getMessage());
+        return new ResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(RuntimeException.class)

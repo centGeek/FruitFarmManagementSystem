@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import LoginPage from './components/LoginPage'
 import RegisterPage from './components/RegisterPage'
 import Navbar from "./components/Navbar"
+import Footer from "./components/Footer"
 import HomePage from './components/homePage/HomePage'
 import InteractiveMap from './components/interactiveMap/OrchardMapSystem'
 import EmployeeManagement from './components/employeeManagement/EmployeeManagement'
@@ -12,6 +13,7 @@ import WorkSchedule from './components/workSchedule/WorkEntryManagement'
 import WeatherNotifications from './components/weatherNotifications/WeatherNotifications'
 import GardenerProfile from './components/gardenerProfile/GardenerProfile'
 import AnalysisPage from './components/analytics/ProfitAnalysis'
+import Support from './components/support/Support'
 import { BACKEND_URL} from "./utils/apiConfigs";
 
 
@@ -91,7 +93,9 @@ useEffect(() => {
 
   return (
     <BrowserRouter>
-      {isLoggedIn && <Navbar onLogout={handleLogout} userRole={userRole} />}
+      <div className="min-h-screen flex flex-col">
+        {isLoggedIn && <Navbar onLogout={handleLogout} userRole={userRole} />}
+        <div className="flex-1 flex flex-col">
       <Routes>
         <Route
           path="/"
@@ -191,9 +195,20 @@ useEffect(() => {
               <AnalysisPage/>
             </ProtectedRoute>
           }
-        />        
+        />
+        <Route
+          path="/support"
+          element={
+            <ProtectedRoute allowedRoles={["Gardener"]}>
+              <Support/>
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+        </div>
+        <Footer />
+      </div>
     </BrowserRouter>
   )
 }

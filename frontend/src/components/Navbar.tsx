@@ -125,6 +125,7 @@ function GardenerNavbar({ onLogout }) {
     { name: "Przychody", path: "/profits" },
     { name: "Notyfikacje pogodowe", path: "/weather" },
     { name: "Analiza", path: "/analyse" },
+    { name: "Zgłoś usterkę", path: "/support" },
     { name: "Edytuj profil", path: "/gardener-profile" },
   ];
 
@@ -144,13 +145,13 @@ function GardenerNavbar({ onLogout }) {
             <span>Panel Sadownika</span>
           </div>
           
-          <div className="flex gap-2 flex-wrap justify-center flex-1">
+          <div className="flex gap-1 flex-nowrap justify-center flex-1">
             {tabs.map((tab) => (
               <NavLink
                 key={tab.path}
                 to={tab.path}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg font-medium text-sm tracking-wide transition-all duration-300 transform whitespace-nowrap ${
+                  `px-3 py-2 rounded-lg font-medium text-xs tracking-wide transition-all duration-300 transform whitespace-nowrap ${
                     isActive
                       ? "bg-white text-green-700 shadow-md scale-105"
                       : "hover:bg-white/20 hover:scale-105 active:scale-95"
