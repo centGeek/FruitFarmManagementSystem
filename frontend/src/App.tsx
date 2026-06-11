@@ -17,6 +17,7 @@ import Support from './components/support/Support'
 import AdminDashboard from './components/admin/AdminDashboard'
 import AdminUsers from './components/admin/AdminUsers'
 import AdminStats from './components/admin/AdminStats'
+import AdminAudit from './components/admin/AdminAudit'
 import { BACKEND_URL} from "./utils/apiConfigs";
 
 
@@ -228,6 +229,14 @@ useEffect(() => {
           element={
             <ProtectedRoute allowedRoles={["Admin"]}>
               <AdminStats/>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/audit"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <AdminAudit/>
             </ProtectedRoute>
           }
         />
