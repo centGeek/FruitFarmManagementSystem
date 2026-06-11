@@ -178,12 +178,64 @@ function GardenerNavbar({ onLogout }) {
   );
 }
 
+function AdminNavbar({ onLogout }) {
+  const navigate = useNavigate();
+
+  return (
+    <nav className="bg-gradient-to-r from-slate-800 via-slate-700 to-gray-800 text-white shadow-xl sticky top-0 z-50">
+      <div className="max-w-[1600px] mx-auto px-6 py-2.5">
+        <div className="flex justify-between items-center gap-4">
+          <div
+            className="text-l font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center gap-2"
+            onClick={() => navigate("/admin/dashboard")}
+          >
+            <span className="text-2xl">🛠️</span>
+            <span>Panel administratora</span>
+          </div>
+
+          <div className="flex gap-1 flex-nowrap justify-center flex-1">
+            {[
+              { name: "Zgłoszenia", path: "/admin/dashboard" },
+              { name: "Użytkownicy", path: "/admin/users" },
+            ].map((tab) => (
+              <NavLink
+                key={tab.path}
+                to={tab.path}
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded-lg font-medium text-xs tracking-wide transition-all duration-300 transform whitespace-nowrap ${
+                    isActive
+                      ? "bg-white text-slate-800 shadow-md scale-105"
+                      : "hover:bg-white/20 hover:scale-105 active:scale-95"
+                  }`
+                }
+              >
+                {tab.name}
+              </NavLink>
+            ))}
+          </div>
+
+          <button
+            onClick={onLogout}
+            className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400"
+          >
+            Wyloguj
+          </button>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
 export default function Navbar({ onLogout, userRole }) {
-  
+
   if (userRole === "Gardener") {
     return <GardenerNavbar onLogout={onLogout} />;
-  } 
-  
+  }
+
+  if (userRole === "Admin") {
+    return <AdminNavbar onLogout={onLogout} />;
+  }
+
   return (
     <nav className="bg-gray-700 text-white shadow-xl sticky top-0 z-50">
       <div className="max-w-[1600px] mx-auto px-6 py-4">

@@ -14,6 +14,8 @@ import WeatherNotifications from './components/weatherNotifications/WeatherNotif
 import GardenerProfile from './components/gardenerProfile/GardenerProfile'
 import AnalysisPage from './components/analytics/ProfitAnalysis'
 import Support from './components/support/Support'
+import AdminDashboard from './components/admin/AdminDashboard'
+import AdminUsers from './components/admin/AdminUsers'
 import { BACKEND_URL} from "./utils/apiConfigs";
 
 
@@ -201,6 +203,22 @@ useEffect(() => {
           element={
             <ProtectedRoute allowedRoles={["Gardener"]}>
               <Support/>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <AdminDashboard/>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <AdminUsers/>
             </ProtectedRoute>
           }
         />

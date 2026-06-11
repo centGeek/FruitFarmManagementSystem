@@ -76,7 +76,6 @@ public class UserRepository {
         }
 
         Object principal = authentication.getPrincipal();
-        System.out.println(principal.toString());
         if (principal instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             UserEntity dbUser = userJpaRepository.findByNickname(username).get();
@@ -87,6 +86,11 @@ public class UserRepository {
 
     public Optional<UserEntity> findById(Long id) {
         return userJpaRepository.findById(id);
+    }
+
+    public long countEmployees(long gardenerId) {
+
+        return userJpaRepository.countByGardenerId(gardenerId);
     }
 
 }

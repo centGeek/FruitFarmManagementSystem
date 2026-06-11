@@ -2,6 +2,7 @@ package fruit.farm.management.entity;
 
 public enum RoleType {
 
+    ADMIN("Admin"),
     GARDENER("Gardener"),
     EMPLOYEE("Employee");
 

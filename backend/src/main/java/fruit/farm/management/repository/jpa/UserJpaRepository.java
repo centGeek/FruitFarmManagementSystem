@@ -45,4 +45,9 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
             and usr.gardener.id =:gardenerId
              """)
     List<UserEntity> getAllEmployees(@Param("gardenerId") long gardenerId);
+
+    @Query("""
+            select count(usr) from user_profile_entity usr where usr.gardener.id =:gardenerId
+             """)
+    long countByGardenerId(@Param("gardenerId") long gardenerId);
 }

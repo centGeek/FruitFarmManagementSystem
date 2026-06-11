@@ -42,6 +42,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/debug/**").permitAll()
                         .requestMatchers("/api/users/**").hasAnyAuthority("Gardener")
                         .requestMatchers("/api/expenses/**").hasAnyAuthority("Gardener")
+                        .requestMatchers("/api/admin/**").hasAuthority("Admin")
+                        .requestMatchers("/api/tickets/all").hasAuthority("Admin")
                         .requestMatchers("/api/tickets/**").authenticated()
                         .anyRequest().authenticated()
                 )

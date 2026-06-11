@@ -1,6 +1,7 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.exception.ExceededWorkHoursException;
+import fruit.farm.management.exception.IncorrectInputFormatException;
 import fruit.farm.management.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,17 @@ public class GlobalExceptionHandler {
         errorBody.put("error", "Not Found");
         errorBody.put("message", ex.getMessage());
         return new ResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(IncorrectInputFormatException.class)
+    public ResponseEntity<Map<String, Object>> handleIncorrectInputFormatException(IncorrectInputFormatException ex) {
+
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", LocalDateTime.now());
+        errorBody.put("status", HttpStatus.BAD_REQUEST.value());
+        errorBody.put("error", "Bad Request");
+        errorBody.put("message", ex.getMessage());
+        return new ResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(RuntimeException.class)
