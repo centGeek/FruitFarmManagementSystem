@@ -198,7 +198,6 @@ function AdminNavbar({ onLogout }) {
               { name: "Zgłoszenia", path: "/admin/dashboard" },
               { name: "Użytkownicy", path: "/admin/users" },
               { name: "Statystyki", path: "/admin/stats" },
-              { name: "Audyt", path: "/admin/audit" },
             ].map((tab) => (
               <NavLink
                 key={tab.path}

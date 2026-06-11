@@ -141,29 +141,6 @@ class AdminControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName("rejects unauthenticated access to the audit log with 403")
-    void getAuditLog_unauthenticated_isForbidden() throws Exception {
-        mockMvc.perform(get("/api/admin/audit"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(username = "admin", authorities = "Admin")
-    @DisplayName("records an audit entry when an admin blocks an account")
-    void setActive_recordsAuditEntry() throws Exception {
-        mockMvc.perform(patch("/api/admin/users/{id}/status", GARDENER_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"active\": false}"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/api/admin/audit"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].action").value("USER_BLOCKED"))
-                .andExpect(jsonPath("$[0].targetId").value((int) GARDENER_ID))
-                .andExpect(jsonPath("$[0].performedByName").exists());
-    }
-
-    @Test
     @WithMockUser(username = "admin", authorities = "Admin")
     @DisplayName("returns 404 when changing status of a missing user")
     void setActive_missingUser_isNotFound() throws Exception {

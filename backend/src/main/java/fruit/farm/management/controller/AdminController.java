@@ -2,10 +2,8 @@ package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.AdminStatsDto;
 import fruit.farm.management.dto.AdminUserDto;
-import fruit.farm.management.dto.AuditLogDto;
 import fruit.farm.management.service.AdminStatsService;
 import fruit.farm.management.service.AdminUserService;
-import fruit.farm.management.service.AuditLogService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -26,20 +24,12 @@ public class AdminController {
 
     private AdminUserService adminUserService;
     private AdminStatsService adminStatsService;
-    private AuditLogService auditLogService;
 
     @GetMapping("/stats")
     public ResponseEntity<AdminStatsDto> getStats() {
 
         log.info("Admin is fetching global statistics");
         return ResponseEntity.ok(adminStatsService.getStats());
-    }
-
-    @GetMapping("/audit")
-    public ResponseEntity<List<AuditLogDto>> getAuditLog() {
-
-        log.info("Admin is fetching the audit log");
-        return ResponseEntity.ok(auditLogService.getRecentLogs());
     }
 
     @GetMapping("/users")

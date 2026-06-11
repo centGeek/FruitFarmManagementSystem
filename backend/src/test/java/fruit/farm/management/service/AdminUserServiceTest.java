@@ -2,7 +2,6 @@ package fruit.farm.management.service;
 
 import fruit.farm.management.dto.AdminUserDto;
 import fruit.farm.management.dto.UserDto;
-import fruit.farm.management.entity.AuditAction;
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.UserCredentialsEntity;
 import fruit.farm.management.entity.UserEntity;
@@ -26,7 +25,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,9 +44,6 @@ class AdminUserServiceTest {
 
     @Mock
     UserService userService;
-
-    @Mock
-    AuditLogService auditLogService;
 
     @InjectMocks
     AdminUserService service;
@@ -102,7 +97,6 @@ class AdminUserServiceTest {
         assertThat(result.isActive()).isFalse();
         assertThat(target.isActive()).isFalse();
         verify(userRepository).save(target);
-        verify(auditLogService).record(eq(AuditAction.USER_BLOCKED), eq("USER"), eq(5L), any());
     }
 
     @Test
@@ -140,7 +134,6 @@ class AdminUserServiceTest {
 
         assertThat(result.getRoleName()).isEqualTo("Gardener");
         assertThat(target.getRole()).isEqualTo(gardenerRole);
-        verify(auditLogService).record(eq(AuditAction.USER_ROLE_CHANGED), eq("USER"), eq(5L), any());
     }
 
     @Test
@@ -167,7 +160,6 @@ class AdminUserServiceTest {
         verify(userCredentialsRepository).update(credentialsCaptor.capture());
         assertThat(credentialsCaptor.getValue().getUser()).isEqualTo(target);
         assertThat(credentialsCaptor.getValue().getPasswordHash()).isEqualTo("newpass123");
-        verify(auditLogService).record(eq(AuditAction.USER_PASSWORD_RESET), eq("USER"), eq(5L), any());
     }
 
     @Test

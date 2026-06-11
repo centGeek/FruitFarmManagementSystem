@@ -1,7 +1,6 @@
 package fruit.farm.management.service;
 
 import fruit.farm.management.dto.AdminUserDto;
-import fruit.farm.management.entity.AuditAction;
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.RoleType;
 import fruit.farm.management.entity.UserCredentialsEntity;
@@ -28,7 +27,6 @@ public class AdminUserService {
     private RoleRepository roleRepository;
     private UserCredentialsRepository userCredentialsRepository;
     private UserService userService;
-    private AuditLogService auditLogService;
 
     public List<AdminUserDto> getAllUsers() {
 
@@ -53,10 +51,6 @@ public class AdminUserService {
         user.setActive(active);
         UserEntity saved = userRepository.save(user);
         log.info("Admin set isActive={} for user {}", active, id);
-        auditLogService.record(
-                active ? AuditAction.USER_UNBLOCKED : AuditAction.USER_BLOCKED,
-                "USER", id,
-                String.format("Konto użytkownika %s zostało %s", user.getNickname(), active ? "odblokowane" : "zablokowane"));
         return toDto(saved);
     }
 
@@ -73,8 +67,6 @@ public class AdminUserService {
         user.setRole(role);
         UserEntity saved = userRepository.save(user);
         log.info("Admin changed role of user {} to {}", id, roleName);
-        auditLogService.record(AuditAction.USER_ROLE_CHANGED, "USER", id,
-                String.format("Zmieniono rolę użytkownika %s na %s", user.getNickname(), roleName));
         return toDto(saved);
     }
 
@@ -88,8 +80,6 @@ public class AdminUserService {
 
         userCredentialsRepository.update(new UserCredentialsEntity(user, newPassword));
         log.info("Admin reset password for user {}", id);
-        auditLogService.record(AuditAction.USER_PASSWORD_RESET, "USER", id,
-                String.format("Zresetowano hasło użytkownika %s", user.getNickname()));
     }
 
     private AdminUserDto toDto(UserEntity user) {

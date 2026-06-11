@@ -2,10 +2,8 @@ package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.AdminStatsDto;
 import fruit.farm.management.dto.AdminUserDto;
-import fruit.farm.management.dto.AuditLogDto;
 import fruit.farm.management.service.AdminStatsService;
 import fruit.farm.management.service.AdminUserService;
-import fruit.farm.management.service.AuditLogService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,23 +30,8 @@ class AdminControllerTest {
     @Mock
     AdminStatsService adminStatsService;
 
-    @Mock
-    AuditLogService auditLogService;
-
     @InjectMocks
     AdminController controller;
-
-    @Test
-    @DisplayName("getAuditLog returns the service result with 200")
-    void getAuditLog_returnsServiceResult() {
-        List<AuditLogDto> entries = List.of(AuditLogDto.builder().id(1L).action("USER_BLOCKED").build());
-        when(auditLogService.getRecentLogs()).thenReturn(entries);
-
-        ResponseEntity<List<AuditLogDto>> response = controller.getAuditLog();
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(entries);
-    }
 
     @Test
     @DisplayName("getStats returns the service result with 200")
