@@ -158,6 +158,22 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- Wymusza nowsze API Dockera; bez tego Testcontainers negocjuje 1.32,
+					     które odrzucają nowsze silniki (np. Rancher Desktop: min. 1.41). -->
+					<systemPropertyVariables>
+						<api.version>1.41</api.version>
+					</systemPropertyVariables>
+					<!-- Ryuk (resource reaper) bywa niestabilny na Rancher Desktop; kontenery
+					     i tak sprząta cykl życia JUnit @Testcontainers przy zamknięciu JVM. -->
+					<environmentVariables>
+						<TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+					</environmentVariables>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
