@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -44,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/expenses/**").hasAnyAuthority("Gardener")
                         .requestMatchers("/api/admin/**").hasAuthority("Admin")
                         .requestMatchers("/api/tickets/all").hasAuthority("Admin")
+                        .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/status").hasAuthority("Admin")
                         .requestMatchers("/api/tickets/**").authenticated()
                         .anyRequest().authenticated()
                 )
