@@ -58,6 +58,27 @@ class AdminControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @WithMockUser(username = "admin", authorities = "Admin")
+    @DisplayName("returns global statistics for an admin")
+    void getStats_asAdmin_returnsAggregates() throws Exception {
+        mockMvc.perform(get("/api/admin/stats"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.totalUsers").value(org.hamcrest.Matchers.greaterThanOrEqualTo(2)))
+                .andExpect(jsonPath("$.admins").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.totalExpenses").exists())
+                .andExpect(jsonPath("$.netBalance").exists())
+                .andExpect(jsonPath("$.ticketsByMonth").isArray());
+    }
+
+    @Test
+    @DisplayName("rejects unauthenticated access to statistics with 403")
+    void getStats_unauthenticated_isForbidden() throws Exception {
+        mockMvc.perform(get("/api/admin/stats"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", authorities = "Admin")
     @DisplayName("lists the seeded roles")
     void getAllRoles_asAdmin_returnsSeededRoles() throws Exception {
         mockMvc.perform(get("/api/admin/roles"))

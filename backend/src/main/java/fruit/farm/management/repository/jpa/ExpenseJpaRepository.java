@@ -8,10 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
 public interface ExpenseJpaRepository extends JpaRepository<ExpenseEntity, Long> {
+
+    @Query("select coalesce(sum(e.expenseCost), 0) from expense_entity e")
+    BigDecimal sumAllExpenses();
+
+    @Query("select coalesce(sum(e.expenseCost), 0) from expense_entity e where e.isPaid = true")
+    BigDecimal sumPaidExpenses();
 
     @Query("""
             select ee from expense_entity ee where ee.userEntity.id =:userId and ee.userEntity.role.roleName = "Gardener"

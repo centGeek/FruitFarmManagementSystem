@@ -30,6 +30,14 @@ public class SectorRepository {
         return sectorJpaRepository.findAll();
     }
 
+    public long count() {
+        return sectorJpaRepository.count();
+    }
+
+    public long countActiveSectors() {
+        return sectorJpaRepository.countActiveSectors();
+    }
+
     public List<SectorEntity> findAllActiveByUserId(long userId) {
         return sectorJpaRepository.findAllActiveByUserId(userId);
     }

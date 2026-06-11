@@ -8,11 +8,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 @Repository
 
 public interface ProfitJpaRepository extends JpaRepository<ProfitEntity, Long> {
+
+    @Query("select coalesce(sum(pe.profit), 0) from profit_entity pe")
+    BigDecimal sumAllProfits();
+
+    @Query("select coalesce(sum(pe.kilogramsSold), 0) from profit_entity pe")
+    long sumAllKilogramsSold();
 
     @Query("""
             select pe from profit_entity pe where pe.userEntity.id =:userId and pe.userEntity.role.roleName = "Gardener"

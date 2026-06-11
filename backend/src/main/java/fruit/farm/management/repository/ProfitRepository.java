@@ -38,6 +38,18 @@ public class ProfitRepository {
                 .collect(Collectors.toList());
     }
 
+    public long count() {
+        return profitJpaRepository.count();
+    }
+
+    public java.math.BigDecimal sumAllProfits() {
+        return profitJpaRepository.sumAllProfits();
+    }
+
+    public long sumAllKilogramsSold() {
+        return profitJpaRepository.sumAllKilogramsSold();
+    }
+
     public ProfitDto getProfitById(Long id) {
 
         ProfitEntity profit = profitJpaRepository.findById(id)

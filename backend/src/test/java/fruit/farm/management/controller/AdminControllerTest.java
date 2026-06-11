@@ -1,6 +1,8 @@
 package fruit.farm.management.controller;
 
+import fruit.farm.management.dto.AdminStatsDto;
 import fruit.farm.management.dto.AdminUserDto;
+import fruit.farm.management.service.AdminStatsService;
 import fruit.farm.management.service.AdminUserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,8 +27,23 @@ class AdminControllerTest {
     @Mock
     AdminUserService adminUserService;
 
+    @Mock
+    AdminStatsService adminStatsService;
+
     @InjectMocks
     AdminController controller;
+
+    @Test
+    @DisplayName("getStats returns the service result with 200")
+    void getStats_returnsServiceResult() {
+        AdminStatsDto stats = AdminStatsDto.builder().totalUsers(7).build();
+        when(adminStatsService.getStats()).thenReturn(stats);
+
+        ResponseEntity<AdminStatsDto> response = controller.getStats();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(stats);
+    }
 
     @Test
     @DisplayName("getAllUsers returns the service result with 200")

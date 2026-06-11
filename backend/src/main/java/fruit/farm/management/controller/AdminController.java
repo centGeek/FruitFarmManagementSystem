@@ -1,6 +1,8 @@
 package fruit.farm.management.controller;
 
+import fruit.farm.management.dto.AdminStatsDto;
 import fruit.farm.management.dto.AdminUserDto;
+import fruit.farm.management.service.AdminStatsService;
 import fruit.farm.management.service.AdminUserService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +23,14 @@ import java.util.Map;
 public class AdminController {
 
     private AdminUserService adminUserService;
+    private AdminStatsService adminStatsService;
+
+    @GetMapping("/stats")
+    public ResponseEntity<AdminStatsDto> getStats() {
+
+        log.info("Admin is fetching global statistics");
+        return ResponseEntity.ok(adminStatsService.getStats());
+    }
 
     @GetMapping("/users")
     public ResponseEntity<List<AdminUserDto>> getAllUsers() {

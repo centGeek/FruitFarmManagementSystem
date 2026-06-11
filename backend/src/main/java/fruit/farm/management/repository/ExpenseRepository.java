@@ -38,6 +38,18 @@ public class ExpenseRepository {
                 .collect(Collectors.toList());
     }
 
+    public long count() {
+        return expenseJpaRepository.count();
+    }
+
+    public java.math.BigDecimal sumAllExpenses() {
+        return expenseJpaRepository.sumAllExpenses();
+    }
+
+    public java.math.BigDecimal sumPaidExpenses() {
+        return expenseJpaRepository.sumPaidExpenses();
+    }
+
     public ExpenseDto getExpenseById(Long id) {
         ExpenseEntity expense = expenseJpaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wydatek nie znaleziony"));

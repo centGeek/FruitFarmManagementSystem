@@ -9,11 +9,19 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, Long> {
+
+    @Query("select coalesce(sum(we.daySalary), 0) from WorkEntryEntity we")
+    BigDecimal sumAllSalaries();
+
+    @Query("select coalesce(sum(we.kilogramsPicked), 0) from WorkEntryEntity we")
+    long sumAllKilogramsPicked();
+
     @Query("SELECT we FROM WorkEntryEntity we WHERE we.user.gardener.id = :gardenerId")
     List<WorkEntryEntity> findByUserGardenerId(@Param("gardenerId") Long gardenerId);
 
@@ -38,14 +46,6 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
             @Param("sectorId") Long sectorId,
             @Param("userId") Long userId
     );
-    @Query("SELECT w FROM WorkEntryEntity w WHERE " +
-            "(:year IS NULL OR YEAR(w.workDate) = :year) AND " +
-            "(:month IS NULL OR MONTH(w.workDate) = :month) AND " +
-            "(:month IS NULL OR MONTH(w.workDate) = :month)")
-    List<WorkEntryEntity> findAllExpensesByGivenDate(
-            @Param("year") Integer year,
-            @Param("month") Integer month);
-
     @Modifying
     @Transactional
     @Query("UPDATE WorkEntryEntity we SET we.isPaid = TRUE " +

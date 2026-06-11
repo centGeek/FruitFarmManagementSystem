@@ -9,6 +9,10 @@ import java.util.List;
 @Repository
 
 public interface SelectorJpaRepository extends JpaRepository<SectorEntity, Long> {
+
+    @Query("select count(se) from sector_entity se where se.isActive = true")
+    long countActiveSectors();
+
     @Query("select se from sector_entity se where se.userEntity.id =:userId and se.isActive = true")
     List<SectorEntity> findAllActiveByUserId(long userId);
 

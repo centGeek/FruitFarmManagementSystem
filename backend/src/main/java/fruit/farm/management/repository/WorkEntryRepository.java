@@ -27,6 +27,18 @@ public class WorkEntryRepository {
         return workEntryJpaRepository.findById(id);
     }
 
+    public long count() {
+        return workEntryJpaRepository.count();
+    }
+
+    public BigDecimal sumAllSalaries() {
+        return workEntryJpaRepository.sumAllSalaries();
+    }
+
+    public long sumAllKilogramsPicked() {
+        return workEntryJpaRepository.sumAllKilogramsPicked();
+    }
+
     public WorkEntryEntity save(WorkEntryEntity workEntryEntity) {
 
         return workEntryJpaRepository.save(workEntryEntity);
@@ -53,11 +65,6 @@ public class WorkEntryRepository {
     public List<WorkEntryEntity> findAllExpensesByGivenDate(Integer year, Integer month, Long sectorId, Long userId) {
 
         return workEntryJpaRepository.findAllExpensesByGivenDate(year, month, sectorId, userId);
-    }
-
-    public List<WorkEntryEntity> findAllExpensesByGivenDate(Integer year, Integer month) {
-
-        return workEntryJpaRepository.findAllExpensesByGivenDate(year, month);
     }
 
     public int payAllUnpaidEntries(long employeeId) {
