@@ -30,6 +30,11 @@ public class TicketRepository {
         return ticketJpaRepository.findAll();
     }
 
+    public List<TicketEntity> findAllOrderByCreatedAtDesc() {
+
+        return ticketJpaRepository.findAllByOrderByCreatedAtDesc();
+    }
+
     public List<TicketEntity> findByUserIdOrderByCreatedAtDesc(Long userId) {
 
         return ticketJpaRepository.findByUserEntityIdOrderByCreatedAtDesc(userId);

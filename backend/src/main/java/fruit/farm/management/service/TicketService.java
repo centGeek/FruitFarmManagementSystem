@@ -49,4 +49,40 @@ public class TicketService {
                 .map(TicketMapper::mapFromEntity)
                 .toList();
     }
+
+    public List<TicketDto> getAllTickets() {
+
+        return ticketRepository.findAllOrderByCreatedAtDesc().stream()
+                .map(TicketMapper::mapFromEntity)
+                .toList();
+    }
+
+    @Transactional
+    public TicketDto updateStatus(Long ticketId, TicketStatus status) {
+
+        TicketEntity ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Zgłoszenie o id %d nie istnieje", ticketId)));
+
+        ticket.setStatus(status);
+        ticket.setClosedAt(status == TicketStatus.CLOSED ? LocalDateTime.now() : null);
+
+        TicketEntity saved = ticketRepository.save(ticket);
+        log.info("Ticket {} status changed to {}", ticketId, status);
+        return TicketMapper.mapFromEntity(saved);
+    }
+
+    @Transactional
+    public TicketDto updateComment(Long ticketId, String comment) {
+
+        TicketEntity ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Zgłoszenie o id %d nie istnieje", ticketId)));
+
+        ticket.setAdminComment(comment != null && comment.isBlank() ? null : comment);
+
+        TicketEntity saved = ticketRepository.save(ticket);
+        log.info("Ticket {} admin comment updated", ticketId);
+        return TicketMapper.mapFromEntity(saved);
+    }
 }

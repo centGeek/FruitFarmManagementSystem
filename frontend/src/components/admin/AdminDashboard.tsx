@@ -15,6 +15,7 @@ export default function AdminDashboard() {
     setSearch,
     refresh,
     updateStatus,
+    updateComment,
   } = useAdminDashboard();
 
   return (
@@ -56,7 +57,7 @@ export default function AdminDashboard() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredTickets.map((ticket) => (
-                <AdminTicketRow key={ticket.id} ticket={ticket} onUpdateStatus={updateStatus} />
+                <AdminTicketRow key={ticket.id} ticket={ticket} onUpdateStatus={updateStatus} onUpdateComment={updateComment} />
               ))}
             </div>
           )}

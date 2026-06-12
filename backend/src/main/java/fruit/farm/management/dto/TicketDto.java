@@ -31,5 +31,8 @@ public class TicketDto {
 
     private TicketStatus status;
 
+    @Size(max = 2000, message = "Komentarz może mieć maksymalnie 2000 znaków")
+    private String adminComment;
+
     private UserDto userDto;
 }

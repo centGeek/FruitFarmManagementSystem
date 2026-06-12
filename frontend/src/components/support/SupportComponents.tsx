@@ -106,6 +106,14 @@ export const TicketCard = React.memo(({ ticket }: any) => {
                 <p className="text-sm font-medium text-gray-500 uppercase mb-1">Opis</p>
                 <p className="text-base text-gray-900 whitespace-pre-wrap break-words">{ticket.description}</p>
             </div>
+            {ticket.adminComment && (
+                <div className="mt-3 p-3 rounded-xl bg-green-50 border border-green-200">
+                    <p className="text-sm font-medium text-green-700 mb-1 flex items-center gap-1">
+                        <span>💬</span> Odpowiedź administratora
+                    </p>
+                    <p className="text-base text-gray-900 whitespace-pre-wrap break-words">{ticket.adminComment}</p>
+                </div>
+            )}
             {closedAt && <p className="text-xs text-gray-400 mt-3">Zamknięto: {closedAt}</p>}
         </div>
     );

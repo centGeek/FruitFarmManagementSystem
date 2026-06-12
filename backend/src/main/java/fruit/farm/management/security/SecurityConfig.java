@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasAuthority("Admin")
                         .requestMatchers("/api/tickets/all").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/status").hasAuthority("Admin")
+                        .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/comment").hasAuthority("Admin")
                         .requestMatchers("/api/tickets/**").authenticated()
                         .anyRequest().authenticated()
                 )

@@ -64,6 +64,27 @@ export const useAdminDashboard = () => {
     }
   }, []);
 
+  const updateComment = useCallback(async (ticketId: number, comment: string) => {
+    try {
+      const response = await authFetch(`${BACKEND_URL}/api/tickets/${ticketId}/comment`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ comment }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok) {
+        setTickets(prev => prev.map(t => (t.id === ticketId ? data : t)));
+        setAlert({ type: 'success', message: `Komentarz do zgłoszenia #${ticketId} został zapisany.` });
+        return true;
+      }
+      setAlert({ type: 'error', message: data.message || 'Nie udało się zapisać komentarza.' });
+      return false;
+    } catch {
+      setAlert({ type: 'error', message: 'Błąd sieci podczas zapisywania komentarza.' });
+      return false;
+    }
+  }, []);
+
   const stats = useMemo(() => ({
     total: tickets.length,
     open: tickets.filter(t => t.status === 'OPEN').length,
@@ -99,5 +120,6 @@ export const useAdminDashboard = () => {
     setSearch,
     refresh: fetchTickets,
     updateStatus,
+    updateComment,
   };
 };

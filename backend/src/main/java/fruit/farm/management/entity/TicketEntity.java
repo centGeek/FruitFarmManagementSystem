@@ -35,6 +35,9 @@ public class TicketEntity {
     @Column(name = "closed_at")
     private LocalDateTime closedAt;
 
+    @Column(name = "admin_comment", columnDefinition = "TEXT")
+    private String adminComment;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
     private TicketStatus status;

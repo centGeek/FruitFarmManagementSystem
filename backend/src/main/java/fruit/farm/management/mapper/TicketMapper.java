@@ -13,6 +13,7 @@ public class TicketMapper {
                 .category(ticketEntity.getCategory())
                 .createdAt(ticketEntity.getCreatedAt())
                 .closedAt(ticketEntity.getClosedAt())
+                .adminComment(ticketEntity.getAdminComment())
                 .status(ticketEntity.getStatus())
                 .userDto(ticketEntity.getUserEntity() != null
                         ? UserMapper.mapFromEntity(ticketEntity.getUserEntity())

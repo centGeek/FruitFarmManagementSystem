@@ -97,7 +97,7 @@ class TicketServiceTest {
     @DisplayName("updateStatus to CLOSED sets the closedAt timestamp")
     void updateStatus_whenClosed_setsClosedAt() {
         TicketEntity ticket = new TicketEntity(1L, reporterEntity(), "desc", "CAT",
-                LocalDateTime.now(), null, TicketStatus.OPEN);
+                LocalDateTime.now(), null, null, TicketStatus.OPEN);
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
         when(ticketRepository.save(ticket)).thenReturn(ticket);
 
@@ -111,7 +111,7 @@ class TicketServiceTest {
     @DisplayName("updateStatus to a non-closed status clears closedAt")
     void updateStatus_whenNotClosed_clearsClosedAt() {
         TicketEntity ticket = new TicketEntity(1L, reporterEntity(), "desc", "CAT",
-                LocalDateTime.now(), LocalDateTime.now(), TicketStatus.CLOSED);
+                LocalDateTime.now(), LocalDateTime.now(), null, TicketStatus.CLOSED);
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
         when(ticketRepository.save(ticket)).thenReturn(ticket);
 
@@ -132,12 +132,51 @@ class TicketServiceTest {
     }
 
     @Test
+    @DisplayName("updateComment stores the admin comment on the ticket")
+    void updateComment_storesComment() {
+        TicketEntity ticket = new TicketEntity(1L, reporterEntity(), "desc", "CAT",
+                LocalDateTime.now(), null, null, TicketStatus.OPEN);
+        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.save(ticket)).thenReturn(ticket);
+
+        TicketDto result = service.updateComment(1L, "Rozwiązane — wymieniono czujnik");
+
+        assertThat(result.getAdminComment()).isEqualTo("Rozwiązane — wymieniono czujnik");
+        assertThat(ticket.getAdminComment()).isEqualTo("Rozwiązane — wymieniono czujnik");
+    }
+
+    @Test
+    @DisplayName("updateComment clears the comment when given a blank value")
+    void updateComment_blankClearsComment() {
+        TicketEntity ticket = new TicketEntity(1L, reporterEntity(), "desc", "CAT",
+                LocalDateTime.now(), null, "old", TicketStatus.OPEN);
+        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(ticketRepository.save(ticket)).thenReturn(ticket);
+
+        TicketDto result = service.updateComment(1L, "   ");
+
+        assertThat(result.getAdminComment()).isNull();
+        assertThat(ticket.getAdminComment()).isNull();
+    }
+
+    @Test
+    @DisplayName("updateComment throws NotFound when the ticket does not exist")
+    void updateComment_whenNotFound_throwsNotFound() {
+        when(ticketRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.updateComment(99L, "x"))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("99");
+        verify(ticketRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("getTicketsByUser maps every ticket returned by the repository")
     void getTicketsByUser_mapsAll() {
         TicketEntity t1 = new TicketEntity(1L, reporterEntity(), "a", "CAT",
-                LocalDateTime.now(), null, TicketStatus.OPEN);
+                LocalDateTime.now(), null, null, TicketStatus.OPEN);
         TicketEntity t2 = new TicketEntity(2L, reporterEntity(), "b", "CAT",
-                LocalDateTime.now(), null, TicketStatus.CLOSED);
+                LocalDateTime.now(), null, null, TicketStatus.CLOSED);
         when(ticketRepository.findByUserIdOrderByCreatedAtDesc(3L)).thenReturn(List.of(t1, t2));
 
         List<TicketDto> result = service.getTicketsByUser(3L);

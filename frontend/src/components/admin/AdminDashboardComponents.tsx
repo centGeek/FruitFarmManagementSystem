@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getCategoryDetails } from '../support/SupportHooks';
 import { StatusBadge } from '../support/SupportComponents';
 
@@ -76,11 +76,20 @@ const STATUS_OPTIONS = [
   { value: 'CLOSED', label: 'Zamknięte', icon: '✅', active: 'bg-green-600 text-white', idle: 'bg-green-50 text-green-700 hover:bg-green-100' },
 ];
 
-export const AdminTicketRow = React.memo(({ ticket, onUpdateStatus }: any) => {
+export const AdminTicketRow = React.memo(({ ticket, onUpdateStatus, onUpdateComment }: any) => {
   const category = getCategoryDetails(ticket.category);
   const createdAt = ticket.createdAt ? new Date(ticket.createdAt).toLocaleString('pl-PL') : '—';
   const closedAt = ticket.closedAt ? new Date(ticket.closedAt).toLocaleString('pl-PL') : null;
   const reporter = ticket.userDto;
+  const [comment, setComment] = useState(ticket.adminComment ?? '');
+  const [savingComment, setSavingComment] = useState(false);
+  const commentDirty = (comment ?? '') !== (ticket.adminComment ?? '');
+
+  const saveComment = async () => {
+    setSavingComment(true);
+    await onUpdateComment?.(ticket.id, comment);
+    setSavingComment(false);
+  };
   const reporterName = reporter
     ? `${reporter.name ?? ''} ${reporter.surname ?? ''}`.trim() || reporter.nickname || `#${reporter.id}`
     : 'Nieznany użytkownik';
@@ -132,6 +141,27 @@ export const AdminTicketRow = React.memo(({ ticket, onUpdateStatus }: any) => {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      <div className="pt-3 mt-3 border-t border-gray-100">
+        <p className="text-xs font-medium text-gray-500 uppercase mb-2">Komentarz administratora</p>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          rows={2}
+          maxLength={2000}
+          placeholder="np. Rozwiązane — wymieniono uszkodzony czujnik."
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+        />
+        <div className="flex justify-end mt-2">
+          <button
+            onClick={saveComment}
+            disabled={!commentDirty || savingComment}
+            className="px-4 py-1.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {savingComment ? 'Zapisywanie...' : 'Zapisz komentarz'}
+          </button>
         </div>
       </div>
     </div>
