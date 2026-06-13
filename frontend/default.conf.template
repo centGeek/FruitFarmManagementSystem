@@ -1,0 +1,31 @@
+# Szablon konfiguracji nginx — obraz nginx:alpine podstawia ${BACKEND_ORIGIN}
+# przez /docker-entrypoint.d/20-envsubst-on-templates.sh (envsubst tyka tylko
+# zdefiniowanych zmiennych env, więc $uri/$host/$scheme zostają nietknięte).
+#
+# BACKEND_ORIGIN — adres backendu z perspektywy serwera nginx (nie przeglądarki):
+#   Compose:  http://backend:8091
+#   Azure:    https://<ca-backend>.azurecontainerapps.io
+server {
+    listen       80;
+    server_name  _;
+
+    root   /usr/share/nginx/html;
+    index  index.html;
+
+    # Reverse-proxy API: przeglądarka widzi tylko origin frontendu, nginx serwerowo
+    # przekazuje /api do backendu. Dzięki temu front+back to ten sam origin →
+    # brak CORS, ciasteczka httpOnly na SameSite=Lax.
+    location /api/ {
+        proxy_pass ${BACKEND_ORIGIN};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_ssl_server_name on;   # SNI dla backendu po HTTPS (Azure)
+    }
+
+    # SPA: pozostałe ścieżki kierujemy do index.html (routing po stronie React Router)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
