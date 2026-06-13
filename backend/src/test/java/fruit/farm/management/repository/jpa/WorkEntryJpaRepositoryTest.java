@@ -256,8 +256,10 @@ class WorkEntryJpaRepositoryTest extends AbstractIntegrationTest {
     void findAllExpensesByGivenDate_whenYearAndMonthNull_returnsAllForGardener() {
         // Arrange
         employee = seedEmployee("worker_exp_all", "Nowak", gardener);
-        seedWorkEntry(employee, null, LocalDate.of(2026, 1, 20), new BigDecimal("70.00"), 2, false);
-        seedWorkEntry(employee, null, LocalDate.of(2026, 2, 20), new BigDecimal("70.00"), 2, false);
+        WorkEntryEntity january = seedWorkEntry(employee, null, LocalDate.of(2026, 1, 20),
+                new BigDecimal("70.00"), 2, false);
+        WorkEntryEntity february = seedWorkEntry(employee, null, LocalDate.of(2026, 2, 20),
+                new BigDecimal("70.00"), 2, false);
         entityManager.flush();
         entityManager.clear();
 
@@ -265,8 +267,10 @@ class WorkEntryJpaRepositoryTest extends AbstractIntegrationTest {
         List<WorkEntryEntity> result =
                 repository.findAllExpensesByGivenDate(null, null, null, SEEDED_GARDENER_ID);
 
-        // Assert
-        assertThat(result).hasSize(2);
+        // Assert: both of the gardener's entries are returned regardless of their month
+        assertThat(result)
+                .extracting(WorkEntryEntity::getEntryId)
+                .containsExactlyInAnyOrder(january.getEntryId(), february.getEntryId());
     }
 
     @Test
