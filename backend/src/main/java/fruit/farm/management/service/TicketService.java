@@ -1,6 +1,7 @@
 package fruit.farm.management.service;
 
 import fruit.farm.management.dto.TicketDto;
+import fruit.farm.management.dto.TicketStatsDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.TicketEntity;
 import fruit.farm.management.entity.TicketStatus;
@@ -10,6 +11,8 @@ import fruit.farm.management.mapper.TicketMapper;
 import fruit.farm.management.repository.TicketRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,11 +53,21 @@ public class TicketService {
                 .toList();
     }
 
-    public List<TicketDto> getAllTickets() {
+    public Page<TicketDto> getAllTickets(TicketStatus status, String search, Pageable pageable) {
 
-        return ticketRepository.findAllOrderByCreatedAtDesc().stream()
-                .map(TicketMapper::mapFromEntity)
-                .toList();
+        String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
+        return ticketRepository.findAllFiltered(status, normalizedSearch, pageable)
+                .map(TicketMapper::mapFromEntity);
+    }
+
+    public TicketStatsDto getStats() {
+
+        return TicketStatsDto.builder()
+                .total(ticketRepository.count())
+                .open(ticketRepository.countByStatus(TicketStatus.OPEN))
+                .inProgress(ticketRepository.countByStatus(TicketStatus.IN_PROGRESS))
+                .closed(ticketRepository.countByStatus(TicketStatus.CLOSED))
+                .build();
     }
 
     @Transactional

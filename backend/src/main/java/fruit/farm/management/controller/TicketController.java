@@ -1,6 +1,7 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.TicketDto;
+import fruit.farm.management.dto.TicketStatsDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.TicketStatus;
 import fruit.farm.management.service.TicketService;
@@ -11,6 +12,10 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,10 +50,20 @@ public class TicketController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<TicketDto>> getAllTickets() {
+    public ResponseEntity<Page<TicketDto>> getAllTickets(
+            @RequestParam(required = false) TicketStatus status,
+            @RequestParam(required = false) String search,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC, size = 12) Pageable pageable) {
 
-        log.info("Admin is fetching all tickets");
-        return ResponseEntity.ok(ticketService.getAllTickets());
+        log.info("Admin is fetching tickets - status: {}, search: {}, page: {}", status, search, pageable);
+        return ResponseEntity.ok(ticketService.getAllTickets(status, search, pageable));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<TicketStatsDto> getStats() {
+
+        log.info("Admin is fetching ticket stats");
+        return ResponseEntity.ok(ticketService.getStats());
     }
 
     @PatchMapping("/{id}/status")

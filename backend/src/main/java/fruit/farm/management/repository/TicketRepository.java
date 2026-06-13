@@ -4,6 +4,8 @@ import fruit.farm.management.entity.TicketEntity;
 import fruit.farm.management.entity.TicketStatus;
 import fruit.farm.management.repository.jpa.TicketJpaRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -43,5 +45,20 @@ public class TicketRepository {
     public List<TicketEntity> findByStatusOrderByCreatedAtDesc(TicketStatus status) {
 
         return ticketJpaRepository.findByStatusOrderByCreatedAtDesc(status);
+    }
+
+    public Page<TicketEntity> findAllFiltered(TicketStatus status, String search, Pageable pageable) {
+
+        return ticketJpaRepository.findAllFiltered(status, search, pageable);
+    }
+
+    public long count() {
+
+        return ticketJpaRepository.count();
+    }
+
+    public long countByStatus(TicketStatus status) {
+
+        return ticketJpaRepository.countByStatus(status);
     }
 }

@@ -1,10 +1,10 @@
 import { Alert } from "../../utils/common";
 import { useAdminDashboard } from './AdminDashboardHooks';
-import { LoadingState, EmptyState, StatCard, FilterBar, AdminTicketRow } from './AdminDashboardComponents';
+import { LoadingState, EmptyState, StatCard, FilterBar, AdminTicketRow, Pagination } from './AdminDashboardComponents';
 
 export default function AdminDashboard() {
   const {
-    filteredTickets,
+    tickets,
     stats,
     isLoading,
     alert,
@@ -13,6 +13,9 @@ export default function AdminDashboard() {
     setStatusFilter,
     search,
     setSearch,
+    currentPage,
+    totalPages,
+    handlePageChange,
     refresh,
     updateStatus,
     updateComment,
@@ -52,14 +55,17 @@ export default function AdminDashboard() {
 
           {isLoading ? (
             <LoadingState />
-          ) : filteredTickets.length === 0 ? (
+          ) : tickets.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredTickets.map((ticket) => (
-                <AdminTicketRow key={ticket.id} ticket={ticket} onUpdateStatus={updateStatus} onUpdateComment={updateComment} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {tickets.map((ticket) => (
+                  <AdminTicketRow key={ticket.id} ticket={ticket} onUpdateStatus={updateStatus} onUpdateComment={updateComment} />
+                ))}
+              </div>
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+            </>
           )}
         </div>
       </div>

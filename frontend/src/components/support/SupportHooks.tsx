@@ -26,8 +26,18 @@ export const getStatusDetails = (value: string) => {
   return TICKET_STATUS[value] || { label: value || 'Nieznany', icon: '❔', color: 'bg-gray-100 text-gray-600 border-gray-200' };
 };
 
+export interface Ticket {
+  id: number;
+  description?: string;
+  category?: string;
+  createdAt?: string;
+  closedAt?: string | null;
+  status?: string;
+  userDto?: any;
+}
+
 export const useSupport = () => {
-  const [tickets, setTickets] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '' });
