@@ -36,10 +36,9 @@ export default function AdminUsers() {
           <Alert type={alert.type} message={alert.message} onClose={closeAlert} />
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Wszyscy" value={stats.total} icon="👥" accent="bg-gray-100" />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           <StatCard label="Sadownicy" value={stats.gardeners} icon="🌱" accent="bg-green-100" />
-          <StatCard label="Pracownicy" value={stats.employees} icon="👷" accent="bg-blue-100" />
+          <StatCard label="Aktywni" value={stats.gardeners - stats.blocked} icon="🟢" accent="bg-emerald-100" />
           <StatCard label="Zablokowani" value={stats.blocked} icon="🔴" accent="bg-red-100" />
         </div>
 

@@ -2,6 +2,26 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
+export interface Sector {
+  id: number;
+  description?: string;
+  plantType?: string;
+  variety?: string;
+  isActive?: boolean;
+}
+
+export interface Profit {
+  purchaseId: number;
+  profitType: string;
+  profit: number;
+  createdAt: string;
+  description?: string;
+  received: boolean;
+  kilogramsSold?: number;
+  userId?: number;
+  sectorDTO?: Sector | null;
+}
+
 export const PROFIT_TYPES = [
 
   { value: 'SPRZEDAZ_JABLEK', label: 'Sprzedaż jabłek', icon: '🍎', color: 'bg-green-50 text-green-700 border-green-200' },
@@ -57,8 +77,8 @@ export const generateYearOptions = () => {
 // --- HOOK ---
 
 export const useProfitManagement = () => {
-    const [allProfits, setAllProfits] = useState<any[]>([]);
-    const [sectors, setSectors] = useState<any[]>([]);
+    const [allProfits, setAllProfits] = useState<Profit[]>([]);
+    const [sectors, setSectors] = useState<Sector[]>([]);
     const [selectedType, setSelectedType] = useState('');
     const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('');
     const [selectedSectorId, setSelectedSectorId] = useState('');
@@ -68,7 +88,7 @@ export const useProfitManagement = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(15);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedProfit, setSelectedProfit] = useState<any>(null);
+    const [selectedProfit, setSelectedProfit] = useState<Profit | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState({ type: '', message: '' });
 
@@ -80,7 +100,7 @@ export const useProfitManagement = () => {
 
     const fetchProfits = useCallback(async () => {
         setIsLoading(true);
-        let allData: any[] = [];
+        let allData: Profit[] = [];
         let currentPage = 0;
         let totalPages = 1;
         
@@ -173,7 +193,7 @@ export const useProfitManagement = () => {
         }
     }, [fetchProfits, closeAlert]);
 
-    const openModal = useCallback((profit: any = null) => { setSelectedProfit(profit); setIsModalOpen(true); closeAlert(); }, [closeAlert]);
+    const openModal = useCallback((profit: Profit | null = null) => { setSelectedProfit(profit); setIsModalOpen(true); closeAlert(); }, [closeAlert]);
     const closeModal = useCallback(() => { setIsModalOpen(false); setSelectedProfit(null); }, []);
 
     const filteredProfits = useMemo(() => {

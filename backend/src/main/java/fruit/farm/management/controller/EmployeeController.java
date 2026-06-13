@@ -142,7 +142,7 @@ public class EmployeeController {
         log.info("Attempting to delete user with ID: {}", id);
         try {
             Optional<UserEntity> optionalUser = userService.findUserEntityById(id);
-            if (optionalUser.isPresent()) {
+            if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "User not found with ID: " + id));
             }

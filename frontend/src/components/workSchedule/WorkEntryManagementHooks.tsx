@@ -2,6 +2,40 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from "../../utils/authFetch";
 
+export interface ScheduleSector {
+  id: number;
+  description?: string;
+  plantType?: string;
+  variety?: string;
+}
+
+export interface ScheduleEmployee {
+  id: number;
+  name?: string;
+  surname?: string;
+  nickname?: string;
+  workDetails?: any;
+}
+
+export interface WorkEntry {
+  entryId: number;
+  workDate: string;
+  workType?: string;
+  description?: string;
+  duration?: number;
+  daySalary?: any;
+  kilogramsPicked?: number;
+  isPaid?: boolean;
+  user?: any;
+  sector?: { id?: number } | null;
+}
+
+export interface UnsettledAdvance {
+  id?: number;
+  amount: any;
+  description?: string;
+}
+
 export const WORK_TYPE_OPTIONS = [
     { value: 'HARVEST', label: '🌾 Zbiory', icon: '🌾' },
     { value: 'WEEDING', label: '🌱 Pielenie', icon: '🌱' },
@@ -24,9 +58,9 @@ export const getWorkTypeIcon = (workType: string) => {
 };
 
 export const useWorkEntryManagement = () => {
-    const [workEntries, setWorkEntries] = useState<any[]>([]);
-    const [employees, setEmployees] = useState<any[]>([]);
-    const [sectors, setSectors] = useState<any[]>([]);
+    const [workEntries, setWorkEntries] = useState<WorkEntry[]>([]);
+    const [employees, setEmployees] = useState<ScheduleEmployee[]>([]);
+    const [sectors, setSectors] = useState<ScheduleSector[]>([]);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEntry, setSelectedEntry] = useState<any>(null);
@@ -40,8 +74,8 @@ export const useWorkEntryManagement = () => {
     const [isPayAllModalOpen, setIsPayAllModalOpen] = useState(false);
     const [selectedEmployeeForPayment, setSelectedEmployeeForPayment] = useState<any>(null);
     const [paymentModalType, setPaymentModalType] = useState('all');
-    const [unpaidEntriesForPayment, setUnpaidEntriesForPayment] = useState<any[]>([]);
-    const [unsettledAdvances, setUnsettledAdvances] = useState<any[]>([]);
+    const [unpaidEntriesForPayment, setUnpaidEntriesForPayment] = useState<WorkEntry[]>([]);
+    const [unsettledAdvances, setUnsettledAdvances] = useState<UnsettledAdvance[]>([]);
 
     const [isAdvancePayModalOpen, setIsAdvancePayModalOpen] = useState(false);
     const [selectedEmployeeForAdvance, setSelectedEmployeeForAdvance] = useState<any>(null);

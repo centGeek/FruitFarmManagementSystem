@@ -54,11 +54,7 @@ const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disable
   </div>
 );
 
-const handleLoginSuccess = () => {  
-  window.location.href = '/home';
-};
-
-export default function LoginPage() {
+export default function LoginPage({ onLogin }: { onLogin: (role: string | null) => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({nickname: '', password: ''});
   const [isLoading, setIsLoading] = useState(false);
@@ -102,7 +98,12 @@ export default function LoginPage() {
       }),
     });
     if (res.ok) {
-      handleLoginSuccess();
+      const verify = await fetch(`${BACKEND_URL}/api/auth/verify`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      const verifyData = verify.ok ? await verify.json() : null;
+      onLogin(verifyData?.roles?.[0] ?? null);
     } else {
       const data = await res.json();
       setError(data.message || 'Błąd logowania');

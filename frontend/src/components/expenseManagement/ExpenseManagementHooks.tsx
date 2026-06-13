@@ -2,6 +2,25 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
+export interface Sector {
+  id: number;
+  description?: string;
+  plantType?: string;
+  variety?: string;
+  isActive?: boolean;
+}
+
+export interface Expense {
+  id: number;
+  type: string;
+  amount: number;
+  createdAt: string;
+  description?: string;
+  paid: boolean;
+  userId?: number;
+  sectorDTO?: Sector | null;
+}
+
 export const EXPENSE_TYPES = [
   { value: 'ŚRODKI_OCHRONY_ROŚLIN', label: 'Opryski / Środki ochrony roślin', icon: '🧴', color: 'bg-green-50 text-green-700 border-green-200' },
   { value: 'NAWOZY', label: 'Nawozy', icon: '🌾', color: 'bg-green-50 text-green-700 border-green-200' },
@@ -45,7 +64,7 @@ export const PAYMENT_STATUS_OPTIONS = [
   { value: 'unpaid', label: 'Nieopłacone ⏳' }
 ];
 
-export const getExpenseTypeDetails = (type) => {
+export const getExpenseTypeDetails = (type: string) => {
   const expense = EXPENSE_TYPES.find(exp => exp.value === type);
   return expense
     ? { label: expense.label, icon: expense.icon, color: expense.color }
@@ -62,8 +81,8 @@ export const generateYearOptions = () => {
 };
 
 export const useExpenseManagement = () => {
-  const [allExpenses, setAllExpenses] = useState([]);
-  const [sectors, setSectors] = useState([]);
+  const [allExpenses, setAllExpenses] = useState<Expense[]>([]);
+  const [sectors, setSectors] = useState<Sector[]>([]);
   const [selectedType, setSelectedType] = useState('');
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('');
   const [selectedSectorId, setSelectedSectorId] = useState('');
@@ -73,7 +92,7 @@ export const useExpenseManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(15);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '' });
 
@@ -85,7 +104,7 @@ export const useExpenseManagement = () => {
 
   const fetchExpenses = useCallback(async () => {
     setIsLoading(true);
-    let allData = [];
+    let allData: Expense[] = [];
     let currentPage = 0;
     let totalPages = 1;
     
@@ -165,7 +184,7 @@ export const useExpenseManagement = () => {
     }
   }, [selectedExpense, fetchExpenses, closeAlert]);
 
-  const handleDeleteExpense = useCallback(async (expenseId) => {
+  const handleDeleteExpense = useCallback(async (expenseId: number) => {
     if (!window.confirm('Czy na pewno chcesz usunąć ten wydatek? Tej operacji nie można cofnąć!')) return;
     closeAlert();
     
@@ -230,14 +249,14 @@ export const useExpenseManagement = () => {
   const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
   const paginatedExpenses = filteredExpenses.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);
 
-  const handlePageChange = useCallback((newPage) => {
+  const handlePageChange = useCallback((newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [totalPages]);
 
-  const openModal = useCallback((expense = null) => { setSelectedExpense(expense); setIsModalOpen(true); closeAlert(); }, [closeAlert]);
+  const openModal = useCallback((expense: Expense | null = null) => { setSelectedExpense(expense); setIsModalOpen(true); closeAlert(); }, [closeAlert]);
   const closeModal = useCallback(() => { setIsModalOpen(false); setSelectedExpense(null); }, []);
 
   return {

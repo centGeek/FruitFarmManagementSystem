@@ -1,14 +1,14 @@
 import { BACKEND_URL } from "./apiConfigs";
 
 let isRefreshing = false;
-let refreshSubscribers = [];
+let refreshSubscribers: Array<(success: boolean) => void> = [];
 
-const onRefreshed = () => {
-  refreshSubscribers.forEach(cb => cb());
+const onRefreshed = (success: boolean) => {
+  refreshSubscribers.forEach(cb => cb(success));
   refreshSubscribers = [];
 };
 
-const addRefreshSubscriber = (callback) => {
+const addRefreshSubscriber = (callback: (success: boolean) => void) => {
   refreshSubscribers.push(callback);
 };
 
@@ -31,7 +31,7 @@ const requestBackendToGenerateAccessToken = async () => {
   }
 };
 
-export const authFetch = async (url, options = {}) => {
+export const authFetch = async (url: string, options: RequestInit = {}) => {
   let res = await fetch(url, { ...options, credentials: 'include' });
 
   if (res.status === 403) {
@@ -39,14 +39,16 @@ export const authFetch = async (url, options = {}) => {
       isRefreshing = true;
       const refreshed = await requestBackendToGenerateAccessToken();
       isRefreshing = false;
+      onRefreshed(refreshed);
 
       if (refreshed) {
-        onRefreshed();
         res = await fetch(url, { ...options, credentials: 'include' });
       }
     } else {
-      await new Promise(resolve => addRefreshSubscriber(resolve));
-      res = await fetch(url, { ...options, credentials: 'include' });
+      const refreshed = await new Promise(resolve => addRefreshSubscriber(resolve));
+      if (refreshed) {
+        res = await fetch(url, { ...options, credentials: 'include' });
+      }
     }
   }
 

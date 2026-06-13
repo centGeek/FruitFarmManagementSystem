@@ -30,7 +30,7 @@ public class AdminUserService {
 
     public List<AdminUserDto> getAllUsers() {
 
-        return userRepository.getAllUsers().stream()
+        return userRepository.getAllUsersByRoleName(RoleType.GARDENER.getDisplayName()).stream()
                 .map(this::toDto)
                 .toList();
     }

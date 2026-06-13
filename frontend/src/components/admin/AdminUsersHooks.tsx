@@ -2,8 +2,18 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
+export interface AdminUser {
+  id: number;
+  name?: string;
+  surname?: string;
+  nickname?: string;
+  email?: string;
+  roleName?: string;
+  active: boolean;
+}
+
 export const useAdminUsers = () => {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '' });
