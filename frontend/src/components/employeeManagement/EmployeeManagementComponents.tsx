@@ -286,20 +286,20 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
 
   return (
     <div className={`bg-white border rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 ${isArchived ? 'opacity-70 border-gray-300' : 'border-green-200'}`}>
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl ${isArchived ? 'bg-gray-100' : 'bg-gradient-to-br from-green-50 to-green-100'}`}>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+        <div className="flex items-center space-x-3 min-w-0 sm:flex-1">
+          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 ${isArchived ? 'bg-gray-100' : 'bg-gradient-to-br from-green-50 to-green-100'}`}>
             🧑‍🌾
           </div>
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-800 flex items-center">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-xl font-bold text-gray-800 break-words">
               {employee.name} {employee.surname}
             </h3>
-            {employee.nickname && <p className="text-sm text-gray-500 italic">"{employee.nickname}"</p>}
+            {employee.nickname && <p className="text-sm text-gray-500 italic break-words">"{employee.nickname}"</p>}
           </div>
         </div>
-        
-        <div className="flex items-center space-x-2">
+
+        <div className="flex items-center space-x-2 flex-shrink-0">
           <button
             onClick={() => onEdit(employee)}
             className="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors text-base"
