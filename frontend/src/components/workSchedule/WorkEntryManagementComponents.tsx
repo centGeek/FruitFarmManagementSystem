@@ -96,12 +96,12 @@ export const DailyWorkForm = ({ date, employees, sectors, onSave, onCancel, isLo
             
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <p className="text-sm font-bold text-blue-800 mb-3">⚡ Szybkie wypełnienie dla wszystkich:</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
                         <label className="text-xs text-gray-600 mb-1 block">Godziny</label>
-                        <div className="flex gap-2">
+                        <div className="grid grid-cols-6 gap-1.5">
                             {[4, 6, 8, 10, 11, 12].map(h => (
-                                <button key={h} onClick={() => quickFillAll('hours', h.toString())} className="flex-1 bg-white hover:bg-blue-100 border border-blue-300 rounded-lg py-2 text-sm font-bold transition-colors">{h}h</button>
+                                <button key={h} onClick={() => quickFillAll('hours', h.toString())} className="bg-white hover:bg-blue-100 border border-blue-300 rounded-lg py-2 text-sm font-bold transition-colors">{h}h</button>
                             ))}
                         </div>
                     </div>
@@ -245,14 +245,14 @@ export const WeekCalendar = ({ workEntries, onAddClick, onEventClick, onTogglePa
                     <h3 className="text-xl font-bold text-white">{weekDays[0].toLocaleDateString('pl-PL', { month: 'long', year: 'numeric' })}</h3>
                 </div>
             </div>
-            <div className="grid grid-cols-7">
+            <div className="grid grid-cols-1 sm:grid-cols-7">
                 {weekDays.map((day, idx) => {
                     const entries = getEntriesForDate(day);
                     const totalHours = entries.reduce((sum: number, e: any) => sum + (e.duration || 0), 0);
                     const totalSalary = entries.reduce((sum: number, e: any) => sum + (parseFloat(e.daySalary) || 0), 0);
                     const dateStr = formatDateToLocal(day);
                     return (
-                        <div key={idx} className={`border-r border-b border-gray-200 min-h-64 ${isToday(day) ? 'bg-green-50' : 'bg-white'}`}>
+                        <div key={idx} className={`border-r border-b border-gray-200 sm:min-h-64 ${isToday(day) ? 'bg-green-50' : 'bg-white'}`}>
                             <div className={`p-3 border-b border-gray-200 ${isToday(day) ? 'bg-green-100' : 'bg-gray-50'}`}>
                                 <div className="text-xs text-gray-500 uppercase">{day.toLocaleDateString('pl-PL', { weekday: 'short' })}</div>
                                 <div className={`text-2xl font-bold ${isToday(day) ? 'text-green-600' : 'text-gray-800'}`}>{day.getDate()}</div>
@@ -331,7 +331,7 @@ export const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePa
     return (
         <Modal isOpen={!!entry} onClose={onClose} title={`Szczegóły wpisu dla: ${entry.user?.name} ${entry.user?.surname}`} size="medium">
             <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {entry.duration !== undefined && entry.duration !== null && <div className="bg-blue-50 p-4 rounded-xl border border-blue-200"><p className="text-xs font-medium text-blue-700 uppercase mb-1">Czas trwania</p><p className="text-lg font-bold text-blue-900">{entry.duration}h</p></div>}
                     {entry.kilogramsPicked > 0 && <div className="bg-orange-50 p-4 rounded-xl border border-orange-200"><p className="text-xs font-medium text-orange-700 uppercase mb-1">Zebrane kilogramy</p><p className="text-lg font-bold text-orange-900">{entry.kilogramsPicked} kg</p></div>}
                     {entry.daySalary > 0 && <div className="bg-red-50 p-4 rounded-xl border border-red-200"><p className="text-xs font-medium text-red-700 uppercase mb-1">Wynagrodzenie dzienne</p><p className="text-lg font-bold text-red-900">{parseFloat(entry.daySalary).toFixed(2)} zł</p></div>}

@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import { authFetch } from "../utils/authFetch";
 
@@ -115,7 +116,8 @@ function WeatherWidget() {
 
 function GardenerNavbar({ onLogout }) {
   const navigate = useNavigate();
-  
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const tabs = [
     { name: "Strona główna", path: "/home" },
     { name: "Mapa", path: "/map" },
@@ -131,48 +133,86 @@ function GardenerNavbar({ onLogout }) {
 
   const handleLogoClick = () => {
     navigate("/home");
+    setMenuOpen(false);
   };
+
+  const desktopTabClass = ({ isActive }) =>
+    `px-3 py-2 rounded-lg font-medium text-xs tracking-wide transition-all duration-300 transform whitespace-nowrap ${
+      isActive
+        ? "bg-white text-green-700 shadow-md scale-105"
+        : "hover:bg-white/20 hover:scale-105 active:scale-95"
+    }`;
+
+  const mobileTabClass = ({ isActive }) =>
+    `block px-4 py-3 rounded-lg font-medium text-sm tracking-wide transition-colors ${
+      isActive ? "bg-white text-green-700 shadow-md" : "hover:bg-white/20"
+    }`;
 
   return (
     <nav className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-600 text-white shadow-xl sticky top-0 z-50">
-      <div className="max-w-[1600px] mx-auto px-6 py-2.5">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5">
         <div className="flex justify-between items-center gap-4">
-          <div 
-            className="text-l font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center gap-2"
+          <div
+            className="text-base sm:text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center gap-2 whitespace-nowrap"
             onClick={handleLogoClick}
           >
             <span className="text-2xl">🌱</span>
             <span>Panel Sadownika</span>
           </div>
-          
-          <div className="flex gap-1 flex-nowrap justify-center flex-1">
+
+          {/* Zakładki desktop (od lg) */}
+          <div className="hidden lg:flex gap-1 flex-nowrap justify-center flex-1">
             {tabs.map((tab) => (
-              <NavLink
-                key={tab.path}
-                to={tab.path}
-                className={({ isActive }) =>
-                  `px-3 py-2 rounded-lg font-medium text-xs tracking-wide transition-all duration-300 transform whitespace-nowrap ${
-                    isActive
-                      ? "bg-white text-green-700 shadow-md scale-105"
-                      : "hover:bg-white/20 hover:scale-105 active:scale-95"
-                  }`
-                }
-              >
+              <NavLink key={tab.path} to={tab.path} className={desktopTabClass}>
                 {tab.name}
               </NavLink>
             ))}
           </div>
-          
-          <div className="flex items-center gap-3">
-            <WeatherWidget /> 
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <WeatherWidget />
             <button
               onClick={onLogout}
-              className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-green-600"
+              className="hidden sm:inline-flex px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-green-600"
+            >
+              Wyloguj
+            </button>
+            {/* Hamburger (poniżej lg) */}
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label={menuOpen ? "Zamknij menu" : "Otwórz menu"}
+              aria-expanded={menuOpen}
+              className="lg:hidden p-2 rounded-lg hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+            >
+              {menuOpen ? <X size={26} /> : <Menu size={26} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Menu mobilne (poniżej lg) */}
+        {menuOpen && (
+          <div className="lg:hidden mt-2 pb-2 flex flex-col gap-1 border-t border-white/20 pt-2">
+            {tabs.map((tab) => (
+              <NavLink
+                key={tab.path}
+                to={tab.path}
+                onClick={() => setMenuOpen(false)}
+                className={mobileTabClass}
+              >
+                {tab.name}
+              </NavLink>
+            ))}
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                onLogout();
+              }}
+              className="mt-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg transition-colors text-left"
             >
               Wyloguj
             </button>
           </div>
-        </div>
+        )}
       </div>
     </nav>
   );
@@ -180,48 +220,93 @@ function GardenerNavbar({ onLogout }) {
 
 function AdminNavbar({ onLogout }) {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const tabs = [
+    { name: "Zgłoszenia", path: "/admin/dashboard" },
+    { name: "Użytkownicy", path: "/admin/users" },
+    { name: "Statystyki", path: "/admin/stats" },
+  ];
+
+  const desktopTabClass = ({ isActive }) =>
+    `px-3 py-2 rounded-lg font-medium text-xs tracking-wide transition-all duration-300 transform whitespace-nowrap ${
+      isActive
+        ? "bg-white text-slate-800 shadow-md scale-105"
+        : "hover:bg-white/20 hover:scale-105 active:scale-95"
+    }`;
+
+  const mobileTabClass = ({ isActive }) =>
+    `block px-4 py-3 rounded-lg font-medium text-sm tracking-wide transition-colors ${
+      isActive ? "bg-white text-slate-800 shadow-md" : "hover:bg-white/20"
+    }`;
 
   return (
     <nav className="bg-gradient-to-r from-slate-800 via-slate-700 to-gray-800 text-white shadow-xl sticky top-0 z-50">
-      <div className="max-w-[1600px] mx-auto px-6 py-2.5">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5">
         <div className="flex justify-between items-center gap-4">
           <div
-            className="text-l font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center gap-2"
-            onClick={() => navigate("/admin/dashboard")}
+            className="text-base sm:text-lg font-bold cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center gap-2 whitespace-nowrap"
+            onClick={() => {
+              navigate("/admin/dashboard");
+              setMenuOpen(false);
+            }}
           >
             <span className="text-2xl">🛠️</span>
             <span>Panel administratora</span>
           </div>
 
-          <div className="flex gap-1 flex-nowrap justify-center flex-1">
-            {[
-              { name: "Zgłoszenia", path: "/admin/dashboard" },
-              { name: "Użytkownicy", path: "/admin/users" },
-              { name: "Statystyki", path: "/admin/stats" },
-            ].map((tab) => (
-              <NavLink
-                key={tab.path}
-                to={tab.path}
-                className={({ isActive }) =>
-                  `px-3 py-2 rounded-lg font-medium text-xs tracking-wide transition-all duration-300 transform whitespace-nowrap ${
-                    isActive
-                      ? "bg-white text-slate-800 shadow-md scale-105"
-                      : "hover:bg-white/20 hover:scale-105 active:scale-95"
-                  }`
-                }
-              >
+          {/* Zakładki desktop (od md) */}
+          <div className="hidden md:flex gap-1 flex-nowrap justify-center flex-1">
+            {tabs.map((tab) => (
+              <NavLink key={tab.path} to={tab.path} className={desktopTabClass}>
                 {tab.name}
               </NavLink>
             ))}
           </div>
 
-          <button
-            onClick={onLogout}
-            className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400"
-          >
-            Wyloguj
-          </button>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={onLogout}
+              className="hidden sm:inline-flex px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400"
+            >
+              Wyloguj
+            </button>
+            {/* Hamburger (poniżej md) */}
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label={menuOpen ? "Zamknij menu" : "Otwórz menu"}
+              aria-expanded={menuOpen}
+              className="md:hidden p-2 rounded-lg hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+            >
+              {menuOpen ? <X size={26} /> : <Menu size={26} />}
+            </button>
+          </div>
         </div>
+
+        {/* Menu mobilne (poniżej md) */}
+        {menuOpen && (
+          <div className="md:hidden mt-2 pb-2 flex flex-col gap-1 border-t border-white/20 pt-2">
+            {tabs.map((tab) => (
+              <NavLink
+                key={tab.path}
+                to={tab.path}
+                onClick={() => setMenuOpen(false)}
+                className={mobileTabClass}
+              >
+                {tab.name}
+              </NavLink>
+            ))}
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                onLogout();
+              }}
+              className="mt-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg transition-colors text-left"
+            >
+              Wyloguj
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   );
