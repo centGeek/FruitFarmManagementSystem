@@ -165,6 +165,72 @@ npm run build     # tsc -b && vite build
 npm run lint      # eslint
 ```
 
+### Standalone commands (`make`)
+
+The recurring operations are wrapped in a root `Makefile`, so they can be run
+directly from a terminal — no IDE or extra tooling required:
+
+```bash
+make help              # list all targets
+make dev-up            # PostgreSQL + backend (:8091) + frontend (:5173), in the background
+make dev-down          # stop the local stack (backend, frontend, DB container)
+```
+
+These wrap the scripts in `.claude/skills/*/run.sh`; you can also call those scripts
+directly (e.g. `bash .claude/skills/dev-up/run.sh`).
+
+---
+
+## Deployment — Azure
+
+The app is deployed to **Azure for Students** (resource group `rg-fruitfarm`, region
+`polandcentral`):
+
+- **PostgreSQL Flexible Server** — the database (the only resource billed 24/7).
+- **Azure Container Apps** — `ca-backend` and `ca-frontend`, both with `min-replicas 0`
+  (scale-to-zero, so they cost nothing while idle).
+- Docker images live on **GitHub Container Registry**: `ghcr.io/centgeek/ff-backend`
+  and `ghcr.io/centgeek/ff-frontend`.
+
+### Requirements
+
+- **Azure CLI** (`az`) logged in — the scripts select the subscription automatically.
+- **Docker + buildx**, logged in to `ghcr.io` as `centgeek`
+  (`echo $GHCR_TOKEN | docker login ghcr.io -u centgeek --password-stdin`).
+- Images are built for **linux/amd64** (a Mac is arm64, Azure needs amd64) — buildx handles this.
+
+### Commands
+
+```bash
+make azure-up                 # resume: start the DB, wait until Ready, warm up the backend
+make azure-stop               # pause: stop the DB (Container Apps scale to zero on their own)
+
+make azure-deploy             # build + push + roll out backend AND frontend on a fresh tag
+make azure-deploy-backend     # backend only
+make azure-deploy-frontend    # frontend only
+```
+
+How deploy works: it computes an immutable image tag from git (e.g. `1f236ab`, or
+`-dirty-HHMMSS` when there are uncommitted changes), builds and pushes the images, then
+runs `az containerapp update` to the new tag — which forces a fresh revision (pushing
+`:latest` alone would not). The backend FQDN is compiled into the frontend at build time
+via `VITE_BACKEND_URL`.
+
+After deploy a new revision comes up in ~30–60s. If the database is stopped, run
+`make azure-up` first (deploy does not start the DB). Backend logs:
+`az containerapp logs show -n ca-backend -g rg-fruitfarm --tail 50`.
+
+### Cost note
+
+Stopping the DB drops the cost to roughly storage only (~1–2 USD/month). **Azure
+auto-starts a stopped Flexible Server after at most 7 days** — re-run `make azure-stop`
+after such an auto-restart. Full teardown (irreversible): `az group delete -n rg-fruitfarm`.
+
+> Production config: set `APP_COOKIE_SECURE=true`, `APP_COOKIE_SAME_SITE=None`, and
+> `CORS_ALLOWED_ORIGINS=https://<frontend-address>` on the backend container (front and
+> backend on different domains over HTTPS). The JWT secret and datasource credentials are
+> also overridable via env vars (`JWT_SECRET_KEY`, `SPRING_DATASOURCE_*`).
+
 ---
 
 ## Notes

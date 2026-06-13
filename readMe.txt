@@ -1,63 +1,63 @@
-INSTRUKCJA URUCHOMIENIA APLIKACJI MENADŻERSADU
+APPLICATION SETUP GUIDE — ORCHARD MANAGER (MENADŻERSADU)
 
-Aplikacja składa się z dwóch niezależnych części: serwera (Backend) 
-oraz klienta (Frontend). Aby system działał poprawnie, należy uruchomić 
-obie warstwy równolegle.
-
-
-1. WYMAGANE OPROGRAMOWANIE
-
-Przed rozpoczęciem upewnij się, że masz zainstalowane:
-
-- Docker Desktop (do obsługi konteneryzacji bazy danych) lub inne narzędzie zgodne z Docker CLI.
-- JDK 21 (można zainstalować i skonfigurować bezpośrednio przez IntelliJ IDEA).
-- Środowisko Node.js (wersja zawierająca menedżer pakietów npm). 
-- Apache Maven (opcjonalnie, jeśli nie używasz wbudowanego w IDE).
-- Środowisko programistyczne (IDE), np.:
-   - IntelliJ IDEA (zalecane dla warstwy serwera)
-   - Visual Studio Code (zalecane dla warstwy klienta)
+The application consists of two independent parts: the server (Backend)
+and the client (Frontend). For the system to work correctly, both layers
+must be run in parallel.
 
 
-2. INSTRUKCJA URUCHOMIENIA - WARSTWA SERWERA (BACKEND)
+1. REQUIRED SOFTWARE
 
-- Otwórz terminal i przejdź do katalogu backendu:
+Before you start, make sure you have installed:
+
+- Docker Desktop (for running the database in a container) or another tool compatible with the Docker CLI.
+- JDK 21 (can be installed and configured directly through IntelliJ IDEA).
+- Node.js (a version that includes the npm package manager).
+- Apache Maven (optional, if you are not using the one built into your IDE).
+- An IDE, for example:
+   - IntelliJ IDEA (recommended for the server layer)
+   - Visual Studio Code (recommended for the client layer)
+
+
+2. SETUP GUIDE — SERVER LAYER (BACKEND)
+
+- Open a terminal and go to the backend directory:
    cd ./backend
 
-- Uruchom kontenery bazy danych (wymagany działający w tle Docker Desktop).
-   Można to zrobić na dwa sposoby: 
-    a) Z terminala: 
-       docker-compose -f compose.yaml up -d 
-    b) Z poziomu IntelliJ IDEA: 
-       Otwórz plik compose.yaml i kliknij ikonę "Run" (podwójna strzałka).
+- Start the database containers (requires Docker Desktop running in the background).
+   You can do this in two ways:
+    a) From the terminal:
+       docker-compose -f compose.yaml up -d
+    b) From within IntelliJ IDEA:
+       Open the compose.yaml file and click the "Run" icon (double arrow).
 
-- Zbuduj aplikację i pobierz zależności Maven:
+- Build the application and download the Maven dependencies:
    mvn clean package install
 
-- Konfiguracja w IDE (np. IntelliJ IDEA):
-   - Otwórz folder ./backend jako projekt.
-   - W ustawieniach projektu (Project Structure) upewnij się, że wybrana wersja SDK to Java 21.
-   - Odśwież projekt Maven, aby pobrały się wszystkie biblioteki.
+- Configuration in the IDE (e.g. IntelliJ IDEA):
+   - Open the ./backend folder as a project.
+   - In the project settings (Project Structure), make sure the selected SDK version is Java 21.
+   - Refresh the Maven project so that all libraries are downloaded.
 
-- Uruchomienie aplikacji:
-   - Znajdź plik: FruitFarmManagementApplication.java
-   - Uruchom go (Run).
+- Running the application:
+   - Find the file: FruitFarmManagementApplication.java
+   - Run it (Run).
 
 
-3. INSTRUKCJA URUCHOMIENIA - WARSTWA KLIENTA (FRONTEND)
+3. SETUP GUIDE — CLIENT LAYER (FRONTEND)
 
-- Otwórz nowy terminal (nie zamykając terminala serwera).
+- Open a new terminal (without closing the server terminal).
 
-- Przejdź do katalogu frontendu:
+- Go to the frontend directory:
    cd ./frontend
 
-- Zainstaluj wymagane biblioteki (zależności z załączonego pliku package.json):
+- Install the required libraries (dependencies from the included package.json file):
    npm install
 
-- Uruchom serwer deweloperski aplikacji:
+- Start the application's development server:
    npm run dev
 
 
-4. DOSTĘP DO APLIKACJI
+4. ACCESSING THE APPLICATION
 
-Po poprawnym wykonaniu powyższych kroków aplikacja będzie dostępna 
-w przeglądarce internetowej pod adresem: http://localhost:5173/
+Once the steps above have been completed successfully, the application will be available
+in your web browser at: http://localhost:5173/
