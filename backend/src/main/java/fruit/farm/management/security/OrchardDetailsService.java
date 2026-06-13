@@ -77,7 +77,7 @@ public class OrchardDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getNickname(),
                 user.getCredentials().getPasswordHash(),
-                true,
+                user.isActive(),
                 true,
                 true,
                 true,

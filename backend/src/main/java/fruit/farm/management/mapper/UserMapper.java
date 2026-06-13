@@ -30,19 +30,19 @@ public class UserMapper {
         if(userEntity.getGardener() == null) {
 
             return new UserDto(userEntity.getId(), userEntity.getName(), userEntity.getSurname(), userEntity.getEmail(), userEntity.getCreationDate(),
-                    userEntity.getNickname(), userEntity.getPhoneNumber(), userEntity.getCredentials().getPasswordHash(),
-                    userEntity.getCredentials().getPasswordHash(), userEntity.isActive(), CoordinateMapper.mapFromEntity(userEntity.getCoordinateEntity()),
+                    userEntity.getNickname(), userEntity.getPhoneNumber(), null,
+                    null, userEntity.isActive(), CoordinateMapper.mapFromEntity(userEntity.getCoordinateEntity()),
                     userEntity.getLocalityName(), null);
         }
         UserEntity gardener = userEntity.getGardener();
         UserDto newGardener = new UserDto(gardener.getId(), gardener.getName(), gardener.getSurname(),
                 gardener.getEmail(), gardener.getCreationDate(), gardener.getNickname(), gardener.getPhoneNumber(),
-                gardener.getCredentials().getPasswordHash(), gardener.getCredentials().getPasswordHash(), gardener.isActive(),
+                null, null, gardener.isActive(),
                 CoordinateMapper.mapFromEntity(gardener.getCoordinateEntity()), gardener.getLocalityName(), null);
 
         return new UserDto(userEntity.getId(), userEntity.getName(), userEntity.getSurname(), userEntity.getEmail(), userEntity.getCreationDate(),
-                userEntity.getNickname(), userEntity.getPhoneNumber(), userEntity.getCredentials().getPasswordHash(),
-                userEntity.getCredentials().getPasswordHash(), userEntity.isActive(), CoordinateMapper.mapFromEntity(userEntity.getCoordinateEntity()),
+                userEntity.getNickname(), userEntity.getPhoneNumber(), null,
+                null, userEntity.isActive(), CoordinateMapper.mapFromEntity(userEntity.getCoordinateEntity()),
                 userEntity.getLocalityName(), newGardener);
 
 

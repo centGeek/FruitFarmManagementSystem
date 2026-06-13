@@ -18,11 +18,13 @@ import fruit.farm.management.repository.CoordinateRepository;
 import fruit.farm.management.repository.RoleRepository;
 import fruit.farm.management.repository.UserCredentialsRepository;
 import fruit.farm.management.repository.UserRepository;
-import jakarta.servlet.http.Cookie;
+import fruit.farm.management.security.CookieProperties;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,6 +49,7 @@ public class UserService {
     private RoleRepository roleRepository;
     private CoordinateRepository coordinateRepository;
     private UserCredentialsRepository userCredentialsRepository;
+    private CookieProperties cookieProperties;
 
     public UserDto getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -66,7 +69,7 @@ public class UserService {
 
     public Optional<UserDto> findUserById(long id) {
 
-        return Optional.of(UserMapper.mapFromEntity(userRepository.findById(id).get()));
+        return userRepository.findById(id).map(UserMapper::mapFromEntity);
     }
 
     public Optional<UserEntity> findUserEntityByNickname(String loggedWithNickname) {
@@ -76,7 +79,7 @@ public class UserService {
 
     public Optional<UserDto> findUserByNickname(String loggedWithNickname) {
 
-        return Optional.of(UserMapper.mapFromEntity(userRepository.findByNickname(loggedWithNickname).get()));
+        return userRepository.findByNickname(loggedWithNickname).map(UserMapper::mapFromEntity);
     }
 
     public UserDto findUserNickname(String loggedWithNickname) {
@@ -269,16 +272,22 @@ public class UserService {
 
     public void logout(HttpServletResponse response) {
 
-        Cookie cookie = new Cookie("accessToken", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(cookieProperties.isSecure())
+                .path("/")
+                .maxAge(0)
+                .sameSite(cookieProperties.getSameSite())
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        Cookie refreshCookie = new Cookie("refreshToken", null);
-        refreshCookie.setMaxAge(0);
-        refreshCookie.setPath("/");
-        refreshCookie.setHttpOnly(true);
-        response.addCookie(refreshCookie);
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(cookieProperties.isSecure())
+                .path("/")
+                .maxAge(0)
+                .sameSite(cookieProperties.getSameSite())
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
 }

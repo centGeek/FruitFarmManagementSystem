@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import fruit.farm.management.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
@@ -41,15 +43,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 log.debug("Valid token for user: {}, roles: {}", nickname, roles);
 
-                List<SimpleGrantedAuthority> authorities = roles.stream()
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+                boolean blocked = userRepository.findByNickname(nickname)
+                        .map(user -> !user.isActive())
+                        .orElse(true);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(nickname, null, authorities);
+                if (blocked) {
+                    log.warn("Rejecting request for blocked or unknown user: {}", nickname);
+                    SecurityContextHolder.clearContext();
+                } else {
+                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.debug("Authentication set successfully for user: {}", nickname);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(nickname, null, authorities);
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.debug("Authentication set successfully for user: {}", nickname);
+                }
             } else if (token != null) {
                 log.debug("Invalid or expired token");
             } else {

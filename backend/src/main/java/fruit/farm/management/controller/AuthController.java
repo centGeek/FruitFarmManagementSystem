@@ -2,9 +2,9 @@ package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.UserEntity;
+import fruit.farm.management.security.CookieProperties;
 import fruit.farm.management.security.JwtService;
 import fruit.farm.management.service.UserService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +30,7 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
     private UserService userService;
+    private CookieProperties cookieProperties;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletResponse response) {
@@ -81,18 +82,18 @@ public class AuthController {
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(cookieProperties.isSecure())
                 .path("/")
                 .maxAge(3600) // 1 godzina
-                .sameSite("Lax")
+                .sameSite(cookieProperties.getSameSite())
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false)
+                .secure(cookieProperties.isSecure())
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60) // 7 dni
-                .sameSite("Lax")
+                .sameSite(cookieProperties.getSameSite())
                 .build();
 
         response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, accessCookie.toString());
@@ -120,17 +121,24 @@ public class AuthController {
         UserEntity user = userService.findUserEntityById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (!user.isActive()) {
+            return ResponseEntity.status(401).body(new ApiErrorResponse("Account is blocked"));
+        }
+
         String newAccessToken = jwtService.generateAccessToken(
                 user.getId(),
                 user.getNickname(),
                 List.of(user.getRole().getRoleName())
         );
 
-        Cookie cookie = new Cookie("accessToken", newAccessToken);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(15 * 60);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)
+                .secure(cookieProperties.isSecure())
+                .path("/")
+                .maxAge(15 * 60)
+                .sameSite(cookieProperties.getSameSite())
+                .build();
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(new AuthResponse(newAccessToken, nickname));
     }
