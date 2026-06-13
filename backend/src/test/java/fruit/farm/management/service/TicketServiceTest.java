@@ -1,6 +1,7 @@
 package fruit.farm.management.service;
 
 import fruit.farm.management.dto.TicketDto;
+import fruit.farm.management.dto.TicketStatsDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.TicketEntity;
 import fruit.farm.management.entity.TicketStatus;
@@ -15,6 +16,10 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +28,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -184,5 +191,64 @@ class TicketServiceTest {
         assertThat(result).hasSize(2)
                 .extracting(TicketDto::getStatus)
                 .containsExactly(TicketStatus.OPEN, TicketStatus.CLOSED);
+    }
+
+    @Test
+    @DisplayName("getAllTickets maps the paginated entities returned by the repository")
+    void getAllTickets_mapsPage() {
+        Pageable pageable = PageRequest.of(0, 12);
+        TicketEntity t1 = new TicketEntity(1L, reporterEntity(), "a", "CAT",
+                LocalDateTime.now(), null, null, TicketStatus.OPEN);
+        TicketEntity t2 = new TicketEntity(2L, reporterEntity(), "b", "CAT",
+                LocalDateTime.now(), null, null, TicketStatus.CLOSED);
+        Page<TicketEntity> page = new PageImpl<>(List.of(t1, t2), pageable, 2);
+        when(ticketRepository.findAllFiltered(null, null, pageable)).thenReturn(page);
+
+        Page<TicketDto> result = service.getAllTickets(null, null, pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent())
+                .extracting(TicketDto::getStatus)
+                .containsExactly(TicketStatus.OPEN, TicketStatus.CLOSED);
+    }
+
+    @Test
+    @DisplayName("getAllTickets normalizes a blank search term to null")
+    void getAllTickets_blankSearchBecomesNull() {
+        Pageable pageable = PageRequest.of(0, 12);
+        when(ticketRepository.findAllFiltered(eq(TicketStatus.OPEN), isNull(), eq(pageable)))
+                .thenReturn(Page.empty(pageable));
+
+        service.getAllTickets(TicketStatus.OPEN, "   ", pageable);
+
+        verify(ticketRepository).findAllFiltered(TicketStatus.OPEN, null, pageable);
+    }
+
+    @Test
+    @DisplayName("getAllTickets trims a non-blank search term before querying")
+    void getAllTickets_trimsSearch() {
+        Pageable pageable = PageRequest.of(0, 12);
+        when(ticketRepository.findAllFiltered(isNull(), eq("valve"), eq(pageable)))
+                .thenReturn(Page.empty(pageable));
+
+        service.getAllTickets(null, "  valve  ", pageable);
+
+        verify(ticketRepository).findAllFiltered(null, "valve", pageable);
+    }
+
+    @Test
+    @DisplayName("getStats aggregates the total and per-status counts")
+    void getStats_aggregatesCounts() {
+        when(ticketRepository.count()).thenReturn(10L);
+        when(ticketRepository.countByStatus(TicketStatus.OPEN)).thenReturn(4L);
+        when(ticketRepository.countByStatus(TicketStatus.IN_PROGRESS)).thenReturn(3L);
+        when(ticketRepository.countByStatus(TicketStatus.CLOSED)).thenReturn(3L);
+
+        TicketStatsDto stats = service.getStats();
+
+        assertThat(stats.getTotal()).isEqualTo(10L);
+        assertThat(stats.getOpen()).isEqualTo(4L);
+        assertThat(stats.getInProgress()).isEqualTo(3L);
+        assertThat(stats.getClosed()).isEqualTo(3L);
     }
 }

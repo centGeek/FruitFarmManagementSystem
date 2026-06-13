@@ -69,19 +69,19 @@ class AdminUserServiceTest {
     }
 
     @Test
-    @DisplayName("getAllUsers counts employees only for gardeners")
-    void getAllUsers_countsEmployeesOnlyForGardeners() {
+    @DisplayName("getAllUsers returns only gardeners with their employee count")
+    void getAllUsers_returnsOnlyGardeners() {
         UserEntity gardener = user(1L, "Gardener");
-        UserEntity employee = user(2L, "Employee");
-        when(userRepository.getAllUsers()).thenReturn(List.of(gardener, employee));
+        when(userRepository.getAllUsersByRoleName("Gardener")).thenReturn(List.of(gardener));
         when(userRepository.countEmployees(1L)).thenReturn(3L);
 
         List<AdminUserDto> result = service.getAllUsers();
 
-        assertThat(result).hasSize(2);
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getRoleName()).isEqualTo("Gardener");
         assertThat(result.get(0).getEmployeeCount()).isEqualTo(3);
-        assertThat(result.get(1).getEmployeeCount()).isZero();
-        verify(userRepository, never()).countEmployees(2L);
+        verify(userRepository).getAllUsersByRoleName("Gardener");
+        verify(userRepository, never()).getAllUsers();
     }
 
     @Test

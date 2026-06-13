@@ -47,13 +47,13 @@ class AdminControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @WithMockUser(username = "admin", authorities = "Admin")
-    @DisplayName("returns the Flyway-seeded users for an admin")
-    void getAllUsers_asAdmin_returnsSeededUsers() throws Exception {
+    @DisplayName("returns only gardeners for an admin, excluding other roles")
+    void getAllUsers_asAdmin_returnsOnlyGardeners() throws Exception {
         mockMvc.perform(get("/api/admin/users"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[?(@.nickname == 'admin')].roleName").value(org.hamcrest.Matchers.hasItem("Admin")))
-                .andExpect(jsonPath("$[?(@.nickname == 'gardener')].roleName").value(org.hamcrest.Matchers.hasItem("Gardener")));
+                .andExpect(jsonPath("$[?(@.nickname == 'gardener')].roleName").value(org.hamcrest.Matchers.hasItem("Gardener")))
+                .andExpect(jsonPath("$[*].roleName").value(org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is("Gardener"))));
     }
 
     @Test

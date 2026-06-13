@@ -1,6 +1,8 @@
 package fruit.farm.management.controller;
 
 import fruit.farm.management.dto.UserDto;
+import fruit.farm.management.entity.RoleEntity;
+import fruit.farm.management.entity.UserEntity;
 import fruit.farm.management.security.CorsConfig;
 import fruit.farm.management.security.JwtAuthenticationFilter;
 import fruit.farm.management.security.JwtService;
@@ -10,6 +12,7 @@ import fruit.farm.management.service.ExpenseService;
 import fruit.farm.management.service.SectorService;
 import fruit.farm.management.service.UserService;
 import fruit.farm.management.service.WorkScheduleService;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -50,6 +56,8 @@ class ExpenseControllerTest {
     JwtService jwtService;
     @MockitoBean
     PasswordEncoder passwordEncoder;
+    @MockitoBean
+    fruit.farm.management.repository.UserRepository userRepository;
 
     @Test
     @DisplayName("GET /api/expenses without authentication is denied (403)")
@@ -76,5 +84,43 @@ class ExpenseControllerTest {
                 .thenReturn(Page.empty());
 
         mvc.perform(get("/api/expenses")).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("a blocked user with a valid token is denied (403)")
+    void getExpenses_withValidTokenButBlockedUser_isDenied() throws Exception {
+        when(jwtService.validateToken("token")).thenReturn(true);
+        when(jwtService.getNicknameFromToken("token")).thenReturn("blocked");
+        when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
+        when(userRepository.findByNickname("blocked")).thenReturn(Optional.of(userWithActive(false)));
+
+        mvc.perform(get("/api/expenses").cookie(new Cookie("accessToken", "token")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("an active Gardener authenticated via token reaches the endpoint (200)")
+    void getExpenses_withValidTokenAndActiveUser_returns200() throws Exception {
+        when(jwtService.validateToken("token")).thenReturn(true);
+        when(jwtService.getNicknameFromToken("token")).thenReturn("active");
+        when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
+        when(userRepository.findByNickname("active")).thenReturn(Optional.of(userWithActive(true)));
+
+        UserDto logged = new UserDto();
+        logged.setId(1L);
+        when(userService.getLoggedUser()).thenReturn(logged);
+        when(expenseService.getAllPaginatedExpensesByGardener(any(), any(), any(), any(), any()))
+                .thenReturn(Page.empty());
+
+        mvc.perform(get("/api/expenses").cookie(new Cookie("accessToken", "token")))
+                .andExpect(status().isOk());
+    }
+
+    private UserEntity userWithActive(boolean active) {
+        UserEntity user = new UserEntity();
+        user.setNickname("user");
+        user.setActive(active);
+        user.setRole(new RoleEntity(2L, "Gardener"));
+        return user;
     }
 }
