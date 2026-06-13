@@ -1,5 +1,19 @@
  import React, { useMemo } from 'react';
 
+ // Escapuje znaki specjalne HTML. Leaflet renderuje treść popupów/tooltipów jako SUROWY HTML
+ // (bindPopup/setPopupContent/divIcon), więc każdą wartość pochodzącą od użytkownika lub z
+ // zewnętrznego API (np. geokoder Nominatim) trzeba zescapować przed wstrzyknięciem do szablonu,
+ // inaczej powstaje XSS. Dla treści budowanej w JSX React robi to automatycznie i helper jest zbędny.
+ export const escapeHtml = (value: unknown): string => {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
  export const formatCurrency = (amount) => {
         return amount.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };

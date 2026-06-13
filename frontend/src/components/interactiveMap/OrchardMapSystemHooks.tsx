@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
-import { CROP_TYPES } from "../../utils/common";
+import { CROP_TYPES, escapeHtml } from "../../utils/common";
 
 export interface Sector {
     id: number | null;
@@ -286,17 +286,7 @@ export const useOrchardMapSystem = () => {
     }, [drawingMode, finishDrawing]);
 
     useEffect(() => {
-        // @ts-ignore
-        window.editSectorVertices = enableSectorEdit;
-        
-        return () => {
-            // @ts-ignore
-            delete window.editSectorVertices;
-        };
-    }, [enableSectorEdit]);
-
-    useEffect(() => {
-        if (sectors.length === 0) { 
+        if (sectors.length === 0) {
             setVisibleSectorIndices([]); 
             return; 
         }
@@ -378,15 +368,31 @@ export const useOrchardMapSystem = () => {
 
             const cropTypeLabel = sector.cropType ? CROP_TYPES.find(c => c.value === sector.cropType)?.label || sector.cropType : 'Nie określono';
             const varietyLabel = sector.variety ? CROP_TYPES.find(c => c.value === sector.cropType)?.varieties.find(v => v.value === sector.variety)?.label || sector.variety : null;
-            
+
+            // Nazwa/odmiana sektora to wolny tekst od użytkownika — escapujemy przed wstrzyknięciem,
+            // bo Leaflet renderuje treść popupu jako surowy HTML (ochrona przed stored XSS).
             polygon.bindPopup(`
                 <div style="padding: 12px;">
-                    <div style="font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 6px;">📍 ${sector.name}</div>
-                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">Uprawa: <b> ${cropTypeLabel} </b></div>
-                    ${varietyLabel ? `<div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">🌱Odmiana: <b>${varietyLabel} </b></div>` : ''}
-                    ${!isBeingEdited ? `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;"><button onclick="window.editSectorVertices(${actualIndex})" style="width: 100%; padding: 6px 12px; background: #ff6b00; color: white; border: none; border-radius: 4px; cursor: pointer;">✏️ Edytuj wierzchołki</button></div>` : ''}
+                    <div style="font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 6px;">📍 ${escapeHtml(sector.name)}</div>
+                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">Uprawa: <b> ${escapeHtml(cropTypeLabel)} </b></div>
+                    ${varietyLabel ? `<div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">🌱Odmiana: <b>${escapeHtml(varietyLabel)} </b></div>` : ''}
+                    ${!isBeingEdited ? `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;"><button type="button" class="edit-sector-vertices-btn" style="width: 100%; padding: 6px 12px; background: #ff6b00; color: white; border: none; border-radius: 4px; cursor: pointer;">✏️ Edytuj wierzchołki</button></div>` : ''}
                 </div>`, { maxWidth: 250 });
-            
+
+            // Przycisk podpinamy przez addEventListener przy otwarciu popupu zamiast inline onclick +
+            // globala window.* — dzięki temu działa ścisłe CSP (script-src 'self', bez 'unsafe-inline').
+            if (!isBeingEdited) {
+                polygon.on('popupopen', (e: any) => {
+                    const btn = e.popup.getElement()?.querySelector('.edit-sector-vertices-btn');
+                    if (btn) {
+                        btn.addEventListener('click', () => {
+                            enableSectorEdit(actualIndex);
+                            polygon.closePopup();
+                        }, { once: true });
+                    }
+                });
+            }
+
             drawnItems.addLayer(polygon);
 
             sector.corners.forEach((corner, cornerIndex) => {

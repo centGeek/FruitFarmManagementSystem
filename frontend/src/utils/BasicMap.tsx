@@ -13,6 +13,16 @@ if (typeof L !== 'undefined') {
     });
 }
 
+// markerPopupContent to zwykły tekst (np. "📍 nazwa miejscowości"). Budujemy węzeł DOM i ustawiamy
+// go przez textContent, dzięki czemu Leaflet renderuje go jako TEKST, a nie surowy HTML — nazwa
+// lokalizacji pochodzi z geokodera/od użytkownika i nie może wstrzyknąć znaczników (ochrona przed XSS).
+const buildTextPopup = (text: string): HTMLElement => {
+    const el = document.createElement('div');
+    el.style.textAlign = 'center';
+    el.textContent = text;
+    return el;
+};
+
 export const MAP_STYLES = {
     streets: { name: '🗺️ Domyślna', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; OpenStreetMap' },
     satellite: { name: '🛰️ Satelita', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attribution: '&copy; Esri' },
@@ -104,12 +114,12 @@ const MapMarkerAndClickManager: React.FC<MapMarkerAndClickManagerProps> = ({
         if (markerRef.current) {
             markerRef.current.setLatLng(newLatLng);
             if (markerPopupContent) {
-                markerRef.current.setPopupContent(markerPopupContent);
+                markerRef.current.setPopupContent(buildTextPopup(markerPopupContent));
             }
         } else {
             const newMarker = L.marker(newLatLng).addTo(map);
             if (markerPopupContent) {
-                newMarker.bindPopup(markerPopupContent).openPopup();
+                newMarker.bindPopup(buildTextPopup(markerPopupContent)).openPopup();
             }
             markerRef.current = newMarker;
         }

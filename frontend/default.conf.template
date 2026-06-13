@@ -1,10 +1,31 @@
-# Szablon konfiguracji nginx — obraz nginx:alpine podstawia ${BACKEND_ORIGIN}
+# Szablon konfiguracji nginx — obraz nginx:alpine podstawia zmienne env
 # przez /docker-entrypoint.d/20-envsubst-on-templates.sh (envsubst tyka tylko
 # zdefiniowanych zmiennych env, więc $uri/$host/$scheme zostają nietknięte).
 #
 # BACKEND_ORIGIN — adres backendu z perspektywy serwera nginx (nie przeglądarki):
 #   Compose:  http://backend:8091
 #   Azure:    https://<ca-backend>.azurecontainerapps.io
+# BACKEND_SCHEME / BACKEND_HOST / BACKEND_HOSTPORT są wyliczane z BACKEND_ORIGIN
+# przez /docker-entrypoint.d/15-derive-backend-origin.envsh (uruchamiany PRZED envsubst).
+
+# Pula trwałych połączeń do backendu. Bez bloku `upstream` z `keepalive` nginx zamyka
+# połączenie po każdym żądaniu i na Azure (HTTPS) płaci pełny handshake TCP+TLS przy KAŻDYM
+# /api — to było główne źródło „aplikacja działa wolniej po deployu". Z keepalive połączenie
+# (i sesja TLS) jest reużywane między żądaniami.
+upstream backend_upstream {
+    server ${BACKEND_HOSTPORT};
+    keepalive 16;
+}
+
+# HSTS wysyłamy TYLKO dla ruchu, który dotarł po HTTPS. Ten nginx nasłuchuje na zwykłym :80
+# (TLS terminuje ingress Azure i ustawia X-Forwarded-Proto=https). Lokalnie w compose ruch jest
+# po HTTP → zmienna pusta → add_header z pustą wartością jest pomijany, więc nie wymuszamy HTTPS
+# tam, gdzie go nie ma (co inaczej zablokowałoby aplikację na localhost).
+map $http_x_forwarded_proto $hsts_header {
+    https   "max-age=63072000; includeSubDomains";
+    default "";
+}
+
 server {
     listen       80;
     server_name  _;
@@ -12,16 +33,39 @@ server {
     root   /usr/share/nginx/html;
     index  index.html;
 
+    # Nagłówki bezpieczeństwa (always = również na odpowiedziach błędów 4xx/5xx).
+    # CSP ograniczony do zasobów, których aplikacja faktycznie używa: kafelki map (OSM/Esri/OpenTopo),
+    # markery Leaflet z cdnjs, Open-Meteo i Nominatim po fetch. script-src 'self' (build Vite nie ma
+    # inline-skryptów; popupy mapy przepięto z inline onclick na addEventListener). style-src wymaga
+    # 'unsafe-inline' bo Leaflet i komponenty używają atrybutów style="" oraz wstrzykiwanych <style>.
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.tile.openstreetmap.org https://*.tile.opentopomap.org https://server.arcgisonline.com https://cdnjs.cloudflare.com; connect-src 'self' https://api.open-meteo.com https://nominatim.openstreetmap.org; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" always;
+    add_header X-Frame-Options "DENY" always;                      # clickjacking (starsze przeglądarki; nowsze pokrywa frame-ancestors)
+    add_header X-Content-Type-Options "nosniff" always;            # bez MIME-sniffingu
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), usb=()" always;
+    add_header Strict-Transport-Security $hsts_header always;      # tylko gdy X-Forwarded-Proto=https (patrz map wyżej)
+    server_tokens off;                                             # nie ujawniaj wersji nginx
+
     # Reverse-proxy API: przeglądarka widzi tylko origin frontendu, nginx serwerowo
     # przekazuje /api do backendu. Dzięki temu front+back to ten sam origin →
     # brak CORS, ciasteczka httpOnly na SameSite=Lax.
     location /api/ {
-        proxy_pass ${BACKEND_ORIGIN};
-        proxy_set_header Host $host;
+        proxy_pass ${BACKEND_SCHEME}://backend_upstream;
+        proxy_http_version 1.1;            # wymagane do keepalive połączeń do backendu
+        proxy_set_header Connection "";    # usuń 'close' → połączenie TCP/TLS jest reużywane
+        # Host MUST match the TLS SNI (proxy_ssl_name below). Azure Container Apps ingress
+        # routes/validates by SNI, and answers a Host/SNI mismatch with a ~1.7s-delayed HTTP 400
+        # — that was the real "slow on cloud after deploy". Send the backend's own host, not $host
+        # (which is the frontend's hostname). Forward the original browser host via X-Forwarded-Host.
+        proxy_set_header Host ${BACKEND_HOST};
+        proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_ssl_server_name on;   # SNI dla backendu po HTTPS (Azure)
+        proxy_ssl_server_name on;          # SNI dla backendu po HTTPS (Azure)
+        proxy_ssl_name ${BACKEND_HOST};    # SNI = realny FQDN backendu (proxy_pass celuje w upstream)
+        proxy_ssl_session_reuse on;        # reużyj sesji TLS (mniej handshake'ów)
+        proxy_read_timeout 120s;           # nie zrywaj połączenia gdy backend zimno startuje
     }
 
     # SPA: pozostałe ścieżki kierujemy do index.html (routing po stronie React Router)

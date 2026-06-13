@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Search, MapPin, Loader } from 'lucide-react';
 import L from 'leaflet';
+import { escapeHtml } from './common';
 
 /**
  * Komponent wyszukiwarki lokalizacji na mapie.
@@ -130,10 +131,10 @@ const LocationSearch = ({
             .bindPopup(`
                 <div style="text-align: center; padding: 5px;">
                     <div style="font-weight: bold; color: #333; margin-bottom: 5px;">
-                        📍 ${location.name.split(',')[0]}
+                        📍 ${escapeHtml(location.name.split(',')[0])}
                     </div>
                     <div style="font-size: 12px; color: #666;">
-                        ${location.name}
+                        ${escapeHtml(location.name)}
                     </div>
                 </div>
             `)
