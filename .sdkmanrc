@@ -1,0 +1,2 @@
+# Wersja JDK dla tego repo (lokalnie). Uruchom `sdk env` w tym katalogu.
+java=21.0.6-tem
