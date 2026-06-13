@@ -78,7 +78,7 @@ class WorkEntryJpaRepositoryTest extends AbstractIntegrationTest {
         SectorEntity sector = new SectorEntity();
         sector.setDescription("Sad jabłoniowy");
         sector.setCreatedAt(LocalDate.now());
-        sector.setActive(true);
+        sector.setIsActive(true);
         sector.setUserEntity(gardener);
         return entityManager.persist(sector);
     }
