@@ -1,0 +1,44 @@
+# Pełny stack w kontenerach (postgres + backend + frontend).
+# To OSOBNY plik od backend/compose.yaml (tamten, db-only, używa spring-boot-docker-compose w dev).
+# Uruchomienie:  docker compose -f compose.full.yaml up --build
+# Frontend:      http://localhost:8080
+# Backend API:   http://localhost:8091
+services:
+  postgres:
+    image: 'postgres:16'
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_PASSWORD=secret'
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U myuser -d mydatabase']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/mydatabase'
+      - 'SPRING_DATASOURCE_USERNAME=myuser'
+      - 'SPRING_DATASOURCE_PASSWORD=secret'
+    ports:
+      - '8091:8091'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      # Adres backendu z perspektywy nginx (sieć dockerowa) — reverse-proxy /api.
+      # Przeglądarka uderza tylko w localhost:8080, więc front+back to ten sam origin.
+      - 'BACKEND_ORIGIN=http://backend:8091'
+    ports:
+      - '8080:80'
+    depends_on:
+      - backend

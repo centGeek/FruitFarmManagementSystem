@@ -3,9 +3,9 @@ spring:
     name: fruit-farm-management
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
-    username: myuser
-    password: secret
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/mydatabase}
+    username: ${SPRING_DATASOURCE_USERNAME:myuser}
+    password: ${SPRING_DATASOURCE_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -24,7 +24,7 @@ spring:
     placeholder-replacement: false
     mixed: false
 server:
-  port: 8091
+  port: ${SERVER_PORT:8091}
 
 logging:
   level:
@@ -32,7 +32,23 @@ logging:
     org.springframework.boot.autoconfigure.flyway: DEBUG
 jwt:
   secret:
-    key: 9683bc6f47cc73bd0dc0fd3738cc59ca1a15637eee20af3dc7b9aa1165716db7ba98e845
+    key: ${JWT_SECRET_KEY:9683bc6f47cc73bd0dc0fd3738cc59ca1a15637eee20af3dc7b9aa1165716db7ba98e845}
+
+# Konfiguracja cross-origin / ciasteczek.
+# Lokalnie: domyślne wartości (HTTP, ten sam host).
+# Produkcja (front i backend na różnych domenach po HTTPS):
+#   APP_COOKIE_SECURE=true, APP_COOKIE_SAME_SITE=None,
+#   CORS_ALLOWED_ORIGINS=https://<adres-frontendu>
+app:
+  cookie:
+    secure: ${APP_COOKIE_SECURE:false}
+    same-site: ${APP_COOKIE_SAME_SITE:Lax}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:}
 security:
   bcrypt:
-    strength: 4
+    # Domyślnie 10 (rozsądny koszt produkcyjny). Istniejące hashe weryfikują się dalej —
+    # siła jest zaszyta w samym hashu, więc podbicie nie wymaga migracji.
+    # Testy nadpisują na 4 (src/test/resources/application.yml) dla szybkości.
+    strength: ${SECURITY_BCRYPT_STRENGTH:10}
