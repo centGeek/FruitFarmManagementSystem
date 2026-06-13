@@ -98,6 +98,7 @@ class AuthControllerTest {
                 .andExpect(cookie().httpOnly("accessToken", true))
                 .andExpect(cookie().maxAge("accessToken", 3600))
                 .andExpect(cookie().value("refreshToken", "refresh-jwt"))
+                .andExpect(cookie().httpOnly("refreshToken", true))
                 .andExpect(cookie().maxAge("refreshToken", 7 * 24 * 60 * 60));
     }
 
@@ -116,7 +117,10 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("Bad credentials"));
+                .andExpect(jsonPath("$.message").value("Bad credentials"))
+                // A failed authentication must not leak any auth cookies.
+                .andExpect(cookie().doesNotExist("accessToken"))
+                .andExpect(cookie().doesNotExist("refreshToken"));
     }
 
     // ---------- POST /api/auth/register ----------
@@ -251,7 +255,10 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.token").value("new-access-jwt"))
                 .andExpect(jsonPath("$.nickname").value("active"))
                 .andExpect(cookie().value("accessToken", "new-access-jwt"))
-                .andExpect(cookie().maxAge("accessToken", 15 * 60));
+                .andExpect(cookie().httpOnly("accessToken", true))
+                .andExpect(cookie().maxAge("accessToken", 15 * 60))
+                // Only the short-lived access cookie is reissued on refresh.
+                .andExpect(cookie().doesNotExist("refreshToken"));
     }
 
     @Test
@@ -321,7 +328,9 @@ class AuthControllerTest {
         // Act / Assert
         mvc.perform(get("/api/auth/verify").cookie(new Cookie("accessToken", "good")))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.authenticated").value(false));
+                .andExpect(jsonPath("$.authenticated").value(false))
+                .andExpect(jsonPath("$.nickname").doesNotExist())
+                .andExpect(jsonPath("$.roles").doesNotExist());
     }
 
     // ---------- /api/auth/** is public: the JWT filter must not gate it ----------
