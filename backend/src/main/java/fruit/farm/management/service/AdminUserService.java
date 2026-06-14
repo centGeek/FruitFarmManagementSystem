@@ -55,22 +55,6 @@ public class AdminUserService {
     }
 
     @Transactional
-    public AdminUserDto changeRole(Long id, String roleName) {
-
-        UserEntity user = findUserOrThrow(id);
-        assertNotSelf(id, "Nie możesz zmienić roli własnego konta");
-
-        RoleEntity role = roleRepository.findByRoleName(roleName)
-                .orElseThrow(() -> new IncorrectInputFormatException(
-                        String.format("Rola '%s' nie istnieje", roleName)));
-
-        user.setRole(role);
-        UserEntity saved = userRepository.save(user);
-        log.info("Admin changed role of user {} to {}", id, roleName);
-        return toDto(saved);
-    }
-
-    @Transactional
     public void resetPassword(Long id, String newPassword) {
 
         UserEntity user = findUserOrThrow(id);

@@ -81,26 +81,6 @@ export const useAdminUsers = () => {
     }
   }, []);
 
-  const changeRole = useCallback(async (user: any, roleName: string) => {
-    if (!roleName || roleName === user.roleName) return;
-    try {
-      const response = await authFetch(`${BACKEND_URL}/api/admin/users/${user.id}/role`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ roleName }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (response.ok) {
-        setUsers(prev => prev.map(u => (u.id === user.id ? data : u)));
-        setAlert({ type: 'success', message: `Rola użytkownika ${user.nickname} została zmieniona na ${roleName}.` });
-      } else {
-        setAlert({ type: 'error', message: data.message || 'Nie udało się zmienić roli.' });
-      }
-    } catch {
-      setAlert({ type: 'error', message: 'Błąd sieci podczas zmiany roli.' });
-    }
-  }, []);
-
   const resetPassword = useCallback(async (user: any, password: string) => {
     try {
       const response = await authFetch(`${BACKEND_URL}/api/admin/users/${user.id}/reset-password`, {
@@ -151,7 +131,6 @@ export const useAdminUsers = () => {
     setSearch,
     refresh: fetchUsers,
     toggleActive,
-    changeRole,
     resetPassword,
   };
 };

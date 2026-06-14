@@ -73,20 +73,6 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("changeRole delegates to the service with the requested role")
-    void changeRole_delegatesToService() {
-        AdminUserDto dto = AdminUserDto.builder().id(5L).roleName("Gardener").build();
-        when(adminUserService.changeRole(5L, "Gardener")).thenReturn(dto);
-        AdminController.RoleRequest request = new AdminController.RoleRequest();
-        request.setRoleName("Gardener");
-
-        ResponseEntity<AdminUserDto> response = controller.changeRole(5L, request);
-
-        assertThat(response.getBody()).isEqualTo(dto);
-        verify(adminUserService).changeRole(5L, "Gardener");
-    }
-
-    @Test
     @DisplayName("resetPassword delegates to the service and returns a confirmation message")
     void resetPassword_delegatesAndReturnsMessage() {
         AdminController.PasswordRequest request = new AdminController.PasswordRequest();

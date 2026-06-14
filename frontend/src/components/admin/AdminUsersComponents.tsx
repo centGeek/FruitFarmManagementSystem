@@ -128,7 +128,7 @@ const ResetPasswordModal = ({ user, onClose, onSubmit }: any) => {
   );
 };
 
-export const AdminUserRow = React.memo(({ user, roles, onToggleActive, onChangeRole, onResetPassword }: any) => {
+export const AdminUserRow = React.memo(({ user, onToggleActive, onResetPassword }: any) => {
   const [showReset, setShowReset] = useState(false);
   const fullName = `${user.name ?? ''} ${user.surname ?? ''}`.trim() || user.nickname || `#${user.id}`;
   const created = user.creationDate ? new Date(user.creationDate).toLocaleDateString('pl-PL') : '—';
@@ -167,17 +167,6 @@ export const AdminUserRow = React.memo(({ user, roles, onToggleActive, onChangeR
       )}
 
       <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center gap-3">
-        <select
-          value={user.roleName ?? ''}
-          disabled={isAdmin}
-          onChange={(e) => onChangeRole(user, e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400"
-        >
-          {roles.map((r: string) => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-
         <button
           onClick={() => onToggleActive(user)}
           disabled={isAdmin}

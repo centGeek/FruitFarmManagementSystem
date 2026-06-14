@@ -4,7 +4,6 @@ import fruit.farm.management.dto.AdminStatsDto;
 import fruit.farm.management.dto.AdminUserDto;
 import fruit.farm.management.service.AdminStatsService;
 import fruit.farm.management.service.AdminUserService;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -53,14 +52,6 @@ public class AdminController {
         return ResponseEntity.ok(adminUserService.setActive(id, request.getActive()));
     }
 
-    @PatchMapping("/users/{id}/role")
-    public ResponseEntity<AdminUserDto> changeRole(@PathVariable Long id,
-                                                   @RequestBody RoleRequest request) {
-
-        log.info("Admin is changing role of user {} to {}", id, request.getRoleName());
-        return ResponseEntity.ok(adminUserService.changeRole(id, request.getRoleName()));
-    }
-
     @PostMapping("/users/{id}/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long id,
                                                              @RequestBody PasswordRequest request) {
@@ -73,12 +64,6 @@ public class AdminController {
     public static class StatusRequest {
         @NotNull(message = "Status jest wymagany")
         private Boolean active;
-    }
-
-    @Data
-    public static class RoleRequest {
-        @NotBlank(message = "Rola jest wymagana")
-        private String roleName;
     }
 
     @Data

@@ -110,23 +110,12 @@ class AdminControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @WithMockUser(username = "admin", authorities = "Admin")
-    @DisplayName("changes another user's role to a valid role")
-    void changeRole_setsValidRole() throws Exception {
+    @DisplayName("no longer exposes a role-change endpoint, so a gardener stays a gardener")
+    void changeRole_endpointRemoved_isNotFound() throws Exception {
         mockMvc.perform(patch("/api/admin/users/{id}/role", GARDENER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"roleName\": \"Employee\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.roleName").value("Employee"));
-    }
-
-    @Test
-    @WithMockUser(username = "admin", authorities = "Admin")
-    @DisplayName("rejects an unknown role with 400")
-    void changeRole_unknownRole_isBadRequest() throws Exception {
-        mockMvc.perform(patch("/api/admin/users/{id}/role", GARDENER_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"roleName\": \"Ghost\"}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @Test

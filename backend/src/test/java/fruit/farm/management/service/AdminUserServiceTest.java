@@ -121,35 +121,6 @@ class AdminUserServiceTest {
     }
 
     @Test
-    @DisplayName("changeRole assigns the resolved role")
-    void changeRole_assignsResolvedRole() {
-        UserEntity target = user(5L, "Employee");
-        RoleEntity gardenerRole = new RoleEntity(2L, "Gardener");
-        when(userRepository.findById(5L)).thenReturn(Optional.of(target));
-        loggedInAs(1L);
-        when(roleRepository.findByRoleName("Gardener")).thenReturn(Optional.of(gardenerRole));
-        when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        AdminUserDto result = service.changeRole(5L, "Gardener");
-
-        assertThat(result.getRoleName()).isEqualTo("Gardener");
-        assertThat(target.getRole()).isEqualTo(gardenerRole);
-    }
-
-    @Test
-    @DisplayName("changeRole rejects an unknown role")
-    void changeRole_unknownRole_throwsBadInput() {
-        UserEntity target = user(5L, "Employee");
-        when(userRepository.findById(5L)).thenReturn(Optional.of(target));
-        loggedInAs(1L);
-        when(roleRepository.findByRoleName("Ghost")).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.changeRole(5L, "Ghost"))
-                .isInstanceOf(IncorrectInputFormatException.class);
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
     @DisplayName("resetPassword updates credentials with the new raw password")
     void resetPassword_updatesCredentials() {
         UserEntity target = user(5L, "Employee");

@@ -16,7 +16,6 @@ export default function AdminUsers() {
     setSearch,
     refresh,
     toggleActive,
-    changeRole,
     resetPassword,
   } = useAdminUsers();
 
@@ -28,7 +27,7 @@ export default function AdminUsers() {
             <span className="text-slate-600 mr-3">👥</span> Panel administratora — użytkownicy
           </h1>
           <p className="text-gray-600 text-lg">
-            Zarządzaj kontami: blokuj, zmieniaj role i resetuj hasła.
+            Zarządzaj kontami: blokuj i resetuj hasła.
           </p>
         </header>
 
@@ -62,9 +61,7 @@ export default function AdminUsers() {
                 <AdminUserRow
                   key={user.id}
                   user={user}
-                  roles={roles}
                   onToggleActive={toggleActive}
-                  onChangeRole={changeRole}
                   onResetPassword={resetPassword}
                 />
               ))}
