@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Validation gate for the usterki-autofix fix loop.
+# Validation gate for the ticket-autofix fix loop.
 # Runs the project's canonical build/test gates with the PINNED JDK 21 and,
 # when Rancher Desktop is running, the Testcontainers DOCKER_HOST.
 #

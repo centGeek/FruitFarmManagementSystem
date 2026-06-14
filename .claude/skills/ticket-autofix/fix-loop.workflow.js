@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'usterki-fix-loop',
+  name: 'ticket-fix-loop',
   description: 'Per usterka: verify the report by testing the code, fix it in an isolated worktree, then adversarially review and improve until there is nothing left to fix',
   phases: [
     { title: 'Fix' },      // verify + implement + internal improve, in an isolated worktree
@@ -8,9 +8,9 @@ export const meta = {
   ],
 }
 
-// ---- inputs (passed as `args` by the usterki-autofix skill) ----
+// ---- inputs (passed as `args` by the ticket-autofix skill) ----
 const REPO = args.repo
-const VALIDATE = args.validateScript || (REPO + '/.claude/skills/usterki-autofix/validate.sh')
+const VALIDATE = args.validateScript || (REPO + '/.claude/skills/ticket-autofix/validate.sh')
 const USTERKI = args.usterki || []
 const MAX_ROUNDS = args.maxRounds || 4
 
