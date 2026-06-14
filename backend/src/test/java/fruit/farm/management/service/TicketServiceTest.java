@@ -225,15 +225,17 @@ class TicketServiceTest {
     }
 
     @Test
-    @DisplayName("getAllTickets trims a non-blank search term before querying")
-    void getAllTickets_trimsSearch() {
+    @DisplayName("getAllTickets builds a trimmed, lowercased, %-wrapped LIKE pattern from a non-blank search term")
+    void getAllTickets_buildsLikePattern() {
         Pageable pageable = PageRequest.of(0, 12);
-        when(ticketRepository.findAllFiltered(isNull(), eq("valve"), eq(pageable)))
+        when(ticketRepository.findAllFiltered(isNull(), eq("%valve%"), eq(pageable)))
                 .thenReturn(Page.empty(pageable));
 
-        service.getAllTickets(null, "  valve  ", pageable);
+        service.getAllTickets(null, "  VALVE  ", pageable);
 
-        verify(ticketRepository).findAllFiltered(null, "valve", pageable);
+        // The query compares LOWER(column) LIKE :search, so the service pre-lowercases and wraps
+        // the term; this also keeps the bind well-typed (a bare null in CONCAT defaults to bytea).
+        verify(ticketRepository).findAllFiltered(null, "%valve%", pageable);
     }
 
     @Test
