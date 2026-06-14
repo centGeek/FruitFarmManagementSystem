@@ -16,7 +16,7 @@ export const Modal = ({ isOpen, onClose, title, children }: any) => {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-transform duration-300 scale-100">
                 <div className="sticky top-0 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-6 py-4 rounded-t-2xl z-10 flex items-center justify-between">
                     <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center"><span className="mr-2 text-red-600 dark:text-red-300">💰</span>{title}</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-red-100 rounded-xl transition-colors text-lg">❌</button>
+                    <button onClick={onClose} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl transition-colors text-lg">❌</button>
                 </div>
                 <div className="p-6">{children}</div>
             </div>
@@ -143,7 +143,7 @@ export const ExpenseForm = ({ expense, onSave, onCancel, isLoading, sectors }: a
                 <button type="submit" disabled={isLoading} className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center shadow-md text-lg">
                     {isLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div> : '💾'} {isUpdating ? t('form.saveChanges') : t('form.addExpense')}
                 </button>
-                <button type="button" onClick={onCancel} className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-800 dark:text-gray-100 py-3 px-4 rounded-xl font-semibold transition-colors" disabled={isLoading}>{t('form.cancel')}</button>
+                <button type="button" onClick={onCancel} className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 py-3 px-4 rounded-xl font-semibold transition-colors" disabled={isLoading}>{t('form.cancel')}</button>
             </div>
         </form>
     );
@@ -169,8 +169,8 @@ export const ExpenseCard = ({ expense, onEdit, onDelete }: any) => {
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <button onClick={() => onEdit(expense)} className="p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 hover:bg-red-100 rounded-lg transition-colors text-base" title={t('card.editTitle')}>✏️</button>
-                    <button onClick={() => onDelete(expense.id)} className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 rounded-lg transition-colors text-base" title={t('card.deleteTitle')}>🗑️</button>
+                    <button onClick={() => onEdit(expense)} className="p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors text-base" title={t('card.editTitle')}>✏️</button>
+                    <button onClick={() => onDelete(expense.id)} className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-base" title={t('card.deleteTitle')}>🗑️</button>
                 </div>
             </div>
             <div className="mb-4 space-x-2">
@@ -193,10 +193,10 @@ export const ExpenseCard = ({ expense, onEdit, onDelete }: any) => {
 export const StatCard = ({ count, label, color, amount }: any) => {
     const { t } = useTranslation("expenseManagement");
     const colorMap: any = {
-        green: { bg: 'from-green-100 to-green-200', text: 'text-green-600', icon: '✅' },
-        red: { bg: 'from-red-100 to-red-200', text: 'text-red-600', icon: '💸' },
-        blue: { bg: 'from-blue-100 to-blue-200', text: 'text-blue-600', icon: '📊' },
-        purple: { bg: 'from-purple-100 to-purple-200', text: 'text-purple-600', icon: '🧑‍🌾' }
+        green: { bg: 'from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30', text: 'text-green-600 dark:text-green-300', icon: '✅' },
+        red: { bg: 'from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30', text: 'text-red-600 dark:text-red-300', icon: '💸' },
+        blue: { bg: 'from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30', text: 'text-blue-600 dark:text-blue-300', icon: '📊' },
+        purple: { bg: 'from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30', text: 'text-purple-600 dark:text-purple-300', icon: '🧑‍🌾' }
     };
     const colors = colorMap[color] || colorMap.red;
     const displayValue = amount !== undefined ? t('card.amountWithCurrency', { amount: formatCurrency(amount) }) : count;
@@ -231,11 +231,11 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: any) => {
 
     return (
         <div className="flex items-center justify-center gap-2 mt-8 pb-4">
-            <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className="px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-red-500 disabled:hover:bg-white disabled:hover:border-gray-300">{t('pagination.previous')}</button>
+            <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className="px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-red-500 disabled:hover:bg-white dark:disabled:hover:bg-gray-800 disabled:hover:border-gray-300 dark:disabled:hover:border-gray-600">{t('pagination.previous')}</button>
             <div className="flex items-center gap-1">
                 {getPageNumbers().map((page, index) => page === '...' ? <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-400 dark:text-gray-500">...</span> : <button key={page} onClick={() => onPageChange(page)} className={`min-w-[40px] h-[40px] rounded-lg font-semibold transition-all ${currentPage === page ? 'bg-gradient-to-r from-red-600 to-orange-700 text-white shadow-lg scale-110' : 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-red-500'}`}>{page}</button>)}
             </div>
-            <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-red-500 disabled:hover:bg-white disabled:hover:border-gray-300">{t('pagination.next')}</button>
+            <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-red-500 disabled:hover:bg-white dark:disabled:hover:bg-gray-800 disabled:hover:border-gray-300 dark:disabled:hover:border-gray-600">{t('pagination.next')}</button>
         </div>
     );
 };

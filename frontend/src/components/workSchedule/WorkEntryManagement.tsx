@@ -77,7 +77,7 @@ export default function WorkEntryManagement() {
                             <div><label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1 block">{t("fields.description")}</label><textarea value={editingEntry.description || ''} onChange={(e) => setEditingEntry((prev: any) => ({ ...prev, description: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-green-500" rows={3} placeholder={t("editModal.descriptionPlaceholder")} /></div>
                             <div className="flex space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <button onClick={() => handleEditEntry(editingEntry)} disabled={isLoading} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-colors disabled:opacity-50">{isLoading ? t("editModal.saving") : t("editModal.saveChanges")}</button>
-                                <button onClick={() => handleCloseModal()} disabled={isLoading} className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-800 dark:text-gray-100 py-3 px-4 rounded-xl font-semibold transition-colors">{t("common:actions.cancel")}</button>
+                                <button onClick={() => handleCloseModal()} disabled={isLoading} className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 py-3 px-4 rounded-xl font-semibold transition-colors">{t("common:actions.cancel")}</button>
                             </div>
                         </div>
                     </Modal>

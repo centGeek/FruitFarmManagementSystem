@@ -349,9 +349,9 @@ export const ProfitCard = ({ profit, onEdit, onDelete }: any) => {
 
 export const StatCard = ({ label, color, amount }: any) => {
     const colorMap: any = {
-        green: { bg: 'from-green-100 to-green-200', text: 'text-green-600', icon: '✅' },
-        amber: { bg: 'from-amber-100 to-amber-200', text: 'text-amber-600', icon: '⏳' },
-        blue: { bg: 'from-blue-100 to-blue-200', text: 'text-blue-600', icon: '📊' }
+        green: { bg: 'from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-900/30', text: 'text-green-600 dark:text-green-300', icon: '✅' },
+        amber: { bg: 'from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-900/30', text: 'text-amber-600 dark:text-amber-300', icon: '⏳' },
+        blue: { bg: 'from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-900/30', text: 'text-blue-600 dark:text-blue-300', icon: '📊' }
     };
     const colors = colorMap[color] || colorMap.blue;
 

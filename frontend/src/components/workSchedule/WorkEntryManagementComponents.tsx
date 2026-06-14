@@ -214,7 +214,7 @@ export const CalendarEvent = ({ entry, onClick, onTogglePaid }: any) => {
                 </div>
             </div>
             <div className="flex items-center space-x-2">
-                {entry.duration > 0 && <div className="text-xs font-bold opacity-90 text-black">⏱️ {entry.duration}h</div>}
+                {entry.duration > 0 && <div className="text-xs font-bold opacity-90 text-black dark:text-gray-100">⏱️ {entry.duration}h</div>}
                 {entry.kilogramsPicked > 0 && <div className="text-xs font-bold opacity-90 text-orange-600 dark:text-orange-300">⚖️ {entry.kilogramsPicked} kg</div>}
                 {entry.daySalary !== undefined && entry.daySalary !== null && <div className="text-xs font-medium text-orange-900 dark:text-orange-300 opacity-90 flex items-center">💰 {t("currency.zl", { value: parseFloat(entry.daySalary).toFixed(0) })}</div>}
             </div>
@@ -339,37 +339,37 @@ export const EventDetailsModal = ({ entry, onClose, onEdit, onDelete, onTogglePa
         <Modal isOpen={!!entry} onClose={onClose} title={t("details.title", { name: entry.user?.name, surname: entry.user?.surname })} size="medium">
             <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {entry.duration !== undefined && entry.duration !== null && <div className="bg-blue-50 p-4 rounded-xl border border-blue-200"><p className="text-xs font-medium text-blue-700 uppercase mb-1">{t("details.duration")}</p><p className="text-lg font-bold text-blue-900">{entry.duration}h</p></div>}
-                    {entry.kilogramsPicked > 0 && <div className="bg-orange-50 p-4 rounded-xl border border-orange-200"><p className="text-xs font-medium text-orange-700 uppercase mb-1">{t("details.kilogramsPicked")}</p><p className="text-lg font-bold text-orange-900">{entry.kilogramsPicked} kg</p></div>}
-                    {entry.daySalary > 0 && <div className="bg-red-50 p-4 rounded-xl border border-red-200"><p className="text-xs font-medium text-red-700 uppercase mb-1">{t("details.daySalary")}</p><p className="text-lg font-bold text-red-900">{t("currency.zl", { value: parseFloat(entry.daySalary).toFixed(2) })}</p></div>}
+                    {entry.duration !== undefined && entry.duration !== null && <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800"><p className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase mb-1">{t("details.duration")}</p><p className="text-lg font-bold text-blue-900 dark:text-blue-300">{entry.duration}h</p></div>}
+                    {entry.kilogramsPicked > 0 && <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-xl border border-orange-200 dark:border-orange-800"><p className="text-xs font-medium text-orange-700 dark:text-orange-300 uppercase mb-1">{t("details.kilogramsPicked")}</p><p className="text-lg font-bold text-orange-900 dark:text-orange-300">{entry.kilogramsPicked} kg</p></div>}
+                    {entry.daySalary > 0 && <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-200 dark:border-red-800"><p className="text-xs font-medium text-red-700 dark:text-red-300 uppercase mb-1">{t("details.daySalary")}</p><p className="text-lg font-bold text-red-900 dark:text-red-300">{t("currency.zl", { value: parseFloat(entry.daySalary).toFixed(2) })}</p></div>}
                 </div>
-                {entry.sector && <div className="bg-purple-50 p-4 rounded-xl border border-purple-200"><p className="text-xs font-medium text-purple-700 uppercase mb-1">{t("details.sector")}</p><p className="text-sm font-bold text-purple-900">📍 {entry.sector.description} ({entry.sector.plantType})</p></div>}
-                {entry.workType && <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-200"><p className="text-xs font-medium text-indigo-700 uppercase mb-1">{t("details.workType")}</p><p className="text-sm font-bold text-indigo-900">{t(`workType.${entry.workType}`)}</p></div>}
-                {entry.description && <div><p className="text-sm font-medium text-gray-700 mb-2">{t("details.descriptionLabel")}</p><p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">{entry.description}</p></div>}
+                {entry.sector && <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl border border-purple-200 dark:border-purple-800"><p className="text-xs font-medium text-purple-700 dark:text-purple-300 uppercase mb-1">{t("details.sector")}</p><p className="text-sm font-bold text-purple-900 dark:text-purple-300">📍 {entry.sector.description} ({entry.sector.plantType})</p></div>}
+                {entry.workType && <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-200 dark:border-indigo-800"><p className="text-xs font-medium text-indigo-700 dark:text-indigo-300 uppercase mb-1">{t("details.workType")}</p><p className="text-sm font-bold text-indigo-900 dark:text-indigo-300">{t(`workType.${entry.workType}`)}</p></div>}
+                {entry.description && <div><p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{t("details.descriptionLabel")}</p><p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">{entry.description}</p></div>}
 
-                <div className="flex space-x-2 pt-4 border-t border-gray-200">
-                    <button onClick={() => onEdit(entry)} className="flex-1 bg-blue-100 text-blue-700 hover:bg-blue-200 py-2 px-4 rounded-lg font-medium transition-colors"><Edit2 className="inline mr-1" size={16} /> {t("details.edit")}</button>
-                    <button onClick={() => confirm(t("details.deleteConfirm")) && onDelete(entry.entryId)} className="flex-1 bg-red-100 text-red-700 hover:bg-red-200 py-2 px-4 rounded-lg font-medium transition-colors"><Trash2 className="inline mr-1" size={16} /> {t("details.delete")}</button>
+                <div className="flex space-x-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button onClick={() => onEdit(entry)} className="flex-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/40 py-2 px-4 rounded-lg font-medium transition-colors"><Edit2 className="inline mr-1" size={16} /> {t("details.edit")}</button>
+                    <button onClick={() => confirm(t("details.deleteConfirm")) && onDelete(entry.entryId)} className="flex-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/40 py-2 px-4 rounded-lg font-medium transition-colors"><Trash2 className="inline mr-1" size={16} /> {t("details.delete")}</button>
                 </div>
 
-                <div className={`p-4 rounded-xl border ${entry.isPaid ? 'bg-emerald-50 border-emerald-300' : 'bg-amber-50 border-amber-300'}`}>
+                <div className={`p-4 rounded-xl border ${entry.isPaid ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-800'}`}>
                     <div className="flex items-center justify-between">
                         <div className="mt-1">
-                            <p className="text-xs font-medium text-gray-600 uppercase mb-1">{t("details.paymentStatus")}</p>
-                            <p className={`text-base font-bold ${entry.isPaid ? 'text-emerald-700' : 'text-amber-700'}`}>{entry.isPaid ? t("details.paid") : t("details.unpaid")}</p>
+                            <p className="text-xs font-medium text-gray-600 dark:text-gray-300 uppercase mb-1">{t("details.paymentStatus")}</p>
+                            <p className={`text-base font-bold ${entry.isPaid ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}`}>{entry.isPaid ? t("details.paid") : t("details.unpaid")}</p>
                         </div>
                         <div className="flex space-x-2">
-                            <button onClick={() => onTogglePaid(entry.entryId)} className={`px-4 py-2 rounded-lg font-medium transition-colors ${entry.isPaid ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}`}>{entry.isPaid ? t("details.markUnpaid") : t("details.markPaid")}</button>
+                            <button onClick={() => onTogglePaid(entry.entryId)} className={`px-4 py-2 rounded-lg font-medium transition-colors ${entry.isPaid ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/40' : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/40'}`}>{entry.isPaid ? t("details.markUnpaid") : t("details.markPaid")}</button>
                         </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
-                        <p className="text-xs font-medium text-gray-500 uppercase">{t("details.quickPayments")}</p>
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t("details.quickPayments")}</p>
                         <div className="grid grid-cols-2 gap-2">
-                            <button onClick={() => onOpenPayAllModal(entry.user?.id)} className="w-full py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded-lg text-sm font-medium transition-colors">{t("details.payAllOutstanding")}</button>
-                            <button onClick={() => onOpenPayAllMonthModal(entry.user?.id)} className="w-full py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded-lg text-sm font-medium transition-colors">{t("details.payMonth")}</button>
+                            <button onClick={() => onOpenPayAllModal(entry.user?.id)} className="w-full py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900/40 rounded-lg text-sm font-medium transition-colors">{t("details.payAllOutstanding")}</button>
+                            <button onClick={() => onOpenPayAllMonthModal(entry.user?.id)} className="w-full py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900/40 rounded-lg text-sm font-medium transition-colors">{t("details.payMonth")}</button>
                         </div>
-                        <button onClick={() => onOpenAdvancePayModal(entry.user?.id)} className="w-full py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"><DollarSign size={16} className="mr-2" /> {t("details.payAdvance")}</button>
+                        <button onClick={() => onOpenAdvancePayModal(entry.user?.id)} className="w-full py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/40 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"><DollarSign size={16} className="mr-2" /> {t("details.payAdvance")}</button>
                     </div>
                 </div>
             </div>
@@ -386,29 +386,29 @@ export const PayConfirmationModal = ({ isOpen, onClose, employee, entries, total
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={isMonthPayment ? t("payModal.titleMonth", { name: employee.name, surname: employee.surname }) : t("payModal.titleAll", { name: employee.name, surname: employee.surname })} size="medium">
             <div className="space-y-4">
-                <div className="bg-red-50 border border-red-300 rounded-xl p-4"><p className="text-sm font-medium text-red-700 mb-2">{t("payModal.warning")}</p></div>
-                <div className="bg-amber-50 border border-amber-300 rounded-xl p-4">
-                    <h3 className="text-base font-medium text-amber-800 flex items-center mb-2"><DollarSign className="mr-2" size={20} /> {t("payModal.summary")}</h3>
-                    <p className="text-sm text-amber-700">{isMonthPayment ? t("payModal.infoMonth", { count: entries.length }) : t("payModal.infoAll", { count: entries.length })}</p>
-                    <div className="mt-3 flex justify-between items-center"><span className="text-sm text-amber-800 font-medium">{t("payModal.totalGross")}</span><span className="text-lg font-extrabold text-amber-800">{t("currency.zl", { value: totalGrossAmount.toFixed(2) })}</span></div>
-                    {totalAdvanceAmount > 0 && <div className="mt-1 flex justify-between items-center border-t border-amber-300 pt-2"><span className="text-sm text-red-700 font-medium">{t("payModal.deductedAdvances")}</span><span className="text-lg font-extrabold text-red-700">-{t("currency.zl", { value: totalAdvanceAmount.toFixed(2) })}</span></div>}
-                    <div className="mt-3 flex justify-between items-center border-t border-amber-300 pt-2"><span className="text-lg text-green-700 font-bold">{t("payModal.netAmount")}</span><span className="text-2xl font-extrabold text-green-700">{t("currency.zl", { value: netAmount.toFixed(2) })}</span></div>
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-xl p-4"><p className="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{t("payModal.warning")}</p></div>
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-800 rounded-xl p-4">
+                    <h3 className="text-base font-medium text-amber-800 dark:text-amber-300 flex items-center mb-2"><DollarSign className="mr-2" size={20} /> {t("payModal.summary")}</h3>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">{isMonthPayment ? t("payModal.infoMonth", { count: entries.length }) : t("payModal.infoAll", { count: entries.length })}</p>
+                    <div className="mt-3 flex justify-between items-center"><span className="text-sm text-amber-800 dark:text-amber-300 font-medium">{t("payModal.totalGross")}</span><span className="text-lg font-extrabold text-amber-800 dark:text-amber-300">{t("currency.zl", { value: totalGrossAmount.toFixed(2) })}</span></div>
+                    {totalAdvanceAmount > 0 && <div className="mt-1 flex justify-between items-center border-t border-amber-300 dark:border-amber-800 pt-2"><span className="text-sm text-red-700 dark:text-red-300 font-medium">{t("payModal.deductedAdvances")}</span><span className="text-lg font-extrabold text-red-700 dark:text-red-300">-{t("currency.zl", { value: totalAdvanceAmount.toFixed(2) })}</span></div>}
+                    <div className="mt-3 flex justify-between items-center border-t border-amber-300 dark:border-amber-800 pt-2"><span className="text-lg text-green-700 dark:text-green-300 font-bold">{t("payModal.netAmount")}</span><span className="text-2xl font-extrabold text-green-700 dark:text-green-300">{t("currency.zl", { value: netAmount.toFixed(2) })}</span></div>
                 </div>
                 {advances.length > 0 && (
-                    <div className="max-h-40 overflow-y-auto space-y-2 p-2 border border-blue-200 rounded-xl bg-blue-50">
-                        <p className="text-sm font-medium text-blue-700 flex items-center"><DollarSign size={16} className="mr-1" /> {t("payModal.unsettledAdvances")}</p>
+                    <div className="max-h-40 overflow-y-auto space-y-2 p-2 border border-blue-200 dark:border-blue-800 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                        <p className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center"><DollarSign size={16} className="mr-1" /> {t("payModal.unsettledAdvances")}</p>
                         {advances.map((advance: any) => (
-                            <div key={advance.id} className="flex justify-between items-center text-xs p-2 bg-blue-100 rounded-lg border-l-4 border-blue-400"><span>{new Date(advance.createdAt).toLocaleDateString()} - {advance.description || t("payModal.noDescription")}</span><span className="font-bold text-red-700">-{t("currency.zl", { value: parseFloat(advance.amount).toFixed(2) })}</span></div>
+                            <div key={advance.id} className="flex justify-between items-center text-xs p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg border-l-4 border-blue-400 dark:border-blue-800"><span>{new Date(advance.createdAt).toLocaleDateString()} - {advance.description || t("payModal.noDescription")}</span><span className="font-bold text-red-700 dark:text-red-300">-{t("currency.zl", { value: parseFloat(advance.amount).toFixed(2) })}</span></div>
                         ))}
                     </div>
                 )}
-                <div className="max-h-60 overflow-y-auto space-y-2 p-2 border border-gray-200 rounded-xl bg-white">
-                    <p className="text-sm font-medium text-gray-700">{isMonthPayment ? t("payModal.listMonth") : t("payModal.listAll")}</p>
-                    {entries.map((entry: any) => <div key={entry.entryId} className="flex justify-between items-center text-xs p-2 bg-gray-50 rounded-lg border-l-4 border-amber-400"><span>{t("payModal.entryRow", { date: new Date(entry.workDate).toLocaleDateString(), duration: entry.duration })}</span><span className="font-bold text-amber-700">{t("currency.zl", { value: parseFloat(entry.daySalary).toFixed(2) })}</span></div>)}
+                <div className="max-h-60 overflow-y-auto space-y-2 p-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{isMonthPayment ? t("payModal.listMonth") : t("payModal.listAll")}</p>
+                    {entries.map((entry: any) => <div key={entry.entryId} className="flex justify-between items-center text-xs p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-4 border-amber-400 dark:border-amber-800"><span>{t("payModal.entryRow", { date: new Date(entry.workDate).toLocaleDateString(), duration: entry.duration })}</span><span className="font-bold text-amber-700 dark:text-amber-300">{t("currency.zl", { value: parseFloat(entry.daySalary).toFixed(2) })}</span></div>)}
                 </div>
                 <div className="mt-6 flex space-x-3">
                     <button onClick={onConfirm} disabled={isLoading || entries.length === 0} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center shadow-md">{isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <DollarSign className="mr-2" size={20} />}{isLoading ? t("payModal.processing") : isMonthPayment ? t("payModal.confirmMonth") : t("payModal.confirmAll")}</button>
-                    <button onClick={onClose} disabled={isLoading} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors">{t("common:actions.cancel")}</button>
+                    <button onClick={onClose} disabled={isLoading} className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 py-3 px-4 rounded-xl font-semibold transition-colors">{t("common:actions.cancel")}</button>
                 </div>
             </div>
         </Modal>

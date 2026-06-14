@@ -4,6 +4,7 @@ import { Eye, EyeOff, User, Lock, Apple, Leaf, BarChart3, Users, MapPin, Bell } 
 import { BACKEND_URL} from "../utils/apiConfigs";
 import { Alert} from "../utils/common";
 import ThemeSwitcher from "./ThemeSwitcher";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 
 const TextInput = ({ id, name, value, onChange, placeholder, icon: Icon, type = "text", disabled }) => (
@@ -122,7 +123,8 @@ export default function LoginPage({ onLogin }: { onLogin: (role: string | null) 
 };
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="fixed top-4 right-4 z-20">
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
+        <LanguageSwitcher variant="surface" />
         <ThemeSwitcher variant="surface" />
       </div>
       <div className="absolute top-20 left-20 text-green-200 animate-pulse"><Apple size={32} /></div>

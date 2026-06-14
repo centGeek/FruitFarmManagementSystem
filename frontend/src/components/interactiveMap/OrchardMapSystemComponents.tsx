@@ -65,7 +65,7 @@ export const SectorConfirmationModal = ({ isOpen, onClose, sectorData, onConfirm
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-50">{t("confirmModal.title")}</h3>
             </div>
-            <button onClick={onClose} disabled={isLoading} className="text-gray-400 dark:text-gray-500 hover:text-gray-600">
+            <button onClick={onClose} disabled={isLoading} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -237,7 +237,7 @@ export const EditSectorModal = ({ isOpen, onClose, sectorData, onSave, onArchive
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-50">{t("editModal.title")}</h3>
             </div>
-            <button onClick={onClose} disabled={isLoading} className="text-gray-400 dark:text-gray-500 hover:text-gray-600">
+            <button onClick={onClose} disabled={isLoading} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -506,7 +506,7 @@ export const SectorsList = ({
 
           {sector.corners && sector.corners.length > 0 && (
             <details className="text-xs">
-              <summary className="cursor-pointer text-blue-600 dark:text-blue-300 hover:text-blue-800 font-medium flex items-center gap-1">
+              <summary className="cursor-pointer text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1">
                 <MapPin className="w-4 h-4" /> {t("sectorsList.gpsCoords")}
               </summary>
               <div className="absolute right-0 mt-2 bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg z-10 max-h-40 overflow-y-auto min-w-64">

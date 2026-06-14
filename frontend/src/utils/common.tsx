@@ -35,7 +35,7 @@
             {onClose && (
                 <button
                     onClick={onClose}
-                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 p-1 transition-colors text-lg"
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1 transition-colors text-lg"
                     aria-label={t('aria.closeAlert')}
                 >
                     ❌
