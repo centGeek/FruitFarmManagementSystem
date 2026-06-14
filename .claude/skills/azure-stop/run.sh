@@ -1,32 +1,32 @@
 #!/usr/bin/env bash
-# Zatrzymuje aplikację na Azure dla oszczędności kredytu.
-# Główny koszt to baza PostgreSQL (działa 24/7) — ją zatrzymujemy.
-# Container Apps (backend/frontend) mają scale-to-zero, więc same przestają kosztować przy braku ruchu.
+# Stops the application on Azure to save credit.
+# The main cost is the PostgreSQL database (runs 24/7) — we stop it.
+# Container Apps (backend/frontend) have scale-to-zero, so they stop costing on their own when there is no traffic.
 set -euo pipefail
 
-SUB="61ad12b2-ac0f-49cb-af8b-049bff4a6d80"   # Azure for Students (Politechnika Łódzka)
+SUB="61ad12b2-ac0f-49cb-af8b-049bff4a6d80"   # Azure for Students (Lodz University of Technology)
 RG="rg-fruitfarm"
 
-echo "==> Subskrypcja: Azure for Students"
+echo "==> Subscription: Azure for Students"
 az account set --subscription "$SUB"
 
 PG=$(az postgres flexible-server list -g "$RG" --query "[0].name" -o tsv 2>/dev/null)
 if [ -z "${PG:-}" ]; then
-  echo "BŁĄD: nie znaleziono serwera PostgreSQL w grupie $RG." >&2
+  echo "ERROR: PostgreSQL server not found in group $RG." >&2
   exit 1
 fi
 
 STATE=$(az postgres flexible-server show -n "$PG" -g "$RG" --query state -o tsv 2>/dev/null)
-echo "==> Serwer bazy: $PG (stan: $STATE)"
+echo "==> Database server: $PG (state: $STATE)"
 
 if [ "$STATE" = "Stopped" ]; then
-  echo "Baza już zatrzymana — nic do zrobienia."
+  echo "Database already stopped — nothing to do."
 else
-  echo "==> Zatrzymuję bazę..."
+  echo "==> Stopping the database..."
   az postgres flexible-server stop -n "$PG" -g "$RG" --only-show-errors
-  echo "==> Zatrzymano. Koszt spada do ~storage (~1-2 USD/mies.)."
+  echo "==> Stopped. Cost drops to ~storage (~1-2 USD/month)."
 fi
 
 echo
-echo "Aplikacja wstrzymana. Wznowienie: skill 'azure-up'."
-echo "Uwaga: Azure auto-startuje zatrzymaną bazę po max 7 dniach — wtedy zatrzymaj ponownie."
+echo "Application paused. To resume: skill 'azure-up'."
+echo "Note: Azure auto-starts a stopped database after max 7 days — stop it again then."

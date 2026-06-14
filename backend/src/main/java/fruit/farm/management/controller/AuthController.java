@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +33,7 @@ public class AuthController {
     private JwtService jwtService;
     private UserService userService;
     private CookieProperties cookieProperties;
+    private MessageSource messageSource;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletResponse response) {
@@ -54,7 +57,12 @@ public class AuthController {
 
         } catch (Exception e) {
             log.error("Registration error: ", e);
-            return ResponseEntity.badRequest().body(new ApiErrorResponse("Błąd podczas rejestracji: " + e.getMessage()));
+            String message = messageSource.getMessage(
+                    "error.registration",
+                    new Object[]{e.getMessage()},
+                    "Błąd podczas rejestracji: {0}",
+                    LocaleContextHolder.getLocale());
+            return ResponseEntity.badRequest().body(new ApiErrorResponse(message));
         }
     }
 

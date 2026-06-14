@@ -1,0 +1,65 @@
+{
+  "errorCode": "Kod błędu:",
+  "codeNA": "N/A",
+  "detailsHeading": "Szczegóły błędu",
+  "defaultMessage": "Nie udało się wykonać operacji. Spróbuj ponownie później.",
+  "timestampHeading": "Czas wystąpienia",
+  "tipsHeading": "Co możesz zrobić?",
+  "retry": "Spróbuj ponownie",
+  "goHome": "Strona główna",
+  "showTechnical": "🔼 Pokaż szczegóły techniczne",
+  "hideTechnical": "🔽 Ukryj szczegóły techniczne",
+  "technicalHeading": "🔧 Szczegóły techniczne:",
+  "types": {
+    "exceeded_hours": {
+      "title": "Przekroczono limit godzin",
+      "tips": [
+        "Sprawdź czy pracownik nie ma już zapisanych godzin na ten dzień",
+        "Maksymalny limit to prawdopodobnie 18h dziennie",
+        "Zredukuj liczbę godzin dla tego pracownika",
+        "Możesz podzielić pracę na kilka dni"
+      ]
+    },
+    "auth_error": {
+      "title": "Błąd uwierzytelnienia",
+      "tips": [
+        "Twoja sesja mogła wygasnąć",
+        "Zaloguj się ponownie",
+        "Sprawdź czy masz odpowiednie uprawnienia"
+      ]
+    },
+    "not_found": {
+      "title": "Nie znaleziono zasobu",
+      "tips": [
+        "Zasób którego szukasz został usunięty lub przeniesiony",
+        "Sprawdź poprawność adresu URL",
+        "Wróć do strony głównej"
+      ]
+    },
+    "server_error": {
+      "title": "Błąd serwera",
+      "tips": [
+        "Wystąpił błąd po stronie serwera",
+        "Sprawdź połączenie z internetem",
+        "Spróbuj ponownie za chwilę",
+        "Skontaktuj się z administratorem jeśli problem się powtarza"
+      ]
+    },
+    "client_error": {
+      "title": "Nieprawidłowe żądanie",
+      "tips": [
+        "Sprawdź poprawność wprowadzonych danych",
+        "Upewnij się, że wszystkie wymagane pola są wypełnione",
+        "Zweryfikuj format danych"
+      ]
+    },
+    "unknown": {
+      "title": "Wystąpił błąd",
+      "tips": [
+        "Spróbuj odświeżyć stronę",
+        "Sprawdź połączenie z internetem",
+        "Skontaktuj się z pomocą techniczną"
+      ]
+    }
+  }
+}

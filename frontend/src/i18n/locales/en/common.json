@@ -1,0 +1,139 @@
+{
+  "appName": "Grower Panel",
+  "adminPanel": "Administrator Panel",
+  "farmManagement": "Farm Management",
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "confirm": "Confirm",
+    "submit": "Submit",
+    "search": "Search",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "refresh": "Refresh",
+    "download": "Download",
+    "logout": "Log out",
+    "login": "Log in",
+    "register": "Sign up"
+  },
+  "status": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "noData": "No data",
+    "error": "An error occurred",
+    "success": "Operation completed successfully"
+  },
+  "fields": {
+    "name": "First name",
+    "surname": "Last name",
+    "nickname": "Username",
+    "email": "Email",
+    "phone": "Phone number",
+    "password": "Password",
+    "date": "Date",
+    "amount": "Amount",
+    "description": "Description",
+    "category": "Category",
+    "status": "Status",
+    "actions": "Actions",
+    "requiredField": "Required field"
+  },
+  "language": {
+    "label": "Language",
+    "pl": "Polish",
+    "en": "English",
+    "switchTo": "Change language"
+  },
+  "nav": {
+    "home": "Home",
+    "map": "Map",
+    "employees": "Employees",
+    "workSchedule": "Work log",
+    "expenses": "Expenses",
+    "profits": "Revenue",
+    "weather": "Weather alerts",
+    "analyse": "Analytics",
+    "support": "Report an issue",
+    "gardenerProfile": "Edit profile",
+    "tickets": "Tickets",
+    "users": "Users",
+    "stats": "Statistics",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "app": {
+    "checkingAuth": "Checking authentication...",
+    "wakingServer": "Waking up the server, this may take a moment..."
+  },
+  "aria": {
+    "closeAlert": "Close alert"
+  },
+  "cropType": {
+    "JABŁOŃ": "🍎 Apple trees",
+    "GRUSZA": "🍐 Pear trees",
+    "WIŚNIA": "🍒 Sour cherries",
+    "ŚLIWA": "🟣 Plums",
+    "CZEREŚNIA": "🍒 Sweet cherries",
+    "MALINA": "🍓 Raspberries",
+    "TRUSKAWKA": "🍓 Strawberries",
+    "PORZECZKA_CZARNA": "🖤 Blackcurrant",
+    "PORZECZKA_CZERWONA": "🔴 Redcurrant",
+    "AGREST": "🟢 Gooseberry",
+    "BORÓWKA": "🔵 Blueberry",
+    "JEŻYNA": "⚫ Blackberry",
+    "ARONIA": "🫐 Chokeberry"
+  },
+  "varietyOther": "Other variety",
+  "notificationType": {
+    "FROST_WARNING": {
+      "label": "🧊 Frost warning",
+      "description": "Notify when temperature drops below"
+    },
+    "TEMP_LOW": {
+      "label": "❄️ Low temperature",
+      "description": "Notify when temperature drops below"
+    },
+    "TEMP_HIGH": {
+      "label": "🌡️ High temperature",
+      "description": "Notify when temperature exceeds"
+    },
+    "RAIN_FORECAST": {
+      "label": "🌧️ Rain forecast",
+      "description": "Notify about rainfall above",
+      "unit": "% probability"
+    },
+    "STRONG_WIND": {
+      "label": "💨 Strong wind",
+      "description": "Notify when wind exceeds"
+    }
+  },
+  "daysAhead": {
+    "1": "In 1 day",
+    "2": "In 2 days",
+    "3": "In 3 days",
+    "5": "In 5 days",
+    "7": "In 7 days"
+  },
+  "monthAll": "All months 📅",
+  "month": {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+  }
+}

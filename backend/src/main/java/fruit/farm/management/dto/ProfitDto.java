@@ -15,23 +15,23 @@ public class ProfitDto {
 
     private Long purchaseId;
 
-    @NotNull(message = "Data wydatku jest wymagana.")
+    @NotNull(message = "{date.required}")
     private LocalDate createdAt;
 
-    @NotNull(message = "Typ produktu/usługi jest wymagany.")
+    @NotNull(message = "{producttype.required}")
     private ProfitType profitType;
 
-    @NotNull(message = "Sprzedano w kilogramach.")
+    @NotNull(message = "{profit.kilograms.required}")
     private Long kilogramsSold;
 
-    @NotNull(message = "Kwota wydatku jest wymagana.")
-    @DecimalMin(value = "0.01", message = "Kwota musi być większa niż 0.")
+    @NotNull(message = "{amount.required}")
+    @DecimalMin(value = "0.01", message = "{amount.positive}")
     private BigDecimal profit;
 
-    @NotNull(message = "Opis wydatku.")
+    @NotNull(message = "{expense.description.required}")
     private String description;
 
-    @NotNull(message = "Czy otrzymano zapłatę?")
+    @NotNull(message = "{profit.received.required}")
     private boolean received;
 
     private Long userId;

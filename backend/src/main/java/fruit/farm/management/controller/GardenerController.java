@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -30,6 +32,15 @@ public class GardenerController {
 
     private final UserService userService;
     private final CoordinateRepository coordinateRepository;
+    private final MessageSource messageSource;
+
+    // Resolves a localized message for the current request locale (Accept-Language),
+    // falling back to the supplied Polish default when the bundle has no entry — this
+    // also keeps @WebMvcTest slices (which lack the message bundle) green.
+    private String localize(String code, String defaultMessage, Object... args) {
+        return messageSource.getMessage(code, args, defaultMessage, LocaleContextHolder.getLocale());
+    }
+
     private UserEntity getGardenerId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedWithNickname = authentication.getName();
@@ -68,7 +79,7 @@ public class GardenerController {
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
             if (!userDTO.getPassword().equals(userDTO.getConfirmPassword())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("error", "Hasła nie są zgodne"));
+                        .body(Map.of("error", localize("error.password.mismatch", "Hasła nie są zgodne")));
             }
         }
 
@@ -91,7 +102,8 @@ public class GardenerController {
             userService.update(gardenerId, userDTO, response);
             log.info("Gardener profile updated successfully for ID: {}", gardenerId);
 
-            return ResponseEntity.ok(Map.of("message", "Profil został zaktualizowany pomyślnie!"));
+            return ResponseEntity.ok(Map.of("message",
+                    localize("success.profile.updated", "Profil został zaktualizowany pomyślnie!")));
 
         } catch (NotFoundException e) {
             log.error("Gardener not found during update: {}", e.getMessage());
@@ -99,11 +111,12 @@ public class GardenerController {
         } catch (NicknameAlreadyExistsException e) {
             log.warn("Nickname conflict during update: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", localize("error.nickname.taken", "Ta nazwa użytkownika jest już zajęta")));
         } catch (Exception e) {
             log.error("Error updating gardener profile: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Błąd serwera podczas zapisu zmian: " + e.getMessage()));
+                    .body(Map.of("error",
+                            localize("error.profile.serverError", "Błąd serwera podczas zapisu zmian: {0}", e.getMessage())));
         }
     }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from "../../utils/authFetch";
 
@@ -29,6 +30,7 @@ export interface NotificationRule {
 }
 
 export const useHomePage = () => {
+    const { t } = useTranslation("homePage");
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState({ type: '', message: '' });
@@ -52,16 +54,16 @@ export const useHomePage = () => {
                 const data = await response.json();
                 setNotifications(Array.isArray(data) ? data : []);
             } else {
-                setAlert({ type: 'error', message: `Nie udało się załadować notyfikacji (${response.status})` });
+                setAlert({ type: 'error', message: t("errors.loadNotifications", { status: response.status }) });
                 setNotifications([]);
             }
         } catch (error) {
-            setAlert({ type: 'error', message: 'Nie można połączyć z serwerem.' });
+            setAlert({ type: 'error', message: t("errors.serverConnection") });
             setNotifications([]);
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [t]);
 
     const fetchGardenerLocation = useCallback(async () => {
         setWeatherError(null);
@@ -71,19 +73,19 @@ export const useHomePage = () => {
                 headers: getAuthHeaders(),
             });
 
-            if (!response.ok) throw new Error('Błąd serwera: Nie udało się pobrać danych lokalizacji.');
+            if (!response.ok) throw new Error(t("errors.locationServer"));
             const data = await response.json();
-            
+
             if (!data.coordinateDTO?.latitude || !data.coordinateDTO?.longitude) {
-                throw new Error('Koordynaty dla sadownika nie są zdefiniowane.');
+                throw new Error(t("errors.coordinatesUndefined"));
             }
-            
+
             setCoordinates({ lat: data.coordinateDTO.latitude, lon: data.coordinateDTO.longitude });
         } catch (error: any) {
-            setWeatherError(error.message || 'Wystąpił błąd podczas ładowania lokalizacji.');
+            setWeatherError(error.message || t("errors.locationLoad"));
             setCoordinates(null);
         }
-    }, []);
+    }, [t]);
 
     const loadWeatherNotifications = useCallback(async () => {
         try {
@@ -115,9 +117,9 @@ export const useHomePage = () => {
                 `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe/Warsaw&forecast_days=${maxDays}`
             );
 
-            if (!response.ok) throw new Error('Nie udało się pobrać prognozy pogody');
+            if (!response.ok) throw new Error(t("errors.forecastFetch"));
             const data = await response.json();
-            
+
             rules.filter(rule => rule.enabled).forEach(rule => {
                 for (let i = 0; i < rule.daysAhead && i < data.daily.time.length; i++) {
                     const date = data.daily.time[i];
@@ -128,28 +130,28 @@ export const useHomePage = () => {
                     switch (rule.weatherNotificationType) {
                         case 'FROST_WARNING':
                             value = data.daily.temperature_2m_min[i];
-                            if (value < rule.threshold) { triggered = true; message = `🧊 Ostrzeżenie o przymrozku: ${value.toFixed(1)}°C`; }
+                            if (value < rule.threshold) { triggered = true; message = t("weather.alert.frost", { value: value.toFixed(1) }); }
                             break;
                         case 'TEMP_LOW':
                             value = data.daily.temperature_2m_min[i];
-                            if (value < rule.threshold) { triggered = true; message = `❄️ Niska temperatura: ${value.toFixed(1)}°C`; }
+                            if (value < rule.threshold) { triggered = true; message = t("weather.alert.tempLow", { value: value.toFixed(1) }); }
                             break;
                         case 'TEMP_HIGH':
                             value = data.daily.temperature_2m_max[i];
-                            if (value > rule.threshold) { triggered = true; message = `🌡️ Wysoka temperatura: ${value.toFixed(1)}°C`; }
+                            if (value > rule.threshold) { triggered = true; message = t("weather.alert.tempHigh", { value: value.toFixed(1) }); }
                             break;
                         case 'RAIN_FORECAST':
                             value = data.daily.precipitation_probability_max[i];
-                            if (value > rule.threshold) { triggered = true; message = `🌧️ Prognoza opadów: ${value.toFixed(0)}%`; }
+                            if (value > rule.threshold) { triggered = true; message = t("weather.alert.rain", { value: value.toFixed(0) }); }
                             break;
                         case 'STRONG_WIND':
                             value = data.daily.wind_speed_10m_max[i];
-                            if (value > rule.threshold) { triggered = true; message = `💨 Silny wiatr: ${value.toFixed(1)} km/h`; }
+                            if (value > rule.threshold) { triggered = true; message = t("weather.alert.wind", { value: value.toFixed(1) }); }
                             break;
                     }
 
                     if (triggered) {
-                        alerts.push({ message: `${message} (próg: ${rule.threshold})`, date });
+                        alerts.push({ message: t("weather.alert.withThreshold", { message, threshold: rule.threshold }), date });
                     }
                 }
             });
@@ -159,7 +161,7 @@ export const useHomePage = () => {
         } finally {
             setIsCheckingAlerts(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         fetchNotifications();

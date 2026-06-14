@@ -1,6 +1,7 @@
 package fruit.farm.management.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fruit.farm.management.config.I18nConfig;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.RoleEntity;
 import fruit.farm.management.entity.UserEntity;
@@ -42,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, CorsConfig.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, CorsConfig.class, I18nConfig.class})
 @DisplayName("AuthController endpoints (/api/auth/** is permitAll)")
 class AuthControllerTest {
 

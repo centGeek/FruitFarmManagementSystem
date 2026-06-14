@@ -1,41 +1,41 @@
 ---
 name: dev-up
-description: Uruchom cały stack Fruit Farm Management System lokalnie - Docker PostgreSQL, backend Spring Boot (port 8091) i frontend Vite (port 5173) w poprawnej kolejności. Użyj, gdy użytkownik prosi o uruchomienie, wystartowanie lub odpalenie aplikacji / projektu / stacku.
+description: Run the entire Fruit Farm Management System stack locally - Docker PostgreSQL, Spring Boot backend (port 8091) and Vite frontend (port 5173) in the correct order. Use when the user asks to run, start, or launch the application / project / stack.
 ---
 
-# dev-up — uruchomienie stacku
+# dev-up — running the stack
 
-Uruchamia projekt w poprawnej kolejności: **Docker/PostgreSQL → backend (8091) → frontend (5173)**.
-Backend i frontend muszą działać równolegle.
+Runs the project in the correct order: **Docker/PostgreSQL → backend (8091) → frontend (5173)**.
+The backend and frontend must run in parallel.
 
-## Szybki start
+## Quick start
 
-Uruchom skrypt pomocniczy (startuje wszystko, backend i frontend w tle, loguje do `backend/.dev-logs/`):
+Run the helper script (starts everything, backend and frontend in the background, logs to `backend/.dev-logs/`):
 
 ```bash
 bash .claude/skills/dev-up/run.sh
 ```
 
-Skrypt sam sprawdza warunki wstępne i raportuje URL-e oraz ścieżki logów. Po starcie zweryfikuj zdrowie:
+The script checks the prerequisites itself and reports the URLs and log paths. After startup, verify health:
 
 ```bash
 curl -fsS http://localhost:8091/actuator/health 2>/dev/null || curl -fsS http://localhost:8091/ -o /dev/null && echo "backend OK"
 curl -fsS http://localhost:5173 -o /dev/null && echo "frontend OK"
 ```
 
-## Kolejność i szczegóły (gdy robisz to ręcznie)
+## Order and details (when doing this manually)
 
-1. **Docker musi działać.** Sprawdź: `docker info`. Jeśli nie działa — poproś użytkownika o uruchomienie Docker Desktop (nie da się go wystartować automatycznie).
-2. **Java 21.** Repo przypina wersję w `.sdkmanrc` (`21.0.6-tem`). Jeśli używany jest SDKMAN: `cd backend && sdk env`.
-3. **PostgreSQL:** z katalogu `backend/` → `docker-compose -f compose.yaml up -d`.
-   - Uwaga: `spring-boot-docker-compose` jest na classpath runtime, więc sam start backendu też podnosi kontener DB. Osobny `up -d` jest mimo to przydatny, by mieć DB gotową wcześniej.
-4. **Backend** (z `backend/`): `./mvnw spring-boot:run` na porcie **8091**.
-   - `backend/mvnw` może nie mieć bitu wykonywalności — wtedy użyj `sh mvnw spring-boot:run` albo `mvn spring-boot:run`.
-   - Pierwszy build pobiera zależności; może potrwać.
-5. **Frontend** (z `frontend/`): `npm install` (jeśli brak `node_modules`), potem `npm run dev` → **http://localhost:5173**.
+1. **Docker must be running.** Check: `docker info`. If it isn't running — ask the user to start Docker Desktop (it can't be started automatically).
+2. **Java 21.** The repo pins the version in `.sdkmanrc` (`21.0.6-tem`). If SDKMAN is used: `cd backend && sdk env`.
+3. **PostgreSQL:** from the `backend/` directory → `docker-compose -f compose.yaml up -d`.
+   - Note: `spring-boot-docker-compose` is on the runtime classpath, so starting the backend also brings up the DB container. A separate `up -d` is still useful to have the DB ready earlier.
+4. **Backend** (from `backend/`): `./mvnw spring-boot:run` on port **8091**.
+   - `backend/mvnw` may lack the executable bit — in that case use `sh mvnw spring-boot:run` or `mvn spring-boot:run`.
+   - The first build downloads dependencies; it may take a while.
+5. **Frontend** (from `frontend/`): `npm install` (if `node_modules` is missing), then `npm run dev` → **http://localhost:5173**.
 
-## Diagnostyka
+## Diagnostics
 
-- Logi (przy uruchomieniu skryptem) leżą w `backend/.dev-logs/backend.log` i `frontend.log`.
-- Port zajęty? Sprawdź: `lsof -i :8091` / `lsof -i :5173`.
-- Backend nie wstaje przez DB: upewnij się, że kontener Postgres działa (`docker ps`).
+- Logs (when started via the script) live in `backend/.dev-logs/backend.log` and `frontend.log`.
+- Port in use? Check: `lsof -i :8091` / `lsof -i :5173`.
+- Backend won't start because of the DB: make sure the Postgres container is running (`docker ps`).

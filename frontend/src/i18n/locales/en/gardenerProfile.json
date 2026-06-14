@@ -1,0 +1,72 @@
+{
+  "header": {
+    "title": "My Profile",
+    "subtitle": "Manage your personal details and account settings 🌱"
+  },
+  "sections": {
+    "basicInfo": "Basic Information",
+    "contactInfo": "Contact Details",
+    "location": "Set Main Location",
+    "passwordChange": "Change Password"
+  },
+  "fields": {
+    "name": "First name",
+    "surname": "Last name",
+    "emailOptional": "Email (optional)",
+    "phoneOptional": "Phone Number (optional)",
+    "nicknameRequired": "Username (required)",
+    "selectedLocality": "Selected Locality (Automatic)",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password"
+  },
+  "placeholders": {
+    "name": "e.g. John",
+    "surname": "e.g. Smith",
+    "email": "email@example.com",
+    "phone": "+48 123 456 789",
+    "nickname": "Your username",
+    "locality": "Search on the map...",
+    "password": "Minimum 6 characters",
+    "confirmPassword": "Repeat password"
+  },
+  "location": {
+    "hint": "Use the search field below to find your locality. Your current location: {{locality}}",
+    "searchLabel": "Search for a Locality",
+    "unknownLocation": "Unknown location",
+    "coordinates": "Coordinates: {{lat}}, {{lon}}"
+  },
+  "password": {
+    "hint": "💡 Leave the password field empty if you don't want to change your password.",
+    "showAria": "Show password",
+    "hideAria": "Hide password"
+  },
+  "unsavedChanges": "You have unsaved changes. Remember to save your profile!",
+  "buttons": {
+    "saving": "Saving...",
+    "save": "Save Changes",
+    "reset": "Reset Changes"
+  },
+  "securityNote": "Your data is stored securely and protected.",
+  "loading": "Loading profile... 🔄",
+  "alerts": {
+    "loadError": "Error loading profile: {{error}}",
+    "networkLoadError": "Network error: Unable to connect to the server.",
+    "locationSet": "New location set: {{locality}}",
+    "validationErrors": "Validation errors occurred.",
+    "updateSuccess": "Profile updated successfully!",
+    "saveError": "Save error: {{error}}",
+    "networkSaveError": "Network error: Unable to save changes.",
+    "changesReverted": "All unsaved changes have been reverted."
+  },
+  "validation": {
+    "nameRequired": "First name is required",
+    "nameLength": "First name must be between 2 and 50 characters",
+    "surnameRequired": "Last name is required",
+    "surnameLength": "Last name must be between 2 and 50 characters",
+    "nicknameRequired": "Username is required",
+    "emailInvalid": "Invalid email format",
+    "localityRequired": "Select a locality by setting it on the map/searching.",
+    "passwordLength": "Password must be at least 6 characters long",
+    "passwordMismatch": "Passwords do not match"
+  }
+}

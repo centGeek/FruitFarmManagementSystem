@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { Alert } from "../../utils/common";
 import { useSupport } from './SupportHooks';
 import { TicketForm, TicketCard, LoadingState, EmptyState } from './SupportComponents';
 
 export default function Support() {
+    const { t } = useTranslation("support");
     const { tickets, isLoading, isSubmitting, alert, closeAlert, submitTicket } = useSupport();
 
     return (
@@ -10,10 +12,10 @@ export default function Support() {
             <div className="max-w-5xl mx-auto">
                 <header className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                        <span className="text-indigo-600 mr-3">🛟</span> Zgłoś usterkę
+                        <span className="text-indigo-600 mr-3">🛟</span> {t('header.title')}
                     </h1>
                     <p className="text-gray-600 text-lg">
-                        Coś nie działa? Zgłoś problem administratorowi systemu. 🛠️
+                        {t('header.subtitle')}
                     </p>
                 </header>
 
@@ -23,7 +25,7 @@ export default function Support() {
 
                 <div className="bg-white rounded-2xl shadow-lg border border-indigo-100 p-6 mb-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                        <span className="mr-2">📝</span> Nowe zgłoszenie
+                        <span className="mr-2">📝</span> {t('newTicket.title')}
                     </h2>
                     <TicketForm onSubmit={submitTicket} isSubmitting={isSubmitting} />
                 </div>
@@ -31,10 +33,10 @@ export default function Support() {
                 <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                            <span className="mr-2">📋</span> Twoje zgłoszenia
+                            <span className="mr-2">📋</span> {t('yourTickets.title')}
                         </h2>
                         <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-lg font-medium">
-                            {tickets.length} {tickets.length === 1 ? 'zgłoszenie' : 'zgłoszeń'}
+                            {t('yourTickets.count', { count: tickets.length })}
                         </span>
                     </div>
 

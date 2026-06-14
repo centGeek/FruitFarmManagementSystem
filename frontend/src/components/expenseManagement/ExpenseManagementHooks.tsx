@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
@@ -81,6 +82,7 @@ export const generateYearOptions = () => {
 };
 
 export const useExpenseManagement = () => {
+  const { t } = useTranslation("expenseManagement");
   const [allExpenses, setAllExpenses] = useState<Expense[]>([]);
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [selectedType, setSelectedType] = useState('');
@@ -132,11 +134,11 @@ export const useExpenseManagement = () => {
       }
       setAllExpenses(allData);
     } catch (error) {
-      setAlert({ type: 'error', message: 'Błąd ładowania wydatków' });
+      setAlert({ type: 'error', message: t('messages.fetchError') });
     } finally {
       setIsLoading(false);
     }
-  }, [selectedYear, selectedMonth, selectedSectorId]);
+  }, [selectedYear, selectedMonth, selectedSectorId, t]);
 
   const fetchSectors = useCallback(async () => {
     try {
@@ -169,25 +171,25 @@ export const useExpenseManagement = () => {
       });
 
       if (response.ok) {
-        setAlert({ type: 'success', message: `Wydatek został ${isUpdate ? 'zaktualizowany' : 'dodany'} pomyślnie!` });
+        setAlert({ type: 'success', message: isUpdate ? t('messages.saveSuccessUpdated') : t('messages.saveSuccessAdded') });
         setIsModalOpen(false);
         setSelectedExpense(null);
         fetchExpenses();
       } else {
         const error = await response.json();
-        setAlert({ type: 'error', message: `Błąd zapisu (${response.status}): ${error.message || error.error || response.statusText}` });
+        setAlert({ type: 'error', message: t('messages.saveError', { status: response.status, error: error.message || error.error || response.statusText }) });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: `Błąd sieci: Nie można zapisać wydatku.` });
+      setAlert({ type: 'error', message: t('messages.saveNetworkError') });
     } finally {
       setIsLoading(false);
     }
-  }, [selectedExpense, fetchExpenses, closeAlert]);
+  }, [selectedExpense, fetchExpenses, closeAlert, t]);
 
   const handleDeleteExpense = useCallback(async (expenseId: number) => {
-    if (!window.confirm('Czy na pewno chcesz usunąć ten wydatek? Tej operacji nie można cofnąć!')) return;
+    if (!window.confirm(t('messages.deleteConfirm'))) return;
     closeAlert();
-    
+
     try {
       const response = await authFetch(`${BACKEND_URL}/api/expenses/${expenseId}`, {
         method: 'DELETE',
@@ -195,16 +197,16 @@ export const useExpenseManagement = () => {
       });
 
       if (response.ok) {
-        setAlert({ type: 'success', message: 'Wydatek został usunięty pomyślnie.' });
+        setAlert({ type: 'success', message: t('messages.deleteSuccess') });
         fetchExpenses();
       } else {
         const error = await response.json();
-        setAlert({ type: 'error', message: `Błąd usuwania: ${error.message || error.error || response.statusText}` });
+        setAlert({ type: 'error', message: t('messages.deleteError', { error: error.message || error.error || response.statusText }) });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Błąd sieci: Nie można usunąć wydatku.' });
+      setAlert({ type: 'error', message: t('messages.deleteNetworkError') });
     }
-  }, [fetchExpenses, closeAlert]);
+  }, [fetchExpenses, closeAlert, t]);
 
   useEffect(() => { 
     fetchExpenses(); 
@@ -223,16 +225,19 @@ export const useExpenseManagement = () => {
     
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      list = list.filter(exp =>
-        (exp.description?.toLowerCase().includes(term)) ||
-        (exp.amount?.toString().includes(term)) ||
-        (exp.createdAt?.includes(term)) ||
-        (getExpenseTypeDetails(exp.type).label.toLowerCase().includes(term))
-      );
+      list = list.filter(exp => {
+        const typeLabel = EXPENSE_TYPES.some(item => item.value === exp.type)
+          ? t(`expenseType.${exp.type}`)
+          : t('expenseType.UNKNOWN');
+        return (exp.description?.toLowerCase().includes(term)) ||
+          (exp.amount?.toString().includes(term)) ||
+          (exp.createdAt?.includes(term)) ||
+          (typeLabel.toLowerCase().includes(term));
+      });
     }
-    
-    return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); 
-  }, [allExpenses, selectedType, selectedPaymentStatus, searchTerm]); 
+
+    return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [allExpenses, selectedType, selectedPaymentStatus, searchTerm, t]);
 
   const filteredStats = useMemo(() => {
     const total = filteredExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
@@ -243,8 +248,8 @@ export const useExpenseManagement = () => {
 
   const selectedSectorName = useMemo(() => {
     if (!selectedSectorId) return null;
-    return sectors.find(s => s.id === Number(selectedSectorId))?.description || `Sektor ${selectedSectorId}`;
-  }, [selectedSectorId, sectors]);
+    return sectors.find(s => s.id === Number(selectedSectorId))?.description || t('sectorFallback', { id: selectedSectorId });
+  }, [selectedSectorId, sectors, t]);
 
   const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
   const paginatedExpenses = filteredExpenses.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage);

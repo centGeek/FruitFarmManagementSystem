@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { Alert } from "../../utils/common";
 import { useAdminUsers } from './AdminUsersHooks';
 import { LoadingState, EmptyState, StatCard, FilterBar, AdminUserRow } from './AdminUsersComponents';
 
 export default function AdminUsers() {
+  const { t } = useTranslation("adminUsers");
   const {
     filteredUsers,
     roles,
@@ -24,10 +26,10 @@ export default function AdminUsers() {
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            <span className="text-slate-600 mr-3">👥</span> Panel administratora — użytkownicy
+            <span className="text-slate-600 mr-3">👥</span> {t("header.title")}
           </h1>
           <p className="text-gray-600 text-lg">
-            Zarządzaj kontami: blokuj i resetuj hasła.
+            {t("header.subtitle")}
           </p>
         </header>
 
@@ -36,9 +38,9 @@ export default function AdminUsers() {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <StatCard label="Sadownicy" value={stats.gardeners} icon="🌱" accent="bg-green-100" />
-          <StatCard label="Aktywni" value={stats.gardeners - stats.blocked} icon="🟢" accent="bg-emerald-100" />
-          <StatCard label="Zablokowani" value={stats.blocked} icon="🔴" accent="bg-red-100" />
+          <StatCard label={t("stats.gardeners")} value={stats.gardeners} icon="🌱" accent="bg-green-100" />
+          <StatCard label={t("stats.active")} value={stats.gardeners - stats.blocked} icon="🟢" accent="bg-emerald-100" />
+          <StatCard label={t("stats.blocked")} value={stats.blocked} icon="🔴" accent="bg-red-100" />
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
@@ -16,6 +17,7 @@ export interface ProfileData {
 }
 
 export const useGardenerProfile = () => {
+    const { t } = useTranslation("gardenerProfile");
     // Domyślna lokalizacja (Warszawa)
     const defaultCenter = useMemo<[number, number]>(() => [52.2297, 21.0122], []);
     
@@ -67,14 +69,14 @@ export const useGardenerProfile = () => {
                 setMapView({ center: [initialLat, initialLon], zoom: initialZoom, viewUpdateKey: Date.now() });
             } else {
                 const error = await response.json();
-                setAlert({ type: 'error', message: `Błąd ładowania profilu: ${error.message || response.statusText}` });
+                setAlert({ type: 'error', message: t("alerts.loadError", { error: error.message || response.statusText }) });
             }
         } catch (error) {
-            setAlert({ type: 'error', message: 'Błąd sieci: Nie można połączyć się z serwerem.' });
+            setAlert({ type: 'error', message: t("alerts.networkLoadError") });
         } finally {
             setIsLoading(false);
         }
-    }, [closeAlert, defaultCenter]);
+    }, [closeAlert, defaultCenter, t]);
 
     useEffect(() => { fetchProfile(); }, [fetchProfile]);
 
@@ -101,39 +103,39 @@ export const useGardenerProfile = () => {
     }, [errors]);
     
     const handleLocationSelect = useCallback((location: any) => {
-        const locality = location.address.city || location.address.town || location.address.village || location.name.split(',')[0] || 'Nieustawiona';
+        const locality = location.address.city || location.address.town || location.address.village || location.name.split(',')[0] || '';
         setProfileData(prev => ({ ...prev, latitude: location.lat, longitude: location.lon, localityName: locality }));
         setMapView({ center: [location.lat, location.lon], zoom: 13, viewUpdateKey: Date.now() });
-        setAlert({ type: 'success', message: `Ustawiono nową lokalizację: ${locality}` });
+        setAlert({ type: 'success', message: t("alerts.locationSet", { locality }) });
         setErrors((prev: any) => ({ ...prev, localityName: '' }));
-    }, []);
+    }, [t]);
 
     const validate = useCallback(() => {
         const newErrors: any = {};
-        if (!profileData.name.trim()) newErrors.name = 'Imię jest wymagane';
-        else if (profileData.name.length < 2 || profileData.name.length > 50) newErrors.name = 'Imię musi mieć między 2 a 50 znaków';
-        
-        if (!profileData.surname.trim()) newErrors.surname = 'Nazwisko jest wymagane';
-        else if (profileData.surname.length < 2 || profileData.surname.length > 50) newErrors.surname = 'Nazwisko musi mieć między 2 a 50 znaków';
-        
-        if (!profileData.nickname.trim()) newErrors.nickname = 'Nazwa użytkownika jest wymagana';
-        if(profileData.email && !/\S+@\S+\.\S+/.test(profileData.email)) newErrors.email = 'Nieprawidłowy format email';
-        
+        if (!profileData.name.trim()) newErrors.name = t("validation.nameRequired");
+        else if (profileData.name.length < 2 || profileData.name.length > 50) newErrors.name = t("validation.nameLength");
+
+        if (!profileData.surname.trim()) newErrors.surname = t("validation.surnameRequired");
+        else if (profileData.surname.length < 2 || profileData.surname.length > 50) newErrors.surname = t("validation.surnameLength");
+
+        if (!profileData.nickname.trim()) newErrors.nickname = t("validation.nicknameRequired");
+        if(profileData.email && !/\S+@\S+\.\S+/.test(profileData.email)) newErrors.email = t("validation.emailInvalid");
+
         if (!profileData.localityName || profileData.localityName === 'Nieustawiona' || (profileData.latitude === defaultCenter[0] && profileData.longitude === defaultCenter[1] && originalData)) {
-             newErrors.localityName = 'Wybierz miejscowość, ustawiając ją na mapie/wyszukując.';
+             newErrors.localityName = t("validation.localityRequired");
         }
-        
+
         if (profileData.password.length > 0) {
-            if (profileData.password.length < 6) newErrors.password = 'Hasło musi mieć co najmniej 6 znaków';
-            if (profileData.password !== profileData.confirmPassword) newErrors.confirmPassword = 'Hasła nie są zgodne';
+            if (profileData.password.length < 6) newErrors.password = t("validation.passwordLength");
+            if (profileData.password !== profileData.confirmPassword) newErrors.confirmPassword = t("validation.passwordMismatch");
         }
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    }, [profileData, defaultCenter, originalData]);
+    }, [profileData, defaultCenter, originalData, t]);
 
     const handleSave = useCallback(async () => {
-        if (!validate()) { setAlert({ type: 'error', message: 'Wystąpiły błędy walidacji.' }); return; }
+        if (!validate()) { setAlert({ type: 'error', message: t("alerts.validationErrors") }); return; }
         setIsSaving(true);
         closeAlert();
         
@@ -151,20 +153,20 @@ export const useGardenerProfile = () => {
             });
 
             if (response.ok) {
-                setAlert({ type: 'success', message: 'Profil został zaktualizowany pomyślnie!' });
+                setAlert({ type: 'success', message: t("alerts.updateSuccess") });
                 await fetchProfile();
                 setProfileData(prev => ({ ...prev, password: '', confirmPassword: '' }));
                 setMapView(prev => ({ ...prev, center: [profileData.latitude, profileData.longitude], zoom: 13, viewUpdateKey: Date.now() }));
             } else {
                 const error = await response.json();
-                setAlert({ type: 'error', message: `Błąd zapisu: ${error.message || response.statusText}` });
+                setAlert({ type: 'error', message: t("alerts.saveError", { error: error.message || response.statusText }) });
             }
         } catch (error) {
-            setAlert({ type: 'error', message: 'Błąd sieci: Nie można zapisać zmian.' });
+            setAlert({ type: 'error', message: t("alerts.networkSaveError") });
         } finally {
             setIsSaving(false);
         }
-    }, [profileData, validate, closeAlert, fetchProfile]);
+    }, [profileData, validate, closeAlert, fetchProfile, t]);
 
     const handleReset = useCallback(() => {
         if (originalData) {
@@ -172,9 +174,9 @@ export const useGardenerProfile = () => {
             setErrors({});
             closeAlert();
             setMapView({ center: [originalData.latitude, originalData.longitude], zoom: 13, viewUpdateKey: Date.now() });
-            setAlert({ type: 'warning', message: 'Cofnięto wszystkie niezapisane zmiany.' });
+            setAlert({ type: 'warning', message: t("alerts.changesReverted") });
         }
-    }, [originalData, closeAlert]);
+    }, [originalData, closeAlert, t]);
 
     return {
         profileData, errors, isLoading, isSaving, alert, hasChanges, showPassword, setShowPassword,

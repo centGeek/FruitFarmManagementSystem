@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { Alert } from "../../utils/common";
 import { useAdminDashboard } from './AdminDashboardHooks';
 import { LoadingState, EmptyState, StatCard, FilterBar, AdminTicketRow, Pagination } from './AdminDashboardComponents';
 
 export default function AdminDashboard() {
+  const { t } = useTranslation("adminDashboard");
   const {
     tickets,
     stats,
@@ -26,10 +28,10 @@ export default function AdminDashboard() {
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            <span className="text-green-600 mr-3">🛠️</span> Panel administratora — zgłoszenia
+            <span className="text-green-600 mr-3">🛠️</span> {t("header.title")}
           </h1>
           <p className="text-gray-600 text-lg">
-            Wszystkie usterki i sugestie zgłoszone przez użytkowników systemu.
+            {t("header.subtitle")}
           </p>
         </header>
 
@@ -38,10 +40,10 @@ export default function AdminDashboard() {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Wszystkie" value={stats.total} icon="📋" accent="bg-gray-100" />
-          <StatCard label="Otwarte" value={stats.open} icon="🟢" accent="bg-blue-100" />
-          <StatCard label="W trakcie" value={stats.inProgress} icon="🛠️" accent="bg-amber-100" />
-          <StatCard label="Zamknięte" value={stats.closed} icon="✅" accent="bg-green-100" />
+          <StatCard label={t("stats.total")} value={stats.total} icon="📋" accent="bg-gray-100" />
+          <StatCard label={t("stats.open")} value={stats.open} icon="🟢" accent="bg-blue-100" />
+          <StatCard label={t("stats.inProgress")} value={stats.inProgress} icon="🛠️" accent="bg-amber-100" />
+          <StatCard label={t("stats.closed")} value={stats.closed} icon="✅" accent="bg-green-100" />
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">

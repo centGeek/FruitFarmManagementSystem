@@ -1,0 +1,38 @@
+{
+  "brand": "MenadżerSadu",
+  "subtitle": "System zarządzania gospodarstwem sadowniczym",
+  "passwordPlaceholder": "Wprowadź hasło",
+  "loggingIn": "Logowanie...",
+  "noAccount": "Nie masz konta?",
+  "about": "O aplikacji",
+  "validation": {
+    "nicknameRequired": "Nazwa użytkownika jest wymagana",
+    "passwordRequired": "Hasło jest wymagane"
+  },
+  "errors": {
+    "loginFailed": "Błąd logowania",
+    "serverUnreachable": "Nie można połączyć się z serwerem"
+  },
+  "hero": {
+    "title": "Zarządzaj swoim sadem profesjonalnie",
+    "subtitle": "Kompleksowy system do zarządzania gospodarstwem sadowniczym z zaawansowanymi narzędziami analizy i optymalizacji.",
+    "features": {
+      "mapping": {
+        "title": "Mapowanie upraw",
+        "desc": "Przypisuj pracowników do konkretnych sektorów"
+      },
+      "workLog": {
+        "title": "Ewidencja pracy",
+        "desc": "Harmonogramowanie i rejestracja czasu pracy"
+      },
+      "analysis": {
+        "title": "Analiza efektywności",
+        "desc": "Monitorowanie finansów i optymalizacja zasobów"
+      },
+      "weather": {
+        "title": "Notyfikacje pogodowe",
+        "desc": "Alerty o anomaliach i zmianach pogodowych"
+      }
+    }
+  }
+}

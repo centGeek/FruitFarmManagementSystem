@@ -1,0 +1,53 @@
+{
+  "backToLogin": "Powrót do logowania",
+  "logoAlt": "MenadżerSadu",
+  "hero": "Kompleksowy system do zarządzania gospodarstwem sadowniczym — planowanie pracy, ewidencja zbiorów, finanse i pogoda w jednym, uporządkowanym miejscu.",
+  "audience": {
+    "title": "Dla kogo?",
+    "body": "MenadżerSadu powstał z myślą o właścicielach i zarządcach gospodarstw sadowniczych — od niewielkich, rodzinnych sadów po większe plantacje owocowe. To narzędzie dla każdego, kto zatrudnia pracowników (również sezonowych), planuje i rozlicza ich pracę, prowadzi ewidencję zebranych owoców i chce trzymać rękę na pulsie finansów swojego gospodarstwa. Jeśli do tej pory wszystko zapisywałeś w zeszycie albo w rozjeżdżających się arkuszach kalkulacyjnych — ta aplikacja zbierze to w jednym, przejrzystym miejscu."
+  },
+  "why": {
+    "title": "Dlaczego MenadżerSadu?",
+    "intro": "Prowadzenie sadu to dziesiątki codziennych decyzji: kto i gdzie dziś pracował, ile godzin lub kilogramów, ile to kosztowało i czy sad na siebie zarabia. MenadżerSadu odciąża Cię od ręcznych obliczeń i porządkuje dane:",
+    "points": {
+      "salary": "automatycznie nalicza wynagrodzenia na podstawie przepracowanych godzin lub zebranych kilogramów,",
+      "finance": "pokazuje koszty, przychody i realny zysk w czytelnych zestawieniach,",
+      "map": "przypisuje pracowników do konkretnych sektorów na mapie Twojego sadu,",
+      "weather": "ostrzega o niebezpiecznych zjawiskach pogodowych dla Twojej lokalizacji."
+    },
+    "outro": "Dzięki temu, zamiast tonąć w papierach, możesz skupić się na tym, co najważniejsze — na swoich owocach."
+  },
+  "features": {
+    "title": "Co znajdziesz w środku",
+    "map": {
+      "title": "Mapa sadu",
+      "desc": "Rysuj sektory na interaktywnej mapie i przypisuj do nich pracowników oraz rodzaje upraw."
+    },
+    "workforce": {
+      "title": "Pracownicy i ewidencja pracy",
+      "desc": "Zarządzaj pracownikami, planuj harmonogram i rejestruj przepracowane godziny lub zebrane kilogramy."
+    },
+    "salary": {
+      "title": "Wynagrodzenia",
+      "desc": "Automatyczne naliczanie wypłat na podstawie stawki godzinowej lub stawki za kilogram zbiorów."
+    },
+    "finance": {
+      "title": "Finanse sadu",
+      "desc": "Zaliczki, wydatki, przychody i realny zysk — pełen obraz finansów Twojego gospodarstwa."
+    },
+    "analytics": {
+      "title": "Analiza efektywności",
+      "desc": "Czytelne zestawienia, które pomagają monitorować wyniki i optymalizować wykorzystanie zasobów."
+    },
+    "weather": {
+      "title": "Notyfikacje pogodowe",
+      "desc": "Alerty o anomaliach i zmianach pogody dla lokalizacji Twojego sadu."
+    }
+  },
+  "cta": {
+    "title": "Gotowy, żeby uporządkować swój sad?",
+    "login": "Zaloguj się",
+    "register": "Załóż konto"
+  },
+  "footer": "© 2026 MenadżerSadu — Cyfrowe zarządzanie gospodarstwem sadowniczym"
+}

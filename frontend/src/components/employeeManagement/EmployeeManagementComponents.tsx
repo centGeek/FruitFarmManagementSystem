@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
@@ -68,6 +69,7 @@ export const InputField = React.memo(({
 ));
 
 export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => {
+  const { t } = useTranslation("employeeManagement");
   const isUpdating = !!employee;
   
   const initialState = useMemo(() => ({
@@ -100,12 +102,12 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
 
   const validate = useCallback(() => {
     const newErrors: any = {};
-    if (!formData.name.trim()) newErrors.name = 'Imię jest wymagane';
-    if (!formData.surname.trim()) newErrors.surname = 'Nazwisko jest wymagane';
-    if (!formData.nickname.trim()) newErrors.nickname = 'Nazwa użytkownika jest wymagana';
+    if (!formData.name.trim()) newErrors.name = t("form.errors.nameRequired");
+    if (!formData.surname.trim()) newErrors.surname = t("form.errors.surnameRequired");
+    if (!formData.nickname.trim()) newErrors.nickname = t("form.errors.nicknameRequired");
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData]);
+  }, [formData, t]);
 
   const handleSubmit = useCallback(() => {
     if (validate()) onSave(formData);
@@ -115,7 +117,7 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField
-          label="Imię"
+          label={t("form.name")}
           name="name"
           required
           value={formData.name}
@@ -124,7 +126,7 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
           isLoading={isLoading}
         />
         <InputField
-          label="Nazwisko"
+          label={t("form.surname")}
           name="surname"
           required
           value={formData.surname}
@@ -133,9 +135,9 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
           isLoading={isLoading}
         />
       </div>
-      
+
       <InputField
-        label="Nazwa użytkownika"
+        label={t("form.nickname")}
         name="nickname"
         required
         value={formData.nickname}
@@ -146,7 +148,7 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField
-          label="Telefon"
+          label={t("form.phone")}
           name="phoneNumber"
           type="tel"
           value={formData.phoneNumber}
@@ -154,7 +156,7 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
           isLoading={isLoading}
         />
         <InputField
-          label="Email"
+          label={t("form.email")}
           name="email"
           type="email"
           value={formData.email}
@@ -174,7 +176,7 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
           disabled={isLoading}
         />
         <label htmlFor="active" className="ml-2 text-sm text-gray-700 font-medium">
-          Aktywny
+          {t("form.active")}
         </label>
       </div>
 
@@ -186,7 +188,7 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-          ) : '💾'} {isUpdating ? 'Zapisz zmiany' : 'Dodaj pracownika'}
+          ) : '💾'} {isUpdating ? t("form.saveChanges") : t("form.addEmployee")}
         </button>
         <button
           type="button"
@@ -194,7 +196,7 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
           className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
           disabled={isLoading}
         >
-          Anuluj
+          {t("form.cancel")}
         </button>
       </div>
     </div>
@@ -224,27 +226,31 @@ export const StatCard = ({ count, label, color }: any) => {
   );
 };
 
-export const LoadingState = () => (
-  <div className="text-center py-16">
-    <div className="w-14 h-14 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
-    <p className="text-gray-500 text-xl font-medium">Ładowanie użytkowników... 🔄</p>
-  </div>
-);
+export const LoadingState = () => {
+  const { t } = useTranslation("employeeManagement");
+  return (
+    <div className="text-center py-16">
+      <div className="w-14 h-14 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
+      <p className="text-gray-500 text-xl font-medium">{t("loading")}</p>
+    </div>
+  );
+};
 
 export const EmptyState = ({ searchTerm, employeesCount, showArchived, onAddClick }: any) => {
+  const { t } = useTranslation("employeeManagement");
   let title, message;
-  
+
   if (searchTerm) {
-    title = 'Brak wyników wyszukiwania';
-    message = 'Spróbuj zmienić kryteria wyszukiwania lub zresetować filtr.';
+    title = t("empty.noResultsTitle");
+    message = t("empty.noResultsMessage");
   } else if (employeesCount === 0) {
-    title = 'Brak użytkowników';
-    message = 'Dodaj pierwszego użytkownika, aby rozpocząć zarządzanie pracownikami.';
+    title = t("empty.noUsersTitle");
+    message = t("empty.noUsersMessage");
   } else {
-    title = showArchived ? 'Brak zarchiwizowanych użytkowników' : 'Brak aktywnych użytkowników';
+    title = showArchived ? t("empty.noArchivedTitle") : t("empty.noActiveTitle");
     message = showArchived
-      ? 'Wszyscy użytkownicy są obecnie aktywni.'
-      : 'Wszyscy użytkownicy są zarchiwizowani. Zaznacz "Pokaż zarchiwizowanych"';
+      ? t("empty.allActiveMessage")
+      : t("empty.allArchivedMessage");
   }
 
   return (
@@ -259,6 +265,7 @@ export const EmptyState = ({ searchTerm, employeesCount, showArchived, onAddClic
 };
 
 export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinanceDetails }: any) => {
+  const { t } = useTranslation("employeeManagement");
   const [isProcessing, setIsProcessing] = useState(false);
   const isEmployeeActive = employee.active || false;
   const isArchived = !isEmployeeActive;
@@ -274,14 +281,14 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
   };
 
   const employeeDetails = [
-    { icon: '✉️', label: 'Email', value: employee.email, truncate: true },
-    { icon: '📞', label: 'Telefon', value: employee.phoneNumber },
+    { icon: '✉️', label: t("card.email"), value: employee.email, truncate: true },
+    { icon: '📞', label: t("card.phone"), value: employee.phoneNumber },
     {
       icon: '📅',
-      label: 'Data utworzenia',
+      label: t("card.creationDate"),
       value: employee.creationDate ? new Date(employee.creationDate).toLocaleDateString('pl-PL') : null
     },
-    { icon: '🆔', label: 'ID', value: `#${employee.id}` }
+    { icon: '🆔', label: t("card.id"), value: `#${employee.id}` }
   ];
 
   return (
@@ -303,7 +310,7 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
           <button
             onClick={() => onEdit(employee)}
             className="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors text-base"
-            title="Edytuj ✏️"
+            title={t("card.editTitle")}
             disabled={isProcessing}
           >
             ✏️
@@ -311,7 +318,7 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
           <button
             onClick={() => onFinanceDetails(employee)}
             className="p-2 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors text-base"
-            title="Detale Pracy 💼"
+            title={t("card.workDetailsTitle")}
             disabled={isProcessing}
           >
             💼
@@ -320,7 +327,7 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
             onClick={handleArchiveToggle}
             disabled={isProcessing}
             className={`p-2 rounded-lg transition-colors text-base ${isArchived ? 'bg-lime-50 text-lime-600 hover:bg-lime-100' : 'bg-red-50 text-red-600 hover:bg-red-100'} disabled:opacity-50`}
-            title={isArchived ? "Przywróć (Aktywuj) 🔄" : "Archiwizuj (Dezaktywuj) 📦"}
+            title={isArchived ? t("card.restoreTitle") : t("card.archiveTitle")}
           >
             {isProcessing ? (
               <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
@@ -332,17 +339,17 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
       <div className="mb-4 space-x-2">
         {isEmployeeActive ? (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-            <span className="mr-1">✅</span>Aktywny 🌱
+            <span className="mr-1">✅</span>{t("card.statusActive")}
           </span>
         ) : (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-            <span className="mr-1">❌</span>Zarchiwizowany 🍂
+            <span className="mr-1">❌</span>{t("card.statusArchived")}
           </span>
         )}
         {employee.role && (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-lime-100 text-lime-700">
             <span className="mr-1">⚙️</span>
-            {employee.role.roleName === 'Employee' ? 'Pracownik' : employee.role.roleName || 'Brak roli'}
+            {employee.role.roleName === 'Employee' ? t("card.roleEmployee") : employee.role.roleName || t("card.noRole")}
           </span>
         )}
       </div>
@@ -367,6 +374,7 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
 };
 
 export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
+  const { t } = useTranslation("employeeManagement");
   const [advances, setAdvances] = useState<any[]>([]);
   const [advanceAmount, setAdvanceAmount] = useState('');
   const [advanceDescription, setAdvanceDescription] = useState('');
@@ -385,14 +393,14 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
       if (response.ok) {
         setAdvances(await response.json());
       } else if (response.status !== 404) {
-        setError('Błąd pobierania zaliczek');
+        setError(t("advances.fetchError"));
       }
     } catch (err) {
-      setError('Błąd sieci');
+      setError(t("advances.networkError"));
     } finally {
       setIsLoading(false);
     }
-  }, [employee.id]);
+  }, [employee.id, t]);
 
   useEffect(() => {
     fetchAdvances();
@@ -401,7 +409,7 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
   const handleNewAdvance = async () => {
     const amount = parseFloat(advanceAmount);
     if (isNaN(amount) || amount <= 0) {
-      setError('Wprowadź prawidłową kwotę');
+      setError(t("advances.invalidAmount"));
       return;
     }
     setIsSaving(true);
@@ -421,12 +429,12 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
         setAdvanceAmount('');
         setAdvanceDescription('');
         await fetchAdvances();
-        onAdvanceSave('success', 'Zaliczka dodana!');
+        onAdvanceSave('success', t("advances.added"));
       } else {
-        setError('Błąd dodawania zaliczki');
+        setError(t("advances.addError"));
       }
     } catch (err) {
-      setError('Błąd sieci');
+      setError(t("advances.networkError"));
     } finally {
       setIsSaving(false);
     }
@@ -441,12 +449,12 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
       });
       if (response.ok) {
         await fetchAdvances();
-        onAdvanceSave('success', 'Zaliczki spłacone!');
+        onAdvanceSave('success', t("advances.paidOff"));
       } else {
-        setError('Błąd spłacania zaliczek');
+        setError(t("advances.payOffError"));
       }
     } catch (err) {
-      setError('Błąd sieci');
+      setError(t("advances.networkError"));
     } finally {
       setIsPayingOff(false);
     }
@@ -466,22 +474,22 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
 
       <div className="p-4 rounded-xl border-l-4 border-yellow-500 bg-yellow-50">
         <p className="text-sm text-gray-800 flex items-center">
-          <span className="mr-2 text-xl">💵</span> Całkowita niespłacona zaliczka:
-          <span className="ml-2 font-bold text-lg text-yellow-700">{unsettledSum} PLN</span>
+          <span className="mr-2 text-xl">💵</span> {t("advances.totalUnsettled")}
+          <span className="ml-2 font-bold text-lg text-yellow-700">{t("advances.amountWithCurrency", { amount: unsettledSum })}</span>
         </p>
-        <p className="text-xs text-gray-600 mt-1">Suma zaliczek oczekujących na rozliczenie.</p>
+        <p className="text-xs text-gray-600 mt-1">{t("advances.totalUnsettledHint")}</p>
       </div>
 
       <div className="p-4 border rounded-xl shadow-sm bg-gray-50 space-y-4">
-        <h4 className="text-lg font-bold text-gray-800 flex items-center">➕ Wypłać pracownikowi zaliczkę</h4>
+        <h4 className="text-lg font-bold text-gray-800 flex items-center">{t("advances.payAdvanceTitle")}</h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Kwota Zaliczki (PLN) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t("advances.amountLabel")}</label>
             <input
               type="number"
               value={advanceAmount}
               onChange={(e) => setAdvanceAmount(e.target.value)}
-              placeholder="np. 50.00"
+              placeholder={t("advances.amountPlaceholder")}
               step="10"
               min="1"
               disabled={isSaving || isLoading}
@@ -496,17 +504,17 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
             >
               {isSaving ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-              ) : 'Zapisz 💾'}
+              ) : t("advances.save")}
             </button>
           </div>
         </div>
         <InputField
-          label="Opis (opcjonalnie)"
+          label={t("advances.descriptionLabel")}
           name="advanceDescription"
           value={advanceDescription}
           handleChange={(e: any) => setAdvanceDescription(e.target.value)}
           isLoading={isSaving || isLoading}
-          placeholder="np. Na jedzenie"
+          placeholder={t("advances.descriptionPlaceholder")}
         />
       </div>
 
@@ -517,28 +525,28 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
             disabled={isPayingOff || isLoading}
             className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center shadow-lg hover:shadow-xl"
           >
-            {isPayingOff ? 'Spłacanie...' : `Spłać wszystkie zaliczki (${unsettledSum} PLN) 💸`}
+            {isPayingOff ? t("advances.payingOff") : t("advances.payOffAll", { amount: unsettledSum })}
           </button>
         </div>
       )}
 
       <h4 className="text-lg font-bold text-gray-800 mt-6 pt-4 border-t">
-        Historia Niespłaconych Zaliczek ({advances.length})
+        {t("advances.historyTitle", { count: advances.length })}
       </h4>
-      
+
       {isLoading ? (
-        <div className="text-center text-gray-500 py-4">Ładowanie historii...</div>
+        <div className="text-center text-gray-500 py-4">{t("advances.loadingHistory")}</div>
       ) : advances.length === 0 ? (
         <div className="text-center text-gray-500 py-4 border border-gray-100 rounded-xl">
-          Brak niespłaconych zaliczek.
+          {t("advances.noUnsettled")}
         </div>
       ) : (
         <ul className="space-y-3">
           {advances.map((advance, index) => (
             <li key={index} className="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-800">{advance.amount?.toFixed(2) || '0.00'} PLN</p>
-                <p className="text-xs text-gray-500 truncate">{advance.description || 'Brak opisu'}</p>
+                <p className="font-semibold text-gray-800">{t("advances.amountWithCurrency", { amount: advance.amount?.toFixed(2) || '0.00' })}</p>
+                <p className="text-xs text-gray-500 truncate">{advance.description || t("advances.noDescription")}</p>
               </div>
               <div className="text-sm text-gray-600 ml-4 flex-shrink-0">
                 📅 {new Date(advance.date || advance.createdAt).toLocaleDateString('pl-PL')}
@@ -552,6 +560,7 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
 };
 
 export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsSave }: any) => {
+  const { t } = useTranslation("employeeManagement");
   const [activeTab, setActiveTab] = useState('workDetails');
   const [workDetails, setWorkDetails] = useState<any>(null);
   const [isPaidHourly, setIsPaidHourly] = useState(true);
@@ -581,11 +590,11 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
         else setPayPerKilogram(formatPay(data.payPerKilogram));
       }
     } catch (err) {
-      setError('Dodaj sposób rozliczania i stawkę');
+      setError(t("workDetails.addPrompt"));
     } finally {
       setIsLoadingWorkDetails(false);
     }
-  }, [employee]);
+  }, [employee, t]);
 
   useEffect(() => {
     if (isOpen && employee) {
@@ -597,11 +606,11 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
   const handleSaveWorkDetails = async () => {
     setError('');
     if (isPaidHourly && (!hourlyPay || parseFloat(hourlyPay) <= 0)) {
-      setError('Wprowadź prawidłową stawkę godzinową');
+      setError(t("workDetails.invalidHourly"));
       return;
     }
     if (!isPaidHourly && (!payPerKilogram || parseFloat(payPerKilogram) <= 0)) {
-      setError('Wprowadź prawidłową stawkę za kilogram');
+      setError(t("workDetails.invalidPerKg"));
       return;
     }
     
@@ -619,13 +628,13 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
       });
 
       if (response.ok) {
-        onWorkDetailsSave('success', 'Detale zatrudnienia zostały zapisane pomyślnie!');
+        onWorkDetailsSave('success', t("workDetails.saved"));
         await fetchLatestWorkDetails();
       } else {
-        setError('Błąd zapisywania detali pracy');
+        setError(t("workDetails.saveError"));
       }
     } catch (err) {
-      setError('Błąd połączenia z serwerem');
+      setError(t("workDetails.serverError"));
     } finally {
       setIsLoadingWorkDetails(false);
     }
@@ -637,11 +646,14 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
     const rate = isHourly ? workDetails.hourlyPay : workDetails.payPerKilogram;
     if (!rate) return null;
     
+    const formattedRate = Number(rate).toFixed(2);
     return {
-      rateText: `${Number(rate).toFixed(2)} ${isHourly ? 'PLN/godz' : 'PLN/kg'}`,
+      rateText: isHourly
+        ? t("workDetails.rateHourly", { rate: formattedRate })
+        : t("workDetails.ratePerKg", { rate: formattedRate }),
       isCurrentHourly: isHourly
     };
-  }, [workDetails]);
+  }, [workDetails, t]);
 
   if (!isOpen || !employee) return null;
 
@@ -652,7 +664,7 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
       title={
         <span>
           <span className="mr-2 text-purple-600">💼</span>
-          Detale Pracy - {employee.name} {employee.surname}
+          {t("workDetails.modalTitle", { name: employee.name, surname: employee.surname })}
         </span>
       }
       headerColor="bg-purple-50"
@@ -671,13 +683,13 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
             onClick={() => setActiveTab('workDetails')}
             className={`py-2 px-4 text-sm font-semibold transition-colors ${activeTab === 'workDetails' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}
           >
-            💼 Detale Pracy
+            {t("workDetails.tabWorkDetails")}
           </button>
           <button
             onClick={() => setActiveTab('advances')}
             className={`py-2 px-4 text-sm font-semibold transition-colors ${activeTab === 'advances' ? 'border-b-2 border-yellow-600 text-yellow-600' : 'text-gray-500 hover:text-gray-700'}`}
           >
-            💸 Zaliczki
+            {t("workDetails.tabAdvances")}
           </button>
         </div>
 
@@ -688,7 +700,7 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
             {isLoadingWorkDetails ? (
               <div className="text-center py-8">
                 <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
-                <p className="text-gray-500 mt-4">Ładowanie detali...</p>
+                <p className="text-gray-500 mt-4">{t("workDetails.loadingDetails")}</p>
               </div>
             ) : (
               <>
@@ -696,12 +708,12 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                   <div className={`p-4 rounded-xl border-l-4 ${currentRateText.isCurrentHourly ? 'bg-blue-100 border-blue-500' : 'bg-green-100 border-green-500'} transition-all`}>
                     <p className="text-sm text-gray-800 flex items-center">
                       <span className="mr-2 text-xl">{currentRateText.isCurrentHourly ? '⏰' : '⚖️'}</span>
-                      Obecna stawka pracownika: <span className="ml-2 font-bold text-base">{currentRateText.rateText}</span>
+                      {t("workDetails.currentRate")} <span className="ml-2 font-bold text-base">{currentRateText.rateText}</span>
                     </p>
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">Typ Rozliczenia</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">{t("workDetails.settlementType")}</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -710,7 +722,7 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                       className={`py-4 px-4 rounded-xl font-medium transition-all ${isPaidHourly ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     >
                       <div className="text-3xl mb-2">⏰</div>
-                      <div className="text-sm font-bold">Płatność Godzinowa</div>
+                      <div className="text-sm font-bold">{t("workDetails.hourlyPayment")}</div>
                     </button>
                     <button
                       type="button"
@@ -719,20 +731,20 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                       className={`py-4 px-4 rounded-xl font-medium transition-all ${!isPaidHourly ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg scale-105' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     >
                       <div className="text-3xl mb-2">⚖️</div>
-                      <div className="text-sm font-bold">Płatność Za Kilogram</div>
+                      <div className="text-sm font-bold">{t("workDetails.perKgPayment")}</div>
                     </button>
                   </div>
                 </div>
                 {isPaidHourly ? (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Stawka Godzinowa (PLN) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("workDetails.hourlyRateLabel")}</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">💼</span>
                       <input
                         type="number"
                         value={hourlyPay}
                         onChange={(e) => setHourlyPay(e.target.value)}
-                        placeholder="np. 25.50"
+                        placeholder={t("workDetails.hourlyRatePlaceholder")}
                         step="1"
                         min="10"
                         disabled={isLoadingWorkDetails}
@@ -742,14 +754,14 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Stawka za Kilogram (PLN) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("workDetails.perKgRateLabel")}</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">🍎</span>
                       <input
                         type="number"
                         value={payPerKilogram}
                         onChange={(e) => setPayPerKilogram(e.target.value)}
-                        placeholder="np. 0.80"
+                        placeholder={t("workDetails.perKgRatePlaceholder")}
                         step="0.01"
                         min="0.01"
                         disabled={isLoadingWorkDetails}
@@ -760,7 +772,7 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                 )}
                 {workDetails && (
                   <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
-                    <p>📅 Ostatnia aktualizacja detali pracy: {new Date(workDetails.createdAt).toLocaleDateString('pl-PL')}</p>
+                    <p>{t("workDetails.lastUpdate", { date: new Date(workDetails.createdAt).toLocaleDateString('pl-PL') })}</p>
                   </div>
                 )}
                 <div className="flex gap-3 pt-4 border-t">
@@ -772,10 +784,10 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                     {isLoadingWorkDetails ? (
                       <span className="flex items-center justify-center">
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Zapisywanie...
+                        {t("workDetails.saving")}
                       </span>
                     ) : (
-                      <span>💾 Zapisz Nowe Detale</span>
+                      <span>{t("workDetails.saveNewDetails")}</span>
                     )}
                   </button>
                   <button
@@ -783,7 +795,7 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                     disabled={isLoadingWorkDetails}
                     className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
                   >
-                    Zamknij
+                    {t("workDetails.close")}
                   </button>
                 </div>
               </>

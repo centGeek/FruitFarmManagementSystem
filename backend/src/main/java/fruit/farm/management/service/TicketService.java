@@ -55,8 +55,10 @@ public class TicketService {
 
     public Page<TicketDto> getAllTickets(TicketStatus status, String search, Pageable pageable) {
 
-        String normalizedSearch = (search == null || search.isBlank()) ? null : search.trim();
-        return ticketRepository.findAllFiltered(status, normalizedSearch, pageable)
+        String pattern = (search == null || search.isBlank())
+                ? null
+                : "%" + search.trim().toLowerCase() + "%";
+        return ticketRepository.findAllFiltered(status, pattern, pageable)
                 .map(TicketMapper::mapFromEntity);
     }
 

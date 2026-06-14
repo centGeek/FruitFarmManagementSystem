@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Administrator panel — users",
+    "subtitle": "Manage accounts: block and reset passwords."
+  },
+  "stats": {
+    "gardeners": "Gardeners",
+    "active": "Active",
+    "blocked": "Blocked"
+  },
+  "roles": {
+    "Admin": "Administrator",
+    "Gardener": "Gardener",
+    "Employee": "Employee"
+  },
+  "filter": {
+    "all": "All",
+    "searchPlaceholder": "Search by name, login or e-mail..."
+  },
+  "loading": "Loading users... 🔄",
+  "empty": {
+    "title": "No users",
+    "subtitle": "No user matches the selected filter."
+  },
+  "row": {
+    "joined": "Joined: {{date}}",
+    "active": "🟢 Active",
+    "blocked": "🔴 Blocked",
+    "employeeCount": "👷 Employees:",
+    "gardener": "🌱 Gardener:",
+    "block": "Block",
+    "unblock": "Unblock",
+    "resetPassword": "Reset password",
+    "adminLocked": "The administrator account cannot be modified"
+  },
+  "resetModal": {
+    "title": "Reset password",
+    "subtitle": "Set a new password for user <strong>{{nickname}}</strong>.",
+    "newPassword": "New password",
+    "repeatPassword": "Repeat password",
+    "save": "Save password",
+    "errorTooShort": "The password must be at least 6 characters long.",
+    "errorMismatch": "The passwords do not match."
+  },
+  "messages": {
+    "fetchUsersError": "Failed to fetch users.",
+    "fetchUsersNetworkError": "Network error while fetching users.",
+    "statusUnblocked": "The account of user {{nickname}} has been unblocked.",
+    "statusBlocked": "The account of user {{nickname}} has been blocked.",
+    "statusError": "Failed to change the account status.",
+    "statusNetworkError": "Network error while changing the account status.",
+    "resetSuccess": "The password of user {{nickname}} has been reset.",
+    "resetError": "Failed to reset the password.",
+    "resetNetworkError": "Network error while resetting the password."
+  }
+}

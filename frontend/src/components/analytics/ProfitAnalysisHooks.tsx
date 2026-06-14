@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from "../../utils/authFetch";
+
+/** Stable internal identifier (not translated) used for click matching / table lookup. */
+export const LABOR_COSTS_KEY = 'Koszty pracownicze';
+/** Stable internal identifier (not translated) used for table no-sector lookup. */
+export const NO_SECTOR_KEY = 'Brak sektoru';
 
 export interface SectorDTO {
     id: string;
@@ -62,6 +68,7 @@ export interface OverallStats {
 }
 
 export const useFinancialData = (selectedYear: string, selectedMonth: string) => {
+    const { t } = useTranslation("analytics");
     const [profits, setProfits] = useState<FinancialEntry[]>([]);
     const [expenses, setExpenses] = useState<FinancialEntry[]>([]);
     const [sectors, setSectors] = useState<SectorDTO[]>([]);
@@ -153,9 +160,9 @@ export const useFinancialData = (selectedYear: string, selectedMonth: string) =>
             setSectorLaborCosts(laborMap);
         } catch (error) {
             console.error(error);
-            setAlert({ type: 'error', message: 'Błąd podczas odświeżania kosztów pracowniczych' });
+            setAlert({ type: 'error', message: t("errors.refreshLaborCosts") });
         }
-    }, [sectors, selectedYear, selectedMonth]);
+    }, [sectors, selectedYear, selectedMonth, t]);
 
     useEffect(() => {
         if (sectors.length > 0) fetchSectorLaborCosts();
@@ -179,7 +186,7 @@ export const useFinancialData = (selectedYear: string, selectedMonth: string) =>
                 setProfits(pData);
                 setExpenses(eData);
             } catch (e) {
-                setAlert({ type: 'error', message: 'Błąd podczas ładowania danych' });
+                setAlert({ type: 'error', message: t("errors.loadData") });
             } finally {
                 setIsLoading(false);
             }
@@ -195,10 +202,11 @@ export const useFinancialCalculations = (
     expenses: FinancialEntry[], 
     sectors: SectorDTO[], 
     sectorLaborCosts: LaborCostMap, 
-    dataType: string, 
+    dataType: string,
     selectedProfitType: string | null
 ) => {
-    
+    const { t } = useTranslation("analytics");
+
     const overallStats: OverallStats = useMemo(() => {
         const totalProfits = profits.reduce((sum, p) => sum + Number(p.profit || 0), 0);
         const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
@@ -223,7 +231,7 @@ export const useFinancialCalculations = (
         profits.forEach(p => {
             if (p.sectorDTO) {
                 const id = p.sectorDTO.id;
-                if (!sectorData[id]) sectorData[id] = { name: p.sectorDTO.description || `Sektor ${id}`, revenue: 0, expenses: 0 };
+                if (!sectorData[id]) sectorData[id] = { name: p.sectorDTO.description || t("fallback.sectorName", { id }), revenue: 0, expenses: 0 };
                 sectorData[id].revenue += Number(p.profit);
             } else noSectorRevenue += Number(p.profit);
         });
@@ -231,7 +239,7 @@ export const useFinancialCalculations = (
         expenses.forEach(e => {
             if (e.sectorDTO) {
                 const id = e.sectorDTO.id;
-                if (!sectorData[id]) sectorData[id] = { name: e.sectorDTO.description || `Sektor ${id}`, revenue: 0, expenses: 0 };
+                if (!sectorData[id]) sectorData[id] = { name: e.sectorDTO.description || t("fallback.sectorName", { id }), revenue: 0, expenses: 0 };
                 sectorData[id].expenses += Number(e.amount);
             } else noSectorExpenses += Number(e.amount);
         });
@@ -242,7 +250,7 @@ export const useFinancialCalculations = (
                 if (cost > 0) {
                     const sector = sectors.find(s => s.id === labor.sectorId);
                     if (sector) {
-                        const target = Object.values(sectorData).find((s: any) => s.name === (sector.description || `Sektor ${sector.id}`));
+                        const target = Object.values(sectorData).find((s: any) => s.name === (sector.description || t("fallback.sectorName", { id: sector.id })));
                         if (target) (target as any).expenses += cost;
                         else {
                             sectorData[`labor-${labor.sectorId}`] = { name: sector.description, revenue: 0, expenses: cost };
@@ -260,36 +268,36 @@ export const useFinancialCalculations = (
 
         if (noSectorRevenue > 0 || noSectorExpenses > 0) {
             data.push({
-                name: 'Ogólne (poza sektorami)',
+                name: t("fallback.general"),
                 value: dataType === 'revenue' ? noSectorRevenue : dataType === 'expenses' ? noSectorExpenses : (noSectorRevenue - noSectorExpenses),
                 revenue: noSectorRevenue, expenses: noSectorExpenses, profit: noSectorRevenue - noSectorExpenses
             });
         }
         return data.filter((d: any) => d.value !== 0);
-    }, [profits, expenses, sectors, sectorLaborCosts, dataType]);
+    }, [profits, expenses, sectors, sectorLaborCosts, dataType, t]);
 
     const pieChartTypeData: ChartDataPoint[] = useMemo(() => {
         const typeData: any = {};
         profits.forEach(p => {
-            const t = p.profitType || 'Nieokreślony';
-            if (!typeData[t]) typeData[t] = { name: t, revenue: 0, expenses: 0 };
-            typeData[t].revenue += Number(p.profit);
+            const key = p.profitType || 'Nieokreślony';
+            if (!typeData[key]) typeData[key] = { name: key, revenue: 0, expenses: 0 };
+            typeData[key].revenue += Number(p.profit);
         });
         expenses.forEach(e => {
-            const t = e.type || 'Nieokreślony';
-            if (!typeData[t]) typeData[t] = { name: t, revenue: 0, expenses: 0 };
-            typeData[t].expenses += Number(e.amount);
+            const key = e.type || 'Nieokreślony';
+            if (!typeData[key]) typeData[key] = { name: key, revenue: 0, expenses: 0 };
+            typeData[key].expenses += Number(e.amount);
         });
 
         const totalLabor = Object.values(sectorLaborCosts || {}).reduce((s: any, l: any) => s + Number(l.totalCost || 0), 0);
         if (totalLabor > 0) {
-            typeData['Koszty pracownicze'] = { name: 'Koszty pracownicze', revenue: 0, expenses: totalLabor };
+            typeData[LABOR_COSTS_KEY] = { name: LABOR_COSTS_KEY, revenue: 0, expenses: totalLabor };
         }
 
-        return Object.values(typeData).map((t: any) => ({
-            name: t.name,
-            value: dataType === 'revenue' ? t.revenue : dataType === 'expenses' ? t.expenses : (t.revenue - t.expenses),
-            revenue: t.revenue, expenses: t.expenses, profit: t.revenue - t.expenses
+        return Object.values(typeData).map((entry: any) => ({
+            name: entry.name,
+            value: dataType === 'revenue' ? entry.revenue : dataType === 'expenses' ? entry.expenses : (entry.revenue - entry.expenses),
+            revenue: entry.revenue, expenses: entry.expenses, profit: entry.revenue - entry.expenses
         })).filter((d: any) => d.value !== 0);
     }, [profits, expenses, sectorLaborCosts, dataType]);
 
@@ -315,13 +323,13 @@ export const useFinancialCalculations = (
         const sData: any = {};
         profits.forEach(p => {
             const id = p.sectorDTO ? p.sectorDTO.id : 'no-sector';
-            const name = p.sectorDTO ? (p.sectorDTO.description || `Sektor ${id}`) : 'Brak sektoru';
+            const name = p.sectorDTO ? (p.sectorDTO.description || t("fallback.sectorName", { id })) : NO_SECTOR_KEY;
             if (!sData[id]) sData[id] = { name, revenue: 0, expenses: 0 };
             sData[id].revenue += Number(p.profit);
         });
         expenses.forEach(e => {
             const id = e.sectorDTO ? e.sectorDTO.id : 'no-sector';
-            const name = e.sectorDTO ? (e.sectorDTO.description || `Sektor ${id}`) : 'Brak sektoru';
+            const name = e.sectorDTO ? (e.sectorDTO.description || t("fallback.sectorName", { id })) : NO_SECTOR_KEY;
             if (!sData[id]) sData[id] = { name, revenue: 0, expenses: 0 };
             sData[id].expenses += Number(e.amount);
         });
@@ -332,11 +340,11 @@ export const useFinancialCalculations = (
                 if (cost > 0) {
                     const sector = sectors.find(s => s.id === l.sectorId);
                     if (sector) {
-                        const t = Object.values(sData).find((d: any) => d.name === (sector.description || `Sektor ${l.sectorId}`));
-                        if (t) (t as any).expenses += cost;
+                        const match = Object.values(sData).find((d: any) => d.name === (sector.description || t("fallback.sectorName", { id: l.sectorId })));
+                        if (match) (match as any).expenses += cost;
                         else sData[`labor-${l.sectorId}`] = { name: sector.description, revenue: 0, expenses: cost };
                     } else {
-                        if (!sData['no-sector']) sData['no-sector'] = { name: 'Brak sektoru', revenue: 0, expenses: 0 };
+                        if (!sData['no-sector']) sData['no-sector'] = { name: NO_SECTOR_KEY, revenue: 0, expenses: 0 };
                         sData['no-sector'].expenses += cost;
                     }
                 }
@@ -347,7 +355,7 @@ export const useFinancialCalculations = (
             profit: s.revenue - s.expenses,
             margin: s.revenue > 0 ? ((s.revenue - s.expenses) / s.revenue * 100).toFixed(1) : "0"
         })).sort((a: any, b: any) => parseFloat(b.margin) - parseFloat(a.margin));
-    }, [profits, expenses, sectorLaborCosts, sectors]);
+    }, [profits, expenses, sectorLaborCosts, sectors, t]);
 
     const yearlyComparison: YearlyDataPoint[] = useMemo(() => {
         const yearData: any = {};

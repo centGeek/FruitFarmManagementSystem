@@ -1,0 +1,109 @@
+{
+  "page": {
+    "title": "Pogoda i Notyfikacje",
+    "subtitle": "Aktualna pogoda oraz zarządzanie alertami pogodowymi"
+  },
+  "weather": {
+    "retry": "Spróbuj ponownie pobrać pogodę. Sprawdź połączenie internetowe",
+    "missingLocationPrefix": "Proszę uzupełnij swoją lokalizację w ",
+    "profileSettings": "Ustawieniach Profilu",
+    "missingLocationSuffix": ".",
+    "fetching": "Pobieranie danych pogodowych dla {{location}}...",
+    "current": "Aktualna pogoda • Open-Meteo",
+    "temperature": "Temperatura",
+    "feelsLike": "Odczuwalna",
+    "humidity": "Wilgotność",
+    "wind": "Wiatr"
+  },
+  "alerts": {
+    "checking": "Sprawdzanie alertów pogodowych...",
+    "heading": "Ostrzeżenia pogodowe ({{count}})",
+    "today": "Dziś",
+    "tomorrow": "Jutro",
+    "dayAfterTomorrow": "Pojutrze",
+    "inDays": "Za {{count}} dni"
+  },
+  "rules": {
+    "title": "Alerty Pogodowe",
+    "refresh": "Odśwież",
+    "addAlert": "Dodaj alert",
+    "howItWorksTitle": "Jak to działa?",
+    "howItWorksBody": " Skonfiguruj alerty pogodowe aby otrzymywać powiadomienia o nadchodzących warunkach pogodowych. System sprawdzi prognozę i powiadomi Cię z wyprzedzeniem.",
+    "loading": "Ładowanie alertów...",
+    "empty": "Brak skonfigurowanych alertów",
+    "addFirst": "Dodaj pierwszy alert",
+    "active": "Aktywny",
+    "inactive": "Nieaktywny",
+    "thresholdLabel": "Próg:",
+    "forecastLabel": "Prognoza:",
+    "inDays": "Za {{count}} dni",
+    "edit": "Edytuj",
+    "enable": "Włącz",
+    "disable": "Wyłącz",
+    "delete": "Usuń",
+    "confirmDelete": "Czy na pewno chcesz usunąć tę notyfikację?"
+  },
+  "stats": {
+    "all": "Wszystkie alerty",
+    "active": "Aktywne alerty",
+    "types": "Typy alertów"
+  },
+  "modal": {
+    "editTitle": "Edytuj notyfikację",
+    "addTitle": "Dodaj notyfikację",
+    "typeLabel": "Typ ostrzeżenia pogodowego *",
+    "typePlaceholder": "Wybierz typ ostrzeżenia...",
+    "thresholdLabel": "Próg ostrzeżenia ({{unit}}) *",
+    "daysAheadLabel": "Wyprzedzenie prognozy *",
+    "daysAheadHint": "Otrzymasz powiadomienie jeśli warunki wystąpią w tym okresie",
+    "saving": "Zapisywanie...",
+    "saveChanges": "Zapisz zmiany",
+    "addNotification": "Dodaj notyfikację",
+    "fillAllFields": "Wypełnij wszystkie pola!",
+    "notificationUpdated": "Notyfikacja zaktualizowana!",
+    "notificationAdded": "Notyfikacja dodana!",
+    "saveFailed": "Nie udało się zapisać notyfikacji"
+  },
+  "location": {
+    "loading": "Ładowanie lokalizacji...",
+    "fetchingCoordinates": "Pobieranie koordynatów z profilu...",
+    "fromProfile": "Lokalizacja z profilu",
+    "noData": "Brak danych lokalizacji",
+    "serverError": "Błąd serwera: Nie udało się pobrać danych lokalizacji.",
+    "coordinatesUndefined": "Koordynaty dla sadownika nie są zdefiniowane. Ustaw je w sekcji Profil.",
+    "unknownError": "Wystąpił nieznany błąd podczas ładowania lokalizacji."
+  },
+  "forecast": {
+    "weatherFetchFailed": "Nie udało się pobrać danych pogodowych z Open-Meteo",
+    "forecastFetchFailed": "Nie udało się pobrać prognozy pogody",
+    "frostWarning": "🧊 Ostrzeżenie o przymrozku: {{value}}°C (próg: {{threshold}}°C)",
+    "tempLow": "❄️ Niska temperatura: {{value}}°C (próg: {{threshold}}°C)",
+    "tempHigh": "🌡️ Wysoka temperatura: {{value}}°C (próg: {{threshold}}°C)",
+    "rainForecast": "🌧️ Prognoza opadów: {{value}}% (próg: {{threshold}}%)",
+    "strongWind": "💨 Silny wiatr: {{value}} km/h (próg: {{threshold}} km/h)"
+  },
+  "weatherCode": {
+    "0": "Bezchmurnie",
+    "1": "Przeważnie bezchmurnie",
+    "2": "Częściowe zachmurzenie",
+    "3": "Zachmurzenie",
+    "45": "Mgła",
+    "48": "Mgła osadzająca szron",
+    "51": "Lekka mżawka",
+    "53": "Umiarkowana mżawka",
+    "55": "Gęsta mżawka",
+    "61": "Słaby deszcz",
+    "63": "Umiarkowany deszcz",
+    "65": "Silny deszcz",
+    "71": "Słabe opady śniegu",
+    "73": "Umiarkowane opady śniegu",
+    "75": "Silne opady śniegu",
+    "80": "Słabe przelotne opady",
+    "81": "Umiarkowane przelotne opady",
+    "82": "Silne przelotne opady",
+    "95": "Burza",
+    "96": "Burza z gradem",
+    "99": "Burza z silnym gradem",
+    "unknown": "Nieznane"
+  }
+}

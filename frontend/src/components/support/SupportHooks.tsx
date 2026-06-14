@@ -1,29 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
 export const TICKET_CATEGORIES = [
-  { value: 'SYSTEM_ERROR', label: 'System nie działa / błąd aplikacji', icon: '💥' },
-  { value: 'DISPLAY', label: 'Błąd wyświetlania', icon: '🖥️' },
-  { value: 'DATA', label: 'Nieprawidłowe dane', icon: '📊' },
-  { value: 'PERFORMANCE', label: 'Wolne działanie', icon: '🐢' },
-  { value: 'SUGGESTION', label: 'Sugestia / usprawnienie', icon: '💡' },
-  { value: 'OTHER', label: 'Inne', icon: '❓' },
+  { value: 'SYSTEM_ERROR', icon: '💥' },
+  { value: 'DISPLAY', icon: '🖥️' },
+  { value: 'DATA', icon: '📊' },
+  { value: 'PERFORMANCE', icon: '🐢' },
+  { value: 'SUGGESTION', icon: '💡' },
+  { value: 'OTHER', icon: '❓' },
 ];
 
-export const TICKET_STATUS: Record<string, { label: string; icon: string; color: string }> = {
-  OPEN: { label: 'Otwarte', icon: '🟢', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  IN_PROGRESS: { label: 'W trakcie', icon: '🛠️', color: 'bg-amber-100 text-amber-700 border-amber-200' },
-  CLOSED: { label: 'Zamknięte', icon: '✅', color: 'bg-gray-100 text-gray-600 border-gray-200' },
+export const TICKET_STATUS: Record<string, { icon: string; color: string }> = {
+  OPEN: { icon: '🟢', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  IN_PROGRESS: { icon: '🛠️', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+  CLOSED: { icon: '✅', color: 'bg-gray-100 text-gray-600 border-gray-200' },
 };
 
 export const getCategoryDetails = (value: string) => {
   return TICKET_CATEGORIES.find(c => c.value === value)
-    || { value, label: 'Inne', icon: '❓' };
+    || { value, icon: '❓' };
 };
 
 export const getStatusDetails = (value: string) => {
-  return TICKET_STATUS[value] || { label: value || 'Nieznany', icon: '❔', color: 'bg-gray-100 text-gray-600 border-gray-200' };
+  return TICKET_STATUS[value] || { icon: '❔', color: 'bg-gray-100 text-gray-600 border-gray-200' };
 };
 
 export interface Ticket {
@@ -37,6 +38,7 @@ export interface Ticket {
 }
 
 export const useSupport = () => {
+  const { t } = useTranslation("support");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,14 +57,14 @@ export const useSupport = () => {
         const data = await response.json();
         setTickets(Array.isArray(data) ? data : []);
       } else {
-        setAlert({ type: 'error', message: 'Nie udało się pobrać zgłoszeń.' });
+        setAlert({ type: 'error', message: t('messages.fetchError') });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Błąd sieci podczas pobierania zgłoszeń.' });
+      setAlert({ type: 'error', message: t('messages.fetchNetworkError') });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const submitTicket = useCallback(async (ticketData: any) => {
     setIsSubmitting(true);
@@ -74,21 +76,21 @@ export const useSupport = () => {
         body: JSON.stringify(ticketData),
       });
       if (response.ok) {
-        setAlert({ type: 'success', message: 'Zgłoszenie zostało wysłane do administratora. Dziękujemy!' });
+        setAlert({ type: 'success', message: t('messages.submitSuccess') });
         await fetchTickets();
         return true;
       } else {
         const error = await response.json().catch(() => ({}));
-        setAlert({ type: 'error', message: `Nie udało się wysłać zgłoszenia: ${error.message || error.error || response.statusText}` });
+        setAlert({ type: 'error', message: t('messages.submitError', { error: error.message || error.error || response.statusText }) });
         return false;
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Błąd sieci: nie można wysłać zgłoszenia.' });
+      setAlert({ type: 'error', message: t('messages.submitNetworkError') });
       return false;
     } finally {
       setIsSubmitting(false);
     }
-  }, [fetchTickets, closeAlert]);
+  }, [fetchTickets, closeAlert, t]);
 
   useEffect(() => {
     fetchTickets();

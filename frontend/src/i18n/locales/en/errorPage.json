@@ -1,0 +1,65 @@
+{
+  "errorCode": "Error code:",
+  "codeNA": "N/A",
+  "detailsHeading": "Error details",
+  "defaultMessage": "The operation could not be completed. Please try again later.",
+  "timestampHeading": "Time of occurrence",
+  "tipsHeading": "What can you do?",
+  "retry": "Try again",
+  "goHome": "Home page",
+  "showTechnical": "🔼 Show technical details",
+  "hideTechnical": "🔽 Hide technical details",
+  "technicalHeading": "🔧 Technical details:",
+  "types": {
+    "exceeded_hours": {
+      "title": "Hour limit exceeded",
+      "tips": [
+        "Check whether the employee already has hours recorded for this day",
+        "The maximum limit is likely 18h per day",
+        "Reduce the number of hours for this employee",
+        "You can split the work across several days"
+      ]
+    },
+    "auth_error": {
+      "title": "Authentication error",
+      "tips": [
+        "Your session may have expired",
+        "Log in again",
+        "Check whether you have the appropriate permissions"
+      ]
+    },
+    "not_found": {
+      "title": "Resource not found",
+      "tips": [
+        "The resource you are looking for has been deleted or moved",
+        "Check that the URL is correct",
+        "Return to the home page"
+      ]
+    },
+    "server_error": {
+      "title": "Server error",
+      "tips": [
+        "An error occurred on the server side",
+        "Check your internet connection",
+        "Try again in a moment",
+        "Contact the administrator if the problem persists"
+      ]
+    },
+    "client_error": {
+      "title": "Invalid request",
+      "tips": [
+        "Check that the entered data is correct",
+        "Make sure all required fields are filled in",
+        "Verify the data format"
+      ]
+    },
+    "unknown": {
+      "title": "An error occurred",
+      "tips": [
+        "Try refreshing the page",
+        "Check your internet connection",
+        "Contact technical support"
+      ]
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 import L from 'leaflet';
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
@@ -48,6 +49,7 @@ const cornersToDTO = (corners: [number, number][]) => {
 };
 
 export const useOrchardMapSystem = () => {
+    const { t } = useTranslation("orchardMap");
     const [sectors, setSectors] = useState<Sector[]>([]);
     const [archivedSectors, setArchivedSectors] = useState<Sector[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -77,7 +79,7 @@ export const useOrchardMapSystem = () => {
 
             const mappedSectors = backendSectors.map(sector => ({
                 id: sector.id,
-                name: sector.description || `Sektor ${sector.id}`,
+                name: sector.description || t("defaultSectorName", { n: sector.id }),
                 cropType: sector.plantType || '',
                 variety: sector.variety || '',
                 corners: sector.coordinates?.map(coord => [coord.latitude, coord.longitude] as [number, number]) || []
@@ -89,7 +91,7 @@ export const useOrchardMapSystem = () => {
                 const archivedBackendSectors: BackendSector[] = await archivedResponse.json();
                 const mappedArchivedSectors = archivedBackendSectors.map(sector => ({
                     id: sector.id,
-                    name: sector.description || `Sektor ${sector.id}`,
+                    name: sector.description || t("defaultSectorName", { n: sector.id }),
                     cropType: sector.plantType || '',
                     variety: sector.variety || '',
                     corners: sector.coordinates?.map(coord => [coord.latitude, coord.longitude] as [number, number]) || []
@@ -125,20 +127,20 @@ export const useOrchardMapSystem = () => {
 
     const finishDrawing = useCallback(async (points: { lat: number; lng: number }[]) => {
         if (points.length < 4) {
-            alert('Wymagane co najmniej 4 punkty'); 
-            cancelDrawing(); 
-            return; 
+            alert(t("alerts.minPoints"));
+            cancelDrawing();
+            return;
         }
         const sortedPoints = sortPointsClockwise(points);
         const newSector: Sector = {
             id: Date.now(),
-            name: `Sektor ${sectors.length + 1}`,
+            name: t("defaultSectorName", { n: sectors.length + 1 }),
             corners: sortedPoints.map(p => [p.lat, p.lng]),
             cropType: '',
             variety: ''
         };
         setConfirmationModal({ isOpen: true, sectorData: newSector });
-    }, [sectors.length]);
+    }, [sectors.length, t]);
 
     const handleSectorConfirm = async (editedSectorData: Sector) => {
         try {
@@ -161,10 +163,10 @@ export const useOrchardMapSystem = () => {
             if (result && result.id) finalSector.id = result.id;
 
             setSectors(prev => [...prev, finalSector]);
-            alert('Sektor został pomyślnie dodany!');
+            alert(t("alerts.sectorAdded"));
         } catch (error) {
             console.error('Błąd podczas wysyłania sektora:', error);
-            alert('Nie udało się dodać sektora');
+            alert(t("alerts.addFailed"));
         }
         setConfirmationModal({ isOpen: false, sectorData: null });
         cancelDrawing();
@@ -172,7 +174,7 @@ export const useOrchardMapSystem = () => {
 
     const handleSaveEditedSector = async (editedSector: Sector) => {
         try {
-            if (!editedSector.id) { alert('Brak ID backendu'); return; }
+            if (!editedSector.id) { alert(t("alerts.noBackendId")); return; }
             const coordinatesDTO = cornersToDTO(editedSector.corners);
             const backendData = {
                 id: editedSector.id,
@@ -185,18 +187,18 @@ export const useOrchardMapSystem = () => {
                 method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(backendData)
             });
             if (!response.ok) throw new Error(`HTTP error!`);
-            
+
             setSectors(prev => prev.map(s => s.id === editedSector.id ? editedSector : s));
             setEditSectorModal({ isOpen: false, sectorData: null });
-            alert('Sektor został pomyślnie zaktualizowany!');
+            alert(t("alerts.sectorUpdated"));
         } catch (error: any) {
-            alert(`Nie udało się zaktualizować sektora: ${error.message}`);
+            alert(t("alerts.updateFailed", { message: error.message }));
         }
     };
 
     const handleActivateSector = async (sector: Sector) => {
         try {
-            if (!sector.id) { alert('Brak ID backendu'); return; }
+            if (!sector.id) { alert(t("alerts.noBackendId")); return; }
             const coordinatesDTO = cornersToDTO(sector.corners);
             const backendData = {
                 id: sector.id, description: sector.name, plantType: sector.cropType || null,
@@ -207,13 +209,13 @@ export const useOrchardMapSystem = () => {
             });
             if (!response.ok) throw new Error(`HTTP error!`);
             await loadSectorsFromBackend();
-            alert('Sektor został pomyślnie aktywowany!');
-        } catch (error: any) { alert(`Nie udało się aktywować sektora: ${error.message}`); }
+            alert(t("alerts.sectorActivated"));
+        } catch (error: any) { alert(t("alerts.activateFailed", { message: error.message })); }
     };
 
     const handleArchiveSector = async (sector: Sector) => {
         try {
-            if (!sector.id) { alert('Brak ID backendu'); return; }
+            if (!sector.id) { alert(t("alerts.noBackendId")); return; }
             const coordinatesDTO = cornersToDTO(sector.corners);
             const backendData = {
                 id: sector.id, description: sector.name, plantType: sector.cropType || null,
@@ -225,7 +227,7 @@ export const useOrchardMapSystem = () => {
             if (!response.ok) throw new Error(`HTTP error!`);
             setEditSectorModal({ isOpen: false, sectorData: null });
             await loadSectorsFromBackend();
-        } catch (error: any) { alert(`Nie udało się zarchiwizować sektora: ${error.message}`); }
+        } catch (error: any) { alert(t("alerts.archiveFailed", { message: error.message })); }
     };
 
     const enableSectorEdit = useCallback((sectorIndex: number) => {
@@ -263,10 +265,10 @@ export const useOrchardMapSystem = () => {
                 });
                 
                 if (!response.ok) throw new Error('Failed to update');
-            } catch (error) { 
+            } catch (error) {
                 console.error('Błąd zapisu pozycji punktu:', error);
                 updatedSectors[sectorIndex].corners[cornerIndex] = previousCorner;
-                alert('Nie udało się zapisać pozycji punktu');
+                alert(t("alerts.pointSaveFailed"));
             }
         }
         setSectors(updatedSectors);
@@ -342,7 +344,7 @@ export const useOrchardMapSystem = () => {
         if (drawingMode === 'polygon' && drawingPoints.length > 0) {
             drawingPoints.forEach((point, index) => {
                 const marker = L.circleMarker([point.lat, point.lng], { radius: 8, fillColor: '#ff6b00', color: '#ffffff', weight: 3, opacity: 1, fillOpacity: 0.9 }).addTo(drawnItems);
-                marker.bindTooltip(`Punkt ${index + 1}`, { permanent: true, direction: 'top' });
+                marker.bindTooltip(escapeHtml(t("tooltip.point", { index: index + 1 })), { permanent: true, direction: 'top' });
             });
             if (drawingPoints.length > 1) {
                 const linePoints = drawingPoints.map(p => [p.lat, p.lng]);
@@ -366,17 +368,18 @@ export const useOrchardMapSystem = () => {
                 fillOpacity: isBeingEdited ? 0.3 : 0.2
             });
 
-            const cropTypeLabel = sector.cropType ? CROP_TYPES.find(c => c.value === sector.cropType)?.label || sector.cropType : 'Nie określono';
-            const varietyLabel = sector.variety ? CROP_TYPES.find(c => c.value === sector.cropType)?.varieties.find(v => v.value === sector.variety)?.label || sector.variety : null;
+            const varietyData = sector.variety ? CROP_TYPES.find(c => c.value === sector.cropType)?.varieties.find(v => v.value === sector.variety) : undefined;
+            const cropTypeLabel = sector.cropType ? (CROP_TYPES.find(c => c.value === sector.cropType) ? t(`common:cropType.${sector.cropType}`) : sector.cropType) : t("sectorsList.notDefined");
+            const varietyLabel = sector.variety ? (varietyData ? (varietyData.value === 'OTHER' ? t("common:varietyOther") : varietyData.label) : sector.variety) : null;
 
             // Nazwa/odmiana sektora to wolny tekst od użytkownika — escapujemy przed wstrzyknięciem,
             // bo Leaflet renderuje treść popupu jako surowy HTML (ochrona przed stored XSS).
             polygon.bindPopup(`
                 <div style="padding: 12px;">
                     <div style="font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 6px;">📍 ${escapeHtml(sector.name)}</div>
-                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">Uprawa: <b> ${escapeHtml(cropTypeLabel)} </b></div>
-                    ${varietyLabel ? `<div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">🌱Odmiana: <b>${escapeHtml(varietyLabel)} </b></div>` : ''}
-                    ${!isBeingEdited ? `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;"><button type="button" class="edit-sector-vertices-btn" style="width: 100%; padding: 6px 12px; background: #ff6b00; color: white; border: none; border-radius: 4px; cursor: pointer;">✏️ Edytuj wierzchołki</button></div>` : ''}
+                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">${escapeHtml(t("popup.crop"))} <b> ${escapeHtml(cropTypeLabel)} </b></div>
+                    ${varietyLabel ? `<div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">${escapeHtml(t("popup.variety"))} <b>${escapeHtml(varietyLabel)} </b></div>` : ''}
+                    ${!isBeingEdited ? `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;"><button type="button" class="edit-sector-vertices-btn" style="width: 100%; padding: 6px 12px; background: #ff6b00; color: white; border: none; border-radius: 4px; cursor: pointer;">${escapeHtml(t("popup.editVertices"))}</button></div>` : ''}
                 </div>`, { maxWidth: 250 });
 
             // Przycisk podpinamy przez addEventListener przy otwarciu popupu zamiast inline onclick +
@@ -411,19 +414,19 @@ export const useOrchardMapSystem = () => {
                         updateCornerPosition(actualIndex, cornerIndex, newLatLng);
                         setIsDragging(false);
                     });
-                    marker.bindTooltip(`Przeciągnij punkt ${cornerIndex + 1}`, { permanent: false, direction: 'top' });
+                    marker.bindTooltip(escapeHtml(t("tooltip.dragPoint", { index: cornerIndex + 1 })), { permanent: false, direction: 'top' });
                     editMarkersRef.current.push(marker);
                     drawnItems.addLayer(marker);
                 } else {
                     const marker = L.circleMarker(corner, { radius: 4, fillColor: '#3388ff', color: '#ffffff', weight: 2, opacity: 1, fillOpacity: 0.8 });
-                    marker.bindTooltip(`Punkt ${cornerIndex + 1}`, { permanent: false, direction: 'top' });
+                    marker.bindTooltip(escapeHtml(t("tooltip.point", { index: cornerIndex + 1 })), { permanent: false, direction: 'top' });
                     drawnItems.addLayer(marker);
                 }
             });
         });
 
         map.getContainer().style.cursor = drawingMode !== 'none' ? 'crosshair' : (isDragging ? 'grabbing' : '');
-    }, [sectors, drawingMode, drawingPoints, mapInstance, visibleSectorIndices, editMode, isDragging, enableSectorEdit]);
+    }, [sectors, drawingMode, drawingPoints, mapInstance, visibleSectorIndices, editMode, isDragging, enableSectorEdit, t]);
 
     useEffect(() => {
         if (!mapInstance) return;
@@ -436,9 +439,9 @@ export const useOrchardMapSystem = () => {
     const getDrawingInstructions = () => {
         if (drawingMode !== 'polygon') return '';
         const currentCount = drawingPoints.length;
-        if (currentCount === 0) return 'Kliknij pierwszy z 4 punktów wielokąta.';
-        if (currentCount < 4) return `Kliknij, aby dodać punkt. Masz: ${currentCount}/4 punkty.`;
-        return 'Rysowanie zakończone, tworzenie sektora...';
+        if (currentCount === 0) return t("drawingInstructions.first");
+        if (currentCount < 4) return t("drawingInstructions.more", { count: currentCount });
+        return t("drawingInstructions.done");
     };
 
     return {

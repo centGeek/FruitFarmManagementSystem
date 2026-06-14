@@ -1,0 +1,140 @@
+{
+  "header": {
+    "title": "Expense Management",
+    "subtitle": "Monitor the cost of fuel, machinery and supplies. 💸"
+  },
+  "stats": {
+    "totalFiltered": "Total (Filtered: {{sector}})",
+    "totalFilteredNoSector": "Total (Filtered)",
+    "total": "Total Expenses",
+    "paidFiltered": "Paid (Filtered)",
+    "paid": "Paid Expenses",
+    "unpaidFiltered": "Unpaid (Filtered)",
+    "unpaid": "Unpaid Expenses"
+  },
+  "activeFilters": {
+    "title": "Active Filters",
+    "type": "Type: {{value}}",
+    "status": "Status: {{value}}",
+    "sector": "🗺️ Sector: {{value}}",
+    "year": "📅 Year: {{value}}",
+    "month": "📆 Month: {{value}}",
+    "search": "Search: \"{{value}}\"",
+    "clear": "Clear Filters"
+  },
+  "search": {
+    "label": "🔍 Search within expenses",
+    "placeholder": "Enter a description, amount, date or expense type...",
+    "clearTitle": "Clear search"
+  },
+  "filters": {
+    "typeLabel": "Expense type",
+    "allTypes": "🛠️ All types",
+    "statusLabel": "Payment status",
+    "sectorLabel": "Sector 🗺️",
+    "allSectors": "📋 All sectors",
+    "yearLabel": "Year 📅",
+    "allYears": "📆 All years",
+    "monthLabel": "Month 📆"
+  },
+  "sectorFallback": "Sector {{id}}",
+  "addExpense": "Add New Expense",
+  "list": {
+    "title": "Expense List",
+    "shown": "Showing: {{from}}-{{to}}",
+    "filteredSuffix": " (filtered)"
+  },
+  "modal": {
+    "editTitle": "Edit Expense",
+    "addTitle": "Add New Expense"
+  },
+  "loading": "Loading expenses... 🔄",
+  "empty": {
+    "noResultsTitle": "No search results",
+    "noResultsMessage": "Try changing your search criteria or filters.",
+    "noExpensesTitle": "No expenses recorded",
+    "noExpensesMessage": "Add your first expense to start tracking costs.",
+    "noMatchTitle": "No expenses match the criteria",
+    "noMatchMessage": "Change the filters to display expenses.",
+    "addFirst": "Add your first expense"
+  },
+  "form": {
+    "dateLabel": "Expense Date",
+    "amountLabel": "Expense Amount (PLN)",
+    "typeLabel": "Expense Type",
+    "sectorLabel": "Assign to Sector (optional) 🗺️",
+    "noSector": "No sector assignment",
+    "sectorAssignInfo": "📍 The expense will be assigned to:",
+    "descriptionLabel": "Expense Description",
+    "paidLabel": "Paid (Payment Completed)",
+    "saveChanges": "Save changes",
+    "addExpense": "Add Expense",
+    "cancel": "Cancel",
+    "errors": {
+      "dateRequired": "The expense date is required",
+      "amountPositive": "The amount must be a positive number",
+      "typeRequired": "The expense type is required"
+    }
+  },
+  "card": {
+    "amountWithCurrency": "{{amount}} PLN",
+    "editTitle": "Edit",
+    "deleteTitle": "Delete",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "sector": "Sector: {{value}}",
+    "descriptionLabel": "Description",
+    "noDescription": "No description."
+  },
+  "pagination": {
+    "previous": "← Previous",
+    "next": "Next →"
+  },
+  "expenseType": {
+    "ŚRODKI_OCHRONY_ROŚLIN": "Spraying / Plant protection products",
+    "NAWOZY": "Fertilizers",
+    "SADZENIE": "Planting / New trees",
+    "NAWADNIANIE": "Irrigation / Irrigation system",
+    "ENERGIA_ELEKTRYCZNA": "Electricity",
+    "WODA": "Water",
+    "MATERIAŁY_POMOCNICZE": "Stakes / Wires / Trellises",
+    "SIATKI_OCHRONNE": "Netting / Films / Agrotextile",
+    "MASZYNY": "Machinery / Equipment",
+    "NAPRAWY": "Repairs / Spare parts",
+    "PALIWO": "Fuel / Oils / Lubricants",
+    "UBEZPIECZENIE": "Insurance (machinery, orchard)",
+    "PRACA": "Seasonal workers",
+    "ZAKWATEROWANIE": "Worker accommodation / Meals",
+    "USŁUGI_ROLNICZE": "Agricultural services / Soil analyses",
+    "TRANSPORT": "Transport / Logistics",
+    "SZKOLENIA": "Training / Consulting / Certificates",
+    "OPAKOWANIA": "Packaging / Crates / Boxes",
+    "CHŁODNIA": "Cold storage / Warehouse",
+    "MARKETING": "Marketing / Sales / Commissions",
+    "BIURO": "Office supplies / Phone / Internet",
+    "REMONTY": "Renovations / Orchard investments",
+    "INFRASTRUKTURA": "Roads / Fences / Buildings",
+    "MODERNIZACJE_TECHNICZNE": "Modernizations / New technologies",
+    "PODATKI": "Taxes / Fees / KRUS",
+    "KSIĘGOWOŚĆ": "Accounting / Accounting office",
+    "INNE_MATERIAŁY": "Other supplies",
+    "INNE": "Other expenses",
+    "UNKNOWN": "Unknown"
+  },
+  "paymentStatus": {
+    "all": "All 📋",
+    "paid": "Paid ✅",
+    "unpaid": "Unpaid ⏳"
+  },
+  "messages": {
+    "fetchError": "Error loading expenses",
+    "saveSuccessUpdated": "The expense was updated successfully!",
+    "saveSuccessAdded": "The expense was added successfully!",
+    "saveError": "Save error ({{status}}): {{error}}",
+    "saveNetworkError": "Network error: The expense could not be saved.",
+    "deleteConfirm": "Are you sure you want to delete this expense? This operation cannot be undone!",
+    "deleteSuccess": "The expense was deleted successfully.",
+    "deleteError": "Delete error: {{error}}",
+    "deleteNetworkError": "Network error: The expense could not be deleted."
+  }
+}

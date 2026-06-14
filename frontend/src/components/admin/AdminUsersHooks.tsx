@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
@@ -13,6 +14,7 @@ export interface AdminUser {
 }
 
 export const useAdminUsers = () => {
+  const { t } = useTranslation("adminUsers");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,14 +35,14 @@ export const useAdminUsers = () => {
         const data = await response.json();
         setUsers(Array.isArray(data) ? data : []);
       } else {
-        setAlert({ type: 'error', message: 'Nie udało się pobrać użytkowników.' });
+        setAlert({ type: 'error', message: t('messages.fetchUsersError') });
       }
     } catch (error) {
-      setAlert({ type: 'error', message: 'Błąd sieci podczas pobierania użytkowników.' });
+      setAlert({ type: 'error', message: t('messages.fetchUsersNetworkError') });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchRoles = useCallback(async () => {
     try {
@@ -72,14 +74,14 @@ export const useAdminUsers = () => {
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
         setUsers(prev => prev.map(u => (u.id === user.id ? data : u)));
-        setAlert({ type: 'success', message: `Konto użytkownika ${user.nickname} zostało ${data.active ? 'odblokowane' : 'zablokowane'}.` });
+        setAlert({ type: 'success', message: t(data.active ? 'messages.statusUnblocked' : 'messages.statusBlocked', { nickname: user.nickname }) });
       } else {
-        setAlert({ type: 'error', message: data.message || 'Nie udało się zmienić statusu konta.' });
+        setAlert({ type: 'error', message: data.message || t('messages.statusError') });
       }
     } catch {
-      setAlert({ type: 'error', message: 'Błąd sieci podczas zmiany statusu konta.' });
+      setAlert({ type: 'error', message: t('messages.statusNetworkError') });
     }
-  }, []);
+  }, [t]);
 
   const resetPassword = useCallback(async (user: any, password: string) => {
     try {
@@ -90,16 +92,16 @@ export const useAdminUsers = () => {
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
-        setAlert({ type: 'success', message: `Hasło użytkownika ${user.nickname} zostało zresetowane.` });
+        setAlert({ type: 'success', message: t('messages.resetSuccess', { nickname: user.nickname }) });
         return true;
       }
-      setAlert({ type: 'error', message: data.message || 'Nie udało się zresetować hasła.' });
+      setAlert({ type: 'error', message: data.message || t('messages.resetError') });
       return false;
     } catch {
-      setAlert({ type: 'error', message: 'Błąd sieci podczas resetowania hasła.' });
+      setAlert({ type: 'error', message: t('messages.resetNetworkError') });
       return false;
     }
-  }, []);
+  }, [t]);
 
   const stats = useMemo(() => ({
     total: users.length,

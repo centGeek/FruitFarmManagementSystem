@@ -73,7 +73,7 @@ Two independent layers run in parallel:
 - Layers: `controller` → `service` → `repository` → `repository.jpa` → DB,
   with `dto` ↔ `entity` translation via static `mapper` classes.
 - **Two-tier repositories**: a hand-written `@Repository` wraps a Spring Data `JpaRepository` interface.
-- **Flyway** — database schema managed by migrations `V1`…`V14` (JPA `ddl-auto = none`).
+- **Flyway** — database schema managed by migrations `V1`…`V19` (JPA `ddl-auto = none`).
 - **Lombok** for dependency injection (`@AllArgsConstructor` / `@RequiredArgsConstructor`).
 - **DTO validation** via `jakarta.validation` (messages in Polish).
 
@@ -154,8 +154,9 @@ mvn clean package install              # build + fetch dependencies
 ./mvnw spring-boot:run                 # run the API on :8091
 ```
 `spring-boot-docker-compose` is on the runtime classpath — starting the app brings
-the database container up by itself. There is **no test suite** (`src/test/` does not
-exist), despite test dependencies in `pom.xml`.
+the database container up by itself. The backend test suite lives in `src/test/` (unit,
+web, repository with Testcontainers, integration) and runs in CI on every push/PR via
+`.github/workflows/backend-tests.yml` (`./mvnw clean test` on JDK 21).
 
 ### Frontend (from `frontend/`)
 ```bash
@@ -213,8 +214,10 @@ make azure-deploy-frontend    # frontend only
 How deploy works: it computes an immutable image tag from git (e.g. `1f236ab`, or
 `-dirty-HHMMSS` when there are uncommitted changes), builds and pushes the images, then
 runs `az containerapp update` to the new tag — which forces a fresh revision (pushing
-`:latest` alone would not). The backend FQDN is compiled into the frontend at build time
-via `VITE_BACKEND_URL`.
+`:latest` alone would not). The frontend image is backend-agnostic: it uses relative
+`/api` paths and nginx reverse-proxies them to the backend. The backend FQDN is injected
+at **runtime** as the `BACKEND_ORIGIN` env var on `ca-frontend` — it is never compiled
+into the bundle, so the same image works in every environment.
 
 After deploy a new revision comes up in ~30–60s. If the database is stopped, run
 `make azure-up` first (deploy does not start the DB). Backend logs:
@@ -226,10 +229,14 @@ Stopping the DB drops the cost to roughly storage only (~1–2 USD/month). **Azu
 auto-starts a stopped Flexible Server after at most 7 days** — re-run `make azure-stop`
 after such an auto-restart. Full teardown (irreversible): `az group delete -n rg-fruitfarm`.
 
-> Production config: set `APP_COOKIE_SECURE=true`, `APP_COOKIE_SAME_SITE=None`, and
-> `CORS_ALLOWED_ORIGINS=https://<frontend-address>` on the backend container (front and
-> backend on different domains over HTTPS). The JWT secret and datasource credentials are
-> also overridable via env vars (`JWT_SECRET_KEY`, `SPRING_DATASOURCE_*`).
+> Production config: front and backend share **one origin** — the browser only ever talks
+> to `ca-frontend`, and nginx forwards `/api` server-side to `ca-backend` (`BACKEND_ORIGIN`).
+> So there is **no CORS** and the JWT cookies work under `SameSite=Lax`. The deploy sets
+> `APP_COOKIE_SECURE=true`, `APP_COOKIE_SAME_SITE=Lax`, `SECURITY_BCRYPT_STRENGTH=12`, and a
+> generated `JWT_SECRET_KEY` (a `jwt-secret` Container App secret created once and never
+> overwritten, so already-issued tokens stay valid) on `ca-backend`. The datasource
+> credentials (`SPRING_DATASOURCE_*`) are **not** set by the deploy script — they were
+> configured on `ca-backend` once at provisioning time and persist across revisions.
 
 ---
 
@@ -237,5 +244,5 @@ after such an auto-restart. Full teardown (irreversible): `az group delete -n rg
 
 - Most UI text, messages, and logs are in **Polish** — keep this convention when editing.
 - The JWT secret and bcrypt parameters live in `application.yml` (committed — fine for an engineering thesis, not for production).
-- Add database schema changes as a new `V15__...sql` migration; do not edit existing migrations.
+- Add database schema changes as a new `V20__...sql` migration; do not edit existing migrations.
 </content>

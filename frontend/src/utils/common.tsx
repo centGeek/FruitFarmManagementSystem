@@ -1,4 +1,5 @@
  import React, { useMemo } from 'react';
+ import { useTranslation } from 'react-i18next';
 
  // Escapuje znaki specjalne HTML. Leaflet renderuje treść popupów/tooltipów jako SUROWY HTML
  // (bindPopup/setPopupContent/divIcon), więc każdą wartość pochodzącą od użytkownika lub z
@@ -18,10 +19,12 @@
         return amount.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
  export const Alert = React.memo(({ type, message, onClose }) => {
-    if (!message) return null;
+    const { t } = useTranslation();
     const colors = useMemo(() => ({
         error: 'bg-red-50 border-red-300 text-red-700', success: 'bg-green-50 border-green-300 text-green-700', warning: 'bg-amber-50 border-amber-300 text-amber-700'
     }), []);
+
+    if (!message) return null;
 
     return (
         <div className={`mb-4 p-4 border rounded-xl ${colors[type]} flex items-center justify-between shadow-sm`} role="alert">
@@ -33,7 +36,7 @@
                 <button
                     onClick={onClose}
                     className="text-gray-500 hover:text-gray-700 p-1 transition-colors text-lg"
-                    aria-label="Zamknij alert"
+                    aria-label={t('aria.closeAlert')}
                 >
                     ❌
                 </button>

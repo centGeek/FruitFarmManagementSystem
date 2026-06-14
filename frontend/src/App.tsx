@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import LoginPage from './components/LoginPage'
 import RegisterPage from './components/RegisterPage'
+import AboutPage from './components/AboutPage'
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 import HomePage from './components/homePage/HomePage'
@@ -21,39 +23,57 @@ import { BACKEND_URL} from "./utils/apiConfigs";
 
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [userRole, setUserRole] = useState(null) 
-  
-  const [isLoading, setIsLoading] = useState(true)
+  const { t } = useTranslation()
+  // Trzy stany zamiast pary boolean: dzięki 'unknown' nie blokujemy CAŁEJ aplikacji
+  // pełnoekranowym spinnerem podczas weryfikacji — publiczna strona logowania renderuje się od razu.
+  const [authStatus, setAuthStatus] = useState<'unknown' | 'authed' | 'anon'>('unknown')
+  const [userRole, setUserRole] = useState(null)
+  const [isWaking, setIsWaking] = useState(false)
+  const isLoggedIn = authStatus === 'authed'
 
 useEffect(() => {
+    const controller = new AbortController();
+    // Backend na Azure (scale-to-zero) potrafi zimno startować kilkadziesiąt sekund.
+    // Po 3 s pokazujemy komunikat „budzenie serwera". NIE przerywamy weryfikacji po timeoucie —
+    // inaczej zalogowany użytkownik z ważną sesją zostałby wyrzucony do logowania w trakcie
+    // zimnego startu. Backstopem jest proxy_read_timeout nginx (504 → response !ok → 'anon').
+    const wakeTimer = setTimeout(() => setIsWaking(true), 3000);
+
     const checkAuthStatus = async () => {
       try {
         const response = await fetch(`${BACKEND_URL}/api/auth/verify`, {
           method: 'GET',
           credentials: 'include',
+          signal: controller.signal,
         });
 
         if (response.ok) {
           const data = await response.json();
-          setIsLoggedIn(true);
           setUserRole(data.roles[0]);
+          setAuthStatus('authed');
         } else {
-          setIsLoggedIn(false);
+          setAuthStatus('anon');
         }
       } catch (error) {
-        console.error('Błąd weryfikacji:', error);
-        setIsLoggedIn(false);
+        // Przerwanie przy odmontowaniu/cleanupie ignorujemy; realny błąd sieci → wylogowany
+        if ((error as any)?.name !== 'AbortError') {
+          setAuthStatus('anon');
+        }
       } finally {
-        setIsLoading(false);
+        clearTimeout(wakeTimer);
       }
     };
     checkAuthStatus();
+
+    return () => {
+      clearTimeout(wakeTimer);
+      controller.abort();
+    };
   }, []);
 
   const handleLogin = (role) => {
-    setIsLoggedIn(true);
     setUserRole(role);
+    setAuthStatus('authed');
   };
 
   const handleLogout = async () => {
@@ -65,34 +85,39 @@ useEffect(() => {
     } catch (error) {
       console.error('Błąd wylogowania:', error);
     } finally {
-      setIsLoggedIn(false);
+      setAuthStatus('anon');
       setUserRole(null);
       window.location.href = '/';
     }
   };
 
   const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+    // Dopóki weryfikacja trwa, nie wyrzucaj zalogowanego użytkownika (Navigate) ani nie
+    // pokazuj treści chronionej — spinner trzymamy TYLKO w obrębie trasy chronionej.
+    if (authStatus === 'unknown') {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">{t('app.checkingAuth')}</p>
+            {isWaking && (
+              <p className="mt-2 text-sm text-gray-400">{t('app.wakingServer')}</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     if (!isLoggedIn) {
       return <Navigate to="/" replace />;
     }
-    
+
     if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-      return <Navigate to="/home" replace />;    
-      }
-    
+      return <Navigate to="/home" replace />;
+    }
+
     return children;
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Sprawdzanie autentyfikacji...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <BrowserRouter>
@@ -114,8 +139,8 @@ useEffect(() => {
             )
           }
         />
-        <Route 
-          path="/register" 
+        <Route
+          path="/register"
           element={
             isLoggedIn ? (
               (
@@ -124,9 +149,10 @@ useEffect(() => {
             ) : (
               <RegisterPage onLogin={handleLogin} />
             )
-          } 
+          }
         />
-        
+        <Route path="/about" element={<AboutPage />} />
+
         <Route
           path="/home"
           element={

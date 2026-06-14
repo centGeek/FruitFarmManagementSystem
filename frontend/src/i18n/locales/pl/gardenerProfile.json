@@ -1,0 +1,72 @@
+{
+  "header": {
+    "title": "Mój Profil",
+    "subtitle": "Zarządzaj swoimi danymi osobowymi i ustawieniami konta 🌱"
+  },
+  "sections": {
+    "basicInfo": "Informacje Podstawowe",
+    "contactInfo": "Dane Kontaktowe",
+    "location": "Ustaw Lokalizację Główną",
+    "passwordChange": "Zmiana Hasła"
+  },
+  "fields": {
+    "name": "Imię",
+    "surname": "Nazwisko",
+    "emailOptional": "Email (opcjonalnie)",
+    "phoneOptional": "Numer Telefonu (opcjonalnie)",
+    "nicknameRequired": "Nazwa użytkownika (obowiązkowo)",
+    "selectedLocality": "Wybrana Miejscowość (Automatycznie)",
+    "newPassword": "Nowe Hasło",
+    "confirmNewPassword": "Potwierdź Nowe Hasło"
+  },
+  "placeholders": {
+    "name": "np. Jan",
+    "surname": "np. Kowalski",
+    "email": "email@example.com",
+    "phone": "+48 123 456 789",
+    "nickname": "Twój pseudonim",
+    "locality": "Wyszukaj na mapie...",
+    "password": "Minimum 6 znaków",
+    "confirmPassword": "Powtórz hasło"
+  },
+  "location": {
+    "hint": "Użyj pola wyszukiwania poniżej, aby znaleźć swoją miejscowość. Twoja aktualna lokalizacja: {{locality}}",
+    "searchLabel": "Wyszukaj Miejscowość",
+    "unknownLocation": "Nieznana lokalizacja",
+    "coordinates": "Współrzędne: {{lat}}, {{lon}}"
+  },
+  "password": {
+    "hint": "💡 Pozostaw pole hasła puste, jeśli nie chcesz zmieniać hasła.",
+    "showAria": "Pokaż hasło",
+    "hideAria": "Ukryj hasło"
+  },
+  "unsavedChanges": "Masz niezapisane zmiany. Pamiętaj o zapisaniu profilu!",
+  "buttons": {
+    "saving": "Zapisywanie...",
+    "save": "Zapisz Zmiany",
+    "reset": "Resetuj Zmiany"
+  },
+  "securityNote": "Twoje dane są bezpiecznie przechowywane i chronione.",
+  "loading": "Ładowanie profilu... 🔄",
+  "alerts": {
+    "loadError": "Błąd ładowania profilu: {{error}}",
+    "networkLoadError": "Błąd sieci: Nie można połączyć się z serwerem.",
+    "locationSet": "Ustawiono nową lokalizację: {{locality}}",
+    "validationErrors": "Wystąpiły błędy walidacji.",
+    "updateSuccess": "Profil został zaktualizowany pomyślnie!",
+    "saveError": "Błąd zapisu: {{error}}",
+    "networkSaveError": "Błąd sieci: Nie można zapisać zmian.",
+    "changesReverted": "Cofnięto wszystkie niezapisane zmiany."
+  },
+  "validation": {
+    "nameRequired": "Imię jest wymagane",
+    "nameLength": "Imię musi mieć między 2 a 50 znaków",
+    "surnameRequired": "Nazwisko jest wymagane",
+    "surnameLength": "Nazwisko musi mieć między 2 a 50 znaków",
+    "nicknameRequired": "Nazwa użytkownika jest wymagana",
+    "emailInvalid": "Nieprawidłowy format email",
+    "localityRequired": "Wybierz miejscowość, ustawiając ją na mapie/wyszukując.",
+    "passwordLength": "Hasło musi mieć co najmniej 6 znaków",
+    "passwordMismatch": "Hasła nie są zgodne"
+  }
+}

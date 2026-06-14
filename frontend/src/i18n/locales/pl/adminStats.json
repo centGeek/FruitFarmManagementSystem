@@ -1,0 +1,99 @@
+{
+  "header": {
+    "titleText": "Panel administratora — statystyki",
+    "subtitle": "Globalny przegląd całego systemu."
+  },
+  "buttons": {
+    "exportCsv": "Eksportuj CSV",
+    "exportPdf": "Eksportuj PDF"
+  },
+  "loading": "Ładowanie statystyk... 🔄",
+  "cards": {
+    "users": "Użytkownicy",
+    "activeSectors": "Sektory aktywne",
+    "workEntries": "Wpisy pracy",
+    "tickets": "Zgłoszenia"
+  },
+  "sections": {
+    "finances": "Finanse",
+    "usersByRole": "Użytkownicy wg roli",
+    "ticketsByStatus": "Zgłoszenia wg statusu",
+    "ticketsByMonth": "Zgłoszenia w czasie (miesiące)",
+    "ticketsByCategory": "Zgłoszenia wg kategorii"
+  },
+  "roles": {
+    "admins": "Administratorzy",
+    "gardeners": "Sadownicy",
+    "employees": "Pracownicy",
+    "blocked": "Zablokowani"
+  },
+  "ticketStatus": {
+    "open": "Otwarte",
+    "inProgress": "W trakcie",
+    "closed": "Zamknięte"
+  },
+  "avgCloseTimeLabel": "Średni czas zamknięcia:",
+  "emptyTickets": "Brak zgłoszeń",
+  "finance": {
+    "totalProfits": "Przychody łącznie",
+    "totalExpenses": "Wydatki łącznie",
+    "paidExpenses": "Wydatki opłacone",
+    "unpaidExpenses": "Wydatki nieopłacone",
+    "totalSalaries": "Wypłacone wynagrodzenia",
+    "kilogramsPicked": "Zebrane kilogramy",
+    "kilogramsSold": "Sprzedane kilogramy",
+    "netBalance": "Bilans netto"
+  },
+  "report": {
+    "sectionUsers": "Użytkownicy",
+    "sectionSectors": "Sektory",
+    "sectionWorkAndHarvest": "Praca i zbiory",
+    "sectionFinances": "Finanse",
+    "sectionTickets": "Zgłoszenia",
+    "rows": {
+      "totalUsers": "Użytkownicy łącznie",
+      "admins": "Administratorzy",
+      "gardeners": "Sadownicy",
+      "employees": "Pracownicy",
+      "activeUsers": "Konta aktywne",
+      "blockedUsers": "Konta zablokowane",
+      "totalSectors": "Sektory łącznie",
+      "activeSectors": "Sektory aktywne",
+      "totalWorkEntries": "Wpisy pracy",
+      "kilogramsPicked": "Zebrane kilogramy",
+      "kilogramsSold": "Sprzedane kilogramy",
+      "totalProfits": "Przychody łącznie",
+      "totalExpenses": "Wydatki łącznie",
+      "paidExpenses": "Wydatki opłacone",
+      "unpaidExpenses": "Wydatki nieopłacone",
+      "totalSalaries": "Wypłacone wynagrodzenia",
+      "netBalance": "Bilans netto",
+      "totalTickets": "Zgłoszenia łącznie",
+      "openTickets": "Zgłoszenia otwarte",
+      "inProgressTickets": "Zgłoszenia w trakcie",
+      "closedTickets": "Zgłoszenia zamknięte",
+      "avgCloseHours": "Śr. czas zamknięcia"
+    },
+    "ticketsByMonth": "Zgłoszenia wg miesiąca",
+    "ticketsByCategory": "Zgłoszenia wg kategorii",
+    "csvHeaders": {
+      "section": "Sekcja",
+      "metric": "Metryka",
+      "value": "Wartość",
+      "unit": "Jednostka"
+    },
+    "pdf": {
+      "title": "Statystyki sadu",
+      "subtitle": "Panel administratora — globalny przegląd całego systemu.",
+      "generatedAt": "Wygenerowano: {{date}}",
+      "thMetric": "Metryka",
+      "thValue": "Wartość",
+      "pageFooter": "Strona {{currentPage}} z {{pageCount}}"
+    }
+  },
+  "errors": {
+    "fetchFailed": "Nie udało się pobrać statystyk.",
+    "network": "Błąd sieci podczas pobierania statystyk.",
+    "pdfFailed": "Nie udało się wygenerować pliku PDF."
+  }
+}

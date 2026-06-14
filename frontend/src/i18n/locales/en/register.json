@@ -1,0 +1,42 @@
+{
+  "heading": "Join us",
+  "subtitle": "Manage your orchard the modern way",
+  "fields": {
+    "name": "First name *",
+    "surname": "Last name *",
+    "nickname": "Username *",
+    "phoneNumber": "Phone number",
+    "email": "Email address",
+    "password": "Password *",
+    "confirmPassword": "Confirm password *",
+    "selectedLocality": "Selected locality"
+  },
+  "location": {
+    "heading": "Your location *",
+    "initialMessage": "Click on the map or search for a location",
+    "notSet": "Not set",
+    "markedPoint": "Marked point ({{lat}}, {{lng}})",
+    "selectedPoint": "Selected point"
+  },
+  "validation": {
+    "nameRequired": "First name is required",
+    "surnameRequired": "Last name is required",
+    "nicknameRequired": "Username is required",
+    "emailInvalid": "Invalid email format",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordsMismatch": "Passwords do not match",
+    "localityRequired": "You must select a location",
+    "fixErrors": "Please correct the errors in the form."
+  },
+  "submit": {
+    "processing": "Processing...",
+    "createAccount": "Create account"
+  },
+  "result": {
+    "success": "Registration successful! You can now log in.",
+    "genericError": "An error occurred during registration.",
+    "connectionError": "Connection error with the server. Check your internet."
+  },
+  "alreadyHaveAccount": "Already have an account?",
+  "loginLink": "Log in"
+}

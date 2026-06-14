@@ -1,0 +1,54 @@
+{
+  "header": {
+    "title": "Zgłoś usterkę",
+    "subtitle": "Coś nie działa? Zgłoś problem administratorowi systemu. 🛠️"
+  },
+  "newTicket": {
+    "title": "Nowe zgłoszenie"
+  },
+  "yourTickets": {
+    "title": "Twoje zgłoszenia",
+    "count_one": "{{count}} zgłoszenie",
+    "count_other": "{{count}} zgłoszeń"
+  },
+  "loading": "Ładowanie zgłoszeń... 🔄",
+  "empty": {
+    "title": "Brak zgłoszeń",
+    "message": "Nie wysłałeś jeszcze żadnego zgłoszenia. Skorzystaj z formularza powyżej, aby zgłosić usterkę."
+  },
+  "form": {
+    "categoryLabel": "Kategoria zgłoszenia",
+    "descriptionLabel": "Opis usterki *",
+    "descriptionPlaceholder": "Opisz, co nie działa lub co chcesz zgłosić administratorowi...",
+    "charCount": "{{count}}/2000 znaków",
+    "minLengthError": "Opis musi mieć co najmniej 5 znaków.",
+    "submit": "Wyślij zgłoszenie"
+  },
+  "card": {
+    "reportedAt": "Zgłoszono: {{date}}",
+    "descriptionLabel": "Opis",
+    "adminReply": "💬 Odpowiedź administratora",
+    "closedAt": "Zamknięto: {{date}}"
+  },
+  "category": {
+    "SYSTEM_ERROR": "System nie działa / błąd aplikacji",
+    "DISPLAY": "Błąd wyświetlania",
+    "DATA": "Nieprawidłowe dane",
+    "PERFORMANCE": "Wolne działanie",
+    "SUGGESTION": "Sugestia / usprawnienie",
+    "OTHER": "Inne"
+  },
+  "status": {
+    "OPEN": "Otwarte",
+    "IN_PROGRESS": "W trakcie",
+    "CLOSED": "Zamknięte",
+    "UNKNOWN": "Nieznany"
+  },
+  "messages": {
+    "fetchError": "Nie udało się pobrać zgłoszeń.",
+    "fetchNetworkError": "Błąd sieci podczas pobierania zgłoszeń.",
+    "submitSuccess": "Zgłoszenie zostało wysłane do administratora. Dziękujemy!",
+    "submitError": "Nie udało się wysłać zgłoszenia: {{error}}",
+    "submitNetworkError": "Błąd sieci: nie można wysłać zgłoszenia."
+  }
+}

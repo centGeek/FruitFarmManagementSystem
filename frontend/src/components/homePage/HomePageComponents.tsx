@@ -1,33 +1,48 @@
 import { useMemo } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 import type { Notification, WeatherAlert } from './HomePageHooks';
 
-const NOTIFICATION_TYPES: Record<string, { label: string; icon: string; color: string }> = {
-    WEATHER: { label: 'Pogoda', icon: '🌤️', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-    USER: { label: 'Użytkownik', icon: '👤', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-    WORK_ENTRY: { label: 'Wpis pracy', icon: '📝', color: 'bg-green-50 text-green-700 border-green-200' },
-    SECTOR: { label: 'Sektor', icon: '🗺️', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-    PROFIT: { label: 'Zysk', icon: '💰', color: 'bg-green-50 text-green-700 border-green-200' },
-    EXPENSE: { label: 'Wydatek', icon: '💸', color: 'bg-red-50 text-red-700 border-red-200' },
+const NOTIFICATION_TYPE_STYLES: Record<string, { icon: string; color: string }> = {
+    WEATHER: { icon: '🌤️', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+    USER: { icon: '👤', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+    WORK_ENTRY: { icon: '📝', color: 'bg-green-50 text-green-700 border-green-200' },
+    SECTOR: { icon: '🗺️', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+    PROFIT: { icon: '💰', color: 'bg-green-50 text-green-700 border-green-200' },
+    EXPENSE: { icon: '💸', color: 'bg-red-50 text-red-700 border-red-200' },
 };
 
-export const LoadingState = () => (
-    <div className="text-center py-16">
-        <div className="w-14 h-14 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
-        <p className="text-gray-500 text-xl font-medium">Ładowanie notyfikacji... 🔄</p>
-    </div>
-);
+export const LoadingState = () => {
+    const { t } = useTranslation("homePage");
+    return (
+        <div className="text-center py-16">
+            <div className="w-14 h-14 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
+            <p className="text-gray-500 text-xl font-medium">{t("loadingNotifications")}</p>
+        </div>
+    );
+};
 
-export const EmptyState = () => (
-    <div className="text-center py-16">
-        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">🔔</div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-3">Brak notyfikacji</h3>
-        <p className="text-gray-500 mb-6 max-w-md mx-auto">Nie masz jeszcze żadnych powiadomień. Sprawdź ponownie później!</p>
-    </div>
-);
+export const EmptyState = () => {
+    const { t } = useTranslation("homePage");
+    return (
+        <div className="text-center py-16">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">🔔</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">{t("empty.title")}</h3>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">{t("empty.subtitle")}</p>
+        </div>
+    );
+};
 
 export const NotificationCard = ({ notification }: { notification: Notification }) => {
-    const typeDetails = NOTIFICATION_TYPES[notification.notificationType] || { label: 'Powiadomienie', icon: '📢', color: 'bg-gray-50 text-gray-700 border-gray-200' };
+    const { t } = useTranslation("homePage");
+    const style = NOTIFICATION_TYPE_STYLES[notification.notificationType] || { icon: '📢', color: 'bg-gray-50 text-gray-700 border-gray-200' };
+    const typeDetails = {
+        icon: style.icon,
+        color: style.color,
+        label: NOTIFICATION_TYPE_STYLES[notification.notificationType]
+            ? t(`notificationType.${notification.notificationType}`)
+            : t("notificationType.DEFAULT"),
+    };
     const notificationDate = new Date(notification.createdAt).toLocaleString('pl-PL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     const timeAgo = useMemo(() => {
@@ -37,12 +52,12 @@ export const NotificationCard = ({ notification }: { notification: Notification 
         const diffMins = Math.floor(diffMs / 60000);
         const diffHours = Math.floor(diffMs / 3600000);
         const diffDays = Math.floor(diffMs / 86400000);
-        if (diffMins < 1) return 'Przed chwilą';
-        if (diffMins < 60) return `${diffMins} min temu`;
-        if (diffHours < 24) return `${diffHours} godz. temu`;
-        if (diffDays < 7) return `${diffDays} dni temu`;
+        if (diffMins < 1) return t("timeAgo.justNow");
+        if (diffMins < 60) return t("timeAgo.minutes", { count: diffMins });
+        if (diffHours < 24) return t("timeAgo.hours", { count: diffHours });
+        if (diffDays < 7) return t("timeAgo.days", { count: diffDays });
         return notificationDate;
-    }, [notification.createdAt, notificationDate]);
+    }, [notification.createdAt, notificationDate, t]);
 
     return (
         <div className={`bg-white border-l-4 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 ${typeDetails.color.replace('bg-', 'border-l-').split(' ')[0]} border border-gray-100`}>
@@ -67,10 +82,17 @@ export const NotificationCard = ({ notification }: { notification: Notification 
 };
 
 export const WeatherAlertCard = ({ alert }: { alert: WeatherAlert }) => {
+    const { t } = useTranslation("homePage");
     const alertDate = new Date(alert.date);
     const today = new Date(); today.setHours(0, 0, 0, 0); alertDate.setHours(0, 0, 0, 0);
     const daysFromNow = Math.round((alertDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    const dateLabel = daysFromNow === 0 ? 'Dziś' : daysFromNow === 1 ? 'Jutro' : daysFromNow === 2 ? 'Pojutrze' : `Za ${daysFromNow} dni`;
+    const dateLabel = daysFromNow === 0
+        ? t("weather.dateLabel.today")
+        : daysFromNow === 1
+            ? t("weather.dateLabel.tomorrow")
+            : daysFromNow === 2
+                ? t("weather.dateLabel.dayAfterTomorrow")
+                : t("weather.dateLabel.inDays", { count: daysFromNow });
     const formattedDate = new Date(alert.date).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
 
     return (

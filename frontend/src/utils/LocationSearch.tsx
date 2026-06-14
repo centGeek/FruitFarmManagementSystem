@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from "react-i18next";
 import { Search, MapPin, Loader } from 'lucide-react';
 import L from 'leaflet';
 import { escapeHtml } from './common';
@@ -10,9 +11,9 @@ import { escapeHtml } from './common';
  * @param {L.Map} props.map Instancja mapy z Leaflet.
  * @param {function} [props.onLocationSelect] Funkcja wywoływana po wybraniu lokalizacji.
  */
-const LocationSearch = ({ 
+const LocationSearch = ({
     map,
-    placeholder = "Wyszukaj miejscowość w Polsce (min. 3 znaki)...",
+    placeholder,
     countryCode = "pl",
     resultsLimit = 5,
     minSearchLength = 3,
@@ -20,6 +21,8 @@ const LocationSearch = ({
     markerDuration = 5000,
     onLocationSelect
 }) => {
+    const { t } = useTranslation("orchardMap");
+    const placeholderText = placeholder ?? t("search.placeholder");
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -175,8 +178,8 @@ const LocationSearch = ({
                     onChange={handleInputChange}
                     onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    placeholder={placeholder}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md"
+                    placeholder={placeholderText}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 hover:shadow-md"
                 />
             </div>
 

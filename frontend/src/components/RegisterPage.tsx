@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, User, Lock, Apple, Leaf, MapPin, Phone, UserCheck, Mail } from 'lucide-react';
 import { BACKEND_URL } from "../utils/apiConfigs";
 import { Alert } from "../utils/common";
@@ -61,8 +62,9 @@ const PasswordInput = React.memo(({ id, name, value, onChange, showPassword, set
 
 export default function RegisterPage() {
     const navigate = useNavigate();
+    const { t } = useTranslation("register");
     const defaultCenter = useMemo(() => [52.2297, 21.0122], []); // Warszawa
-    const initialLocalityMessage = 'Kliknij na mapę lub wyszukaj lokalizację';
+    const initialLocalityMessage = t('location.initialMessage');
 
     const [mapInstance, setMapInstance] = useState(null);
     
@@ -94,7 +96,7 @@ export default function RegisterPage() {
     const [success, setSuccess] = useState('');
 
     const handleLocationSelect = useCallback((location) => {
-        const locality = location.address.city || location.address.town || location.address.village || location.name.split(',')[0] || 'Nieustawiona';
+        const locality = location.address.city || location.address.town || location.address.village || location.name.split(',')[0] || t('location.notSet');
         
         setFormData(prev => ({
             ...prev,
@@ -110,13 +112,13 @@ export default function RegisterPage() {
         });
         
         setErrors(prev => ({ ...prev, localityName: '' }));
-    }, []);
+    }, [t]);
 
     const handleMapClick = useCallback((e) => {
         if (!mapInstance) return;
 
         const { lat, lng } = e.latlng;
-        const locality = `Zaznaczony punkt (${lat.toFixed(4)}, ${lng.toFixed(4)})`; 
+        const locality = t('location.markedPoint', { lat: lat.toFixed(4), lng: lng.toFixed(4) });
 
         setFormData(prev => ({
             ...prev,
@@ -135,9 +137,9 @@ export default function RegisterPage() {
         });
         
         setErrors(prev => ({ ...prev, localityName: '' }));
-        setGeneralError(''); 
+        setGeneralError('');
         setSuccess('');
-    }, [mapInstance]);
+    }, [mapInstance, t]);
     
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -156,24 +158,24 @@ export default function RegisterPage() {
         const newErrors = {};
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!formData.name?.trim()) newErrors.name = 'Imię jest wymagane';
-        if (!formData.surname?.trim()) newErrors.surname = 'Nazwisko jest wymagane';
-        if (!formData.nickname?.trim()) newErrors.nickname = 'Nazwa użytkownika jest wymagana';
-        
+        if (!formData.name?.trim()) newErrors.name = t('validation.nameRequired');
+        if (!formData.surname?.trim()) newErrors.surname = t('validation.surnameRequired');
+        if (!formData.nickname?.trim()) newErrors.nickname = t('validation.nicknameRequired');
+
         if (formData.email && !emailRegex.test(formData.email)) {
-            newErrors.email = 'Nieprawidłowy format email';
+            newErrors.email = t('validation.emailInvalid');
         }
 
-        if (formData.password.length < 6) newErrors.password = 'Hasło min. 6 znaków';
-        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Hasła nie są identyczne';
-        
+        if (formData.password.length < 6) newErrors.password = t('validation.passwordTooShort');
+        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = t('validation.passwordsMismatch');
+
         if (!formData.localityName || formData.localityName === initialLocalityMessage) {
-            newErrors.localityName = 'Musisz wybrać lokalizację';
+            newErrors.localityName = t('validation.localityRequired');
         }
 
         setErrors(newErrors);
         if (Object.keys(newErrors).length > 0) {
-            setGeneralError('Popraw błędy w formularzu.');
+            setGeneralError(t('validation.fixErrors'));
         }
         return Object.keys(newErrors).length === 0;
     };
@@ -211,14 +213,14 @@ export default function RegisterPage() {
                 if (data.token) {
                     navigate('/home');
                 } else {
-                    setSuccess('Rejestracja pomyślna! Możesz się teraz zalogować.');
+                    setSuccess(t('result.success'));
                     setTimeout(() => navigate('/login'), 3000);
                 }
             } else {
-                setGeneralError(data.message || 'Wystąpił błąd podczas rejestracji.');
+                setGeneralError(data.message || t('result.genericError'));
             }
         } catch (err) {
-            setGeneralError('Błąd połączenia z serwerem. Sprawdź internet.');
+            setGeneralError(t('result.connectionError'));
         } finally {
             setIsLoading(false);
         }
@@ -238,8 +240,8 @@ export default function RegisterPage() {
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                                 <Apple className="w-8 h-8 text-white" />
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Dołącz do nas</h1>
-                            <p className="text-gray-600 text-sm">Zarządzaj swoim sadem w nowoczesny sposób</p>
+                            <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('heading')}</h1>
+                            <p className="text-gray-600 text-sm">{t('subtitle')}</p>
                         </div>
 
                         <Alert type="error" message={generalError} />
@@ -247,17 +249,17 @@ export default function RegisterPage() {
 
                         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <TextInput id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="Imię *" icon={User} disabled={isLoading} error={errors.name}/>
-                                <TextInput id="surname" name="surname" value={formData.surname} onChange={handleInputChange} placeholder="Nazwisko *" icon={UserCheck} disabled={isLoading} error={errors.surname}/>
+                                <TextInput id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder={t('fields.name')} icon={User} disabled={isLoading} error={errors.name}/>
+                                <TextInput id="surname" name="surname" value={formData.surname} onChange={handleInputChange} placeholder={t('fields.surname')} icon={UserCheck} disabled={isLoading} error={errors.surname}/>
                             </div>
 
-                            <TextInput id="nickname" name="nickname" value={formData.nickname} onChange={handleInputChange} placeholder="Nazwa użytkownika *" icon={User} disabled={isLoading} error={errors.nickname}/>
-                            <TextInput id="phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Numer telefonu" icon={Phone} disabled={isLoading}/>
-                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="Adres email" icon={Mail} disabled={isLoading} error={errors.email}/>
+                            <TextInput id="nickname" name="nickname" value={formData.nickname} onChange={handleInputChange} placeholder={t('fields.nickname')} icon={User} disabled={isLoading} error={errors.nickname}/>
+                            <TextInput id="phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder={t('fields.phoneNumber')} icon={Phone} disabled={isLoading}/>
+                            <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder={t('fields.email')} icon={Mail} disabled={isLoading} error={errors.email}/>
 
                             <div className="pt-2">
                                 <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                    <MapPin className="w-4 h-4 mr-2 text-green-600" /> Twoja lokalizacja *
+                                    <MapPin className="w-4 h-4 mr-2 text-green-600" /> {t('location.heading')}
                                 </h3>
                                 
                                 {mapInstance && (
@@ -278,7 +280,7 @@ export default function RegisterPage() {
                                             ? null 
                                             : [formData.latitude, formData.longitude]
                                         }
-                                        markerPopupContent={`📍 ${formData.localityName || 'Wybrany punkt'}`}
+                                        markerPopupContent={`📍 ${formData.localityName || t('location.selectedPoint')}`}
                                         viewUpdateKey={mapView.viewUpdateKey} 
                                     />
                                 </div>
@@ -287,7 +289,7 @@ export default function RegisterPage() {
                                 <div className="mt-2">
                                     <TextInput
                                         id="localityName" name="localityName" value={formData.localityName}
-                                        placeholder="Wybrana Miejscowość" icon={MapPin}
+                                        placeholder={t('fields.selectedLocality')} icon={MapPin}
                                         disabled={true} 
                                     />
                                 </div>
@@ -296,13 +298,13 @@ export default function RegisterPage() {
                             <PasswordInput
                                 id="password" name="password" value={formData.password} onChange={handleInputChange}
                                 showPassword={showPassword} setShowPassword={setShowPassword}
-                                placeholder="Hasło *" disabled={isLoading} error={errors.password}
+                                placeholder={t('fields.password')} disabled={isLoading} error={errors.password}
                             />
 
                             <PasswordInput
                                 id="confirmPassword" name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange}
                                 showPassword={showConfirmPassword} setShowPassword={setShowConfirmPassword}
-                                placeholder="Potwierdź hasło *" disabled={isLoading} error={errors.confirmPassword}
+                                placeholder={t('fields.confirmPassword')} disabled={isLoading} error={errors.confirmPassword}
                             />
 
                             <button
@@ -313,19 +315,19 @@ export default function RegisterPage() {
                                 {isLoading ? (
                                     <div className="flex items-center justify-center">
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                        Przetwarzanie...
+                                        {t('submit.processing')}
                                     </div>
                                 ) : (
-                                    'Utwórz konto'
+                                    t('submit.createAccount')
                                 )}
                             </button>
                         </form>
 
                         <div className="mt-6 text-center">
                             <p className="text-sm text-gray-600">
-                                Masz już konto?{' '}
+                                {t('alreadyHaveAccount')}{' '}
                                 <a href="/login" className="text-green-600 hover:text-green-500 font-medium transition-colors" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
-                                    Zaloguj się
+                                    {t('loginLink')}
                                 </a>
                             </p>
                         </div>

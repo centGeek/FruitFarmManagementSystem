@@ -328,7 +328,7 @@ class WorkDetailsControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("blocked");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("blocked")).thenReturn(Optional.of(userWithActive(false)));
+        when(userRepository.findActiveByNickname("blocked")).thenReturn(Optional.of(false));
 
         // Act & Assert
         mvc.perform(get("/api/work-details").cookie(new Cookie("accessToken", "token")))
@@ -342,7 +342,7 @@ class WorkDetailsControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("active");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("active")).thenReturn(Optional.of(userWithActive(true)));
+        when(userRepository.findActiveByNickname("active")).thenReturn(Optional.of(true));
         when(workDetailsService.getAllWorkDetails()).thenReturn(List.of());
 
         // Act & Assert
