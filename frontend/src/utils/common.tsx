@@ -21,7 +21,7 @@
  export const Alert = React.memo(({ type, message, onClose }) => {
     const { t } = useTranslation();
     const colors = useMemo(() => ({
-        error: 'bg-red-50 border-red-300 text-red-700', success: 'bg-green-50 border-green-300 text-green-700', warning: 'bg-amber-50 border-amber-300 text-amber-700'
+        error: 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-800 text-red-700 dark:text-red-300', success: 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-800 text-green-700 dark:text-green-300', warning: 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-300'
     }), []);
 
     if (!message) return null;
@@ -35,7 +35,7 @@
             {onClose && (
                 <button
                     onClick={onClose}
-                    className="text-gray-500 hover:text-gray-700 p-1 transition-colors text-lg"
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1 transition-colors text-lg"
                     aria-label={t('aria.closeAlert')}
                 >
                     ❌

@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import { authFetch } from "../utils/authFetch";
 import LanguageSwitcher from "./LanguageSwitcher";
+import ThemeSwitcher from "./ThemeSwitcher";
 
 function WeatherWidget() {
   const [weather, setWeather] = useState(null);
@@ -174,6 +175,7 @@ function GardenerNavbar({ onLogout }) {
 
           <div className="flex items-center gap-2 sm:gap-3">
             <WeatherWidget />
+            <ThemeSwitcher />
             <LanguageSwitcher />
             <button
               onClick={onLogout}
@@ -206,7 +208,10 @@ function GardenerNavbar({ onLogout }) {
                 {tab.name}
               </NavLink>
             ))}
-            <LanguageSwitcher className="self-start mt-1" />
+            <div className="flex items-center gap-2 mt-1">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
             <button
               onClick={() => {
                 setMenuOpen(false);
@@ -271,6 +276,7 @@ function AdminNavbar({ onLogout }) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeSwitcher />
             <LanguageSwitcher />
             <button
               onClick={onLogout}
@@ -303,7 +309,10 @@ function AdminNavbar({ onLogout }) {
                 {tab.name}
               </NavLink>
             ))}
-            <LanguageSwitcher className="self-start mt-1" />
+            <div className="flex items-center gap-2 mt-1">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
             <button
               onClick={() => {
                 setMenuOpen(false);
@@ -337,6 +346,7 @@ export default function Navbar({ onLogout, userRole }) {
         <div className="flex justify-between items-center">
           <div className="text-xl font-bold">{t("farmManagement")}</div>
           <div className="flex items-center gap-3">
+            <ThemeSwitcher />
             <LanguageSwitcher />
             <button
               onClick={onLogout}

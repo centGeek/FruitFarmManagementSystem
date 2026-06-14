@@ -14,3 +14,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Base page colours so areas not covered by a component background still adapt,
+   plus a smooth fade when toggling between light and dark. */
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100;
+  }
+}

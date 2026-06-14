@@ -24,13 +24,13 @@ export default function AdminDashboard() {
   } = useAdminDashboard();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 p-6 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6 font-sans">
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            <span className="text-green-600 mr-3">🛠️</span> {t("header.title")}
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+            <span className="text-green-600 dark:text-green-300 mr-3">🛠️</span> {t("header.title")}
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
             {t("header.subtitle")}
           </p>
         </header>
@@ -46,7 +46,7 @@ export default function AdminDashboard() {
           <StatCard label={t("stats.closed")} value={stats.closed} icon="✅" accent="bg-green-100" />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
           <FilterBar
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}

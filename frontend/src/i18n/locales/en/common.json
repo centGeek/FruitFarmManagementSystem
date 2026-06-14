@@ -51,6 +51,14 @@
     "en": "English",
     "switchTo": "Change language"
   },
+  "theme": {
+    "label": "Theme",
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "switchToLight": "Switch to light theme",
+    "switchToDark": "Switch to dark theme"
+  },
   "nav": {
     "home": "Home",
     "map": "Map",

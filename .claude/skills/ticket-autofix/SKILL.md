@@ -1,9 +1,9 @@
 ---
-name: usterki-autofix
+name: ticket-autofix
 description: Daily defect-fixing loop for user-reported usterki (tickets) — scans the running app as Admin, opens one local tracked issue per new OPEN ticket, then runs a multi-agent loop that verifies each report by testing the code, fixes legitimate ones in an isolated git worktree, adversarially reviews and improves the fix until clean, and opens a PR. After you merge it deploys via azure-deploy and closes the ticket. Use when the user wants to triage and auto-fix newly reported usterki / bug tickets (as opposed to azure-deploy, which only ships an already-prepared version).
 ---
 
-# usterki-autofix — triage and auto-fix newly reported usterki
+# ticket-autofix — triage and auto-fix newly reported usterki
 
 Runs the full loop the team described: **new usterka → new issue → AI verifies the report by testing the code → if the reporter is right, fix → adversarially improve until there is nothing left to fix → PR → (after merge) deploy and close the ticket.** Each new usterka becomes exactly one tracked issue and one fix branch/PR; reports that turn out not to be real defects are flagged with a Polish explanation, never silently closed.
 
@@ -33,21 +33,21 @@ This skill ships three helpers in its own folder:
 
 ## Running
 
-When invoked (`/usterki-autofix`), follow these steps. Let `REPO` be the repository root (the parent of `backend/`).
+When invoked (`/ticket-autofix`), follow these steps. Let `REPO` be the repository root (the parent of `backend/`).
 
 1. **Scan for new usterki:**
    ```bash
-   bash .claude/skills/usterki-autofix/run.sh scan
+   bash .claude/skills/ticket-autofix/run.sh scan
    ```
    This prints a JSON array. If it is `[]`, report "no new usterki today" and stop. Otherwise parse it — each element is `{id, description, category, createdAt, reporter, nickname}`.
 
 2. **Run the fix loop** via the **Workflow** tool with the shipped script, passing the scanned usterki as `args`:
    ```
    Workflow({
-     scriptPath: "<REPO>/.claude/skills/usterki-autofix/fix-loop.workflow.js",
+     scriptPath: "<REPO>/.claude/skills/ticket-autofix/fix-loop.workflow.js",
      args: {
        repo: "<REPO>",
-       validateScript: "<REPO>/.claude/skills/usterki-autofix/validate.sh",
+       validateScript: "<REPO>/.claude/skills/ticket-autofix/validate.sh",
        usterki: <the JSON array from step 1>,
        maxRounds: 4
      }
@@ -57,15 +57,15 @@ When invoked (`/usterki-autofix`), follow these steps. Let `REPO` be the reposit
 
 3. **For each `fixed` result**, in this order:
    ```bash
-   bash .claude/skills/usterki-autofix/run.sh ticket  <id> IN_PROGRESS
-   bash .claude/skills/usterki-autofix/run.sh open-pr <id> usterka/<id> "Fix usterka #<id>: <short title>"
-   bash .claude/skills/usterki-autofix/run.sh comment <id> "Zgłoszenie w trakcie naprawy. PR: <prUrl>. Po wdrożeniu damy znać."   # reporter-facing message stays Polish; <prUrl> printed by open-pr
+   bash .claude/skills/ticket-autofix/run.sh ticket  <id> IN_PROGRESS
+   bash .claude/skills/ticket-autofix/run.sh open-pr <id> usterka/<id> "Fix usterka #<id>: <short title>"
+   bash .claude/skills/ticket-autofix/run.sh comment <id> "Zgłoszenie w trakcie naprawy. PR: <prUrl>. Po wdrożeniu damy znać."   # reporter-facing message stays Polish; <prUrl> printed by open-pr
    ```
    (`open-pr` prints the PR/compare URL and updates the usterka file to `status: fixed` with the branch + PR link.) If the result has `improvementsOutstanding: true` or `reviewIncomplete: true`, say so plainly in the PR title/body and in your summary — do **not** present it as fully polished — so the human reviewer knows to look harder before merging.
 
 4. **For each `invalid` result**, append the reasoning to `usterki/USTERKA-<id>.md` (set `status: invalid`), comment back to the reporter in Polish, and **leave the ticket OPEN** for a human to decide:
    ```bash
-   bash .claude/skills/usterki-autofix/run.sh comment <id> "<explanationPl from the workflow result — the courteous Polish message shown to the reporter>"
+   bash .claude/skills/ticket-autofix/run.sh comment <id> "<explanationPl from the workflow result — the courteous Polish message shown to the reporter>"
    ```
 
 5. **Summarize** to the user: how many usterki were scanned/created, which got PRs (with links), which were dismissed (with reasons), and the next action — **review + merge the green PRs, then run `finalize` to deploy and close the tickets**.
@@ -75,8 +75,8 @@ When invoked (`/usterki-autofix`), follow these steps. Let `REPO` be the reposit
 Once the PR(s) are reviewed and merged into `main` (CI green), deploy the new version and close the corresponding tickets:
 ```bash
 # pull merged main first, run azure-up if the Azure DB is stopped
-bash .claude/skills/usterki-autofix/run.sh finalize           # all usterki currently marked 'fixed'
-bash .claude/skills/usterki-autofix/run.sh finalize 42 47      # or specific ticket ids
+bash .claude/skills/ticket-autofix/run.sh finalize           # all usterki currently marked 'fixed'
+bash .claude/skills/ticket-autofix/run.sh finalize 42 47      # or specific ticket ids
 ```
 This runs `azure-deploy both`, then sets those tickets to `CLOSED` with a Polish "naprawione i wdrożone" comment and marks the usterka files `deployed`.
 
@@ -85,9 +85,9 @@ This runs `azure-deploy both`, then sets those tickets to `CLOSED` with a Polish
 The daily run must happen on this machine (it scans the local app, builds, and pushes), so schedule a headless invocation rather than a cloud routine. Example macOS cron entry (run `dev-up` beforehand or ensure the stack is up):
 ```cron
 # 08:00 every day — prepare PRs for new usterki (review + merge + finalize stay manual)
-0 8 * * *  cd /Users/lukasz.centkowski/Desktop/student/FruitFarmManagementSystem/backend && claude -p "/usterki-autofix" >> "$HOME/.usterki-autofix.log" 2>&1
+0 8 * * *  cd /Users/lukasz.centkowski/Desktop/student/FruitFarmManagementSystem/backend && claude -p "/ticket-autofix" >> "$HOME/.ticket-autofix.log" 2>&1
 ```
-Or, inside an open Claude Code session: `/loop 24h /usterki-autofix`. Either way the loop stops at "PR open" so a human merges and runs `finalize`.
+Or, inside an open Claude Code session: `/loop 24h /ticket-autofix`. Either way the loop stops at "PR open" so a human merges and runs `finalize`.
 
 ## Notes
 

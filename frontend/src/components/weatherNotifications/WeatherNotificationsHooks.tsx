@@ -53,9 +53,9 @@ export const getWeatherIconFromCode = (code: number): JSX.Element => {
     const weatherMap: { [key: number]: { IconComponent: any; color: string } } = {
         0: { IconComponent: Sun, color: 'text-yellow-500' },
         1: { IconComponent: Sun, color: 'text-yellow-400' },
-        2: { IconComponent: Cloud, color: 'text-gray-400' },
-        3: { IconComponent: Cloud, color: 'text-gray-500' },
-        45: { IconComponent: CloudFog, color: 'text-gray-400' },
+        2: { IconComponent: Cloud, color: 'text-gray-400 dark:text-gray-500' },
+        3: { IconComponent: Cloud, color: 'text-gray-500 dark:text-gray-400' },
+        45: { IconComponent: CloudFog, color: 'text-gray-400 dark:text-gray-500' },
         48: { IconComponent: CloudFog, color: 'text-blue-300' },
         51: { IconComponent: CloudDrizzle, color: 'text-blue-300' },
         53: { IconComponent: CloudDrizzle, color: 'text-blue-400' },
@@ -74,7 +74,7 @@ export const getWeatherIconFromCode = (code: number): JSX.Element => {
         99: { IconComponent: Zap, color: 'text-orange-600' },
     };
 
-    const weather = weatherMap[code] || { IconComponent: Cloud, color: 'text-gray-400' };
+    const weather = weatherMap[code] || { IconComponent: Cloud, color: 'text-gray-400 dark:text-gray-500' };
     const IconComponent = weather.IconComponent;
 
     return <IconComponent className={`w-16 h-16 ${weather.color}`} />;

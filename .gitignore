@@ -33,7 +33,7 @@ frontend/node_modules/**
 ### VS Code ###
 .vscode/
 
-# usterki-autofix local tracking files (not committed)
+# ticket-autofix local tracking files (not committed)
 usterki/
 
 # OS / scratch / scan artifacts (not committed)

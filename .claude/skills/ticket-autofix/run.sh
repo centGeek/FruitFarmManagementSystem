@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# usterki-autofix plumbing: talk to the running app as Admin, manage the local
+# ticket-autofix plumbing: talk to the running app as Admin, manage the local
 # usterka tracking files, push fix branches + open PRs, and deploy after merge.
 # The multi-agent verify/fix/improve loop itself lives in fix-loop.workflow.js;
 # this script only does the deterministic GitHub/HTTP/git glue around it.
@@ -13,7 +13,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$SCRIPT_DIR/../../.." && pwd)"   # 3 levels up from .claude/skills/usterki-autofix/run.sh
+REPO="$(cd "$SCRIPT_DIR/../../.." && pwd)"   # 3 levels up from .claude/skills/ticket-autofix/run.sh
 
 BASE_URL="${USTERKI_BASE_URL:-http://localhost:8091}"
 ADMIN_NICK="${USTERKI_ADMIN_NICKNAME:-admin}"
@@ -23,7 +23,7 @@ GH_REPO="FruitFarmManagementSystem"
 GH_WEB="https://github.com/$GH_OWNER/$GH_REPO"
 USTERKI_DIR="$REPO/usterki"
 
-JAR="$(mktemp -t usterki-cookies.XXXXXX)"
+JAR="$(mktemp -t ticket-cookies.XXXXXX)"
 trap 'rm -f "$JAR"' EXIT
 
 need() { command -v "$1" >/dev/null || { echo "ERROR: '$1' is required but not installed." >&2; exit 1; }; }
@@ -48,7 +48,7 @@ api_patch() { curl -s -o /dev/null -w '%{http_code}' -b "$JAR" -X PATCH -H 'Cont
 ensure_gitignored() {
   local gi="$REPO/.gitignore"
   if ! grep -qxF 'usterki/' "$gi" 2>/dev/null; then
-    printf '\n# usterki-autofix local tracking files (not committed)\nusterki/\n' >> "$gi"
+    printf '\n# ticket-autofix local tracking files (not committed)\nusterki/\n' >> "$gi"
   fi
 }
 
@@ -84,7 +84,7 @@ write_usterka_file() {
     echo
     echo "## Worklog"
     echo
-    echo "- $now — detected by usterki-autofix scan; status: open"
+    echo "- $now — detected by ticket-autofix scan; status: open"
   } > "$file"
 }
 

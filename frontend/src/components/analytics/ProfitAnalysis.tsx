@@ -45,7 +45,7 @@ export default function ProfitAnalysis() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6">
         <LoadingState />
       </div>
     );
@@ -55,14 +55,14 @@ export default function ProfitAnalysis() {
   const commonTitleSuffix = `${selectedYear !== 'all' ? t("titleSuffix.year", { year: selectedYear }) : ''}${selectedMonth ? t("titleSuffix.month", { month: monthLabel }) : ''}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 p-6 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6 font-sans">
       <div className="max-w-7xl mx-auto">
         
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
-            <span className="text-blue-600 mr-3">📊</span> {t("header.title")}
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center">
+            <span className="text-blue-600 dark:text-blue-300 mr-3">📊</span> {t("header.title")}
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
             {t("header.subtitle")}
           </p>
         </header>
@@ -104,18 +104,18 @@ export default function ProfitAnalysis() {
           />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-200 dark:border-gray-700 mb-8">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-6 flex items-center">
             <span className="mr-3">🎛️</span> {t("controlPanel.title")}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t("controlPanel.displayType")}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{t("controlPanel.displayType")}</label>
               <select
                 value={chartType}
                 onChange={(e) => setChartType(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
                 <option value="pieTypes">{t("chartType.pieTypes")}</option>
                 <option value="pie">{t("chartType.pie")}</option>
@@ -126,11 +126,11 @@ export default function ProfitAnalysis() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t("controlPanel.year")}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{t("controlPanel.year")}</label>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
                 <option value="all">{t("controlPanel.allYears")}</option>
                 {availableYears.map(year => (
@@ -140,11 +140,11 @@ export default function ProfitAnalysis() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t("controlPanel.month")}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{t("controlPanel.month")}</label>
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
                 {MONTH_VALUES.map(v => (
                   <option key={v} value={v}>{v === '' ? t("common:monthAll") : t(`common:month.${v}`)}</option>
@@ -154,11 +154,11 @@ export default function ProfitAnalysis() {
 
             {['pie', 'pieTypes', 'treemap'].includes(chartType) && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t("controlPanel.dataType")}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{t("controlPanel.dataType")}</label>
                 <select
                   value={dataType}
                   onChange={(e) => setDataType(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="revenue">{t("dataTypeOption.revenue")}</option>
                   <option value="expenses">{t("dataTypeOption.expenses")}</option>
@@ -169,8 +169,8 @@ export default function ProfitAnalysis() {
         </div>
 
         {chartType === 'pie' && (pieChartData.length > 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-6 flex items-center">
               <span className="mr-3">🥧</span> {t("sections.pieBySectors", { kind: t(dataType === 'revenue' ? "sections.kindRevenueGenitive" : "sections.kindExpensesGenitive"), suffix: commonTitleSuffix })}
             </h2>
             <PieChartSection data={pieChartData} />
@@ -179,22 +179,22 @@ export default function ProfitAnalysis() {
 
         {chartType === 'pieTypes' && (pieChartTypeData.length > 0 ? (
           <div className="space-y-8">
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 flex items-center">
                   <span className="mr-3">🔖</span> {t("sections.pieByTypes", { kind: t(dataType === 'revenue' ? "sections.kindRevenueGenitive" : "sections.kindExpensesGenitive"), suffix: commonTitleSuffix })}
                 </h2>
                 {selectedProfitType && (
                   <button
                     onClick={() => setSelectedProfitType(null)}
-                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors text-sm font-medium"
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 dark:text-gray-100 rounded-lg transition-colors text-sm font-medium"
                   >
                     {t("detailView.close")}
                   </button>
                 )}
               </div>
 
-              <p className="text-gray-600 mb-4 text-sm">
+              <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
                 <Trans i18nKey="detailView.hint" ns="analytics" components={{ 1: <strong /> }} />
               </p>
 
@@ -239,8 +239,8 @@ export default function ProfitAnalysis() {
         ) : <NoData icon="📊" title={t("noData.noChart")} />)}
 
         {chartType === 'table' && (tableData.length > 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-6 flex items-center">
               <span className="mr-3">📋</span> {t("sections.table", { suffix: commonTitleSuffix })}
             </h2>
             <ProfitTableSection
@@ -252,8 +252,8 @@ export default function ProfitAnalysis() {
         ) : <NoData icon="📋" title={t("noData.noTable")} />)}
 
         {chartType === 'treemap' && (pieChartData.length > 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-6 flex items-center">
               <span className="mr-3">🗺️</span> {t("sections.treemap", { kind: t(dataType === 'revenue' ? "sections.kindRevenue" : "sections.kindExpenses"), suffix: commonTitleSuffix })}
             </h2>
             <TreemapSection data={pieChartData} />
@@ -261,8 +261,8 @@ export default function ProfitAnalysis() {
         ) : <NoData icon="🗺️" title={t("noData.noMap")} />)}
 
         {chartType === 'yearly' && (yearlyComparison.length > 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-6 flex items-center">
               <span className="mr-3">📈</span> {t("sections.yearly")}
             </h2>
             <YearlyChartSection data={yearlyComparison} />
@@ -280,12 +280,12 @@ export default function ProfitAnalysis() {
 const NoData = ({ icon, title }: any) => {
   const { t } = useTranslation("analytics");
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200 mb-8 text-center">
-      <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 mb-8 text-center">
+      <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
-      <p className="text-gray-500">{t("noData.periodHint")}</p>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-3">{title}</h3>
+      <p className="text-gray-500 dark:text-gray-400">{t("noData.periodHint")}</p>
     </div>
   );
 };
