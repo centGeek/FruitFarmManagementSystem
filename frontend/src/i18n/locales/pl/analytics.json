@@ -1,0 +1,103 @@
+{
+  "header": {
+    "title": "Analiza Finansowa Gospodarstwa",
+    "subtitle": "Szczegółowa analiza przychodów, wydatków i rentowności"
+  },
+  "stats": {
+    "totalRevenue": "Całkowite Przychody",
+    "totalExpenses": "Całkowite Wydatki",
+    "laborSubtitle": "w tym pracownicze: {{amount}} PLN",
+    "profit": "Zysk",
+    "profitPositive": "✅ Dodatni",
+    "profitNegative": "⚠️ Ujemny",
+    "profitMargin": "Marża Zysku"
+  },
+  "controlPanel": {
+    "title": "Panel Kontrolny - Wybierz Typ Analizy",
+    "displayType": "Typ wyświetlania",
+    "year": "Rok 📅",
+    "allYears": "Wszystkie lata",
+    "month": "Miesiąc 📆",
+    "dataType": "Typ danych"
+  },
+  "chartType": {
+    "pieTypes": "🔖 Wykres kołowy (typy)",
+    "pie": "📊 Wykres kołowy (sektory)",
+    "table": "📋 Tabela z marżami",
+    "treemap": "🗺️ Mapa drzewa (sektory)",
+    "yearly": "📈 Analiza rok do roku"
+  },
+  "dataTypeOption": {
+    "revenue": "💰 Przychody",
+    "expenses": "💸 Koszty"
+  },
+  "titleSuffix": {
+    "year": " - Rok {{year}}",
+    "month": " - {{month}}"
+  },
+  "sections": {
+    "pieBySectors": "Rozkład {{kind}} według Sektorów{{suffix}}",
+    "pieByTypes": "Rozkład {{kind}} według Typów{{suffix}}",
+    "table": "Tabela Rentowności Sektorów{{suffix}}",
+    "treemap": "Mapa Drzewa - {{kind}}{{suffix}}",
+    "yearly": "Analiza Rok do Roku",
+    "kindRevenueGenitive": "Przychodów",
+    "kindExpensesGenitive": "Kosztów",
+    "kindRevenue": "Przychody",
+    "kindExpenses": "Koszty"
+  },
+  "detailView": {
+    "close": "✖ Zamknij widok szczegółów",
+    "hint": "💡 <1>Wskazówka:</1> Kliknij na segment sprzedaży owoców lub kosztów pracowniczych, aby zobaczyć szczegóły",
+    "varietyDistribution": "Rozkład odmian: {{type}}",
+    "laborDistribution": "Rozkład kosztów pracowniczych"
+  },
+  "noData": {
+    "noChart": "Brak Wykresu",
+    "noTable": "Brak Tabeli",
+    "noMap": "Brak Mapy",
+    "noLaborData": "Brak danych",
+    "noVarietyData": "Brak danych o odmianach dla {{type}}",
+    "noAnalysisData": "Brak danych do analizy",
+    "periodHint": "Brak danych dla wybranego okresu i filtrów."
+  },
+  "fallback": {
+    "otherSector": "Inne",
+    "noSector": "Brak sektoru",
+    "general": "Ogólne (poza sektorami)",
+    "undefinedType": "Nieokreślony",
+    "sectorName": "Sektor {{id}}",
+    "laborCosts": "Koszty pracownicze"
+  },
+  "loading": "Ładowanie danych analitycznych... 📊",
+  "tooltip": {
+    "revenue": "Przychody",
+    "expenses": "Wydatki",
+    "profit": "Zysk",
+    "revenueSingular": "Przychód",
+    "soldKg": "Sprzedano: {{kilograms}} kg",
+    "pricePerKg": "Cena/kg",
+    "totalCost": "Koszt całkowity",
+    "paid": "Wypłacono",
+    "toPay": "Do wypłaty",
+    "entriesCount": "Liczba wpisów: {{count}}"
+  },
+  "yearlyLegend": {
+    "revenue": "Przychody",
+    "expenses": "Wydatki",
+    "netProfit": "Zysk Netto"
+  },
+  "table": {
+    "position": "Pozycja",
+    "sector": "Sektor",
+    "revenue": "Przychody",
+    "expenses": "Koszty",
+    "laborCosts": "W tym: Koszty pracy",
+    "profit": "Zysk",
+    "margin": "Marża"
+  },
+  "errors": {
+    "refreshLaborCosts": "Błąd podczas odświeżania kosztów pracowniczych",
+    "loadData": "Błąd podczas ładowania danych"
+  }
+}

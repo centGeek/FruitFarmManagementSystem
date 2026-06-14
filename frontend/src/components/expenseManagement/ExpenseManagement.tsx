@@ -1,54 +1,59 @@
+import { useTranslation } from "react-i18next";
 import { Alert } from "../../utils/common";
 import { MONTH_OPTIONS } from '../../utils/common';
 import { useExpenseManagement, EXPENSE_TYPES, PAYMENT_STATUS_OPTIONS, generateYearOptions } from './ExpenseManagementHooks';
 import { StatCard, ExpenseCard, LoadingState, EmptyState, Modal, ExpenseForm, Pagination } from './ExpenseManagementComponents';
 
 export default function ExpenseManagement() {
-    const {allExpenses, sectors, 
+    const { t } = useTranslation("expenseManagement");
+    const {allExpenses, sectors,
         selectedType, setSelectedType, selectedPaymentStatus, setSelectedPaymentStatus,
         selectedSectorId, setSelectedSectorId, selectedYear, setSelectedYear, selectedMonth, setSelectedMonth,
         searchTerm, setSearchTerm, currentPage, totalPages, isModalOpen, selectedExpense, isLoading, alert,
-        filteredStats, selectedSectorName,  paginatedExpenses,handleSaveExpense, 
+        filteredStats, selectedSectorName,  paginatedExpenses,handleSaveExpense,
         handleDeleteExpense, openModal, closeModal, handlePageChange, closeAlert
     } = useExpenseManagement();
 
     const hasActiveFilters = selectedType || selectedPaymentStatus || selectedSectorId || selectedYear || selectedMonth || searchTerm;
+
+    const paymentStatusLabel = (value: string) => value === '' ? t('paymentStatus.all') : t(`paymentStatus.${value}`);
+    const monthLabel = (value: string) => value === '' ? t('common:monthAll') : t(`common:month.${value}`);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-red-50 via-red-50 to-orange-100 p-6 font-sans">
             <div className="max-w-7xl mx-auto">
                 <header className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                        <span className="text-red-600 mr-3">💰</span> Zarządzanie Wydatkami
+                        <span className="text-red-600 mr-3">💰</span> {t('header.title')}
                     </h1>
                     <p className="text-gray-600 text-lg flex items-center">
-                        Monitoruj koszty paliwa, maszyn i zaopatrzenia. 💸
+                        {t('header.subtitle')}
                     </p>
                 </header>
-                
+
                 {alert.message && (
-                    <Alert 
-                        type={alert.type} 
-                        message={alert.message} 
-                        onClose={closeAlert} 
+                    <Alert
+                        type={alert.type}
+                        message={alert.message}
+                        onClose={closeAlert}
                     />
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <StatCard 
-                        amount={filteredStats.total} 
-                        label={hasActiveFilters ? `Suma (Filtrowane${selectedSectorId ? `: ${selectedSectorName}` : ''})` : "Całkowite Wydatki"} 
-                        color="blue" 
+                    <StatCard
+                        amount={filteredStats.total}
+                        label={hasActiveFilters ? (selectedSectorId ? t('stats.totalFiltered', { sector: selectedSectorName }) : t('stats.totalFilteredNoSector')) : t('stats.total')}
+                        color="blue"
                     />
-                    <StatCard 
-                        amount={filteredStats.paid} 
-                        label={hasActiveFilters ? "Opłacone (Filtrowane)" : "Wydatki Opłacone"} 
-                        color="green" 
+                    <StatCard
+                        amount={filteredStats.paid}
+                        label={hasActiveFilters ? t('stats.paidFiltered') : t('stats.paid')}
+                        color="green"
                     />
-                    <StatCard 
-                        amount={filteredStats.unpaid} 
-                        label={hasActiveFilters ? "Nieopłacone (Filtrowane)" : "Wydatki Nieopłacone"} 
-                        color="red" 
+                    <StatCard
+                        amount={filteredStats.unpaid}
+                        label={hasActiveFilters ? t('stats.unpaidFiltered') : t('stats.unpaid')}
+                        color="red"
                     />
                 </div>
 
@@ -57,22 +62,22 @@ export default function ExpenseManagement() {
                         <div className="flex items-start justify-between">
                             <div className="flex-1">
                                 <h3 className="text-lg font-bold text-purple-900 mb-2 flex items-center">
-                                    <span className="mr-2">🔍</span> Aktywne Filtry
+                                    <span className="mr-2">🔍</span> {t('activeFilters.title')}
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {selectedType && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">Typ: {EXPENSE_TYPES.find(t => t.value === selectedType)?.label}</span>}
-                                    {selectedPaymentStatus && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">Status: {PAYMENT_STATUS_OPTIONS.find(o => o.value === selectedPaymentStatus)?.label}</span>}
-                                    {selectedSectorId && selectedSectorName && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">🗺️ Sektor: {selectedSectorName}</span>}
-                                    {selectedYear && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">📅 Rok: {selectedYear}</span>}
-                                    {selectedMonth && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">📆 Miesiąc: {MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label}</span>}
-                                    {searchTerm && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">Szukaj: "{searchTerm}"</span>}
+                                    {selectedType && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">{t('activeFilters.type', { value: t(`expenseType.${selectedType}`) })}</span>}
+                                    {selectedPaymentStatus && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">{t('activeFilters.status', { value: paymentStatusLabel(selectedPaymentStatus) })}</span>}
+                                    {selectedSectorId && selectedSectorName && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">{t('activeFilters.sector', { value: selectedSectorName })}</span>}
+                                    {selectedYear && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">{t('activeFilters.year', { value: selectedYear })}</span>}
+                                    {selectedMonth && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">{t('activeFilters.month', { value: monthLabel(selectedMonth) })}</span>}
+                                    {searchTerm && <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">{t('activeFilters.search', { value: searchTerm })}</span>}
                                 </div>
                             </div>
                             <button onClick={() => {
                                 setSelectedType(''); setSelectedPaymentStatus(''); setSelectedSectorId('');
                                 setSelectedYear(''); setSelectedMonth(''); setSearchTerm('');
                             }} className="ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors text-sm whitespace-nowrap">
-                                Wyczyść Filtry
+                                {t('activeFilters.clear')}
                             </button>
                         </div>
                     </div>
@@ -81,57 +86,57 @@ export default function ExpenseManagement() {
                 <div className="bg-white rounded-2xl shadow-lg border border-red-100 mb-8">
                     <div className="p-6 space-y-6">
                         <div className="space-y-3">
-                            <label className="block text-sm font-medium text-gray-700">🔍 Wyszukiwanie w wydatkach</label>
+                            <label className="block text-sm font-medium text-gray-700">{t('search.label')}</label>
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg">🔍</span>
-                                <input 
-                                    type="text" 
-                                    placeholder="Wpisz opis, kwotę, datę lub typ wydatku..." 
-                                    value={searchTerm} 
-                                    onChange={(e) => setSearchTerm(e.target.value)} 
-                                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                                <input
+                                    type="text"
+                                    placeholder={t('search.placeholder')}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white"
                                 />
-                                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" title="Wyczyść wyszukiwanie">❌</button>}
+                                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" title={t('search.clearTitle')}>❌</button>}
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">Typ wydatku</label>
+                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">{t('filters.typeLabel')}</label>
                                     <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors shadow-sm">
-                                        <option value="">🛠️ Wszystkie typy</option>
-                                        {EXPENSE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                                        <option value="">{t('filters.allTypes')}</option>
+                                        {EXPENSE_TYPES.map(item => <option key={item.value} value={item.value}>{t(`expenseType.${item.value}`)}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">Status płatności</label>
+                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">{t('filters.statusLabel')}</label>
                                     <select value={selectedPaymentStatus} onChange={(e) => setSelectedPaymentStatus(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors shadow-sm">
-                                        {PAYMENT_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                        {PAYMENT_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{paymentStatusLabel(o.value)}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">Sektor 🗺️</label>
+                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">{t('filters.sectorLabel')}</label>
                                     <select value={selectedSectorId} onChange={(e) => setSelectedSectorId(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors shadow-sm">
-                                        <option value="">📋 Wszystkie sektory</option>
+                                        <option value="">{t('filters.allSectors')}</option>
                                         {sectors.map((sector) => (
                                             <option key={sector.id} value={sector.id}>
-                                                {sector.description || `Sektor ${sector.id}`}{sector.plantType && ` - ${sector.plantType}`}
+                                                {sector.description || t('sectorFallback', { id: sector.id })}{sector.plantType && ` - ${sector.plantType}`}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">Rok 📅</label>
+                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">{t('filters.yearLabel')}</label>
                                     <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors shadow-sm">
-                                        <option value="">📆 Wszystkie lata</option>
+                                        <option value="">{t('filters.allYears')}</option>
                                         {generateYearOptions().map(year => <option key={year} value={year}>{year}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">Miesiąc 📆</label>
+                                    <label className="block text-xs font-medium text-gray-600 uppercase tracking-wide">{t('filters.monthLabel')}</label>
                                     <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors shadow-sm">
-                                        {MONTH_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                                        {MONTH_OPTIONS.map(o => <option key={o.value} value={o.value}>{monthLabel(o.value)}</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -140,7 +145,7 @@ export default function ExpenseManagement() {
                         <div className="pt-4 border-t border-gray-100">
                             <button onClick={() => openModal()} className="w-full md:w-auto bg-gradient-to-r from-red-600 to-orange-700 hover:from-red-700 hover:to-orange-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl group">
                                 <span className="text-xl group-hover:scale-110 transition-transform">+</span>
-                                <span>Dodaj Nowy Wydatek</span>
+                                <span>{t('addExpense')}</span>
                             </button>
                         </div>
                     </div>
@@ -148,54 +153,54 @@ export default function ExpenseManagement() {
 
                 <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900 flex items-center">Lista Wydatków</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 flex items-center">{t('list.title')}</h2>
                         <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-lg font-medium">
-                            Wyświetlono: {Math.min((currentPage - 1) * 15 + 1, filteredStats.total > 0 ? 1 : 0)}-{Math.min(currentPage * 15, paginatedExpenses.length + (currentPage-1)*15)} {allExpenses.length !== paginatedExpenses.length && ` (przefiltrowano)`}
+                            {t('list.shown', { from: Math.min((currentPage - 1) * 15 + 1, filteredStats.total > 0 ? 1 : 0), to: Math.min(currentPage * 15, paginatedExpenses.length + (currentPage-1)*15) })}{allExpenses.length !== paginatedExpenses.length && t('list.filteredSuffix')}
                         </div>
                     </div>
-                    
+
                     {isLoading ? (
                         <LoadingState />
                     ) : paginatedExpenses.length === 0 ? (
-                        <EmptyState 
-                            searchTerm={searchTerm || selectedType || selectedPaymentStatus || selectedSectorId || selectedYear} 
-                            expensesCount={allExpenses.length} 
-                            onAddClick={openModal} 
+                        <EmptyState
+                            searchTerm={searchTerm || selectedType || selectedPaymentStatus || selectedSectorId || selectedYear}
+                            expensesCount={allExpenses.length}
+                            onAddClick={openModal}
                         />
                     ) : (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {paginatedExpenses.map((expense) => (
-                                    <ExpenseCard 
-                                        key={expense.id} 
-                                        expense={expense} 
-                                        onEdit={openModal} 
-                                        onDelete={handleDeleteExpense} 
-                                        sectors={sectors} 
+                                    <ExpenseCard
+                                        key={expense.id}
+                                        expense={expense}
+                                        onEdit={openModal}
+                                        onDelete={handleDeleteExpense}
+                                        sectors={sectors}
                                     />
                                 ))}
                             </div>
-                            <Pagination 
-                                currentPage={currentPage} 
-                                totalPages={totalPages} 
-                                onPageChange={handlePageChange} 
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
                             />
                         </>
                     )}
                 </div>
             </div>
 
-            <Modal 
-                isOpen={isModalOpen} 
-                onClose={closeModal} 
-                title={selectedExpense ? 'Edytuj Wydatek' : 'Dodaj Nowy Wydatek'}
+            <Modal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                title={selectedExpense ? t('modal.editTitle') : t('modal.addTitle')}
             >
-                <ExpenseForm 
-                    expense={selectedExpense} 
-                    onSave={handleSaveExpense} 
-                    onCancel={closeModal} 
-                    isLoading={isLoading} 
-                    sectors={sectors} 
+                <ExpenseForm
+                    expense={selectedExpense}
+                    onSave={handleSaveExpense}
+                    onCancel={closeModal}
+                    isLoading={isLoading}
+                    sectors={sectors}
                 />
             </Modal>
         </div>

@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Panel administratora — zgłoszenia",
+    "subtitle": "Wszystkie usterki i sugestie zgłoszone przez użytkowników systemu."
+  },
+  "stats": {
+    "total": "Wszystkie",
+    "open": "Otwarte",
+    "inProgress": "W trakcie",
+    "closed": "Zamknięte"
+  },
+  "loading": "Ładowanie zgłoszeń... 🔄",
+  "empty": {
+    "title": "Brak zgłoszeń",
+    "description": "Żaden użytkownik nie zgłosił jeszcze usterki, albo żadne zgłoszenie nie pasuje do filtra."
+  },
+  "filters": {
+    "all": "Wszystkie",
+    "open": "Otwarte",
+    "inProgress": "W trakcie",
+    "closed": "Zamknięte",
+    "searchPlaceholder": "Szukaj po opisie lub zgłaszającym..."
+  },
+  "statusOptions": {
+    "open": "Otwarte",
+    "inProgress": "W trakcie",
+    "closed": "Zamknięte"
+  },
+  "pagination": {
+    "previous": "← Poprzednia",
+    "next": "Następna →"
+  },
+  "ticket": {
+    "reportedAt": "Zgłoszono: {{date}}",
+    "unknownReporter": "Nieznany użytkownik",
+    "descriptionLabel": "Opis",
+    "closedAt": "Zamknięto: {{date}}",
+    "changeStatus": "Zmień status",
+    "currentStatusTitle": "Aktualny status",
+    "setStatusTitle": "Ustaw status: {{status}}",
+    "adminCommentLabel": "Komentarz administratora",
+    "commentPlaceholder": "np. Rozwiązane — wymieniono uszkodzony czujnik.",
+    "saving": "Zapisywanie...",
+    "saveComment": "Zapisz komentarz"
+  },
+  "alerts": {
+    "fetchFailed": "Nie udało się pobrać zgłoszeń.",
+    "fetchNetworkError": "Błąd sieci podczas pobierania zgłoszeń.",
+    "statusUpdated": "Status zgłoszenia #{{id}} został zaktualizowany.",
+    "statusUpdateFailed": "Nie udało się zmienić statusu zgłoszenia.",
+    "statusNetworkError": "Błąd sieci podczas zmiany statusu zgłoszenia.",
+    "commentSaved": "Komentarz do zgłoszenia #{{id}} został zapisany.",
+    "commentSaveFailed": "Nie udało się zapisać komentarza.",
+    "commentNetworkError": "Błąd sieci podczas zapisywania komentarza."
+  }
+}

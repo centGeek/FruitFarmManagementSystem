@@ -1,0 +1,149 @@
+{
+  "header": {
+    "title": "Team Work Scheduling",
+    "subtitle": "Weekly planning and assigning tasks/hours to employees 🗓️"
+  },
+  "stats": {
+    "total": "Entries this week",
+    "unpaid": "Unpaid this week",
+    "paid": "Paid this week",
+    "totalSalaryWeek": "Weekly wages"
+  },
+  "calendar": {
+    "today": "Today",
+    "addEntries": "Add entries",
+    "addMore": "+ Add more"
+  },
+  "event": {
+    "togglePaidTitlePaid": "Cancel payment",
+    "togglePaidTitleUnpaid": "Mark as paid"
+  },
+  "fields": {
+    "hours": "Hours",
+    "kilograms": "Kilograms",
+    "salary": "Wages (PLN)",
+    "sector": "Sector",
+    "workType": "Work type",
+    "description": "Description",
+    "noSector": "None"
+  },
+  "currency": {
+    "zl": "{{value}} PLN"
+  },
+  "bulkModal": {
+    "title": "Bulk work assignment: {{date}}"
+  },
+  "editModal": {
+    "title": "Edit entry: {{name}} {{surname}}",
+    "descriptionPlaceholder": "Additional notes...",
+    "saving": "Saving...",
+    "saveChanges": "Save changes"
+  },
+  "dailyForm": {
+    "quickFill": "⚡ Quick fill for everyone:",
+    "hoursLabel": "Hours",
+    "sectorLabel": "Sector",
+    "workTypeLabel": "Work type",
+    "choose": "Select...",
+    "noSector": "None",
+    "hoursRequired": "Hours *",
+    "kilogramsRequired": "Kilograms *",
+    "hoursPlaceholder": "8",
+    "kilogramsPlaceholder": "50",
+    "notesPlaceholder": "Notes (optional)...",
+    "filledCount": "Employees with data: ",
+    "filledCountValue": "{{filled}} / {{total}}",
+    "totalHours": "Total hours: ",
+    "totalHoursValue": "{{hours}}h",
+    "totalKilograms": "Total kilograms: ",
+    "totalKilogramsValue": "{{kg}} kg",
+    "saveEntries": "Save entries"
+  },
+  "details": {
+    "title": "Entry details for: {{name}} {{surname}}",
+    "duration": "Duration",
+    "kilogramsPicked": "Kilograms picked",
+    "daySalary": "Daily wages",
+    "sector": "Sector",
+    "workType": "Work type",
+    "descriptionLabel": "Description:",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this entry?",
+    "paymentStatus": "Payment status",
+    "paid": "✅ Paid",
+    "unpaid": "🟡 Unpaid",
+    "markUnpaid": "❌ Mark as unpaid",
+    "markPaid": "💵 Mark as paid",
+    "quickPayments": "Quick payments for the employee:",
+    "payAllOutstanding": "Pay for everything (outstanding)",
+    "payMonth": "Pay for the month",
+    "payAdvance": "Pay a portion (advance)"
+  },
+  "advanceModal": {
+    "title": "Advance payment for: {{name}} {{surname}}",
+    "heading": "Advance payment",
+    "info": "Pay the employee part of what is owed as an advance. This amount will be deducted from the next payout.",
+    "amountLabel": "Advance amount (PLN) *",
+    "amountPlaceholder": "e.g. 500.00",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "e.g. Advance toward the weekly payout...",
+    "processing": "Processing...",
+    "confirm": "Confirm advance payment",
+    "invalidAmount": "Enter a valid advance amount greater than 0."
+  },
+  "payModal": {
+    "titleMonth": "Confirm payment for the entire month for: {{name}} {{surname}}",
+    "titleAll": "Confirm payment for all outstanding entries for: {{name}} {{surname}}",
+    "warning": "⚠️ IMPORTANT: Make sure the payment has actually been made.",
+    "summary": "Payment Summary",
+    "infoMonth": "This operation will mark all {{count}} unpaid entries from the current month as paid.",
+    "infoAll": "This operation will mark all {{count}} unpaid entries up to today as paid.",
+    "totalGross": "Total wages: ",
+    "deductedAdvances": "Deducted advances:",
+    "netAmount": "Amount to pay:",
+    "unsettledAdvances": "Outstanding advances:",
+    "noDescription": "No description",
+    "listMonth": "List of entries from the current month:",
+    "listAll": "List of all outstanding entries:",
+    "entryRow": "{{date}} - {{duration}}h",
+    "processing": "Processing...",
+    "confirmMonth": "Confirm payment for the month",
+    "confirmAll": "Confirm payment for everything"
+  },
+  "workType": {
+    "HARVEST": "🌾 Harvest",
+    "WEEDING": "🌱 Weeding",
+    "WATERING": "💧 Watering",
+    "SPRAYING": "💨 Spraying",
+    "PLANTING": "🌿 Planting",
+    "PRUNING": "✂️ Pruning",
+    "FERTILIZING": "🧪 Fertilizing",
+    "OTHER": "📋 Other"
+  },
+  "messages": {
+    "validationRequired": "Provide the required data for at least one employee",
+    "noDateSelected": "No work date selected.",
+    "saveSuccess": "Saved {{count}} entries.",
+    "entryUpdated": "Entry updated.",
+    "entryDeleted": "Entry deleted.",
+    "markedPaid": "Marked as paid",
+    "markedUnpaid": "Marked as unpaid",
+    "paymentSuccess": "Payment completed successfully.",
+    "advanceSaved": "Advance of {{amount}} PLN saved.",
+    "employeeNotFound": "Employee not found.",
+    "error": "Error: {{error}}",
+    "connectionError": "Connection error.",
+    "loadEntriesError": "Error loading entries.",
+    "loadError": "Error loading {{entity}}: {{status}}",
+    "loadConnectionError": "Server connection error while loading {{entity}}.",
+    "loadEmployeesError": "Error loading employees: {{status}}",
+    "serverConnectionError": "Server connection error.",
+    "unexpectedError": "An unexpected error occurred",
+    "connectionShort": "Connection error",
+    "errorShort": "Error"
+  },
+  "entities": {
+    "sectors": "sectors"
+  }
+}

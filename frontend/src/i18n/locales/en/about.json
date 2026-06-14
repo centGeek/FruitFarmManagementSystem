@@ -1,0 +1,53 @@
+{
+  "backToLogin": "Back to login",
+  "logoAlt": "MenadżerSadu",
+  "hero": "A comprehensive system for managing an orchard business — work planning, harvest records, finances and weather all in one organized place.",
+  "audience": {
+    "title": "Who is it for?",
+    "body": "MenadżerSadu was created with the owners and managers of orchard businesses in mind — from small, family orchards to larger fruit plantations. It is a tool for anyone who employs workers (including seasonal ones), plans and settles their work, keeps records of harvested fruit and wants to stay on top of their business's finances. If until now you have been writing everything down in a notebook or in scattered spreadsheets — this application brings it all together in one clear place."
+  },
+  "why": {
+    "title": "Why MenadżerSadu?",
+    "intro": "Running an orchard means dozens of daily decisions: who worked where today, how many hours or kilograms, how much it cost and whether the orchard pays for itself. MenadżerSadu takes the burden of manual calculations off your shoulders and organizes your data:",
+    "points": {
+      "salary": "automatically calculates wages based on hours worked or kilograms harvested,",
+      "finance": "shows costs, revenue and real profit in clear summaries,",
+      "map": "assigns workers to specific sectors on the map of your orchard,",
+      "weather": "warns about dangerous weather phenomena for your location."
+    },
+    "outro": "As a result, instead of drowning in paperwork, you can focus on what matters most — your fruit."
+  },
+  "features": {
+    "title": "What's inside",
+    "map": {
+      "title": "Orchard map",
+      "desc": "Draw sectors on an interactive map and assign workers and crop types to them."
+    },
+    "workforce": {
+      "title": "Workers and work records",
+      "desc": "Manage workers, plan the schedule and log hours worked or kilograms harvested."
+    },
+    "salary": {
+      "title": "Wages",
+      "desc": "Automatic payroll calculation based on an hourly rate or a per-kilogram harvest rate."
+    },
+    "finance": {
+      "title": "Orchard finances",
+      "desc": "Advances, expenses, revenue and real profit — a complete picture of your business's finances."
+    },
+    "analytics": {
+      "title": "Efficiency analysis",
+      "desc": "Clear summaries that help you monitor results and optimize resource usage."
+    },
+    "weather": {
+      "title": "Weather notifications",
+      "desc": "Alerts about anomalies and weather changes for your orchard's location."
+    }
+  },
+  "cta": {
+    "title": "Ready to organize your orchard?",
+    "login": "Log in",
+    "register": "Create an account"
+  },
+  "footer": "© 2026 MenadżerSadu — Digital management of an orchard business"
+}

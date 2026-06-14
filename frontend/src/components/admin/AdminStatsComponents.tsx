@@ -1,11 +1,15 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
-export const LoadingState = () => (
-  <div className="text-center py-16">
-    <div className="w-14 h-14 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto mb-6"></div>
-    <p className="text-gray-500 text-xl font-medium">Ładowanie statystyk... 🔄</p>
-  </div>
-);
+export const LoadingState = () => {
+  const { t } = useTranslation("adminStats");
+  return (
+    <div className="text-center py-16">
+      <div className="w-14 h-14 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto mb-6"></div>
+      <p className="text-gray-500 text-xl font-medium">{t("loading")}</p>
+    </div>
+  );
+};
 
 const fmtMoney = (v: any) => {
   const n = Number(v ?? 0);
@@ -39,21 +43,22 @@ const Row = ({ label, value, strong }: any) => (
 );
 
 export const FinanceSummary = ({ stats }: any) => {
+  const { t } = useTranslation("adminStats");
   const balance = Number(stats.netBalance ?? 0);
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
       <div>
-        <Row label="Przychody łącznie" value={fmtMoney(stats.totalProfits)} />
-        <Row label="Wydatki łącznie" value={fmtMoney(stats.totalExpenses)} />
-        <Row label="Wydatki opłacone" value={fmtMoney(stats.paidExpenses)} />
-        <Row label="Wydatki nieopłacone" value={fmtMoney(stats.unpaidExpenses)} />
+        <Row label={t("finance.totalProfits")} value={fmtMoney(stats.totalProfits)} />
+        <Row label={t("finance.totalExpenses")} value={fmtMoney(stats.totalExpenses)} />
+        <Row label={t("finance.paidExpenses")} value={fmtMoney(stats.paidExpenses)} />
+        <Row label={t("finance.unpaidExpenses")} value={fmtMoney(stats.unpaidExpenses)} />
       </div>
       <div>
-        <Row label="Wypłacone wynagrodzenia" value={fmtMoney(stats.totalSalaries)} />
-        <Row label="Zebrane kilogramy" value={`${stats.totalKilogramsPicked} kg`} />
-        <Row label="Sprzedane kilogramy" value={`${stats.totalKilogramsSold} kg`} />
+        <Row label={t("finance.totalSalaries")} value={fmtMoney(stats.totalSalaries)} />
+        <Row label={t("finance.kilogramsPicked")} value={`${stats.totalKilogramsPicked} kg`} />
+        <Row label={t("finance.kilogramsSold")} value={`${stats.totalKilogramsSold} kg`} />
         <Row
-          label="Bilans netto"
+          label={t("finance.netBalance")}
           strong
           value={<span className={balance >= 0 ? 'text-green-600' : 'text-red-600'}>{fmtMoney(balance)}</span>}
         />
@@ -62,9 +67,11 @@ export const FinanceSummary = ({ stats }: any) => {
   );
 };
 
-export const BarChart = ({ data, color = 'bg-slate-600', emptyText = 'Brak danych' }: any) => {
+export const BarChart = ({ data, color = 'bg-slate-600', emptyText }: any) => {
+  const { t } = useTranslation("adminStats");
+  const empty = emptyText ?? t("common:status.noData");
   if (!data || data.length === 0) {
-    return <p className="text-gray-400 text-sm py-6 text-center">{emptyText}</p>;
+    return <p className="text-gray-400 text-sm py-6 text-center">{empty}</p>;
   }
   const max = Math.max(...data.map((d: any) => d.count), 1);
   return (
@@ -86,13 +93,16 @@ export const BarChart = ({ data, color = 'bg-slate-600', emptyText = 'Brak danyc
   );
 };
 
-export const TicketStatusBars = React.memo(({ stats }: any) => (
-  <BarChart
-    color="bg-amber-500"
-    data={[
-      { label: 'Otwarte', count: stats.openTickets },
-      { label: 'W trakcie', count: stats.inProgressTickets },
-      { label: 'Zamknięte', count: stats.closedTickets },
-    ]}
-  />
-));
+export const TicketStatusBars = React.memo(({ stats }: any) => {
+  const { t } = useTranslation("adminStats");
+  return (
+    <BarChart
+      color="bg-amber-500"
+      data={[
+        { label: t("ticketStatus.open"), count: stats.openTickets },
+        { label: t("ticketStatus.inProgress"), count: stats.inProgressTickets },
+        { label: t("ticketStatus.closed"), count: stats.closedTickets },
+      ]}
+    />
+  );
+});

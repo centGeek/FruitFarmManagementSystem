@@ -18,11 +18,11 @@ public class TicketDto {
 
     private Long id;
 
-    @NotBlank(message = "Opis usterki jest wymagany")
-    @Size(min = 5, max = 2000, message = "Opis musi mieć między 5 a 2000 znaków")
+    @NotBlank(message = "{ticket.description.required}")
+    @Size(min = 5, max = 2000, message = "{ticket.description.size}")
     private String description;
 
-    @Size(max = 64, message = "Kategoria może mieć maksymalnie 64 znaki")
+    @Size(max = 64, message = "{ticket.category.size}")
     private String category;
 
     private LocalDateTime createdAt;
@@ -31,7 +31,7 @@ public class TicketDto {
 
     private TicketStatus status;
 
-    @Size(max = 2000, message = "Komentarz może mieć maksymalnie 2000 znaków")
+    @Size(max = 2000, message = "{ticket.adminComment.size}")
     private String adminComment;
 
     private UserDto userDto;

@@ -337,7 +337,7 @@ class TicketControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("blocked");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("blocked")).thenReturn(Optional.of(userWithActive(false)));
+        when(userRepository.findActiveByNickname("blocked")).thenReturn(Optional.of(false));
 
         mvc.perform(get("/api/tickets").cookie(new Cookie("accessToken", "token")))
                 .andExpect(status().isForbidden());
@@ -349,7 +349,7 @@ class TicketControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("active");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("active")).thenReturn(Optional.of(userWithActive(true)));
+        when(userRepository.findActiveByNickname("active")).thenReturn(Optional.of(true));
 
         UserDto logged = new UserDto();
         logged.setId(5L);

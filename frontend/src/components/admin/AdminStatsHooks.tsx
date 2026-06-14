@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
+
+type TFn = (key: string, opts?: Record<string, unknown>) => string;
 import { authFetch } from '../../utils/authFetch';
 
 interface ReportRow {
@@ -14,55 +17,55 @@ interface ReportSection {
 }
 
 // Single source of truth for both the CSV and the PDF export, so they never drift apart.
-const buildSections = (stats: any): ReportSection[] => {
+const buildSections = (stats: any, t: TFn): ReportSection[] => {
   const num = (v: any): number | null => (v == null ? null : Number(v));
 
   const sections: ReportSection[] = [
     {
-      title: 'Użytkownicy',
+      title: t('report.sectionUsers'),
       rows: [
-        { label: 'Użytkownicy łącznie', value: num(stats.totalUsers) },
-        { label: 'Administratorzy', value: num(stats.admins) },
-        { label: 'Sadownicy', value: num(stats.gardeners) },
-        { label: 'Pracownicy', value: num(stats.employees) },
-        { label: 'Konta aktywne', value: num(stats.activeUsers) },
-        { label: 'Konta zablokowane', value: num(stats.blockedUsers) },
+        { label: t('report.rows.totalUsers'), value: num(stats.totalUsers) },
+        { label: t('report.rows.admins'), value: num(stats.admins) },
+        { label: t('report.rows.gardeners'), value: num(stats.gardeners) },
+        { label: t('report.rows.employees'), value: num(stats.employees) },
+        { label: t('report.rows.activeUsers'), value: num(stats.activeUsers) },
+        { label: t('report.rows.blockedUsers'), value: num(stats.blockedUsers) },
       ],
     },
     {
-      title: 'Sektory',
+      title: t('report.sectionSectors'),
       rows: [
-        { label: 'Sektory łącznie', value: num(stats.totalSectors) },
-        { label: 'Sektory aktywne', value: num(stats.activeSectors) },
+        { label: t('report.rows.totalSectors'), value: num(stats.totalSectors) },
+        { label: t('report.rows.activeSectors'), value: num(stats.activeSectors) },
       ],
     },
     {
-      title: 'Praca i zbiory',
+      title: t('report.sectionWorkAndHarvest'),
       rows: [
-        { label: 'Wpisy pracy', value: num(stats.totalWorkEntries) },
-        { label: 'Zebrane kilogramy', value: num(stats.totalKilogramsPicked), unit: 'kg' },
-        { label: 'Sprzedane kilogramy', value: num(stats.totalKilogramsSold), unit: 'kg' },
+        { label: t('report.rows.totalWorkEntries'), value: num(stats.totalWorkEntries) },
+        { label: t('report.rows.kilogramsPicked'), value: num(stats.totalKilogramsPicked), unit: 'kg' },
+        { label: t('report.rows.kilogramsSold'), value: num(stats.totalKilogramsSold), unit: 'kg' },
       ],
     },
     {
-      title: 'Finanse',
+      title: t('report.sectionFinances'),
       rows: [
-        { label: 'Przychody łącznie', value: num(stats.totalProfits), unit: 'zł', money: true },
-        { label: 'Wydatki łącznie', value: num(stats.totalExpenses), unit: 'zł', money: true },
-        { label: 'Wydatki opłacone', value: num(stats.paidExpenses), unit: 'zł', money: true },
-        { label: 'Wydatki nieopłacone', value: num(stats.unpaidExpenses), unit: 'zł', money: true },
-        { label: 'Wypłacone wynagrodzenia', value: num(stats.totalSalaries), unit: 'zł', money: true },
-        { label: 'Bilans netto', value: num(stats.netBalance), unit: 'zł', money: true },
+        { label: t('report.rows.totalProfits'), value: num(stats.totalProfits), unit: 'zł', money: true },
+        { label: t('report.rows.totalExpenses'), value: num(stats.totalExpenses), unit: 'zł', money: true },
+        { label: t('report.rows.paidExpenses'), value: num(stats.paidExpenses), unit: 'zł', money: true },
+        { label: t('report.rows.unpaidExpenses'), value: num(stats.unpaidExpenses), unit: 'zł', money: true },
+        { label: t('report.rows.totalSalaries'), value: num(stats.totalSalaries), unit: 'zł', money: true },
+        { label: t('report.rows.netBalance'), value: num(stats.netBalance), unit: 'zł', money: true },
       ],
     },
     {
-      title: 'Zgłoszenia',
+      title: t('report.sectionTickets'),
       rows: [
-        { label: 'Zgłoszenia łącznie', value: num(stats.totalTickets) },
-        { label: 'Zgłoszenia otwarte', value: num(stats.openTickets) },
-        { label: 'Zgłoszenia w trakcie', value: num(stats.inProgressTickets) },
-        { label: 'Zgłoszenia zamknięte', value: num(stats.closedTickets) },
-        { label: 'Śr. czas zamknięcia', value: num(stats.avgTicketCloseHours), unit: 'h' },
+        { label: t('report.rows.totalTickets'), value: num(stats.totalTickets) },
+        { label: t('report.rows.openTickets'), value: num(stats.openTickets) },
+        { label: t('report.rows.inProgressTickets'), value: num(stats.inProgressTickets) },
+        { label: t('report.rows.closedTickets'), value: num(stats.closedTickets) },
+        { label: t('report.rows.avgCloseHours'), value: num(stats.avgTicketCloseHours), unit: 'h' },
       ],
     },
   ];
@@ -71,8 +74,8 @@ const buildSections = (stats: any): ReportSection[] => {
     const rows: ReportRow[] = (arr ?? []).map((d: any) => ({ label: String(d.label), value: Number(d.count) }));
     return rows.length ? { title, rows } : null;
   };
-  const byMonth = breakdown('Zgłoszenia wg miesiąca', stats.ticketsByMonth);
-  const byCategory = breakdown('Zgłoszenia wg kategorii', stats.ticketsByCategory);
+  const byMonth = breakdown(t('report.ticketsByMonth'), stats.ticketsByMonth);
+  const byCategory = breakdown(t('report.ticketsByCategory'), stats.ticketsByCategory);
   if (byMonth) sections.push(byMonth);
   if (byCategory) sections.push(byCategory);
 
@@ -96,6 +99,7 @@ const fmtPdfValue = (r: ReportRow): string => {
 };
 
 export const useAdminStats = () => {
+  const { t } = useTranslation("adminStats");
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({ type: '', message: '' });
@@ -112,14 +116,14 @@ export const useAdminStats = () => {
       if (response.ok) {
         setStats(await response.json());
       } else {
-        setAlert({ type: 'error', message: 'Nie udało się pobrać statystyk.' });
+        setAlert({ type: 'error', message: t('errors.fetchFailed') });
       }
     } catch {
-      setAlert({ type: 'error', message: 'Błąd sieci podczas pobierania statystyk.' });
+      setAlert({ type: 'error', message: t('errors.network') });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchStats();
@@ -127,9 +131,14 @@ export const useAdminStats = () => {
 
   const exportCsv = useCallback(() => {
     if (!stats) return;
-    const sections = buildSections(stats);
+    const sections = buildSections(stats, t);
 
-    const grid: string[][] = [['Sekcja', 'Metryka', 'Wartość', 'Jednostka']];
+    const grid: string[][] = [[
+      t('report.csvHeaders.section'),
+      t('report.csvHeaders.metric'),
+      t('report.csvHeaders.value'),
+      t('report.csvHeaders.unit'),
+    ]];
     for (const s of sections) {
       for (const r of s.rows) {
         grid.push([s.title, r.label, fmtCsvValue(r), r.unit ?? '']);
@@ -148,7 +157,7 @@ export const useAdminStats = () => {
     a.download = `statystyki-sadu-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [stats]);
+  }, [stats, t]);
 
   const exportPdf = useCallback(async () => {
     if (!stats) return;
@@ -164,14 +173,14 @@ export const useAdminStats = () => {
       const vfsRaw: any = vfsMod as any;
       pdfMake.vfs = vfsRaw.vfs ?? vfsRaw.pdfMake?.vfs ?? vfsRaw.default?.vfs ?? vfsRaw.default ?? vfsRaw;
 
-      const sections = buildSections(stats);
+      const sections = buildSections(stats, t);
       const generatedAt = new Date().toLocaleString('pl-PL');
       const fileDate = new Date().toISOString().slice(0, 10);
 
       const content: any[] = [
-        { text: 'Statystyki sadu', style: 'title' },
-        { text: 'Panel administratora — globalny przegląd całego systemu.', style: 'subtitle' },
-        { text: `Wygenerowano: ${generatedAt}`, style: 'meta', margin: [0, 2, 0, 18] },
+        { text: t('report.pdf.title'), style: 'title' },
+        { text: t('report.pdf.subtitle'), style: 'subtitle' },
+        { text: t('report.pdf.generatedAt', { date: generatedAt }), style: 'meta', margin: [0, 2, 0, 18] },
       ];
 
       for (const s of sections) {
@@ -183,8 +192,8 @@ export const useAdminStats = () => {
             widths: ['*', 'auto'],
             body: [
               [
-                { text: 'Metryka', style: 'th' },
-                { text: 'Wartość', style: 'th', alignment: 'right' },
+                { text: t('report.pdf.thMetric'), style: 'th' },
+                { text: t('report.pdf.thValue'), style: 'th', alignment: 'right' },
               ],
               ...s.rows.map(r => [
                 { text: r.label, style: 'td' },
@@ -209,7 +218,7 @@ export const useAdminStats = () => {
         pageMargins: [40, 48, 40, 48],
         defaultStyle: { font: 'Roboto', fontSize: 10, color: '#1f2937' },
         footer: (currentPage: number, pageCount: number) => ({
-          text: `Strona ${currentPage} z ${pageCount}`,
+          text: t('report.pdf.pageFooter', { currentPage, pageCount }),
           alignment: 'center',
           fontSize: 8,
           color: '#94a3b8',
@@ -228,9 +237,9 @@ export const useAdminStats = () => {
 
       pdfMake.createPdf(docDefinition).download(`statystyki-sadu-${fileDate}.pdf`);
     } catch {
-      setAlert({ type: 'error', message: 'Nie udało się wygenerować pliku PDF.' });
+      setAlert({ type: 'error', message: t('errors.pdfFailed') });
     }
-  }, [stats]);
+  }, [stats, t]);
 
   return { stats, isLoading, alert, closeAlert, refresh: fetchStats, exportCsv, exportPdf };
 };

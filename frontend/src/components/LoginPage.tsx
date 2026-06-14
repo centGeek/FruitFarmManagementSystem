@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, User, Lock, Apple, Leaf, BarChart3, Users, MapPin, Bell } from 'lucide-react';
 import { BACKEND_URL} from "../utils/apiConfigs";
 import { Alert} from "../utils/common";
@@ -25,9 +26,11 @@ const TextInput = ({ id, name, value, onChange, placeholder, icon: Icon, type = 
   </div>
 );
 
-const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disabled }) => (
+const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disabled }) => {
+  const { t } = useTranslation("login");
+  return (
   <div>
-    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">Hasło</label>
+    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">{t("common:fields.password")}</label>
     <div className="relative">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <Lock className="h-5 w-5 text-gray-400" />
@@ -39,7 +42,7 @@ const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disable
         value={value}
         onChange={onChange}
         className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-        placeholder="Wprowadź hasło"
+        placeholder={t("passwordPlaceholder")}
         disabled={disabled}
       />
       <button
@@ -52,9 +55,11 @@ const PasswordInput = ({ value, onChange, showPassword, setShowPassword, disable
       </button>
     </div>
   </div>
-);
+  );
+};
 
 export default function LoginPage({ onLogin }: { onLogin: (role: string | null) => void }) {
+  const { t } = useTranslation("login");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({nickname: '', password: ''});
   const [isLoading, setIsLoading] = useState(false);
@@ -71,11 +76,11 @@ export default function LoginPage({ onLogin }: { onLogin: (role: string | null) 
 
   const validateForm = () => {
     if (!formData.nickname.trim()) {
-      setError('Nazwa użytkownika jest wymagana');
+      setError(t('validation.nicknameRequired'));
       return false;
     }
     if (!formData.password.trim()) {
-      setError('Hasło jest wymagane');
+      setError(t('validation.passwordRequired'));
       return false;
     }
     return true;
@@ -106,10 +111,10 @@ export default function LoginPage({ onLogin }: { onLogin: (role: string | null) 
       onLogin(verifyData?.roles?.[0] ?? null);
     } else {
       const data = await res.json();
-      setError(data.message || 'Błąd logowania');
+      setError(data.message || t('errors.loginFailed'));
     }
   } catch (err) {
-    setError('Nie można połączyć się z serwerem');
+    setError(t('errors.serverUnreachable'));
   } finally {
     setIsLoading(false);
   }
@@ -127,20 +132,11 @@ export default function LoginPage({ onLogin }: { onLogin: (role: string | null) 
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg">
                 <Apple className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">MenadżerSadu</h1>
-              <p className="text-gray-600">System zarządzania gospodarstwem sadowniczym</p>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('brand')}</h1>
+              <p className="text-gray-600">{t('subtitle')}</p>
             </div>
 
             <Alert type="error" message={error} />
-
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">lub użyj nazwy użytkownika</span>
-              </div>
-            </div>
 
             <div className="space-y-5">
               <TextInput
@@ -149,7 +145,7 @@ export default function LoginPage({ onLogin }: { onLogin: (role: string | null) 
                 type="nickname"
                 value={formData.nickname}
                 onChange={handleInputChange}
-                placeholder="Nazwa użytkownika"
+                placeholder={t('common:fields.nickname')}
                 icon={User}
                 disabled={isLoading}
               />
@@ -171,19 +167,24 @@ export default function LoginPage({ onLogin }: { onLogin: (role: string | null) 
                 {isLoading ? (
                   <div className="flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Logowanie...
+                    {t('loggingIn')}
                   </div>
                 ) : (
-                  'Zaloguj się'
+                  t('common:actions.login')
                 )}
               </button>
             </div>
 
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
-                Nie masz konta?{' '}
+                {t('noAccount')}{' '}
                 <a href="/register" className="text-green-600 hover:text-green-500 font-medium">
-                  Zarejestruj się
+                  {t('common:actions.register')}
+                </a>
+              </p>
+              <p className="mt-2 text-sm text-gray-500">
+                <a href="/about" className="text-green-600 hover:text-green-500 font-medium">
+                  {t('about')}
                 </a>
               </p>
             </div>
@@ -191,17 +192,17 @@ export default function LoginPage({ onLogin }: { onLogin: (role: string | null) 
         </div>
 
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-emerald-700 p-12 flex-col justify-center text-white">
-          <h2 className="text-4xl font-bold mb-6">Zarządzaj swoim sadem profesjonalnie</h2>
-          <p className="text-green-100 text-lg mb-8 leading-Farelaxed">
-            Kompleksowy system do zarządzania gospodarstwem sadowniczym z zaawansowanymi narzędziami analizy i optymalizacji.
+          <h2 className="text-4xl font-bold mb-6">{t('hero.title')}</h2>
+          <p className="text-green-100 text-lg mb-8 leading-relaxed">
+            {t('hero.subtitle')}
           </p>
-          
+
           <div className="space-y-6">
             {[
-              { icon: MapPin, title: 'Mapowanie upraw', desc: 'Przypisuj pracowników do konkretnych sektorów' },
-              { icon: Users, title: 'Ewidencja pracy', desc: 'Harmonogramowanie i rejestracja czasu pracy' },
-              { icon: BarChart3, title: 'Analiza efektywności', desc: 'Monitorowanie finansów i optymalizacja zasobów' },
-              { icon: Bell, title: 'Notyfikacje pogodowe', desc: 'Alerty o anomaliach i zmianach pogodowych' }
+              { icon: MapPin, title: t('hero.features.mapping.title'), desc: t('hero.features.mapping.desc') },
+              { icon: Users, title: t('hero.features.workLog.title'), desc: t('hero.features.workLog.desc') },
+              { icon: BarChart3, title: t('hero.features.analysis.title'), desc: t('hero.features.analysis.desc') },
+              { icon: Bell, title: t('hero.features.weather.title'), desc: t('hero.features.weather.desc') }
             ].map((feature, idx) => (
               <div key={idx} className="flex items-center space-x-4">
                 <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">

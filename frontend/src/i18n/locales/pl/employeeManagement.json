@@ -1,0 +1,127 @@
+{
+  "header": {
+    "title": "Zarządzaj pracownikami",
+    "subtitle": "Przeglądaj, dodawaj i zarządzaj kontami użytkowników. Gotowi do zbiorów! 🍎"
+  },
+  "searchPlaceholder": "Szukaj: imię, email, numer telefonu...",
+  "showArchived": "Pokaż Zarchiwizowanych 📦",
+  "addEmployee": "Dodaj Pracownika",
+  "stats": {
+    "active": "Aktywni Pracownicy",
+    "archived": "Zarchiwizowani",
+    "filtered": "Wyświetlani w Filtrze"
+  },
+  "list": {
+    "archivedTitle": "Zarchiwizowani pracownicy 🧑‍🌾",
+    "activeTitle": "Aktywny Zespół 🧑‍🌾",
+    "shownCount": "Wyświetlono: {{shown}} z {{total}}"
+  },
+  "modal": {
+    "editTitle": "Edytuj Pracownika",
+    "addTitle": "Dodaj Nowego Pracownika"
+  },
+  "form": {
+    "name": "Imię",
+    "surname": "Nazwisko",
+    "nickname": "Nazwa użytkownika",
+    "phone": "Telefon",
+    "email": "Email",
+    "active": "Aktywny",
+    "saveChanges": "Zapisz zmiany",
+    "addEmployee": "Dodaj pracownika",
+    "cancel": "Anuluj",
+    "errors": {
+      "nameRequired": "Imię jest wymagane",
+      "surnameRequired": "Nazwisko jest wymagane",
+      "nicknameRequired": "Nazwa użytkownika jest wymagana"
+    }
+  },
+  "loading": "Ładowanie użytkowników... 🔄",
+  "empty": {
+    "noResultsTitle": "Brak wyników wyszukiwania",
+    "noResultsMessage": "Spróbuj zmienić kryteria wyszukiwania lub zresetować filtr.",
+    "noUsersTitle": "Brak użytkowników",
+    "noUsersMessage": "Dodaj pierwszego użytkownika, aby rozpocząć zarządzanie pracownikami.",
+    "noArchivedTitle": "Brak zarchiwizowanych użytkowników",
+    "noActiveTitle": "Brak aktywnych użytkowników",
+    "allActiveMessage": "Wszyscy użytkownicy są obecnie aktywni.",
+    "allArchivedMessage": "Wszyscy użytkownicy są zarchiwizowani. Zaznacz \"Pokaż zarchiwizowanych\""
+  },
+  "card": {
+    "email": "Email",
+    "phone": "Telefon",
+    "creationDate": "Data utworzenia",
+    "id": "ID",
+    "editTitle": "Edytuj ✏️",
+    "workDetailsTitle": "Detale Pracy 💼",
+    "restoreTitle": "Przywróć (Aktywuj) 🔄",
+    "archiveTitle": "Archiwizuj (Dezaktywuj) 📦",
+    "statusActive": "Aktywny 🌱",
+    "statusArchived": "Zarchiwizowany 🍂",
+    "roleEmployee": "Pracownik",
+    "noRole": "Brak roli"
+  },
+  "advances": {
+    "fetchError": "Błąd pobierania zaliczek",
+    "networkError": "Błąd sieci",
+    "invalidAmount": "Wprowadź prawidłową kwotę",
+    "added": "Zaliczka dodana!",
+    "addError": "Błąd dodawania zaliczki",
+    "paidOff": "Zaliczki spłacone!",
+    "payOffError": "Błąd spłacania zaliczek",
+    "totalUnsettled": "Całkowita niespłacona zaliczka:",
+    "amountWithCurrency": "{{amount}} PLN",
+    "totalUnsettledHint": "Suma zaliczek oczekujących na rozliczenie.",
+    "payAdvanceTitle": "➕ Wypłać pracownikowi zaliczkę",
+    "amountLabel": "Kwota Zaliczki (PLN) *",
+    "amountPlaceholder": "np. 50.00",
+    "save": "Zapisz 💾",
+    "descriptionLabel": "Opis (opcjonalnie)",
+    "descriptionPlaceholder": "np. Na jedzenie",
+    "payingOff": "Spłacanie...",
+    "payOffAll": "Spłać wszystkie zaliczki ({{amount}} PLN) 💸",
+    "historyTitle": "Historia Niespłaconych Zaliczek ({{count}})",
+    "loadingHistory": "Ładowanie historii...",
+    "noUnsettled": "Brak niespłaconych zaliczek.",
+    "noDescription": "Brak opisu"
+  },
+  "workDetails": {
+    "addPrompt": "Dodaj sposób rozliczania i stawkę",
+    "invalidHourly": "Wprowadź prawidłową stawkę godzinową",
+    "invalidPerKg": "Wprowadź prawidłową stawkę za kilogram",
+    "saved": "Detale zatrudnienia zostały zapisane pomyślnie!",
+    "saveError": "Błąd zapisywania detali pracy",
+    "serverError": "Błąd połączenia z serwerem",
+    "rateHourly": "{{rate}} PLN/godz",
+    "ratePerKg": "{{rate}} PLN/kg",
+    "modalTitle": "Detale Pracy - {{name}} {{surname}}",
+    "tabWorkDetails": "💼 Detale Pracy",
+    "tabAdvances": "💸 Zaliczki",
+    "loadingDetails": "Ładowanie detali...",
+    "currentRate": "Obecna stawka pracownika:",
+    "settlementType": "Typ Rozliczenia",
+    "hourlyPayment": "Płatność Godzinowa",
+    "perKgPayment": "Płatność Za Kilogram",
+    "hourlyRateLabel": "Stawka Godzinowa (PLN) *",
+    "hourlyRatePlaceholder": "np. 25.50",
+    "perKgRateLabel": "Stawka za Kilogram (PLN) *",
+    "perKgRatePlaceholder": "np. 0.80",
+    "lastUpdate": "📅 Ostatnia aktualizacja detali pracy: {{date}}",
+    "saving": "Zapisywanie...",
+    "saveNewDetails": "💾 Zapisz Nowe Detale",
+    "close": "Zamknij"
+  },
+  "messages": {
+    "fetchError": "Błąd ładowania pracowników: {{error}}",
+    "fetchNetworkError": "Błąd sieci: Nie można połączyć się z backendem.",
+    "saveUpdated": "Pracownik został zaktualizowany pomyślnie!",
+    "saveAdded": "Pracownik został dodany pomyślnie!",
+    "saveNetworkError": "Błąd sieci: Nie można zapisać danych pracownika.",
+    "statusRestored": "Pracownik został pomyślnie przywrócony.",
+    "statusArchived": "Pracownik został pomyślnie zarchiwizowany.",
+    "statusErrorActivate": "Błąd podczas aktywowanie: {{error}}",
+    "statusErrorArchive": "Błąd podczas archiwizowanie: {{error}}",
+    "statusNetworkErrorActivate": "Błąd sieci: Nie można aktywowanie pracownika.",
+    "statusNetworkErrorArchive": "Błąd sieci: Nie można archiwizowanie pracownika."
+  }
+}

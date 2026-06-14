@@ -18,6 +18,11 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByNickname(@Param("nickname") String nickname);
 
     @Query("""
+            select usr.isActive from user_profile_entity usr where usr.nickname =:nickname
+             """)
+    Optional<Boolean> findActiveByNickname(@Param("nickname") String nickname);
+
+    @Query("""
             select usr from user_profile_entity usr where usr.role.roleName =:roleName
              """)
     List<UserEntity> getAllUsersByRoleName(@Param("roleName") String roleName);

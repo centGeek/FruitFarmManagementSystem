@@ -18,15 +18,19 @@ public interface TicketJpaRepository extends JpaRepository<TicketEntity, Long> {
 
     List<TicketEntity> findAllByOrderByCreatedAtDesc();
 
+    // :search is a pre-lowercased, %-wrapped pattern (or null) built in the service.
+    // It must be compared directly against a string expression (LIKE :search) rather than
+    // wrapped in CONCAT(...): a bare null inside CONCAT gives PostgreSQL no type to infer,
+    // so it defaults to bytea and the query blows up with "function lower(bytea) does not exist".
     @Query("""
             SELECT t FROM TicketEntity t WHERE
             (:status IS NULL OR t.status = :status) AND
             (:search IS NULL OR
-             LOWER(t.description) LIKE LOWER(CONCAT('%', :search, '%')) OR
-             LOWER(t.userEntity.name) LIKE LOWER(CONCAT('%', :search, '%')) OR
-             LOWER(t.userEntity.surname) LIKE LOWER(CONCAT('%', :search, '%')) OR
-             LOWER(t.userEntity.nickname) LIKE LOWER(CONCAT('%', :search, '%')) OR
-             LOWER(t.userEntity.email) LIKE LOWER(CONCAT('%', :search, '%')))
+             LOWER(t.description) LIKE :search OR
+             LOWER(t.userEntity.name) LIKE :search OR
+             LOWER(t.userEntity.surname) LIKE :search OR
+             LOWER(t.userEntity.nickname) LIKE :search OR
+             LOWER(t.userEntity.email) LIKE :search)
             """)
     Page<TicketEntity> findAllFiltered(@Param("status") TicketStatus status,
                                        @Param("search") String search,

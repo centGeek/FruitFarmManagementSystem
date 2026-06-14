@@ -13,10 +13,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserCredentialsDto {
 
-    @NotBlank(message = "Hasło jest wymagane")
-    @Size(min = 6, message = "Hasło musi mieć minimum 6 znaków")
+    @NotBlank(message = "{password.required}")
+    @Size(min = 6, message = "{password.size}")
     private String password;
 
-    @NotBlank(message = "Potwierdzenie hasła jest wymagane")
+    @NotBlank(message = "{password.confirm.required}")
     private String confirmPassword;
 }

@@ -1,0 +1,59 @@
+{
+  "header": {
+    "title": "Notifications",
+    "subtitle": "All important information in one place"
+  },
+  "news": {
+    "title": "Latest updates"
+  },
+  "loadingNotifications": "Loading notifications... 🔄",
+  "empty": {
+    "title": "No notifications",
+    "subtitle": "You don't have any notifications yet. Check back later!"
+  },
+  "notificationType": {
+    "WEATHER": "Weather",
+    "USER": "User",
+    "WORK_ENTRY": "Work entry",
+    "SECTOR": "Sector",
+    "PROFIT": "Profit",
+    "EXPENSE": "Expense",
+    "DEFAULT": "Notification"
+  },
+  "timeAgo": {
+    "justNow": "Just now",
+    "minutes": "{{count}} min ago",
+    "hours": "{{count}} h ago",
+    "days": "{{count}} d ago"
+  },
+  "weather": {
+    "title": "Weather",
+    "checking": "Checking alerts...",
+    "warningCount_one": "warning",
+    "warningCount_other": "warnings",
+    "noAlertsTitle": "No warnings",
+    "noAlertsHint": "No surprises. You can configure weather alerts in <weatherLink>Weather Notifications</weatherLink>",
+    "dateLabel": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "dayAfterTomorrow": "The day after tomorrow",
+      "inDays": "In {{count}} days"
+    },
+    "alert": {
+      "frost": "🧊 Frost warning: {{value}}°C",
+      "tempLow": "❄️ Low temperature: {{value}}°C",
+      "tempHigh": "🌡️ High temperature: {{value}}°C",
+      "rain": "🌧️ Precipitation forecast: {{value}}%",
+      "wind": "💨 Strong wind: {{value}} km/h",
+      "withThreshold": "{{message}} (threshold: {{threshold}})"
+    }
+  },
+  "errors": {
+    "loadNotifications": "Failed to load notifications ({{status}})",
+    "serverConnection": "Unable to connect to the server.",
+    "locationServer": "Server error: Failed to fetch location data.",
+    "coordinatesUndefined": "Coordinates for the gardener are not defined.",
+    "locationLoad": "An error occurred while loading the location.",
+    "forecastFetch": "Failed to fetch the weather forecast"
+  }
+}

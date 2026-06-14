@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Administrator panel — tickets",
+    "subtitle": "All issues and suggestions reported by the system's users."
+  },
+  "stats": {
+    "total": "All",
+    "open": "Open",
+    "inProgress": "In progress",
+    "closed": "Closed"
+  },
+  "loading": "Loading tickets... 🔄",
+  "empty": {
+    "title": "No tickets",
+    "description": "No user has reported an issue yet, or no ticket matches the filter."
+  },
+  "filters": {
+    "all": "All",
+    "open": "Open",
+    "inProgress": "In progress",
+    "closed": "Closed",
+    "searchPlaceholder": "Search by description or reporter..."
+  },
+  "statusOptions": {
+    "open": "Open",
+    "inProgress": "In progress",
+    "closed": "Closed"
+  },
+  "pagination": {
+    "previous": "← Previous",
+    "next": "Next →"
+  },
+  "ticket": {
+    "reportedAt": "Reported: {{date}}",
+    "unknownReporter": "Unknown user",
+    "descriptionLabel": "Description",
+    "closedAt": "Closed: {{date}}",
+    "changeStatus": "Change status",
+    "currentStatusTitle": "Current status",
+    "setStatusTitle": "Set status: {{status}}",
+    "adminCommentLabel": "Administrator comment",
+    "commentPlaceholder": "e.g. Resolved — the damaged sensor was replaced.",
+    "saving": "Saving...",
+    "saveComment": "Save comment"
+  },
+  "alerts": {
+    "fetchFailed": "Failed to fetch tickets.",
+    "fetchNetworkError": "Network error while fetching tickets.",
+    "statusUpdated": "Ticket #{{id}} status has been updated.",
+    "statusUpdateFailed": "Failed to change the ticket status.",
+    "statusNetworkError": "Network error while changing the ticket status.",
+    "commentSaved": "The comment on ticket #{{id}} has been saved.",
+    "commentSaveFailed": "Failed to save the comment.",
+    "commentNetworkError": "Network error while saving the comment."
+  }
+}

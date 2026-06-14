@@ -1,0 +1,126 @@
+{
+  "defaultSectorName": "Sektor {{n}}",
+  "page": {
+    "title": "System Zarządzania Gospodarstwem Sadowniczym",
+    "subtitle": "Mapowanie i zarządzanie sektorami upraw"
+  },
+  "loading": {
+    "title": "Ładowanie danych...",
+    "subtitle": "Pobieranie sektorów z serwera"
+  },
+  "loadError": {
+    "title": "Błąd ładowania danych",
+    "retry": "Spróbuj ponownie"
+  },
+  "stats": {
+    "definedSectors": "Zdefiniowane sektory",
+    "sectorsWithCrop": "Sektory z uprawą",
+    "varietyKinds": "Rodzaje odmian"
+  },
+  "confirmModal": {
+    "title": "Dodaj nowy sektor",
+    "redraw": "Narysuj ponownie",
+    "sending": "Wysyłanie...",
+    "create": "Utwórz sektor"
+  },
+  "editModal": {
+    "title": "Edytuj sektor",
+    "archive": "Archiwizuj sektor"
+  },
+  "sectorData": {
+    "groupTitle": "Dane sektora",
+    "nameLabel": "Nazwa sektora *",
+    "namePlaceholder": "np. Sektor wschodni...",
+    "cropTypeLabel": "Rodzaj uprawy",
+    "cropTypePlaceholder": "Wybierz rodzaj uprawy...",
+    "varietyLabel": "Odmiana",
+    "varietyPlaceholder": "Wybierz odmianę..."
+  },
+  "selectedCrop": {
+    "title": "Wybrana uprawa",
+    "typeLabel": "Typ: {{type}}"
+  },
+  "gpsCoords": {
+    "summary": "Współrzędne GPS (kliknij aby rozwinąć)",
+    "label": "Współrzędne GPS",
+    "point": "Punkt {{index}}:"
+  },
+  "validation": {
+    "nameRequired": "Nazwa sektora jest wymagana!"
+  },
+  "alerts": {
+    "minPoints": "Wymagane co najmniej 4 punkty",
+    "sectorAdded": "Sektor został pomyślnie dodany!",
+    "addFailed": "Nie udało się dodać sektora",
+    "noBackendId": "Brak ID backendu",
+    "sectorUpdated": "Sektor został pomyślnie zaktualizowany!",
+    "updateFailed": "Nie udało się zaktualizować sektora: {{message}}",
+    "sectorActivated": "Sektor został pomyślnie aktywowany!",
+    "activateFailed": "Nie udało się aktywować sektora: {{message}}",
+    "archiveFailed": "Nie udało się zarchiwizować sektora: {{message}}",
+    "pointSaveFailed": "Nie udało się zapisać pozycji punktu"
+  },
+  "map": {
+    "howTo": "Jak korzystać:",
+    "step1Label": "1. Wyszukaj lokalizację:",
+    "step1Text": "Wpisz nazwę miejscowości",
+    "step2Label": "2. Rysuj sektor:",
+    "step2Text": "Klikaj 4 punkty na mapie",
+    "finishEdit": "Zakończ edycję",
+    "drawSector": "Rysuj Sektor",
+    "cancel": "Anuluj",
+    "statistics": "Statystyki:",
+    "sectorsCount": "Sektorów: {{count}}",
+    "editModeActive": "🔧 Tryb edycji aktywny",
+    "loadingProgress": "Ładowanie: {{loaded}}/{{total}}",
+    "dragVertices": "Przeciągnij wierzchołki aby zmienić kształt",
+    "clickForDetails": "Kliknij sektor aby zobaczyć szczegóły"
+  },
+  "drawingInstructions": {
+    "first": "Kliknij pierwszy z 4 punktów wielokąta.",
+    "more": "Kliknij, aby dodać punkt. Masz: {{count}}/4 punkty.",
+    "done": "Rysowanie zakończone, tworzenie sektora..."
+  },
+  "tooltip": {
+    "point": "Punkt {{index}}",
+    "dragPoint": "Przeciągnij punkt {{index}}"
+  },
+  "popup": {
+    "crop": "Uprawa:",
+    "variety": "🌱Odmiana:",
+    "editVertices": "✏️ Edytuj wierzchołki"
+  },
+  "sectorsList": {
+    "title": "Zdefiniowane sektory",
+    "loadingSectors": "Ładowanie sektorów...",
+    "noSectors": "Nie zdefiniowano jeszcze żadnych sektorów",
+    "pleaseWait": "Proszę czekać...",
+    "searchHint": "Wyszukaj miejscowość i użyj mapy, aby oznaczyć obszary upraw",
+    "tip1Label": "Wyszukaj miejscowość:",
+    "tip1Text": "znajdź swoje gospodarstwo",
+    "tip2Label": "Rysuj sektor:",
+    "tip2Text": "kliknij 4 punkty na mapie",
+    "nameLabel": "Nazwa sektora",
+    "archivedBadge": "(Zarchiwizowany)",
+    "cropTypeLabel": "Rodzaj uprawy",
+    "notDefined": "Nie określono",
+    "varietyLabel": "Odmiana",
+    "activateAgain": "Aktywuj ponownie",
+    "editSector": "Edytuj sektor",
+    "gpsCoords": "Współrzędne GPS",
+    "point": "Punkt {{index}}:",
+    "archivedTitle": "Sektory zarchiwizowane ({{count}})"
+  },
+  "mapStyles": {
+    "streets": "🗺️ Domyślna",
+    "satellite": "🛰️ Satelita",
+    "hybrid": "🌍 Hybrydowa",
+    "topo": "⛰️ Topograficzna",
+    "zoomIn": "Przybliż",
+    "zoomOut": "Oddal",
+    "layers": "Warstwy mapy"
+  },
+  "search": {
+    "placeholder": "Wyszukaj miejscowość w Polsce (min. 3 znaki)..."
+  }
+}

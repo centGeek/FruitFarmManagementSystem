@@ -32,3 +32,20 @@ frontend/node_modules/**
 
 ### VS Code ###
 .vscode/
+
+# usterki-autofix local tracking files (not committed)
+usterki/
+
+# OS / scratch / scan artifacts (not committed)
+.DS_Store
+backend/img.png
+backend/.cleanup_check
+backend/.deptree.txt
+backend/.fwtest.log
+backend/.grepout.txt
+backend/.perf_grep1.txt
+backend/.polishcheck
+backend/.tmp_verify/
+backend/.tmp_verify_ls
+backend/.tmp_verify_common
+backend/.tmp_i18nfiles

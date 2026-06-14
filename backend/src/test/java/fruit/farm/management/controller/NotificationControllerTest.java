@@ -123,7 +123,7 @@ class NotificationControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("active");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("active")).thenReturn(Optional.of(userWithActive(true)));
+        when(userRepository.findActiveByNickname("active")).thenReturn(Optional.of(true));
 
         UserDto logged = new UserDto();
         logged.setId(5L);
@@ -142,7 +142,7 @@ class NotificationControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("blocked");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("blocked")).thenReturn(Optional.of(userWithActive(false)));
+        when(userRepository.findActiveByNickname("blocked")).thenReturn(Optional.of(false));
 
         // Act + Assert
         mvc.perform(get("/api/notification").cookie(new Cookie("accessToken", "token")))
@@ -223,7 +223,7 @@ class NotificationControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("active");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Employee"));
-        when(userRepository.findByNickname("active")).thenReturn(Optional.of(userWithActive(true)));
+        when(userRepository.findActiveByNickname("active")).thenReturn(Optional.of(true));
         when(notificationService.getNotificationsByUserSortedByDate(eq(11L))).thenReturn(List.of());
 
         // Act + Assert

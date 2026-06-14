@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
@@ -31,6 +32,7 @@ export interface Advance {
 }
 
 export const useEmployeeManagement = () => {
+    const { t } = useTranslation("employeeManagement");
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -54,14 +56,14 @@ export const useEmployeeManagement = () => {
                 setEmployees(Array.isArray(data) ? data : []);
             } else {
                 const error = await response.json();
-                setAlert({ type: 'error', message: `Błąd ładowania pracowników: ${error.message || response.statusText}` });
+                setAlert({ type: 'error', message: t("messages.fetchError", { error: error.message || response.statusText }) });
             }
         } catch (error) {
-            setAlert({ type: 'error', message: `Błąd sieci: Nie można połączyć się z backendem.` });
+            setAlert({ type: 'error', message: t("messages.fetchNetworkError") });
         } finally {
             setIsLoading(false);
         }
-    }, [showArchived]);
+    }, [showArchived, t]);
 
     const fetchAllEmployeesForStats = useCallback(async () => {
         try {
@@ -109,7 +111,7 @@ export const useEmployeeManagement = () => {
             });
 
             if (response.ok) {
-                setAlert({ type: 'success', message: `Pracownik został ${isUpdate ? 'zaktualizowany' : 'dodany'} pomyślnie!` });
+                setAlert({ type: 'success', message: isUpdate ? t("messages.saveUpdated") : t("messages.saveAdded") });
                 setIsModalOpen(false);
                 setSelectedEmployee(null);
                 fetchEmployees();
@@ -119,15 +121,14 @@ export const useEmployeeManagement = () => {
                 setAlert({ type: 'error', message: `${error.message || error.error || response.statusText}` });
             }
         } catch (error) {
-            setAlert({ type: 'error', message: `Błąd sieci: Nie można zapisać danych pracownika.` });
+            setAlert({ type: 'error', message: t("messages.saveNetworkError") });
         } finally {
             setIsLoading(false);
         }
-    }, [selectedEmployee, fetchEmployees, fetchAllEmployeesForStats, closeAlert]);
+    }, [selectedEmployee, fetchEmployees, fetchAllEmployeesForStats, closeAlert, t]);
 
     const toggleEmployeeStatus = useCallback(async (employeeId: number, newStatus: boolean) => {
         closeAlert();
-        const action = newStatus ? 'aktywowanie' : 'archiwizowanie';
         const endpoint = `${BACKEND_URL}/api/users/${employeeId}/toggle-status`;
 
         try {
@@ -136,17 +137,18 @@ export const useEmployeeManagement = () => {
             });
 
             if (response.ok) {
-                setAlert({ type: 'success', message: `Pracownik został pomyślnie ${newStatus ? 'przywrócony' : 'zarchiwizowany'}.` });
+                setAlert({ type: 'success', message: newStatus ? t("messages.statusRestored") : t("messages.statusArchived") });
                 fetchEmployees();
                 fetchAllEmployeesForStats();
             } else {
                 const error = await response.json();
-                setAlert({ type: 'error', message: `Błąd podczas ${action}: ${error.message || response.statusText}` });
+                const errorDetail = error.message || response.statusText;
+                setAlert({ type: 'error', message: newStatus ? t("messages.statusErrorActivate", { error: errorDetail }) : t("messages.statusErrorArchive", { error: errorDetail }) });
             }
         } catch (error) {
-            setAlert({ type: 'error', message: `Błąd sieci: Nie można ${action} pracownika.` });
+            setAlert({ type: 'error', message: newStatus ? t("messages.statusNetworkErrorActivate") : t("messages.statusNetworkErrorArchive") });
         }
-    }, [fetchEmployees, fetchAllEmployeesForStats, closeAlert]);
+    }, [fetchEmployees, fetchAllEmployeesForStats, closeAlert, t]);
 
     const openModal = useCallback((employee: Employee | null = null) => { setSelectedEmployee(employee); setIsModalOpen(true); closeAlert(); }, [closeAlert]);
     const closeModal = useCallback(() => { setIsModalOpen(false); setSelectedEmployee(null); }, []);

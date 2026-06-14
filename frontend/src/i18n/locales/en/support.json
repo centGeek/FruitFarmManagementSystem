@@ -1,0 +1,54 @@
+{
+  "header": {
+    "title": "Report an issue",
+    "subtitle": "Something not working? Report the problem to the system administrator. 🛠️"
+  },
+  "newTicket": {
+    "title": "New ticket"
+  },
+  "yourTickets": {
+    "title": "Your tickets",
+    "count_one": "{{count}} ticket",
+    "count_other": "{{count}} tickets"
+  },
+  "loading": "Loading tickets... 🔄",
+  "empty": {
+    "title": "No tickets",
+    "message": "You haven't submitted any tickets yet. Use the form above to report an issue."
+  },
+  "form": {
+    "categoryLabel": "Ticket category",
+    "descriptionLabel": "Issue description *",
+    "descriptionPlaceholder": "Describe what isn't working or what you'd like to report to the administrator...",
+    "charCount": "{{count}}/2000 characters",
+    "minLengthError": "The description must be at least 5 characters long.",
+    "submit": "Send ticket"
+  },
+  "card": {
+    "reportedAt": "Reported: {{date}}",
+    "descriptionLabel": "Description",
+    "adminReply": "💬 Administrator's reply",
+    "closedAt": "Closed: {{date}}"
+  },
+  "category": {
+    "SYSTEM_ERROR": "System down / application error",
+    "DISPLAY": "Display error",
+    "DATA": "Incorrect data",
+    "PERFORMANCE": "Slow performance",
+    "SUGGESTION": "Suggestion / improvement",
+    "OTHER": "Other"
+  },
+  "status": {
+    "OPEN": "Open",
+    "IN_PROGRESS": "In progress",
+    "CLOSED": "Closed",
+    "UNKNOWN": "Unknown"
+  },
+  "messages": {
+    "fetchError": "Failed to fetch tickets.",
+    "fetchNetworkError": "Network error while fetching tickets.",
+    "submitSuccess": "Your ticket has been sent to the administrator. Thank you!",
+    "submitError": "Failed to send ticket: {{error}}",
+    "submitNetworkError": "Network error: unable to send the ticket."
+  }
+}

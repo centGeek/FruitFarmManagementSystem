@@ -18,7 +18,7 @@ docker-compose -f compose.yaml up -d   # start PostgreSQL (required first; Docke
 mvn clean package install              # build + fetch deps
 ./mvnw spring-boot:run                 # run the app (or run FruitFarmManagementApplication in IDE)
 ```
-Note: `spring-boot-docker-compose` is on the runtime classpath, so booting the app also brings the DB container up automatically. There is **no test suite** (`src/test/` does not exist) despite test deps in `pom.xml`.
+Note: `spring-boot-docker-compose` is on the runtime classpath, so booting the app also brings the DB container up automatically. The test suite lives in `src/test/` (unit, web `@WebMvcTest`, repository `@DataJpaTest` + Testcontainers PostgreSQL, integration) and runs in CI on every push/PR to `main` via `.github/workflows/backend-tests.yml` (`./mvnw clean test` on JDK 21).
 
 ### Frontend (run from `frontend/`)
 ```bash
@@ -40,7 +40,7 @@ Key conventions:
 - **Mappers are static utility classes**, called directly (`UserMapper.mapFromEntity(...)`), not injected beans.
 - **DTO validation** uses `jakarta.validation` annotations (`@NotBlank`, `@Size`) with Polish messages.
 - Exceptions in `exception/` are surfaced through `controller/GlobalExceptionHandler`.
-- DB schema is owned by **Flyway** migrations in `src/main/resources/db/migration/` (`V1__...sql` … `V13__...sql`). JPA `ddl-auto` is `none` — never rely on Hibernate to create tables. Add schema changes as a new `V14__...sql` file; do not edit existing migrations.
+- DB schema is owned by **Flyway** migrations in `src/main/resources/db/migration/` (`V1__...sql` … `V19__...sql`). JPA `ddl-auto` is `none` — never rely on Hibernate to create tables. Add schema changes as a new `V20__...sql` file; do not edit existing migrations.
 
 ### Auth / security
 - **JWT in httpOnly cookies**, stateless sessions (`SessionCreationPolicy.STATELESS`).

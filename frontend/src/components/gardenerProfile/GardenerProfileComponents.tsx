@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
 export interface InputFieldProps {
     label: string;
@@ -16,7 +17,9 @@ export interface InputFieldProps {
     disabled?: boolean;
 }
 
-export const InputField = React.memo(({ label, name, type = 'text', required = false, isPassword = false, error, isLoading, showPassword, setShowPassword, value, onChange, placeholder, disabled = false }: InputFieldProps) => (
+export const InputField = React.memo(({ label, name, type = 'text', required = false, isPassword = false, error, isLoading, showPassword, setShowPassword, value, onChange, placeholder, disabled = false }: InputFieldProps) => {
+    const { t } = useTranslation("gardenerProfile");
+    return (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
             {label} {required && <span className="text-red-500">*</span>}
@@ -37,7 +40,7 @@ export const InputField = React.memo(({ label, name, type = 'text', required = f
                     type="button"
                     onClick={() => setShowPassword(prev => !prev)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
-                    aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
+                    aria-label={showPassword ? t("password.hideAria") : t("password.showAria")}
                     disabled={isLoading}
                 >
                     {showPassword ? "🙈" : "👁️"}
@@ -46,11 +49,15 @@ export const InputField = React.memo(({ label, name, type = 'text', required = f
         </div>
         {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
-));
+    );
+});
 
-export const LoadingState = React.memo(() => (
+export const LoadingState = React.memo(() => {
+    const { t } = useTranslation("gardenerProfile");
+    return (
     <div className="text-center py-16">
         <div className="w-14 h-14 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
-        <p className="text-gray-500 text-xl font-medium">Ładowanie profilu... 🔄</p>
+        <p className="text-gray-500 text-xl font-medium">{t("loading")}</p>
     </div>
-));
+    );
+});

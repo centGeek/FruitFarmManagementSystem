@@ -10,10 +10,10 @@ import lombok.Setter;
 @Getter
 public class CoordinateDto {
 
-    @NotNull(message = "Szerokość geograficzna jest wymagana")
+    @NotNull(message = "{coordinate.latitude.required}")
     private Double latitude;
 
-    @NotNull(message = "Długość geograficzna jest wymagana")
+    @NotNull(message = "{coordinate.longitude.required}")
     private Double longitude;
 
 

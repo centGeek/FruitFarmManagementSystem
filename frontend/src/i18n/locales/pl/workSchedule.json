@@ -1,0 +1,149 @@
+{
+  "header": {
+    "title": "Planowanie Pracy Zespołów",
+    "subtitle": "Planowanie tygodniowe i przypisywanie zadań/godzin do pracowników 🗓️"
+  },
+  "stats": {
+    "total": "Wpisy w tygodniu",
+    "unpaid": "Nieopłacone w tygodniu",
+    "paid": "Opłacone w tygodniu",
+    "totalSalaryWeek": "Tygodniowe wynagrodzenie"
+  },
+  "calendar": {
+    "today": "Dzisiaj",
+    "addEntries": "Dodaj wpisy",
+    "addMore": "+ Dodaj więcej"
+  },
+  "event": {
+    "togglePaidTitlePaid": "Anuluj płatność",
+    "togglePaidTitleUnpaid": "Oznacz jako opłacone"
+  },
+  "fields": {
+    "hours": "Godziny",
+    "kilograms": "Kilogramy",
+    "salary": "Wynagrodzenie (zł)",
+    "sector": "Sektor",
+    "workType": "Typ pracy",
+    "description": "Opis",
+    "noSector": "Brak"
+  },
+  "currency": {
+    "zl": "{{value}} zł"
+  },
+  "bulkModal": {
+    "title": "Masowe przypisanie pracy: {{date}}"
+  },
+  "editModal": {
+    "title": "Edycja wpisu: {{name}} {{surname}}",
+    "descriptionPlaceholder": "Dodatkowe uwagi...",
+    "saving": "Zapisywanie...",
+    "saveChanges": "Zapisz zmiany"
+  },
+  "dailyForm": {
+    "quickFill": "⚡ Szybkie wypełnienie dla wszystkich:",
+    "hoursLabel": "Godziny",
+    "sectorLabel": "Sektor",
+    "workTypeLabel": "Typ pracy",
+    "choose": "Wybierz...",
+    "noSector": "Brak",
+    "hoursRequired": "Godziny *",
+    "kilogramsRequired": "Kilogramy *",
+    "hoursPlaceholder": "8",
+    "kilogramsPlaceholder": "50",
+    "notesPlaceholder": "Uwagi (opcjonalnie)...",
+    "filledCount": "Pracowników z danymi: ",
+    "filledCountValue": "{{filled}} / {{total}}",
+    "totalHours": "Suma godzin: ",
+    "totalHoursValue": "{{hours}}h",
+    "totalKilograms": "Suma kilogramów: ",
+    "totalKilogramsValue": "{{kg}} kg",
+    "saveEntries": "Zapisz wpisy"
+  },
+  "details": {
+    "title": "Szczegóły wpisu dla: {{name}} {{surname}}",
+    "duration": "Czas trwania",
+    "kilogramsPicked": "Zebrane kilogramy",
+    "daySalary": "Wynagrodzenie dzienne",
+    "sector": "Sektor",
+    "workType": "Typ pracy",
+    "descriptionLabel": "Opis:",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "deleteConfirm": "Czy na pewno chcesz usunąć ten wpis?",
+    "paymentStatus": "Status płatności",
+    "paid": "✅ Zapłacono",
+    "unpaid": "🟡 Niezapłacono",
+    "markUnpaid": "❌ Oznacz jako niezapłacone",
+    "markPaid": "💵 Oznacz jako zapłacone",
+    "quickPayments": "Szybkie płatności dla pracownika:",
+    "payAllOutstanding": "Zapłać za wszystko (zaległe)",
+    "payMonth": "Zapłać za miesiąc",
+    "payAdvance": "Wypłać część (zaliczka)"
+  },
+  "advanceModal": {
+    "title": "Wypłata zaliczki dla: {{name}} {{surname}}",
+    "heading": "Wypłata zaliczki",
+    "info": "Wypłać pracownikowi część należności jako zaliczkę. Kwota ta zostanie odliczona od kolejnej wypłaty.",
+    "amountLabel": "Kwota zaliczki (zł) *",
+    "amountPlaceholder": "np. 500.00",
+    "descriptionLabel": "Opis (opcjonalnie)",
+    "descriptionPlaceholder": "np. Zaliczka na poczet wypłaty tygodniowej...",
+    "processing": "Przetwarzanie...",
+    "confirm": "Potwierdź wypłatę zaliczki",
+    "invalidAmount": "Podaj prawidłową kwotę zaliczki większą od 0."
+  },
+  "payModal": {
+    "titleMonth": "Potwierdź płatność za cały miesiąc dla: {{name}} {{surname}}",
+    "titleAll": "Potwierdź płatność za wszystkie zaległe wpisy dla: {{name}} {{surname}}",
+    "warning": "⚠️ WAŻNE: Upewnij się, że płatność została faktycznie wykonana.",
+    "summary": "Podsumowanie Płatności",
+    "infoMonth": "Ta operacja oznaczy wszystkie: {{count}} nieopłacone wpisy z bieżącego miesiąca jako opłacone.",
+    "infoAll": "Ta operacja oznaczy wszystkie: {{count}} nieopłacone wpisy do dzisiaj jako opłacone.",
+    "totalGross": "Łączne wynagrodzenie: ",
+    "deductedAdvances": "Odliczone zaliczki:",
+    "netAmount": "Kwota do zapłaty:",
+    "unsettledAdvances": "Nieuregulowane zaliczki:",
+    "noDescription": "Brak opisu",
+    "listMonth": "Lista wpisów z bieżącego miesiąca:",
+    "listAll": "Lista wszystkich zaległych wpisów:",
+    "entryRow": "{{date}} - {{duration}}h",
+    "processing": "Przetwarzanie...",
+    "confirmMonth": "Potwierdź zapłatę za miesiąc",
+    "confirmAll": "Potwierdź zapłatę za wszystko"
+  },
+  "workType": {
+    "HARVEST": "🌾 Zbiory",
+    "WEEDING": "🌱 Pielenie",
+    "WATERING": "💧 Nawadnianie",
+    "SPRAYING": "💨 Opryski",
+    "PLANTING": "🌿 Sadzenie",
+    "PRUNING": "✂️ Przycinanie",
+    "FERTILIZING": "🧪 Nawożenie",
+    "OTHER": "📋 Inne"
+  },
+  "messages": {
+    "validationRequired": "Podaj wymagane dane dla co najmniej jednego pracownika",
+    "noDateSelected": "Nie wybrano daty pracy.",
+    "saveSuccess": "Zapisano {{count}} wpisów.",
+    "entryUpdated": "Wpis zaktualizowany.",
+    "entryDeleted": "Wpis usunięty.",
+    "markedPaid": "Oznaczono jako zapłacone",
+    "markedUnpaid": "Oznaczono jako niezapłacone",
+    "paymentSuccess": "Płatność zakończona sukcesem.",
+    "advanceSaved": "Zapisano zaliczkę {{amount}} zł.",
+    "employeeNotFound": "Nie znaleziono pracownika.",
+    "error": "Błąd: {{error}}",
+    "connectionError": "Błąd połączenia.",
+    "loadEntriesError": "Błąd ładowania wpisów.",
+    "loadError": "Błąd ładowania {{entity}}: {{status}}",
+    "loadConnectionError": "Błąd połączenia z serwerem podczas ładowania {{entity}}.",
+    "loadEmployeesError": "Błąd ładowania pracowników: {{status}}",
+    "serverConnectionError": "Błąd połączenia z serwerem.",
+    "unexpectedError": "Wystąpił nieoczekiwany błąd",
+    "connectionShort": "Błąd połączenia",
+    "errorShort": "Błąd"
+  },
+  "entities": {
+    "sectors": "sektorów"
+  }
+}

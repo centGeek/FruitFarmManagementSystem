@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from '../../utils/authFetch';
 
@@ -23,6 +24,7 @@ export interface TicketStats {
 const PAGE_SIZE = 12;
 
 export const useAdminDashboard = () => {
+  const { t } = useTranslation("adminDashboard");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<TicketStats>({ total: 0, open: 0, inProgress: 0, closed: 0 });
   const [isLoading, setIsLoading] = useState(false);
@@ -78,14 +80,14 @@ export const useAdminDashboard = () => {
         setTickets(Array.isArray(data.content) ? data.content : []);
         setTotalPages(data.totalPages || 1);
       } else {
-        setAlert({ type: 'error', message: 'Nie udało się pobrać zgłoszeń.' });
+        setAlert({ type: 'error', message: t('alerts.fetchFailed') });
       }
     } catch {
-      setAlert({ type: 'error', message: 'Błąd sieci podczas pobierania zgłoszeń.' });
+      setAlert({ type: 'error', message: t('alerts.fetchNetworkError') });
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, statusFilter, debouncedSearch]);
+  }, [currentPage, statusFilter, debouncedSearch, t]);
 
   useEffect(() => {
     fetchTickets();
@@ -116,17 +118,17 @@ export const useAdminDashboard = () => {
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
-        setAlert({ type: 'success', message: `Status zgłoszenia #${ticketId} został zaktualizowany.` });
+        setAlert({ type: 'success', message: t('alerts.statusUpdated', { id: ticketId }) });
         // A status change affects both counts and the active filter, so refresh from the server.
         fetchTickets();
         fetchStats();
       } else {
-        setAlert({ type: 'error', message: data.message || 'Nie udało się zmienić statusu zgłoszenia.' });
+        setAlert({ type: 'error', message: data.message || t('alerts.statusUpdateFailed') });
       }
     } catch {
-      setAlert({ type: 'error', message: 'Błąd sieci podczas zmiany statusu zgłoszenia.' });
+      setAlert({ type: 'error', message: t('alerts.statusNetworkError') });
     }
-  }, [fetchTickets, fetchStats]);
+  }, [fetchTickets, fetchStats, t]);
 
   const updateComment = useCallback(async (ticketId: number, comment: string) => {
     try {
@@ -137,17 +139,17 @@ export const useAdminDashboard = () => {
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
-        setTickets(prev => prev.map(t => (t.id === ticketId ? data : t)));
-        setAlert({ type: 'success', message: `Komentarz do zgłoszenia #${ticketId} został zapisany.` });
+        setTickets(prev => prev.map(item => (item.id === ticketId ? data : item)));
+        setAlert({ type: 'success', message: t('alerts.commentSaved', { id: ticketId }) });
         return true;
       }
-      setAlert({ type: 'error', message: data.message || 'Nie udało się zapisać komentarza.' });
+      setAlert({ type: 'error', message: data.message || t('alerts.commentSaveFailed') });
       return false;
     } catch {
-      setAlert({ type: 'error', message: 'Błąd sieci podczas zapisywania komentarza.' });
+      setAlert({ type: 'error', message: t('alerts.commentNetworkError') });
       return false;
     }
-  }, []);
+  }, [t]);
 
   return {
     tickets,
