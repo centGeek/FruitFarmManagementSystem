@@ -5,7 +5,7 @@ import {
 } from './AdminStatsComponents';
 
 export default function AdminStats() {
-  const { stats, isLoading, alert, closeAlert, refresh, exportCsv, printReport } = useAdminStats();
+  const { stats, isLoading, alert, closeAlert, refresh, exportCsv, exportPdf } = useAdminStats();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 p-6 font-sans">
@@ -17,10 +17,10 @@ export default function AdminStats() {
             </h1>
             <p className="text-gray-600 text-lg">Globalny przegląd całego systemu.</p>
           </div>
-          <div className="flex gap-2 print:hidden">
+          <div className="flex gap-2">
             <button onClick={refresh} className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600" title="Odśwież">🔄</button>
             <button onClick={exportCsv} disabled={!stats} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-40">Eksportuj CSV</button>
-            <button onClick={printReport} disabled={!stats} className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-40">Drukuj / PDF</button>
+            <button onClick={exportPdf} disabled={!stats} className="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-40">Eksportuj PDF</button>
           </div>
         </header>
 
