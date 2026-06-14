@@ -23,40 +23,40 @@ export interface Expense {
 }
 
 export const EXPENSE_TYPES = [
-  { value: 'ŚRODKI_OCHRONY_ROŚLIN', label: 'Opryski / Środki ochrony roślin', icon: '🧴', color: 'bg-green-50 text-green-700 border-green-200' },
-  { value: 'NAWOZY', label: 'Nawozy', icon: '🌾', color: 'bg-green-50 text-green-700 border-green-200' },
-  { value: 'SADZENIE', label: 'Sadzenie / Nowe drzewka', icon: '🌳', color: 'bg-green-50 text-green-700 border-green-200' },
-  { value: 'NAWADNIANIE', label: 'Nawadnianie / System nawadniania', icon: '💧', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { value: 'ENERGIA_ELEKTRYCZNA', label: 'Prąd', icon: '⚡', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  { value: 'WODA', label: 'Woda', icon: '💧', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { value: 'MATERIAŁY_POMOCNICZE', label: 'Paliki / Druty / Rusztowania', icon: '🪵', color: 'bg-green-50 text-green-700 border-green-200' },
-  { value: 'SIATKI_OCHRONNE', label: 'Siatki / Folie / Agrowłóknina', icon: '🕸️', color: 'bg-green-50 text-green-700 border-green-200' },
+  { value: 'ŚRODKI_OCHRONY_ROŚLIN', label: 'Opryski / Środki ochrony roślin', icon: '🧴', color: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' },
+  { value: 'NAWOZY', label: 'Nawozy', icon: '🌾', color: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' },
+  { value: 'SADZENIE', label: 'Sadzenie / Nowe drzewka', icon: '🌳', color: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' },
+  { value: 'NAWADNIANIE', label: 'Nawadnianie / System nawadniania', icon: '💧', color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
+  { value: 'ENERGIA_ELEKTRYCZNA', label: 'Prąd', icon: '⚡', color: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800' },
+  { value: 'WODA', label: 'Woda', icon: '💧', color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
+  { value: 'MATERIAŁY_POMOCNICZE', label: 'Paliki / Druty / Rusztowania', icon: '🪵', color: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' },
+  { value: 'SIATKI_OCHRONNE', label: 'Siatki / Folie / Agrowłóknina', icon: '🕸️', color: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' },
 
-  { value: 'MASZYNY', label: 'Maszyny / Sprzęt', icon: '🚜', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  { value: 'NAPRAWY', label: 'Naprawy / Części zamienne', icon: '🔧', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  { value: 'PALIWO', label: 'Paliwo / Oleje / Smary', icon: '⛽', color: 'bg-orange-50 text-orange-700 border-orange-200' },
-  { value: 'UBEZPIECZENIE', label: 'Ubezpieczenia (maszyny, sad)', icon: '🧾', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+  { value: 'MASZYNY', label: 'Maszyny / Sprzęt', icon: '🚜', color: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' },
+  { value: 'NAPRAWY', label: 'Naprawy / Części zamienne', icon: '🔧', color: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' },
+  { value: 'PALIWO', label: 'Paliwo / Oleje / Smary', icon: '⛽', color: 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800' },
+  { value: 'UBEZPIECZENIE', label: 'Ubezpieczenia (maszyny, sad)', icon: '🧾', color: 'bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700' },
 
-  { value: 'PRACA', label: 'Pracownicy sezonowi', icon: '💼', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { value: 'ZAKWATEROWANIE', label: 'Zakwaterowanie / Wyżywienie pracowników', icon: '🏠🍽️', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { value: 'USŁUGI_ROLNICZE', label: 'Usługi rolnicze / Analizy gleby', icon: '🧪', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { value: 'TRANSPORT', label: 'Transport / Logistyka', icon: '🚚', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { value: 'SZKOLENIA', label: 'Szkolenia / Doradztwo / Certyfikaty', icon: '🎓', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { value: 'PRACA', label: 'Pracownicy sezonowi', icon: '💼', color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
+  { value: 'ZAKWATEROWANIE', label: 'Zakwaterowanie / Wyżywienie pracowników', icon: '🏠🍽️', color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
+  { value: 'USŁUGI_ROLNICZE', label: 'Usługi rolnicze / Analizy gleby', icon: '🧪', color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
+  { value: 'TRANSPORT', label: 'Transport / Logistyka', icon: '🚚', color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
+  { value: 'SZKOLENIA', label: 'Szkolenia / Doradztwo / Certyfikaty', icon: '🎓', color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
 
-  { value: 'OPAKOWANIA', label: 'Opakowania / Skrzynki / Kartony', icon: '📦', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  { value: 'CHŁODNIA', label: 'Chłodnia / Przechowalnia', icon: '🧊', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { value: 'MARKETING', label: 'Marketing / Sprzedaż / Prowizje', icon: '💰', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  { value: 'BIURO', label: 'Materiały biurowe / Telefon / Internet', icon: '📱', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+  { value: 'OPAKOWANIA', label: 'Opakowania / Skrzynki / Kartony', icon: '📦', color: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800' },
+  { value: 'CHŁODNIA', label: 'Chłodnia / Przechowalnia', icon: '🧊', color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
+  { value: 'MARKETING', label: 'Marketing / Sprzedaż / Prowizje', icon: '💰', color: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800' },
+  { value: 'BIURO', label: 'Materiały biurowe / Telefon / Internet', icon: '📱', color: 'bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700' },
 
-  { value: 'REMONTY', label: 'Renowacje / Inwestycje w sadzie', icon: '🧱', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  { value: 'INFRASTRUKTURA', label: 'Drogi / Ogrodzenia / Budynki', icon: '🚧', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  { value: 'MODERNIZACJE_TECHNICZNE', label: 'Modernizacje / Nowe technologie', icon: '⚙️', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  { value: 'REMONTY', label: 'Renowacje / Inwestycje w sadzie', icon: '🧱', color: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' },
+  { value: 'INFRASTRUKTURA', label: 'Drogi / Ogrodzenia / Budynki', icon: '🚧', color: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' },
+  { value: 'MODERNIZACJE_TECHNICZNE', label: 'Modernizacje / Nowe technologie', icon: '⚙️', color: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' },
 
-  { value: 'PODATKI', label: 'Podatki / Opłaty / KRUS', icon: '💸', color: 'bg-red-50 text-red-700 border-red-200' },
-  { value: 'KSIĘGOWOŚĆ', label: 'Księgowość / Biuro rachunkowe', icon: '📊', color: 'bg-red-50 text-red-700 border-red-200' },
+  { value: 'PODATKI', label: 'Podatki / Opłaty / KRUS', icon: '💸', color: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800' },
+  { value: 'KSIĘGOWOŚĆ', label: 'Księgowość / Biuro rachunkowe', icon: '📊', color: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800' },
 
-  { value: 'INNE_MATERIAŁY', label: 'Inne zaopatrzenie', icon: '🛒', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { value: 'INNE', label: 'Inne wydatki', icon: '🪙', color: 'bg-gray-50 text-gray-700 border-gray-200' },
+  { value: 'INNE_MATERIAŁY', label: 'Inne zaopatrzenie', icon: '🛒', color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
+  { value: 'INNE', label: 'Inne wydatki', icon: '🪙', color: 'bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700' },
 ];
 
 export const PAYMENT_STATUS_OPTIONS = [
@@ -69,7 +69,7 @@ export const getExpenseTypeDetails = (type: string) => {
   const expense = EXPENSE_TYPES.find(exp => exp.value === type);
   return expense
     ? { label: expense.label, icon: expense.icon, color: expense.color }
-    : { label: 'Nieznany', icon: '❓', color: 'bg-gray-50 text-gray-700 border-gray-200' };
+    : { label: 'Nieznany', icon: '❓', color: 'bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700' };
 };
 
 export const generateYearOptions = () => {

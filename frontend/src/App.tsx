@@ -96,12 +96,12 @@ useEffect(() => {
     // pokazuj treści chronionej — spinner trzymamy TYLKO w obrębie trasy chronionej.
     if (authStatus === 'unknown') {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">{t('app.checkingAuth')}</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-300">{t('app.checkingAuth')}</p>
             {isWaking && (
-              <p className="mt-2 text-sm text-gray-400">{t('app.wakingServer')}</p>
+              <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">{t('app.wakingServer')}</p>
             )}
           </div>
         </div>

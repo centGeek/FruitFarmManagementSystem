@@ -45,32 +45,32 @@ const MapTools: React.FC<MapToolsProps> = React.memo(({ onStyleChange, currentSt
     return (
         <div className="absolute top-4 left-4 z-[1000] flex flex-col items-start space-y-2">
 
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden w-10">
-                <button onClick={() => map.zoomIn()} className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors border-b border-gray-200" title={t("mapStyles.zoomIn")}>
-                    <span className="text-xl font-bold text-gray-700">+</span>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden w-10">
+                <button onClick={() => map.zoomIn()} className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-200 dark:border-gray-700" title={t("mapStyles.zoomIn")}>
+                    <span className="text-xl font-bold text-gray-700 dark:text-gray-200">+</span>
                 </button>
-                <button onClick={() => map.zoomOut()} className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors rounded-b-lg" title={t("mapStyles.zoomOut")}>
-                    <span className="text-xl font-bold text-gray-700">−</span>
+                <button onClick={() => map.zoomOut()} className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors rounded-b-lg" title={t("mapStyles.zoomOut")}>
+                    <span className="text-xl font-bold text-gray-700 dark:text-gray-200">−</span>
                 </button>
             </div>
 
             <div className="relative">
                 <button
                     onClick={() => setIsStyleOpen(!isStyleOpen)}
-                    className={`w-10 h-10 flex items-center justify-center transition-colors rounded-lg shadow-lg ${isStyleOpen ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100 text-gray-700'}`}
+                    className={`w-10 h-10 flex items-center justify-center transition-colors rounded-lg shadow-lg ${isStyleOpen ? 'bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-200'}`}
                     title={t("mapStyles.layers")}
                 >
                     <Layers className="w-5 h-5" />
                 </button>
 
                 {isStyleOpen && (
-                    <div className="absolute left-12 top-0 bg-white rounded-lg shadow-xl border border-gray-200 w-40">
+                    <div className="absolute left-12 top-0 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-40">
                         <div className="p-1 space-y-0.5 max-h-40 overflow-y-auto">
                             {Object.keys(MAP_STYLES).map((key) => (
                                 <button
                                     key={key}
                                     onClick={() => onStyleChange(key as keyof typeof MAP_STYLES)}
-                                    className={`w-full text-left px-2 py-1.5 rounded text-xs transition-all flex items-center justify-between ${currentStyle === key ? 'bg-blue-500 text-white font-medium' : 'hover:bg-gray-100 text-gray-700'}`}
+                                    className={`w-full text-left px-2 py-1.5 rounded text-xs transition-all flex items-center justify-between ${currentStyle === key ? 'bg-blue-500 text-white font-medium' : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-200'}`}
                                 >
                                     <span className="whitespace-nowrap">{t(`mapStyles.${key}`)}</span>
                                     {currentStyle === key && (<Check className="w-3 h-3 ml-1 flex-shrink-0" />)}

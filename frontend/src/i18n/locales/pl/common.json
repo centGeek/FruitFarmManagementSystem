@@ -51,6 +51,14 @@
     "en": "Angielski",
     "switchTo": "Zmień język"
   },
+  "theme": {
+    "label": "Motyw",
+    "toggle": "Przełącz motyw",
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "switchToLight": "Przełącz na jasny motyw",
+    "switchToDark": "Przełącz na ciemny motyw"
+  },
   "nav": {
     "home": "Strona główna",
     "map": "Mapa",

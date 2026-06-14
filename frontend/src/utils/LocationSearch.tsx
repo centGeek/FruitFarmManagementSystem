@@ -167,9 +167,9 @@ const LocationSearch = ({
             <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     {isLoading ? (
-                        <Loader className="h-5 w-5 text-gray-400 animate-spin" />
+                        <Loader className="h-5 w-5 text-gray-400 dark:text-gray-500 animate-spin" />
                     ) : (
-                        <Search className="h-5 w-5 text-gray-400" />
+                        <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     )}
                 </div>
                 <input
@@ -179,30 +179,30 @@ const LocationSearch = ({
                     onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     placeholder={placeholderText}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 hover:shadow-md"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 shadow-sm transition-all duration-200 hover:shadow-md"
                 />
             </div>
 
             {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
                     {suggestions.map((suggestion) => (
                         <button
                             key={suggestion.id}
                             onMouseDown={() => selectLocation(suggestion)}
-                            className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                            className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
                         >
                             <div className="flex items-start gap-3">
-                                <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
                                 <div className="flex-1 min-w-0">
-                                    <div className="text-sm font-medium text-gray-900 truncate">
+                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
                                         {suggestion.name.split(',')[0]}
                                         {suggestion.type && (
-                                            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                            <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded">
                                                 {suggestion.type}
                                             </span>
                                         )}
                                     </div>
-                                    <div className="text-xs text-gray-500 truncate">
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                         {suggestion.name}
                                     </div>
                                 </div>

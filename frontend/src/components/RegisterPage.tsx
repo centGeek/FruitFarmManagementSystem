@@ -6,13 +6,15 @@ import { BACKEND_URL } from "../utils/apiConfigs";
 import { Alert } from "../utils/common";
 import BasicMap from '../utils/BasicMap';
 import LocationSearch from '../utils/LocationSearch';
+import ThemeSwitcher from './ThemeSwitcher';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const TextInput = React.memo(({ id, name, value, onChange, placeholder, icon: Icon, type = "text", disabled, error }) => (
     <div>
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{placeholder}</label>
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{placeholder}</label>
         <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-400'}`} />
+                <Icon className={`h-5 w-5 ${error ? 'text-red-400 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'}`} />
             </div>
             <input
                 type={type}
@@ -20,7 +22,7 @@ const TextInput = React.memo(({ id, name, value, onChange, placeholder, icon: Ic
                 name={name}
                 value={value}
                 onChange={onChange}
-                className={`w-full pl-10 pr-4 py-3 border ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white`}
+                className={`w-full pl-10 pr-4 py-3 border ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:bg-white dark:focus:bg-gray-700`}
                 placeholder={placeholder}
                 disabled={disabled}
             />
@@ -31,10 +33,10 @@ const TextInput = React.memo(({ id, name, value, onChange, placeholder, icon: Ic
 
 const PasswordInput = React.memo(({ id, name, value, onChange, showPassword, setShowPassword, placeholder, disabled, error }) => (
     <div>
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{placeholder}</label>
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{placeholder}</label>
         <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-400'}`} />
+                <Lock className={`h-5 w-5 ${error ? 'text-red-400 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'}`} />
             </div>
             <input
                 type={showPassword ? "text" : "password"}
@@ -42,14 +44,14 @@ const PasswordInput = React.memo(({ id, name, value, onChange, showPassword, set
                 name={name}
                 value={value}
                 onChange={onChange}
-                className={`w-full pl-10 pr-12 py-3 border ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white`}
+                className={`w-full pl-10 pr-12 py-3 border ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:bg-white dark:focus:bg-gray-700`}
                 placeholder={placeholder}
                 disabled={disabled}
             />
             <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
                 disabled={disabled}
             >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -227,12 +229,16 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+            <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
+                <LanguageSwitcher variant="surface" />
+                <ThemeSwitcher variant="surface" />
+            </div>
             <div className="absolute top-20 left-20 text-green-200 animate-pulse"><Apple size={32} /></div>
             <div className="absolute top-40 right-32 text-lime-200 animate-bounce"><Leaf size={24} /></div>
             <div className="absolute bottom-32 left-16 text-emerald-200 animate-pulse"><Leaf size={28} /></div>
 
-            <div className="w-full max-w-lg bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/50">
+            <div className="w-full max-w-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/50 dark:border-gray-700">
                 <div className="p-8 lg:p-10">
                     <div className="max-w-md mx-auto">
                         
@@ -240,8 +246,8 @@ export default function RegisterPage() {
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mb-4 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                                 <Apple className="w-8 h-8 text-white" />
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('heading')}</h1>
-                            <p className="text-gray-600 text-sm">{t('subtitle')}</p>
+                            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">{t('heading')}</h1>
+                            <p className="text-gray-600 dark:text-gray-300 text-sm">{t('subtitle')}</p>
                         </div>
 
                         <Alert type="error" message={generalError} />
@@ -258,8 +264,8 @@ export default function RegisterPage() {
                             <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder={t('fields.email')} icon={Mail} disabled={isLoading} error={errors.email}/>
 
                             <div className="pt-2">
-                                <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                                    <MapPin className="w-4 h-4 mr-2 text-green-600" /> {t('location.heading')}
+                                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center">
+                                    <MapPin className="w-4 h-4 mr-2 text-green-600 dark:text-green-300" /> {t('location.heading')}
                                 </h3>
                                 
                                 {mapInstance && (
@@ -268,7 +274,7 @@ export default function RegisterPage() {
                                     </div>
                                 )}
                                 
-                                <div className={`rounded-xl overflow-hidden shadow-sm border ${errors.localityName ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'} relative z-0`} style={{ height: '250px' }}>
+                                <div className={`rounded-xl overflow-hidden shadow-sm border ${errors.localityName ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 dark:border-gray-600'} relative z-0`} style={{ height: '250px' }}>
                                     <BasicMap
                                         center={mapView.center}
                                         zoom={mapView.zoom}
@@ -324,9 +330,9 @@ export default function RegisterPage() {
                         </form>
 
                         <div className="mt-6 text-center">
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
                                 {t('alreadyHaveAccount')}{' '}
-                                <a href="/login" className="text-green-600 hover:text-green-500 font-medium transition-colors" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
+                                <a href="/login" className="text-green-600 dark:text-green-300 hover:text-green-500 dark:hover:text-green-400 font-medium transition-colors" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
                                     {t('loginLink')}
                                 </a>
                             </p>

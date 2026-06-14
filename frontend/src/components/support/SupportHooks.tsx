@@ -13,9 +13,9 @@ export const TICKET_CATEGORIES = [
 ];
 
 export const TICKET_STATUS: Record<string, { icon: string; color: string }> = {
-  OPEN: { icon: '🟢', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  IN_PROGRESS: { icon: '🛠️', color: 'bg-amber-100 text-amber-700 border-amber-200' },
-  CLOSED: { icon: '✅', color: 'bg-gray-100 text-gray-600 border-gray-200' },
+  OPEN: { icon: '🟢', color: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800' },
+  IN_PROGRESS: { icon: '🛠️', color: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800' },
+  CLOSED: { icon: '✅', color: 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700' },
 };
 
 export const getCategoryDetails = (value: string) => {
@@ -24,7 +24,7 @@ export const getCategoryDetails = (value: string) => {
 };
 
 export const getStatusDetails = (value: string) => {
-  return TICKET_STATUS[value] || { icon: '❔', color: 'bg-gray-100 text-gray-600 border-gray-200' };
+  return TICKET_STATUS[value] || { icon: '❔', color: 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700' };
 };
 
 export interface Ticket {

@@ -8,7 +8,7 @@ const formatPay = (pay: any) => {
   return Number(pay).toFixed(2);
 };
 
-export const Modal = ({ isOpen, onClose, title, children, headerColor = 'bg-green-50' }: any) => {
+export const Modal = ({ isOpen, onClose, title, children, headerColor = 'bg-green-50 dark:bg-green-900/20' }: any) => {
   if (!isOpen) return null;
 
   useEffect(() => {
@@ -21,9 +21,9 @@ export const Modal = ({ isOpen, onClose, title, children, headerColor = 'bg-gree
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-transform duration-300 scale-100">
-        <div className={`sticky top-0 ${headerColor} border-b border-gray-200 px-6 py-4 rounded-t-2xl z-10 flex items-center justify-between`}>
-          <h2 className="text-xl font-bold text-gray-800 flex items-center">{title}</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-transform duration-300 scale-100">
+        <div className={`sticky top-0 ${headerColor} border-b border-gray-200 dark:border-gray-700 px-6 py-4 rounded-t-2xl z-10 flex items-center justify-between`}>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center">{title}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-white hover:bg-opacity-50 rounded-xl transition-colors text-lg"
@@ -49,7 +49,7 @@ export const InputField = React.memo(({
   ...props
 }: any) => (
   <div>
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+    <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
       {label} {required && '*'}
     </label>
     <div className="relative">
@@ -57,14 +57,14 @@ export const InputField = React.memo(({
         id={name}
         name={name}
         onChange={handleChange}
-        className={`w-full px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300'} border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors`}
+        className={`w-full px-3 py-2 ${error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} border rounded-lg dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors`}
         disabled={isLoading}
         value={value}
         type={type}
         {...props}
       />
     </div>
-    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    {error && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{error}</p>}
   </div>
 ));
 
@@ -172,15 +172,15 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
           id="active"
           checked={formData.active}
           onChange={handleChange}
-          className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+          className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600 rounded"
           disabled={isLoading}
         />
-        <label htmlFor="active" className="ml-2 text-sm text-gray-700 font-medium">
+        <label htmlFor="active" className="ml-2 text-sm text-gray-700 dark:text-gray-200 font-medium">
           {t("form.active")}
         </label>
       </div>
 
-      <div className="flex space-x-3 pt-6 border-t border-gray-100">
+      <div className="flex space-x-3 pt-6 border-t border-gray-100 dark:border-gray-700">
         <button
           onClick={handleSubmit}
           disabled={isLoading}
@@ -193,7 +193,7 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
+          className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-800 dark:text-gray-100 py-3 px-4 rounded-xl font-semibold transition-colors"
           disabled={isLoading}
         >
           {t("form.cancel")}
@@ -205,21 +205,21 @@ export const EmployeeForm = ({ employee, onSave, onCancel, isLoading }: any) => 
 
 export const StatCard = ({ count, label, color }: any) => {
   const colorMap: any = {
-    green: { bg: 'from-green-100 to-green-200', emoji: '🟢', icon: '🍃' },
-    red: { bg: 'from-red-100 to-red-200', emoji: '🔴', icon: '📦' },
-    lime: { bg: 'from-lime-100 to-lime-200', emoji: '✨', icon: '🔎' }
+    green: { bg: 'from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30', emoji: '🟢', icon: '🍃' },
+    red: { bg: 'from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30', emoji: '🔴', icon: '📦' },
+    lime: { bg: 'from-lime-100 to-lime-200 dark:from-lime-900/30 dark:to-lime-800/30', emoji: '✨', icon: '🔎' }
   };
   const colors = colorMap[color] || colorMap.green;
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow">
       <div className="flex items-center space-x-4">
         <div className={`w-14 h-14 bg-gradient-to-br ${colors.bg} rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl`}>
           {colors.icon}
         </div>
         <div>
-          <p className="text-3xl font-extrabold text-gray-900">{count}</p>
-          <p className="text-sm text-gray-500">{label} {colors.emoji}</p>
+          <p className="text-3xl font-extrabold text-gray-900 dark:text-gray-50">{count}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{label} {colors.emoji}</p>
         </div>
       </div>
     </div>
@@ -231,7 +231,7 @@ export const LoadingState = () => {
   return (
     <div className="text-center py-16">
       <div className="w-14 h-14 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-6"></div>
-      <p className="text-gray-500 text-xl font-medium">{t("loading")}</p>
+      <p className="text-gray-500 dark:text-gray-400 text-xl font-medium">{t("loading")}</p>
     </div>
   );
 };
@@ -255,11 +255,11 @@ export const EmptyState = ({ searchTerm, employeesCount, showArchived, onAddClic
 
   return (
     <div className="text-center py-16">
-      <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">
+      <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">
         👤
       </div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
-      <p className="text-gray-500 mb-6 max-w-md mx-auto">{message}</p>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-3">{title}</h3>
+      <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">{message}</p>
     </div>
   );
 };
@@ -292,24 +292,24 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
   ];
 
   return (
-    <div className={`bg-white border rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 ${isArchived ? 'opacity-70 border-gray-300' : 'border-green-200'}`}>
+    <div className={`bg-white dark:bg-gray-800 border rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 ${isArchived ? 'opacity-70 border-gray-300 dark:border-gray-600' : 'border-green-200 dark:border-green-800'}`}>
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
         <div className="flex items-center space-x-3 min-w-0 sm:flex-1">
-          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 ${isArchived ? 'bg-gray-100' : 'bg-gradient-to-br from-green-50 to-green-100'}`}>
+          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 ${isArchived ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30'}`}>
             🧑‍🌾
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-xl font-bold text-gray-800 break-words">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 break-words">
               {employee.name} {employee.surname}
             </h3>
-            {employee.nickname && <p className="text-sm text-gray-500 italic break-words">"{employee.nickname}"</p>}
+            {employee.nickname && <p className="text-sm text-gray-500 dark:text-gray-400 italic break-words">"{employee.nickname}"</p>}
           </div>
         </div>
 
         <div className="flex items-center space-x-2 flex-shrink-0">
           <button
             onClick={() => onEdit(employee)}
-            className="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors text-base"
+            className="p-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-300 hover:bg-green-100 rounded-lg transition-colors text-base"
             title={t("card.editTitle")}
             disabled={isProcessing}
           >
@@ -317,7 +317,7 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
           </button>
           <button
             onClick={() => onFinanceDetails(employee)}
-            className="p-2 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors text-base"
+            className="p-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300 hover:bg-purple-100 rounded-lg transition-colors text-base"
             title={t("card.workDetailsTitle")}
             disabled={isProcessing}
           >
@@ -326,7 +326,7 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
           <button
             onClick={handleArchiveToggle}
             disabled={isProcessing}
-            className={`p-2 rounded-lg transition-colors text-base ${isArchived ? 'bg-lime-50 text-lime-600 hover:bg-lime-100' : 'bg-red-50 text-red-600 hover:bg-red-100'} disabled:opacity-50`}
+            className={`p-2 rounded-lg transition-colors text-base ${isArchived ? 'bg-lime-50 dark:bg-lime-900/20 text-lime-600 dark:text-lime-300 hover:bg-lime-100' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 hover:bg-red-100'} disabled:opacity-50`}
             title={isArchived ? t("card.restoreTitle") : t("card.archiveTitle")}
           >
             {isProcessing ? (
@@ -338,31 +338,31 @@ export const EmployeeCard = ({ employee, onEdit, onArchive, onRestore, onFinance
 
       <div className="mb-4 space-x-2">
         {isEmployeeActive ? (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
             <span className="mr-1">✅</span>{t("card.statusActive")}
           </span>
         ) : (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
             <span className="mr-1">❌</span>{t("card.statusArchived")}
           </span>
         )}
         {employee.role && (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-lime-100 text-lime-700">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300">
             <span className="mr-1">⚙️</span>
             {employee.role.roleName === 'Employee' ? t("card.roleEmployee") : employee.role.roleName || t("card.noRole")}
           </span>
         )}
       </div>
 
-      <div className="space-y-3 pt-4 border-t border-gray-100">
+      <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-700">
         {employeeDetails.map((item, index) => item.value && (
-          <div key={index} className="flex items-center space-x-3 text-gray-600">
-            <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 text-lg">
+          <div key={index} className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
+            <div className="w-8 h-8 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center flex-shrink-0 text-lg">
               {item.icon}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-gray-500 uppercase">{item.label}</p>
-              <p className={`text-sm font-medium text-gray-900 ${item.truncate ? 'truncate' : ''}`}>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{item.label}</p>
+              <p className={`text-sm font-medium text-gray-900 dark:text-gray-50 ${item.truncate ? 'truncate' : ''}`}>
                 {item.value}
               </p>
             </div>
@@ -467,24 +467,24 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
           ⚠️ {error}
         </div>
       )}
 
-      <div className="p-4 rounded-xl border-l-4 border-yellow-500 bg-yellow-50">
-        <p className="text-sm text-gray-800 flex items-center">
+      <div className="p-4 rounded-xl border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20">
+        <p className="text-sm text-gray-800 dark:text-gray-100 flex items-center">
           <span className="mr-2 text-xl">💵</span> {t("advances.totalUnsettled")}
-          <span className="ml-2 font-bold text-lg text-yellow-700">{t("advances.amountWithCurrency", { amount: unsettledSum })}</span>
+          <span className="ml-2 font-bold text-lg text-yellow-700 dark:text-yellow-300">{t("advances.amountWithCurrency", { amount: unsettledSum })}</span>
         </p>
-        <p className="text-xs text-gray-600 mt-1">{t("advances.totalUnsettledHint")}</p>
+        <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{t("advances.totalUnsettledHint")}</p>
       </div>
 
-      <div className="p-4 border rounded-xl shadow-sm bg-gray-50 space-y-4">
-        <h4 className="text-lg font-bold text-gray-800 flex items-center">{t("advances.payAdvanceTitle")}</h4>
+      <div className="p-4 border rounded-xl shadow-sm bg-gray-50 dark:bg-gray-900 space-y-4">
+        <h4 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center">{t("advances.payAdvanceTitle")}</h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t("advances.amountLabel")}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{t("advances.amountLabel")}</label>
             <input
               type="number"
               value={advanceAmount}
@@ -493,7 +493,7 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
               step="10"
               min="1"
               disabled={isSaving || isLoading}
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
+              className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors"
             />
           </div>
           <div className="sm:col-span-1 flex items-end">
@@ -519,7 +519,7 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
       </div>
 
       {parseFloat(unsettledSum) > 0 && (
-        <div className="pt-4 border-t border-gray-100">
+        <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
           <button
             onClick={handlePayOff}
             disabled={isPayingOff || isLoading}
@@ -530,25 +530,25 @@ export const AdvancePaySection = ({ employee, onAdvanceSave }: any) => {
         </div>
       )}
 
-      <h4 className="text-lg font-bold text-gray-800 mt-6 pt-4 border-t">
+      <h4 className="text-lg font-bold text-gray-800 dark:text-gray-100 mt-6 pt-4 border-t dark:border-gray-700">
         {t("advances.historyTitle", { count: advances.length })}
       </h4>
 
       {isLoading ? (
-        <div className="text-center text-gray-500 py-4">{t("advances.loadingHistory")}</div>
+        <div className="text-center text-gray-500 dark:text-gray-400 py-4">{t("advances.loadingHistory")}</div>
       ) : advances.length === 0 ? (
-        <div className="text-center text-gray-500 py-4 border border-gray-100 rounded-xl">
+        <div className="text-center text-gray-500 dark:text-gray-400 py-4 border border-gray-100 dark:border-gray-700 rounded-xl">
           {t("advances.noUnsettled")}
         </div>
       ) : (
         <ul className="space-y-3">
           {advances.map((advance, index) => (
-            <li key={index} className="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
+            <li key={index} className="flex justify-between items-center p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm">
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-800">{t("advances.amountWithCurrency", { amount: advance.amount?.toFixed(2) || '0.00' })}</p>
-                <p className="text-xs text-gray-500 truncate">{advance.description || t("advances.noDescription")}</p>
+                <p className="font-semibold text-gray-800 dark:text-gray-100">{t("advances.amountWithCurrency", { amount: advance.amount?.toFixed(2) || '0.00' })}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{advance.description || t("advances.noDescription")}</p>
               </div>
-              <div className="text-sm text-gray-600 ml-4 flex-shrink-0">
+              <div className="text-sm text-gray-600 dark:text-gray-300 ml-4 flex-shrink-0">
                 📅 {new Date(advance.date || advance.createdAt).toLocaleDateString('pl-PL')}
               </div>
             </li>
@@ -663,31 +663,31 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
       onClose={onClose}
       title={
         <span>
-          <span className="mr-2 text-purple-600">💼</span>
+          <span className="mr-2 text-purple-600 dark:text-purple-300">💼</span>
           {t("workDetails.modalTitle", { name: employee.name, surname: employee.surname })}
         </span>
       }
-      headerColor="bg-purple-50"
+      headerColor="bg-purple-50 dark:bg-purple-900/20"
     >
       <div className="space-y-6">
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-          <p className="text-sm font-medium text-blue-900">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded">
+          <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
             👤 {employee.name} {employee.surname}
-            {employee.nickname && <span className="italic text-blue-700"> "{employee.nickname}"</span>}
+            {employee.nickname && <span className="italic text-blue-700 dark:text-blue-300"> "{employee.nickname}"</span>}
           </p>
-          <p className="text-xs text-blue-700 mt-1">{employee.email}</p>
+          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">{employee.email}</p>
         </div>
 
-        <div className="flex border-b border-gray-200">
+        <div className="flex border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setActiveTab('workDetails')}
-            className={`py-2 px-4 text-sm font-semibold transition-colors ${activeTab === 'workDetails' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`py-2 px-4 text-sm font-semibold transition-colors ${activeTab === 'workDetails' ? 'border-b-2 border-purple-600 text-purple-600 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
           >
             {t("workDetails.tabWorkDetails")}
           </button>
           <button
             onClick={() => setActiveTab('advances')}
-            className={`py-2 px-4 text-sm font-semibold transition-colors ${activeTab === 'advances' ? 'border-b-2 border-yellow-600 text-yellow-600' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`py-2 px-4 text-sm font-semibold transition-colors ${activeTab === 'advances' ? 'border-b-2 border-yellow-600 text-yellow-600 dark:text-yellow-300' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
           >
             {t("workDetails.tabAdvances")}
           </button>
@@ -695,31 +695,31 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
 
         {activeTab === 'workDetails' && (
           <div className="space-y-6">
-            {error && <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">⚠️ {error}</div>}
+            {error && <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">⚠️ {error}</div>}
             
             {isLoadingWorkDetails ? (
               <div className="text-center py-8">
                 <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
-                <p className="text-gray-500 mt-4">{t("workDetails.loadingDetails")}</p>
+                <p className="text-gray-500 dark:text-gray-400 mt-4">{t("workDetails.loadingDetails")}</p>
               </div>
             ) : (
               <>
                 {currentRateText && (
-                  <div className={`p-4 rounded-xl border-l-4 ${currentRateText.isCurrentHourly ? 'bg-blue-100 border-blue-500' : 'bg-green-100 border-green-500'} transition-all`}>
-                    <p className="text-sm text-gray-800 flex items-center">
+                  <div className={`p-4 rounded-xl border-l-4 ${currentRateText.isCurrentHourly ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-500' : 'bg-green-100 dark:bg-green-900/30 border-green-500'} transition-all`}>
+                    <p className="text-sm text-gray-800 dark:text-gray-100 flex items-center">
                       <span className="mr-2 text-xl">{currentRateText.isCurrentHourly ? '⏰' : '⚖️'}</span>
                       {t("workDetails.currentRate")} <span className="ml-2 font-bold text-base">{currentRateText.rateText}</span>
                     </p>
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">{t("workDetails.settlementType")}</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">{t("workDetails.settlementType")}</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => { setIsPaidHourly(true); setPayPerKilogram(''); }}
                       disabled={isLoadingWorkDetails}
-                      className={`py-4 px-4 rounded-xl font-medium transition-all ${isPaidHourly ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      className={`py-4 px-4 rounded-xl font-medium transition-all ${isPaidHourly ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200'}`}
                     >
                       <div className="text-3xl mb-2">⏰</div>
                       <div className="text-sm font-bold">{t("workDetails.hourlyPayment")}</div>
@@ -728,7 +728,7 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                       type="button"
                       onClick={() => { setIsPaidHourly(false); setHourlyPay(''); }}
                       disabled={isLoadingWorkDetails}
-                      className={`py-4 px-4 rounded-xl font-medium transition-all ${!isPaidHourly ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg scale-105' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      className={`py-4 px-4 rounded-xl font-medium transition-all ${!isPaidHourly ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg scale-105' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200'}`}
                     >
                       <div className="text-3xl mb-2">⚖️</div>
                       <div className="text-sm font-bold">{t("workDetails.perKgPayment")}</div>
@@ -737,9 +737,9 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                 </div>
                 {isPaidHourly ? (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("workDetails.hourlyRateLabel")}</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{t("workDetails.hourlyRateLabel")}</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">💼</span>
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-xl">💼</span>
                       <input
                         type="number"
                         value={hourlyPay}
@@ -748,15 +748,15 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                         step="1"
                         min="10"
                         disabled={isLoadingWorkDetails}
-                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("workDetails.perKgRateLabel")}</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{t("workDetails.perKgRateLabel")}</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl">🍎</span>
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-xl">🍎</span>
                       <input
                         type="number"
                         value={payPerKilogram}
@@ -765,17 +765,17 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                         step="0.01"
                         min="0.01"
                         disabled={isLoadingWorkDetails}
-                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                       />
                     </div>
                   </div>
                 )}
                 {workDetails && (
-                  <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-xs text-gray-600 dark:text-gray-300">
                     <p>{t("workDetails.lastUpdate", { date: new Date(workDetails.createdAt).toLocaleDateString('pl-PL') })}</p>
                   </div>
                 )}
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex gap-3 pt-4 border-t dark:border-gray-700">
                   <button
                     onClick={handleSaveWorkDetails}
                     disabled={isLoadingWorkDetails}
@@ -793,7 +793,7 @@ export const EmployeeFinanceModal = ({ isOpen, onClose, employee, onWorkDetailsS
                   <button
                     onClick={onClose}
                     disabled={isLoadingWorkDetails}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded-xl font-semibold transition-colors"
+                    className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-800 dark:text-gray-100 py-3 px-4 rounded-xl font-semibold transition-colors"
                   >
                     {t("workDetails.close")}
                   </button>
