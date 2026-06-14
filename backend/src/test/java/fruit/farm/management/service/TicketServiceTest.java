@@ -225,15 +225,15 @@ class TicketServiceTest {
     }
 
     @Test
-    @DisplayName("getAllTickets trims a non-blank search term before querying")
+    @DisplayName("getAllTickets normalizes a non-blank search term (trim + lowercase) into a %-wrapped LIKE pattern")
     void getAllTickets_trimsSearch() {
         Pageable pageable = PageRequest.of(0, 12);
-        when(ticketRepository.findAllFiltered(isNull(), eq("valve"), eq(pageable)))
+        when(ticketRepository.findAllFiltered(isNull(), eq("%valve%"), eq(pageable)))
                 .thenReturn(Page.empty(pageable));
 
-        service.getAllTickets(null, "  valve  ", pageable);
+        service.getAllTickets(null, "  Valve  ", pageable);
 
-        verify(ticketRepository).findAllFiltered(null, "valve", pageable);
+        verify(ticketRepository).findAllFiltered(null, "%valve%", pageable);
     }
 
     @Test
