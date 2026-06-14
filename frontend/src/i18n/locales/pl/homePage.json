@@ -1,0 +1,61 @@
+{
+  "header": {
+    "title": "Powiadomienia",
+    "subtitle": "Wszystkie ważne informacje w jednym miejscu"
+  },
+  "news": {
+    "title": "Ostatnie aktualności"
+  },
+  "loadingNotifications": "Ładowanie notyfikacji... 🔄",
+  "empty": {
+    "title": "Brak notyfikacji",
+    "subtitle": "Nie masz jeszcze żadnych powiadomień. Sprawdź ponownie później!"
+  },
+  "notificationType": {
+    "WEATHER": "Pogoda",
+    "USER": "Użytkownik",
+    "WORK_ENTRY": "Wpis pracy",
+    "SECTOR": "Sektor",
+    "PROFIT": "Zysk",
+    "EXPENSE": "Wydatek",
+    "DEFAULT": "Powiadomienie"
+  },
+  "timeAgo": {
+    "justNow": "Przed chwilą",
+    "minutes": "{{count}} min temu",
+    "hours": "{{count}} godz. temu",
+    "days": "{{count}} dni temu"
+  },
+  "weather": {
+    "title": "Pogoda",
+    "checking": "Sprawdzanie alertów...",
+    "warningCount_one": "ostrzeżenie",
+    "warningCount_few": "ostrzeżenia",
+    "warningCount_many": "ostrzeżeń",
+    "warningCount_other": "ostrzeżeń",
+    "noAlertsTitle": "Brak ostrzeżeń",
+    "noAlertsHint": "Brak niespodzianek. Możesz skonfigurować alerty pogodowe w <weatherLink>Notyfikacjach Powodowych</weatherLink>",
+    "dateLabel": {
+      "today": "Dziś",
+      "tomorrow": "Jutro",
+      "dayAfterTomorrow": "Pojutrze",
+      "inDays": "Za {{count}} dni"
+    },
+    "alert": {
+      "frost": "🧊 Ostrzeżenie o przymrozku: {{value}}°C",
+      "tempLow": "❄️ Niska temperatura: {{value}}°C",
+      "tempHigh": "🌡️ Wysoka temperatura: {{value}}°C",
+      "rain": "🌧️ Prognoza opadów: {{value}}%",
+      "wind": "💨 Silny wiatr: {{value}} km/h",
+      "withThreshold": "{{message}} (próg: {{threshold}})"
+    }
+  },
+  "errors": {
+    "loadNotifications": "Nie udało się załadować notyfikacji ({{status}})",
+    "serverConnection": "Nie można połączyć z serwerem.",
+    "locationServer": "Błąd serwera: Nie udało się pobrać danych lokalizacji.",
+    "coordinatesUndefined": "Koordynaty dla sadownika nie są zdefiniowane.",
+    "locationLoad": "Wystąpił błąd podczas ładowania lokalizacji.",
+    "forecastFetch": "Nie udało się pobrać prognozy pogody"
+  }
+}

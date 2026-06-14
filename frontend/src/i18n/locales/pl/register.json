@@ -1,0 +1,42 @@
+{
+  "heading": "Dołącz do nas",
+  "subtitle": "Zarządzaj swoim sadem w nowoczesny sposób",
+  "fields": {
+    "name": "Imię *",
+    "surname": "Nazwisko *",
+    "nickname": "Nazwa użytkownika *",
+    "phoneNumber": "Numer telefonu",
+    "email": "Adres email",
+    "password": "Hasło *",
+    "confirmPassword": "Potwierdź hasło *",
+    "selectedLocality": "Wybrana Miejscowość"
+  },
+  "location": {
+    "heading": "Twoja lokalizacja *",
+    "initialMessage": "Kliknij na mapę lub wyszukaj lokalizację",
+    "notSet": "Nieustawiona",
+    "markedPoint": "Zaznaczony punkt ({{lat}}, {{lng}})",
+    "selectedPoint": "Wybrany punkt"
+  },
+  "validation": {
+    "nameRequired": "Imię jest wymagane",
+    "surnameRequired": "Nazwisko jest wymagane",
+    "nicknameRequired": "Nazwa użytkownika jest wymagana",
+    "emailInvalid": "Nieprawidłowy format email",
+    "passwordTooShort": "Hasło min. 6 znaków",
+    "passwordsMismatch": "Hasła nie są identyczne",
+    "localityRequired": "Musisz wybrać lokalizację",
+    "fixErrors": "Popraw błędy w formularzu."
+  },
+  "submit": {
+    "processing": "Przetwarzanie...",
+    "createAccount": "Utwórz konto"
+  },
+  "result": {
+    "success": "Rejestracja pomyślna! Możesz się teraz zalogować.",
+    "genericError": "Wystąpił błąd podczas rejestracji.",
+    "connectionError": "Błąd połączenia z serwerem. Sprawdź internet."
+  },
+  "alreadyHaveAccount": "Masz już konto?",
+  "loginLink": "Zaloguj się"
+}

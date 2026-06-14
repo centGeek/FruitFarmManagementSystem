@@ -39,6 +39,18 @@ class UserJpaRepositoryTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("findActiveByNickname projects only the active flag for a known user")
+    void findActiveByNickname_whenKnown_returnsActiveFlag() {
+        assertThat(repository.findActiveByNickname("gardener")).contains(true);
+    }
+
+    @Test
+    @DisplayName("findActiveByNickname returns empty for an unknown nickname")
+    void findActiveByNickname_whenUnknown_returnsEmpty() {
+        assertThat(repository.findActiveByNickname("nobody")).isEmpty();
+    }
+
+    @Test
     @DisplayName("getAllUsersByRoleName filters users by their role name")
     void getAllUsersByRoleName_filtersByRole() {
         List<UserEntity> gardeners = repository.getAllUsersByRoleName("Gardener");

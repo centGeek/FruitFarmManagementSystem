@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertCircle, XCircle, Clock, ArrowLeft, Home, RefreshCw, AlertTriangle, Info } from 'lucide-react';
 
 const ErrorPage = ({ error, onGoBack, onGoHome, onRetry }) => {
+    const { t } = useTranslation('errorPage');
     const [showDetails, setShowDetails] = useState(false);
-    
+
     if (!error) return null;
     
     const getErrorType = () => {
@@ -23,100 +25,69 @@ const ErrorPage = ({ error, onGoBack, onGoHome, onRetry }) => {
 
     const getErrorConfig = () => {
         const type = getErrorType();
-        
+
         const configs = {
             exceeded_hours: {
                 icon: Clock,
-                iconColor: 'text-amber-500',
-                bgColor: 'bg-amber-50',
-                borderColor: 'border-amber-300',
-                textColor: 'text-amber-800',
-                title: 'Przekroczono limit godzin',
-                tips: [
-                    'Sprawdź czy pracownik nie ma już zapisanych godzin na ten dzień',
-                    'Maksymalny limit to prawdopodobnie 18h dziennie',
-                    'Zredukuj liczbę godzin dla tego pracownika',
-                    'Możesz podzielić pracę na kilka dni'
-                ]
+                iconColor: 'text-amber-500 dark:text-amber-400',
+                bgColor: 'bg-amber-50 dark:bg-amber-900/20',
+                borderColor: 'border-amber-300 dark:border-amber-800',
+                textColor: 'text-amber-800 dark:text-amber-300',
+                title: t('types.exceeded_hours.title')
             },
             auth_error: {
                 icon: XCircle,
-                iconColor: 'text-red-500',
-                bgColor: 'bg-red-50',
-                borderColor: 'border-red-300',
-                textColor: 'text-red-800',
-                title: error.error || 'Błąd uwierzytelnienia',
-                tips: [
-                    'Twoja sesja mogła wygasnąć',
-                    'Zaloguj się ponownie',
-                    'Sprawdź czy masz odpowiednie uprawnienia'
-                ]
+                iconColor: 'text-red-500 dark:text-red-400',
+                bgColor: 'bg-red-50 dark:bg-red-900/20',
+                borderColor: 'border-red-300 dark:border-red-800',
+                textColor: 'text-red-800 dark:text-red-300',
+                title: error.error || t('types.auth_error.title')
             },
             not_found: {
                 icon: AlertCircle,
-                iconColor: 'text-blue-500',
-                bgColor: 'bg-blue-50',
-                borderColor: 'border-blue-300',
-                textColor: 'text-blue-800',
-                title: 'Nie znaleziono zasobu',
-                tips: [
-                    'Zasób którego szukasz został usunięty lub przeniesiony',
-                    'Sprawdź poprawność adresu URL',
-                    'Wróć do strony głównej'
-                ]
+                iconColor: 'text-blue-500 dark:text-blue-400',
+                bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+                borderColor: 'border-blue-300 dark:border-blue-800',
+                textColor: 'text-blue-800 dark:text-blue-300',
+                title: t('types.not_found.title')
             },
             server_error: {
                 icon: XCircle,
-                iconColor: 'text-red-500',
-                bgColor: 'bg-red-50',
-                borderColor: 'border-red-300',
-                textColor: 'text-red-800',
-                title: error.error || 'Błąd serwera',
-                tips: [
-                    'Wystąpił błąd po stronie serwera',
-                    'Sprawdź połączenie z internetem',
-                    'Spróbuj ponownie za chwilę',
-                    'Skontaktuj się z administratorem jeśli problem się powtarza'
-                ]
+                iconColor: 'text-red-500 dark:text-red-400',
+                bgColor: 'bg-red-50 dark:bg-red-900/20',
+                borderColor: 'border-red-300 dark:border-red-800',
+                textColor: 'text-red-800 dark:text-red-300',
+                title: error.error || t('types.server_error.title')
             },
             client_error: {
                 icon: AlertTriangle,
-                iconColor: 'text-orange-500',
-                bgColor: 'bg-orange-50',
-                borderColor: 'border-orange-300',
-                textColor: 'text-orange-800',
-                title: error.error || 'Nieprawidłowe żądanie',
-                tips: [
-                    'Sprawdź poprawność wprowadzonych danych',
-                    'Upewnij się, że wszystkie wymagane pola są wypełnione',
-                    'Zweryfikuj format danych'
-                ]
+                iconColor: 'text-orange-500 dark:text-orange-400',
+                bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+                borderColor: 'border-orange-300 dark:border-orange-800',
+                textColor: 'text-orange-800 dark:text-orange-300',
+                title: error.error || t('types.client_error.title')
             },
             unknown: {
                 icon: AlertCircle,
-                iconColor: 'text-gray-500',
-                bgColor: 'bg-gray-50',
-                borderColor: 'border-gray-300',
-                textColor: 'text-gray-800',
-                title: error.error || 'Wystąpił błąd',
-                tips: [
-                    'Spróbuj odświeżyć stronę',
-                    'Sprawdź połączenie z internetem',
-                    'Skontaktuj się z pomocą techniczną'
-                ]
+                iconColor: 'text-gray-500 dark:text-gray-400',
+                bgColor: 'bg-gray-50 dark:bg-gray-700/50',
+                borderColor: 'border-gray-300 dark:border-gray-600',
+                textColor: 'text-gray-800 dark:text-gray-100',
+                title: error.error || t('types.unknown.title')
             }
         };
 
-        return configs[type];
+        return { ...configs[type], type };
     };
 
     const config = getErrorConfig();
     const Icon = config.icon;
+    const tips = t(`types.${config.type}.tips`, { returnObjects: true }) as string[];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
             <div className="max-w-2xl w-full animate-slideUp">
-                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-200">
+                <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-200 dark:border-gray-700">
                     <div className={`${config.bgColor} border-b-4 ${config.borderColor} px-6 sm:px-8 py-6`}>
                         <div className="flex items-center justify-center mb-4">
                             <Icon className={config.iconColor} size={64} />
@@ -124,26 +95,26 @@ const ErrorPage = ({ error, onGoBack, onGoHome, onRetry }) => {
                         <h1 className={`text-2xl sm:text-3xl font-extrabold text-center ${config.textColor} mb-2`}>
                             {config.title}
                         </h1>
-                        <p className="text-center text-gray-600 text-sm">
-                            Kod błędu: <span className="font-mono font-bold">{error.status || 'N/A'}</span>
+                        <p className="text-center text-gray-600 dark:text-gray-300 text-sm">
+                            {t('errorCode')} <span className="font-mono font-bold">{error.status || t('codeNA')}</span>
                         </p>
                     </div>
 
                     <div className="px-6 sm:px-8 py-6 space-y-6">
-                        <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border-2 border-gray-200">
-                            <h3 className="text-xs sm:text-sm font-bold text-gray-500 uppercase mb-3 flex items-center">
+                        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 sm:p-6 border-2 border-gray-200 dark:border-gray-700">
+                            <h3 className="text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 uppercase mb-3 flex items-center">
                                 <AlertCircle size={16} className="mr-2" />
-                                Szczegóły błędu
+                                {t('detailsHeading')}
                             </h3>
-                            <p className="text-base sm:text-lg text-gray-800 leading-relaxed break-words">
-                                {error.message || 'Nie udało się wykonać operacji. Spróbuj ponownie później.'}
+                            <p className="text-base sm:text-lg text-gray-800 dark:text-gray-100 leading-relaxed break-words">
+                                {error.message || t('defaultMessage')}
                             </p>
                         </div>
 
                         {error.timestamp && (
-                            <div className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
-                                <p className="text-xs font-bold text-blue-700 uppercase mb-1">Czas wystąpienia</p>
-                                <p className="text-sm text-blue-900 font-mono">
+                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border-2 border-blue-200 dark:border-blue-800">
+                                <p className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase mb-1">{t('timestampHeading')}</p>
+                                <p className="text-sm text-blue-900 dark:text-blue-300 font-mono">
                                     {new Date(error.timestamp).toLocaleString('pl-PL', {
                                         day: '2-digit',
                                         month: '2-digit',
@@ -156,14 +127,14 @@ const ErrorPage = ({ error, onGoBack, onGoHome, onRetry }) => {
                             </div>
                         )}
 
-                        {config.tips && config.tips.length > 0 && (
+                        {tips && tips.length > 0 && (
                             <div className={`${config.bgColor} rounded-xl p-4 border-2 ${config.borderColor}`}>
                                 <h4 className={`text-sm font-bold ${config.textColor} mb-2 flex items-center`}>
                                     <Info size={16} className="mr-2" />
-                                    Co możesz zrobić?
+                                    {t('tipsHeading')}
                                 </h4>
                                 <ul className={`text-sm ${config.textColor} space-y-1 list-disc list-inside`}>
-                                    {config.tips.map((tip, index) => (
+                                    {tips.map((tip, index) => (
                                         <li key={index}>{tip}</li>
                                     ))}
                                 </ul>
@@ -171,7 +142,7 @@ const ErrorPage = ({ error, onGoBack, onGoHome, onRetry }) => {
                         )}
                     </div>
 
-                    <div className="px-6 sm:px-8 py-6 bg-gray-50 border-t-2 border-gray-200">
+                    <div className="px-6 sm:px-8 py-6 bg-gray-50 dark:bg-gray-700/50 border-t-2 border-gray-200 dark:border-gray-700">
                         <div className="flex flex-col sm:flex-row gap-3">
                             {onRetry && (
                                 <button
@@ -179,25 +150,25 @@ const ErrorPage = ({ error, onGoBack, onGoHome, onRetry }) => {
                                     className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 sm:px-6 rounded-xl font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center text-sm sm:text-base"
                                 >
                                     <RefreshCw size={18} className="mr-2" />
-                                    Spróbuj ponownie
+                                    {t('retry')}
                                 </button>
                             )}
                             {onGoBack && (
                                 <button
                                     onClick={onGoBack}
-                                    className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-3 px-4 sm:px-6 rounded-xl font-bold transition-all flex items-center justify-center text-sm sm:text-base"
+                                    className="flex-1 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 text-blue-700 dark:text-blue-300 py-3 px-4 sm:px-6 rounded-xl font-bold transition-all flex items-center justify-center text-sm sm:text-base"
                                 >
                                     <ArrowLeft size={18} className="mr-2" />
-                                    Wróć
+                                    {t('common:actions.back')}
                                 </button>
                             )}
                             {onGoHome && (
                                 <button
                                     onClick={onGoHome}
-                                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 sm:px-6 rounded-xl font-bold transition-all flex items-center justify-center text-sm sm:text-base"
+                                    className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-800 dark:text-gray-100 py-3 px-4 sm:px-6 rounded-xl font-bold transition-all flex items-center justify-center text-sm sm:text-base"
                                 >
                                     <Home size={18} className="mr-2" />
-                                    Strona główna
+                                    {t('goHome')}
                                 </button>
                             )}
                         </div>
@@ -205,9 +176,9 @@ const ErrorPage = ({ error, onGoBack, onGoHome, onRetry }) => {
                         <div className="mt-4 text-center">
                             <button
                                 onClick={() => setShowDetails(!showDetails)}
-                                className="text-sm text-gray-500 hover:text-gray-700 underline transition-colors"
+                                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 underline transition-colors"
                             >
-                                {showDetails ? '🔽 Ukryj szczegóły techniczne' : '🔼 Pokaż szczegóły techniczne'}
+                                {showDetails ? t('hideTechnical') : t('showTechnical')}
                             </button>
                         </div>
                     </div>
@@ -215,7 +186,7 @@ const ErrorPage = ({ error, onGoBack, onGoHome, onRetry }) => {
 
                 {showDetails && (
                     <div className="mt-4 bg-gray-800 text-gray-100 rounded-xl p-4 text-xs font-mono overflow-x-auto animate-slideUp">
-                        <p className="text-green-400 font-bold mb-2">🔧 Szczegóły techniczne:</p>
+                        <p className="text-green-400 font-bold mb-2">{t('technicalHeading')}</p>
                         <pre className="whitespace-pre-wrap break-words">{JSON.stringify(error, null, 2)}</pre>
                     </div>
                 )}

@@ -18,23 +18,23 @@ public class UserDto {
 
     private Long id;
 
-    @NotBlank(message = "Nazwa jest wymagana")
-    @Size(min = 2, max = 50, message = "Nazwa musi mieć między 2 a 50 znaków")
+    @NotBlank(message = "{user.name.required}")
+    @Size(min = 2, max = 50, message = "{user.name.size}")
     private String name;
 
-    @NotBlank(message = "Nazwa jest wymagana")
-    @Size(min = 2, max = 50, message = "Nazwisko musi mieć między 2 a 50 znaków")
+    @NotBlank(message = "{user.surname.required}")
+    @Size(min = 2, max = 50, message = "{user.surname.size}")
     private String surname;
 
-    @Email(message = "Email musi być poprawny")
+    @Email(message = "{user.email.invalid}")
     private String email;
 
     private LocalDate creationDate;
 
-    @NotBlank(message = "Nickname jest wymagany")
+    @NotBlank(message = "{user.nickname.required}")
     private String nickname;
 
-    @NotBlank(message = "Numer telefonu jest wymagany")
+    @NotBlank(message = "{user.phone.required}")
     private String phoneNumber;
 
     private String password;

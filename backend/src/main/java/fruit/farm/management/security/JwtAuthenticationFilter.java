@@ -43,8 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 log.debug("Valid token for user: {}, roles: {}", nickname, roles);
 
-                boolean blocked = userRepository.findByNickname(nickname)
-                        .map(user -> !user.isActive())
+                boolean blocked = userRepository.findActiveByNickname(nickname)
+                        .map(active -> !active)
                         .orElse(true);
 
                 if (blocked) {

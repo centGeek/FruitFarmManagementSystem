@@ -1,0 +1,33 @@
+#!/bin/sh
+# Rozbija BACKEND_ORIGIN (pełny URL) na schemat + host:port dla bloku `upstream` nginx.
+# Blok upstream z `keepalive` jest WYMAGANY, by nginx reużywał połączeń TCP/TLS do backendu
+# zamiast otwierać świeży handshake na każde /api (to była główna przyczyna spowolnienia po
+# wpięciu reverse-proxy). proxy_pass nie może wskazywać na nazwany upstream z pełnym URL,
+# więc schemat i host wyłuskujemy tutaj — env-agnostycznie:
+#   Compose:  http://backend:8091   -> SCHEME=http  HOSTPORT=backend:8091          HOST=backend
+#   Azure:    https://ca-backend..io -> SCHEME=https HOSTPORT=ca-backend..io:443    HOST=ca-backend..io
+#
+# Plik ma rozszerzenie .envsh, więc entrypoint nginx:alpine go ŹRÓDŁUJE (.) przed
+# 20-envsubst-on-templates.sh — wyeksportowane zmienne trafiają do envsubst szablonu.
+set -e
+
+: "${BACKEND_ORIGIN:?BACKEND_ORIGIN must be set}"
+
+scheme="${BACKEND_ORIGIN%%://*}"
+rest="${BACKEND_ORIGIN#*://}"
+rest="${rest%%/*}"   # utnij ewentualną ścieżkę
+
+host="${rest%%:*}"
+if [ "${rest#*:}" != "$rest" ]; then
+  hostport="$rest"                       # port podany jawnie
+elif [ "$scheme" = "https" ]; then
+  hostport="${host}:443"                 # domyślny port HTTPS
+else
+  hostport="${host}:80"                  # domyślny port HTTP
+fi
+
+export BACKEND_SCHEME="$scheme"
+export BACKEND_HOST="$host"
+export BACKEND_HOSTPORT="$hostport"
+
+echo "15-derive-backend-origin: BACKEND_SCHEME=$BACKEND_SCHEME BACKEND_HOSTPORT=$BACKEND_HOSTPORT BACKEND_HOST=$BACKEND_HOST"

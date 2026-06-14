@@ -68,6 +68,11 @@ public class UserRepository {
         return userJpaRepository.findByNickname(nickname);
     }
 
+    public Optional<Boolean> findActiveByNickname(String nickname) {
+
+        return userJpaRepository.findActiveByNickname(nickname);
+    }
+
     public Long getCurrentUserId() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

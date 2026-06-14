@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from "react-i18next";
 import { BACKEND_URL, getAuthHeaders } from "../../utils/apiConfigs";
 import { authFetch } from "../../utils/authFetch";
 
@@ -37,20 +38,15 @@ export interface UnsettledAdvance {
 }
 
 export const WORK_TYPE_OPTIONS = [
-    { value: 'HARVEST', label: '🌾 Zbiory', icon: '🌾' },
-    { value: 'WEEDING', label: '🌱 Pielenie', icon: '🌱' },
-    { value: 'WATERING', label: '💧 Nawadnianie', icon: '💧' },
-    { value: 'SPRAYING', label: '💨 Opryski', icon: '💨' },
-    { value: 'PLANTING', label: '🌿 Sadzenie', icon: '🌿' },
-    { value: 'PRUNING', label: '✂️ Przycinanie', icon: '✂️' },
-    { value: 'FERTILIZING', label: '🧪 Nawożenie', icon: '🧪' },
-    { value: 'OTHER', label: '📋 Inne', icon: '📋' }
+    { value: 'HARVEST', icon: '🌾' },
+    { value: 'WEEDING', icon: '🌱' },
+    { value: 'WATERING', icon: '💧' },
+    { value: 'SPRAYING', icon: '💨' },
+    { value: 'PLANTING', icon: '🌿' },
+    { value: 'PRUNING', icon: '✂️' },
+    { value: 'FERTILIZING', icon: '🧪' },
+    { value: 'OTHER', icon: '📋' }
 ];
-
-export const getWorkTypeLabel = (workType: string) => {
-    const option = WORK_TYPE_OPTIONS.find(opt => opt.value === workType);
-    return option ? option.label : workType;
-};
 
 export const getWorkTypeIcon = (workType: string) => {
     const option = WORK_TYPE_OPTIONS.find(opt => opt.value === workType);
@@ -58,6 +54,7 @@ export const getWorkTypeIcon = (workType: string) => {
 };
 
 export const useWorkEntryManagement = () => {
+    const { t } = useTranslation("workSchedule");
     const [workEntries, setWorkEntries] = useState<WorkEntry[]>([]);
     const [employees, setEmployees] = useState<ScheduleEmployee[]>([]);
     const [sectors, setSectors] = useState<ScheduleSector[]>([]);
@@ -86,7 +83,7 @@ export const useWorkEntryManagement = () => {
         let errorData = {
             status: response.status,
             error: response.statusText,
-            message: 'Wystąpił nieoczekiwany błąd',
+            message: t("messages.unexpectedError"),
             timestamp: new Date().toISOString()
         };
         try {
@@ -100,7 +97,7 @@ export const useWorkEntryManagement = () => {
             }
         } catch (e) { console.error('Błąd parsowania odpowiedzi:', e); }
         return errorData;
-    }, []);
+    }, [t]);
 
     const fetchData = useCallback(async (setter: any, endpoint: string, entityName: string) => {
         try {
@@ -109,14 +106,14 @@ export const useWorkEntryManagement = () => {
                 const data = await response.json();
                 setter(Array.isArray(data) ? data.map((item: any) => ({ ...item, id: item.id || item.sectorId })) : []);
             } else {
-                setAlert({ type: 'error', message: `Błąd ładowania ${entityName}: ${response.status}` });
+                setAlert({ type: 'error', message: t("messages.loadError", { entity: entityName, status: response.status }) });
                 setter([]);
             }
         } catch (error) {
-            setAlert({ type: 'error', message: `Błąd połączenia z serwerem podczas ładowania ${entityName}.` });
+            setAlert({ type: 'error', message: t("messages.loadConnectionError", { entity: entityName }) });
             setter([]);
         }
-    }, []);
+    }, [t]);
 
     const fetchEmployees = useCallback(async () => {
         try {
@@ -133,15 +130,15 @@ export const useWorkEntryManagement = () => {
                 setEmployees(employeesWithDetails);
             } else {
                 setEmployees([]);
-                setAlert({ type: 'error', message: `Błąd ładowania pracowników: ${response.status}` });
+                setAlert({ type: 'error', message: t("messages.loadEmployeesError", { status: response.status }) });
             }
         } catch {
             setEmployees([]);
-            setAlert({ type: 'error', message: 'Błąd połączenia z serwerem.' });
+            setAlert({ type: 'error', message: t("messages.serverConnectionError") });
         }
-    }, []);
+    }, [t]);
 
-    const fetchSectors = useCallback(() => fetchData(setSectors, '/api/sectors', 'sektorów'), [fetchData]);
+    const fetchSectors = useCallback(() => fetchData(setSectors, '/api/sectors', t("entities.sectors")), [fetchData, t]);
     const fetchUnsettledAdvances = useCallback(async (userId: number) => {
         try {
             const response = await authFetch(`${BACKEND_URL}/api/advances/user/${userId}/unsettled`, { method: 'GET', headers: getAuthHeaders() });
@@ -176,9 +173,9 @@ export const useWorkEntryManagement = () => {
 
             if (response.ok) setWorkEntries(await response.json());
             else setWorkEntries([]);
-        } catch { setWorkEntries([]); setAlert({ type: 'error', message: 'Błąd ładowania wpisów.' }); }
+        } catch { setWorkEntries([]); setAlert({ type: 'error', message: t("messages.loadEntriesError") }); }
         finally { setIsLoading(false); }
-    }, [currentDate]);
+    }, [currentDate, t]);
 
     useEffect(() => { fetchEmployees(); fetchSectors(); }, [fetchEmployees, fetchSectors]);
     useEffect(() => { fetchWorkEntries(); }, [currentDate, fetchWorkEntries]);
@@ -188,7 +185,7 @@ export const useWorkEntryManagement = () => {
         closeAlert();
         const workDateString = bulkAssignDate ? new Date(bulkAssignDate).toISOString().split('T')[0] : null;
         
-        if (!workDateString) { setAlert({ type: 'error', message: 'Nie wybrano daty pracy.' }); setIsLoading(false); return; }
+        if (!workDateString) { setAlert({ type: 'error', message: t("messages.noDateSelected") }); setIsLoading(false); return; }
 
         const entriesToSend = entries.map(entry => {
             const fullEmployee = employees.find(emp => emp.id === entry.employeeId);
@@ -212,14 +209,14 @@ export const useWorkEntryManagement = () => {
             if (response.ok) {
                 setIsModalOpen(false);
                 setBulkAssignDate(null);
-                setAlert({ type: 'success', message: `Zapisano ${entriesToSend.length} wpisów.` });
+                setAlert({ type: 'success', message: t("messages.saveSuccess", { count: entriesToSend.length }) });
                 await fetchWorkEntries();
             } else {
                 setCriticalError(await parseApiError(response));
             }
-        } catch { setCriticalError({ status: 0, error: 'Błąd', message: 'Błąd połączenia', timestamp: new Date().toISOString() }); }
+        } catch { setCriticalError({ status: 0, error: t("messages.errorShort"), message: t("messages.connectionShort"), timestamp: new Date().toISOString() }); }
         finally { setIsLoading(false); }
-    }, [bulkAssignDate, employees, fetchWorkEntries, parseApiError, closeAlert]);
+    }, [bulkAssignDate, employees, fetchWorkEntries, parseApiError, closeAlert, t]);
 
     const handleEditEntry = useCallback(async (updatedEntry: any) => {
         setIsLoading(true);
@@ -237,14 +234,14 @@ export const useWorkEntryManagement = () => {
             if (response.ok) {
                 await fetchWorkEntries();
                 setIsEditModalOpen(false); setEditingEntry(null); setSelectedEntry(null);
-                setAlert({ type: 'success', message: 'Wpis zaktualizowany.' });
+                setAlert({ type: 'success', message: t("messages.entryUpdated") });
             } else {
                 const err = await parseApiError(response);
-                setAlert({ type: 'error', message: `Błąd: ${err.message}` });
+                setAlert({ type: 'error', message: t("messages.error", { error: err.message }) });
             }
-        } catch { setAlert({ type: 'error', message: 'Błąd połączenia.' }); }
+        } catch { setAlert({ type: 'error', message: t("messages.connectionError") }); }
         finally { setIsLoading(false); }
-    }, [fetchWorkEntries, parseApiError]);
+    }, [fetchWorkEntries, parseApiError, t]);
 
     const handleDeleteEntry = useCallback(async (entryId: number) => {
         setIsLoading(true);
@@ -253,14 +250,14 @@ export const useWorkEntryManagement = () => {
             if (response.ok) {
                 setWorkEntries(prev => prev.filter(e => e.entryId !== entryId));
                 setSelectedEntry(null);
-                setAlert({ type: 'success', message: 'Wpis usunięty.' });
+                setAlert({ type: 'success', message: t("messages.entryDeleted") });
             } else {
                 const err = await parseApiError(response);
-                setAlert({ type: 'error', message: `Błąd: ${err.message}` });
+                setAlert({ type: 'error', message: t("messages.error", { error: err.message }) });
             }
-        } catch { setAlert({ type: 'error', message: 'Błąd połączenia.' }); }
+        } catch { setAlert({ type: 'error', message: t("messages.connectionError") }); }
         finally { setIsLoading(false); }
-    }, [parseApiError]);
+    }, [parseApiError, t]);
 
     const handleTogglePaid = useCallback(async (entryId: number) => {
         const entry = workEntries.find(e => e.entryId === entryId);
@@ -272,14 +269,14 @@ export const useWorkEntryManagement = () => {
             });
             if (response.ok) {
                 setWorkEntries(prev => prev.map(e => e.entryId === entryId ? { ...e, isPaid: !e.isPaid } : e));
-                setAlert({ type: 'success', message: !entry.isPaid ? 'Oznaczono jako zapłacone' : 'Oznaczono jako niezapłacone' });
+                setAlert({ type: 'success', message: !entry.isPaid ? t("messages.markedPaid") : t("messages.markedUnpaid") });
             } else {
                 const err = await parseApiError(response);
-                setAlert({ type: 'error', message: `Błąd: ${err.message}` });
+                setAlert({ type: 'error', message: t("messages.error", { error: err.message }) });
             }
-        } catch { setAlert({ type: 'error', message: 'Błąd połączenia.' }); }
+        } catch { setAlert({ type: 'error', message: t("messages.connectionError") }); }
         finally { setIsLoading(false); }
-    }, [workEntries, parseApiError]);
+    }, [workEntries, parseApiError, t]);
 
     const handlePayAllForEmployee = useCallback(async (userId: number) => { return performMassPayment(userId, 'pay-all-and-settle'); }, []);
     const handlePayAllForMonth = useCallback(async (userId: number) => { return performMassPayment(userId, 'pay-month-and-settle'); }, []);
@@ -291,12 +288,12 @@ export const useWorkEntryManagement = () => {
             if (response.ok) {
                 await fetchWorkEntries();
                 handleClosePayAllModal();
-                setAlert({ type: 'success', message: 'Płatność zakończona sukcesem.' });
+                setAlert({ type: 'success', message: t("messages.paymentSuccess") });
             } else {
                 const err = await parseApiError(response);
-                setAlert({ type: 'error', message: `Błąd: ${err.message}` });
+                setAlert({ type: 'error', message: t("messages.error", { error: err.message }) });
             }
-        } catch { setAlert({ type: 'error', message: 'Błąd połączenia.' }); }
+        } catch { setAlert({ type: 'error', message: t("messages.connectionError") }); }
         finally { setIsLoading(false); }
     };
 
@@ -309,15 +306,15 @@ export const useWorkEntryManagement = () => {
             });
             if (response.ok) {
                 handleCloseAdvancePayModal();
-                setAlert({ type: 'success', message: `Zapisano zaliczkę ${amount.toFixed(2)} zł.` });
+                setAlert({ type: 'success', message: t("messages.advanceSaved", { amount: amount.toFixed(2) }) });
                 fetchUnsettledAdvances(userId);
             } else {
                 const err = await parseApiError(response);
-                setAlert({ type: 'error', message: `Błąd: ${err.message}` });
+                setAlert({ type: 'error', message: t("messages.error", { error: err.message }) });
             }
-        } catch { setAlert({ type: 'error', message: 'Błąd połączenia.' }); }
+        } catch { setAlert({ type: 'error', message: t("messages.connectionError") }); }
         finally { setIsLoading(false); }
-    }, [closeAlert, parseApiError, fetchUnsettledAdvances]);
+    }, [closeAlert, parseApiError, fetchUnsettledAdvances, t]);
 
     const fetchUnpaidEntriesForEmployee = useCallback(async (userId: number) => {
         try {
@@ -332,22 +329,22 @@ export const useWorkEntryManagement = () => {
         if (emp) {
             setSelectedEmployeeForPayment(emp); setPaymentModalType('all'); setIsPayAllModalOpen(true);
             fetchUnpaidEntriesForEmployee(emp.id); fetchUnsettledAdvances(emp.id);
-        } else setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
-    }, [employees, fetchUnpaidEntriesForEmployee, fetchUnsettledAdvances]);
+        } else setAlert({ type: 'error', message: t("messages.employeeNotFound") });
+    }, [employees, fetchUnpaidEntriesForEmployee, fetchUnsettledAdvances, t]);
 
     const handleOpenPayAllMonthModal = useCallback((employeeId: number) => {
         const emp = employees.find(e => e.id === Number(employeeId));
         if (emp) {
             setSelectedEmployeeForPayment(emp); setPaymentModalType('month'); setIsPayAllModalOpen(true);
             fetchUnpaidEntriesForEmployee(emp.id); fetchUnsettledAdvances(emp.id);
-        } else setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
-    }, [employees, fetchUnpaidEntriesForEmployee, fetchUnsettledAdvances]);
+        } else setAlert({ type: 'error', message: t("messages.employeeNotFound") });
+    }, [employees, fetchUnpaidEntriesForEmployee, fetchUnsettledAdvances, t]);
 
     const handleOpenAdvancePayModal = useCallback((employeeId: number) => {
         const emp = employees.find(e => e.id === Number(employeeId));
         if (emp) { setSelectedEmployeeForAdvance(emp); setIsAdvancePayModalOpen(true); setSelectedEntry(null); }
-        else setAlert({ type: 'error', message: 'Nie znaleziono pracownika.' });
-    }, [employees]);
+        else setAlert({ type: 'error', message: t("messages.employeeNotFound") });
+    }, [employees, t]);
 
     const handleCloseModal = (type?: string, message?: string) => {
         setIsModalOpen(false); setBulkAssignDate(null); setSelectedEntry(null); setIsEditModalOpen(false); setEditingEntry(null);

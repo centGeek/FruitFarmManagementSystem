@@ -1,0 +1,126 @@
+{
+  "defaultSectorName": "Sector {{n}}",
+  "page": {
+    "title": "Orchard Farm Management System",
+    "subtitle": "Mapping and managing crop sectors"
+  },
+  "loading": {
+    "title": "Loading data...",
+    "subtitle": "Fetching sectors from the server"
+  },
+  "loadError": {
+    "title": "Error loading data",
+    "retry": "Try again"
+  },
+  "stats": {
+    "definedSectors": "Defined sectors",
+    "sectorsWithCrop": "Sectors with a crop",
+    "varietyKinds": "Variety kinds"
+  },
+  "confirmModal": {
+    "title": "Add a new sector",
+    "redraw": "Draw again",
+    "sending": "Sending...",
+    "create": "Create sector"
+  },
+  "editModal": {
+    "title": "Edit sector",
+    "archive": "Archive sector"
+  },
+  "sectorData": {
+    "groupTitle": "Sector details",
+    "nameLabel": "Sector name *",
+    "namePlaceholder": "e.g. East sector...",
+    "cropTypeLabel": "Crop type",
+    "cropTypePlaceholder": "Choose a crop type...",
+    "varietyLabel": "Variety",
+    "varietyPlaceholder": "Choose a variety..."
+  },
+  "selectedCrop": {
+    "title": "Selected crop",
+    "typeLabel": "Type: {{type}}"
+  },
+  "gpsCoords": {
+    "summary": "GPS coordinates (click to expand)",
+    "label": "GPS coordinates",
+    "point": "Point {{index}}:"
+  },
+  "validation": {
+    "nameRequired": "Sector name is required!"
+  },
+  "alerts": {
+    "minPoints": "At least 4 points are required",
+    "sectorAdded": "Sector added successfully!",
+    "addFailed": "Failed to add the sector",
+    "noBackendId": "Missing backend ID",
+    "sectorUpdated": "Sector updated successfully!",
+    "updateFailed": "Failed to update the sector: {{message}}",
+    "sectorActivated": "Sector activated successfully!",
+    "activateFailed": "Failed to activate the sector: {{message}}",
+    "archiveFailed": "Failed to archive the sector: {{message}}",
+    "pointSaveFailed": "Failed to save the point position"
+  },
+  "map": {
+    "howTo": "How to use:",
+    "step1Label": "1. Search for a location:",
+    "step1Text": "Type the name of a town",
+    "step2Label": "2. Draw a sector:",
+    "step2Text": "Click 4 points on the map",
+    "finishEdit": "Finish editing",
+    "drawSector": "Draw Sector",
+    "cancel": "Cancel",
+    "statistics": "Statistics:",
+    "sectorsCount": "Sectors: {{count}}",
+    "editModeActive": "🔧 Edit mode active",
+    "loadingProgress": "Loading: {{loaded}}/{{total}}",
+    "dragVertices": "Drag the vertices to change the shape",
+    "clickForDetails": "Click a sector to see details"
+  },
+  "drawingInstructions": {
+    "first": "Click the first of the 4 polygon points.",
+    "more": "Click to add a point. You have: {{count}}/4 points.",
+    "done": "Drawing finished, creating the sector..."
+  },
+  "tooltip": {
+    "point": "Point {{index}}",
+    "dragPoint": "Drag point {{index}}"
+  },
+  "popup": {
+    "crop": "Crop:",
+    "variety": "🌱Variety:",
+    "editVertices": "✏️ Edit vertices"
+  },
+  "sectorsList": {
+    "title": "Defined sectors",
+    "loadingSectors": "Loading sectors...",
+    "noSectors": "No sectors have been defined yet",
+    "pleaseWait": "Please wait...",
+    "searchHint": "Search for a town and use the map to mark crop areas",
+    "tip1Label": "Search for a town:",
+    "tip1Text": "find your farm",
+    "tip2Label": "Draw a sector:",
+    "tip2Text": "click 4 points on the map",
+    "nameLabel": "Sector name",
+    "archivedBadge": "(Archived)",
+    "cropTypeLabel": "Crop type",
+    "notDefined": "Not specified",
+    "varietyLabel": "Variety",
+    "activateAgain": "Activate again",
+    "editSector": "Edit sector",
+    "gpsCoords": "GPS coordinates",
+    "point": "Point {{index}}:",
+    "archivedTitle": "Archived sectors ({{count}})"
+  },
+  "mapStyles": {
+    "streets": "🗺️ Default",
+    "satellite": "🛰️ Satellite",
+    "hybrid": "🌍 Hybrid",
+    "topo": "⛰️ Topographic",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "layers": "Map layers"
+  },
+  "search": {
+    "placeholder": "Search for a town in Poland (min. 3 characters)..."
+  }
+}

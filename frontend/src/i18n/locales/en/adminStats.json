@@ -1,0 +1,99 @@
+{
+  "header": {
+    "titleText": "Administrator panel — statistics",
+    "subtitle": "Global overview of the whole system."
+  },
+  "buttons": {
+    "exportCsv": "Export CSV",
+    "exportPdf": "Export PDF"
+  },
+  "loading": "Loading statistics... 🔄",
+  "cards": {
+    "users": "Users",
+    "activeSectors": "Active sectors",
+    "workEntries": "Work entries",
+    "tickets": "Tickets"
+  },
+  "sections": {
+    "finances": "Finances",
+    "usersByRole": "Users by role",
+    "ticketsByStatus": "Tickets by status",
+    "ticketsByMonth": "Tickets over time (months)",
+    "ticketsByCategory": "Tickets by category"
+  },
+  "roles": {
+    "admins": "Administrators",
+    "gardeners": "Gardeners",
+    "employees": "Employees",
+    "blocked": "Blocked"
+  },
+  "ticketStatus": {
+    "open": "Open",
+    "inProgress": "In progress",
+    "closed": "Closed"
+  },
+  "avgCloseTimeLabel": "Average close time:",
+  "emptyTickets": "No tickets",
+  "finance": {
+    "totalProfits": "Total revenue",
+    "totalExpenses": "Total expenses",
+    "paidExpenses": "Paid expenses",
+    "unpaidExpenses": "Unpaid expenses",
+    "totalSalaries": "Salaries paid",
+    "kilogramsPicked": "Kilograms picked",
+    "kilogramsSold": "Kilograms sold",
+    "netBalance": "Net balance"
+  },
+  "report": {
+    "sectionUsers": "Users",
+    "sectionSectors": "Sectors",
+    "sectionWorkAndHarvest": "Work and harvest",
+    "sectionFinances": "Finances",
+    "sectionTickets": "Tickets",
+    "rows": {
+      "totalUsers": "Total users",
+      "admins": "Administrators",
+      "gardeners": "Gardeners",
+      "employees": "Employees",
+      "activeUsers": "Active accounts",
+      "blockedUsers": "Blocked accounts",
+      "totalSectors": "Total sectors",
+      "activeSectors": "Active sectors",
+      "totalWorkEntries": "Work entries",
+      "kilogramsPicked": "Kilograms picked",
+      "kilogramsSold": "Kilograms sold",
+      "totalProfits": "Total revenue",
+      "totalExpenses": "Total expenses",
+      "paidExpenses": "Paid expenses",
+      "unpaidExpenses": "Unpaid expenses",
+      "totalSalaries": "Salaries paid",
+      "netBalance": "Net balance",
+      "totalTickets": "Total tickets",
+      "openTickets": "Open tickets",
+      "inProgressTickets": "Tickets in progress",
+      "closedTickets": "Closed tickets",
+      "avgCloseHours": "Avg. close time"
+    },
+    "ticketsByMonth": "Tickets by month",
+    "ticketsByCategory": "Tickets by category",
+    "csvHeaders": {
+      "section": "Section",
+      "metric": "Metric",
+      "value": "Value",
+      "unit": "Unit"
+    },
+    "pdf": {
+      "title": "Orchard statistics",
+      "subtitle": "Administrator panel — global overview of the whole system.",
+      "generatedAt": "Generated: {{date}}",
+      "thMetric": "Metric",
+      "thValue": "Value",
+      "pageFooter": "Page {{currentPage}} of {{pageCount}}"
+    }
+  },
+  "errors": {
+    "fetchFailed": "Failed to fetch statistics.",
+    "network": "Network error while fetching statistics.",
+    "pdfFailed": "Failed to generate the PDF file."
+  }
+}

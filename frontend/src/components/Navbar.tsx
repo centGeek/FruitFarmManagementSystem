@@ -1,8 +1,11 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Menu, X } from "lucide-react";
 import { BACKEND_URL, getAuthHeaders } from "../utils/apiConfigs";
 import { authFetch } from "../utils/authFetch";
+import LanguageSwitcher from "./LanguageSwitcher";
+import ThemeSwitcher from "./ThemeSwitcher";
 
 function WeatherWidget() {
   const [weather, setWeather] = useState(null);
@@ -116,19 +119,20 @@ function WeatherWidget() {
 
 function GardenerNavbar({ onLogout }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const tabs = [
-    { name: "Strona główna", path: "/home" },
-    { name: "Mapa", path: "/map" },
-    { name: "Pracownicy", path: "/employees" },
-    { name: "Ewidencja pracy", path: "/work-schedule" },
-    { name: "Wydatki", path: "/expenses" },
-    { name: "Przychody", path: "/profits" },
-    { name: "Notyfikacje pogodowe", path: "/weather" },
-    { name: "Analiza", path: "/analyse" },
-    { name: "Zgłoś usterkę", path: "/support" },
-    { name: "Edytuj profil", path: "/gardener-profile" },
+    { name: t("nav.home"), path: "/home" },
+    { name: t("nav.map"), path: "/map" },
+    { name: t("nav.employees"), path: "/employees" },
+    { name: t("nav.workSchedule"), path: "/work-schedule" },
+    { name: t("nav.expenses"), path: "/expenses" },
+    { name: t("nav.profits"), path: "/profits" },
+    { name: t("nav.weather"), path: "/weather" },
+    { name: t("nav.analyse"), path: "/analyse" },
+    { name: t("nav.support"), path: "/support" },
+    { name: t("nav.gardenerProfile"), path: "/gardener-profile" },
   ];
 
   const handleLogoClick = () => {
@@ -157,7 +161,7 @@ function GardenerNavbar({ onLogout }) {
             onClick={handleLogoClick}
           >
             <span className="text-2xl">🌱</span>
-            <span>Panel Sadownika</span>
+            <span>{t("appName")}</span>
           </div>
 
           {/* Zakładki desktop (od lg) */}
@@ -171,16 +175,18 @@ function GardenerNavbar({ onLogout }) {
 
           <div className="flex items-center gap-2 sm:gap-3">
             <WeatherWidget />
+            <ThemeSwitcher />
+            <LanguageSwitcher />
             <button
               onClick={onLogout}
               className="hidden sm:inline-flex px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-green-600"
             >
-              Wyloguj
+              {t("actions.logout")}
             </button>
             {/* Hamburger (poniżej lg) */}
             <button
               onClick={() => setMenuOpen((o) => !o)}
-              aria-label={menuOpen ? "Zamknij menu" : "Otwórz menu"}
+              aria-label={menuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
               aria-expanded={menuOpen}
               className="lg:hidden p-2 rounded-lg hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
             >
@@ -202,6 +208,10 @@ function GardenerNavbar({ onLogout }) {
                 {tab.name}
               </NavLink>
             ))}
+            <div className="flex items-center gap-2 mt-1">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
             <button
               onClick={() => {
                 setMenuOpen(false);
@@ -209,7 +219,7 @@ function GardenerNavbar({ onLogout }) {
               }}
               className="mt-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg transition-colors text-left"
             >
-              Wyloguj
+              {t("actions.logout")}
             </button>
           </div>
         )}
@@ -220,12 +230,13 @@ function GardenerNavbar({ onLogout }) {
 
 function AdminNavbar({ onLogout }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const tabs = [
-    { name: "Zgłoszenia", path: "/admin/dashboard" },
-    { name: "Użytkownicy", path: "/admin/users" },
-    { name: "Statystyki", path: "/admin/stats" },
+    { name: t("nav.tickets"), path: "/admin/dashboard" },
+    { name: t("nav.users"), path: "/admin/users" },
+    { name: t("nav.stats"), path: "/admin/stats" },
   ];
 
   const desktopTabClass = ({ isActive }) =>
@@ -252,7 +263,7 @@ function AdminNavbar({ onLogout }) {
             }}
           >
             <span className="text-2xl">🛠️</span>
-            <span>Panel administratora</span>
+            <span>{t("adminPanel")}</span>
           </div>
 
           {/* Zakładki desktop (od md) */}
@@ -265,16 +276,18 @@ function AdminNavbar({ onLogout }) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeSwitcher />
+            <LanguageSwitcher />
             <button
               onClick={onLogout}
               className="hidden sm:inline-flex px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400"
             >
-              Wyloguj
+              {t("actions.logout")}
             </button>
             {/* Hamburger (poniżej md) */}
             <button
               onClick={() => setMenuOpen((o) => !o)}
-              aria-label={menuOpen ? "Zamknij menu" : "Otwórz menu"}
+              aria-label={menuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
               aria-expanded={menuOpen}
               className="md:hidden p-2 rounded-lg hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
             >
@@ -296,6 +309,10 @@ function AdminNavbar({ onLogout }) {
                 {tab.name}
               </NavLink>
             ))}
+            <div className="flex items-center gap-2 mt-1">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
             <button
               onClick={() => {
                 setMenuOpen(false);
@@ -303,7 +320,7 @@ function AdminNavbar({ onLogout }) {
               }}
               className="mt-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-semibold text-sm tracking-wide shadow-lg transition-colors text-left"
             >
-              Wyloguj
+              {t("actions.logout")}
             </button>
           </div>
         )}
@@ -313,6 +330,7 @@ function AdminNavbar({ onLogout }) {
 }
 
 export default function Navbar({ onLogout, userRole }) {
+  const { t } = useTranslation();
 
   if (userRole === "Gardener") {
     return <GardenerNavbar onLogout={onLogout} />;
@@ -326,13 +344,17 @@ export default function Navbar({ onLogout, userRole }) {
     <nav className="bg-gray-700 text-white shadow-xl sticky top-0 z-50">
       <div className="max-w-[1600px] mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          <div className="text-xl font-bold">Farm Management</div>
-          <button
-            onClick={onLogout}
-            className="px-6 py-2.5 bg-red-400 hover:bg-red-600 rounded-lg font-semibold text-sm shadow-lg transition-all duration-300"
-          >
-            Wyloguj
-          </button>
+          <div className="text-xl font-bold">{t("farmManagement")}</div>
+          <div className="flex items-center gap-3">
+            <ThemeSwitcher />
+            <LanguageSwitcher />
+            <button
+              onClick={onLogout}
+              className="px-6 py-2.5 bg-red-400 hover:bg-red-600 rounded-lg font-semibold text-sm shadow-lg transition-all duration-300"
+            >
+              {t("actions.logout")}
+            </button>
+          </div>
         </div>
       </div>
     </nav>

@@ -2,11 +2,30 @@ spring:
   application:
     name: fruit-farm-management
 
+  # Localized service/controller messages (basename `messages`). The per-request
+  # locale comes from the Accept-Language header (see config/I18nConfig). Falling
+  # back to the base (Polish) bundle instead of the JVM locale keeps behavior
+  # deterministic across machines/CI.
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/mydatabase}
     username: ${SPRING_DATASOURCE_USERNAME:myuser}
     password: ${SPRING_DATASOURCE_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
+    # Pula pod zdalną bazę na Azure (Flexible Server). connection-timeout ogranicza
+    # zawieszenie żądania gdy baza wstaje; max-lifetime poniżej serwerowego idle-timeout
+    # + keepalive-time zapobiegają reużyciu martwego połączenia (reconnect/TLS przy pierwszym
+    # żądaniu po bezczynności = odczuwalne spowolnienie).
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 5000
+      max-lifetime: 300000
+      keepalive-time: 120000
 
   jpa:
     hibernate:
@@ -28,17 +47,20 @@ server:
 
 logging:
   level:
-    org.flywaydb: DEBUG
-    org.springframework.boot.autoconfigure.flyway: DEBUG
+    # INFO zamiast DEBUG: Flyway na DEBUG zalewa logami każdy (zimny) start, niepotrzebnie
+    # wydłużając boot. DEBUG włączaj tylko przy diagnozie migracji.
+    org.flywaydb: INFO
+    org.springframework.boot.autoconfigure.flyway: INFO
 jwt:
   secret:
     key: ${JWT_SECRET_KEY:9683bc6f47cc73bd0dc0fd3738cc59ca1a15637eee20af3dc7b9aa1165716db7ba98e845}
 
 # Konfiguracja cross-origin / ciasteczek.
 # Lokalnie: domyślne wartości (HTTP, ten sam host).
-# Produkcja (front i backend na różnych domenach po HTTPS):
-#   APP_COOKIE_SECURE=true, APP_COOKIE_SAME_SITE=None,
-#   CORS_ALLOWED_ORIGINS=https://<adres-frontendu>
+# Produkcja (Azure): front i backend są pod jednym originem — nginx na ca-frontend
+# reverse-proxuje /api do backendu, więc CORS nie występuje (CORS_ALLOWED_ORIGINS puste).
+#   Deploy ustawia: APP_COOKIE_SECURE=true, APP_COOKIE_SAME_SITE=Lax.
+# (SameSite=None + CORS_ALLOWED_ORIGINS były potrzebne tylko w starym wariancie z dwiema domenami.)
 app:
   cookie:
     secure: ${APP_COOKIE_SECURE:false}

@@ -20,8 +20,11 @@ RUN npm run build:docker
 # --- Etap uruchomieniowy ---
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
-# Szablon: entrypoint nginx:alpine podstawia ${BACKEND_ORIGIN} z env i generuje conf.d/default.conf
+# Szablon: entrypoint nginx:alpine podstawia zmienne env i generuje conf.d/default.conf
 COPY default.conf.template /etc/nginx/templates/default.conf.template
+# Skrypt .envsh wylicza BACKEND_SCHEME/HOST/HOSTPORT z BACKEND_ORIGIN; entrypoint go ŹRÓDŁUJE
+# przed envsubst. Musi być wykonywalny (chmod), inaczej nginx:alpine go pominie.
+COPY --chmod=0755 docker-entrypoint.d/15-derive-backend-origin.envsh /docker-entrypoint.d/15-derive-backend-origin.envsh
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,0 +1,127 @@
+{
+  "header": {
+    "title": "Manage employees",
+    "subtitle": "Browse, add and manage user accounts. Ready for the harvest! 🍎"
+  },
+  "searchPlaceholder": "Search: first name, email, phone number...",
+  "showArchived": "Show Archived 📦",
+  "addEmployee": "Add Employee",
+  "stats": {
+    "active": "Active Employees",
+    "archived": "Archived",
+    "filtered": "Shown in Filter"
+  },
+  "list": {
+    "archivedTitle": "Archived employees 🧑‍🌾",
+    "activeTitle": "Active Team 🧑‍🌾",
+    "shownCount": "Shown: {{shown}} of {{total}}"
+  },
+  "modal": {
+    "editTitle": "Edit Employee",
+    "addTitle": "Add New Employee"
+  },
+  "form": {
+    "name": "First name",
+    "surname": "Last name",
+    "nickname": "Username",
+    "phone": "Phone",
+    "email": "Email",
+    "active": "Active",
+    "saveChanges": "Save changes",
+    "addEmployee": "Add employee",
+    "cancel": "Cancel",
+    "errors": {
+      "nameRequired": "First name is required",
+      "surnameRequired": "Last name is required",
+      "nicknameRequired": "Username is required"
+    }
+  },
+  "loading": "Loading users... 🔄",
+  "empty": {
+    "noResultsTitle": "No search results",
+    "noResultsMessage": "Try changing your search criteria or resetting the filter.",
+    "noUsersTitle": "No users",
+    "noUsersMessage": "Add your first user to start managing employees.",
+    "noArchivedTitle": "No archived users",
+    "noActiveTitle": "No active users",
+    "allActiveMessage": "All users are currently active.",
+    "allArchivedMessage": "All users are archived. Check \"Show archived\""
+  },
+  "card": {
+    "email": "Email",
+    "phone": "Phone",
+    "creationDate": "Creation date",
+    "id": "ID",
+    "editTitle": "Edit ✏️",
+    "workDetailsTitle": "Work Details 💼",
+    "restoreTitle": "Restore (Activate) 🔄",
+    "archiveTitle": "Archive (Deactivate) 📦",
+    "statusActive": "Active 🌱",
+    "statusArchived": "Archived 🍂",
+    "roleEmployee": "Employee",
+    "noRole": "No role"
+  },
+  "advances": {
+    "fetchError": "Error fetching advances",
+    "networkError": "Network error",
+    "invalidAmount": "Enter a valid amount",
+    "added": "Advance added!",
+    "addError": "Error adding advance",
+    "paidOff": "Advances paid off!",
+    "payOffError": "Error paying off advances",
+    "totalUnsettled": "Total unsettled advance:",
+    "amountWithCurrency": "{{amount}} PLN",
+    "totalUnsettledHint": "Sum of advances awaiting settlement.",
+    "payAdvanceTitle": "➕ Pay an advance to the employee",
+    "amountLabel": "Advance Amount (PLN) *",
+    "amountPlaceholder": "e.g. 50.00",
+    "save": "Save 💾",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "e.g. For food",
+    "payingOff": "Paying off...",
+    "payOffAll": "Pay off all advances ({{amount}} PLN) 💸",
+    "historyTitle": "Unsettled Advances History ({{count}})",
+    "loadingHistory": "Loading history...",
+    "noUnsettled": "No unsettled advances.",
+    "noDescription": "No description"
+  },
+  "workDetails": {
+    "addPrompt": "Add a settlement method and rate",
+    "invalidHourly": "Enter a valid hourly rate",
+    "invalidPerKg": "Enter a valid rate per kilogram",
+    "saved": "Employment details have been saved successfully!",
+    "saveError": "Error saving work details",
+    "serverError": "Server connection error",
+    "rateHourly": "{{rate}} PLN/hr",
+    "ratePerKg": "{{rate}} PLN/kg",
+    "modalTitle": "Work Details - {{name}} {{surname}}",
+    "tabWorkDetails": "💼 Work Details",
+    "tabAdvances": "💸 Advances",
+    "loadingDetails": "Loading details...",
+    "currentRate": "Employee's current rate:",
+    "settlementType": "Settlement Type",
+    "hourlyPayment": "Hourly Payment",
+    "perKgPayment": "Payment Per Kilogram",
+    "hourlyRateLabel": "Hourly Rate (PLN) *",
+    "hourlyRatePlaceholder": "e.g. 25.50",
+    "perKgRateLabel": "Rate per Kilogram (PLN) *",
+    "perKgRatePlaceholder": "e.g. 0.80",
+    "lastUpdate": "📅 Last work details update: {{date}}",
+    "saving": "Saving...",
+    "saveNewDetails": "💾 Save New Details",
+    "close": "Close"
+  },
+  "messages": {
+    "fetchError": "Error loading employees: {{error}}",
+    "fetchNetworkError": "Network error: Unable to connect to the backend.",
+    "saveUpdated": "Employee updated successfully!",
+    "saveAdded": "Employee added successfully!",
+    "saveNetworkError": "Network error: Unable to save employee data.",
+    "statusRestored": "Employee restored successfully.",
+    "statusArchived": "Employee archived successfully.",
+    "statusErrorActivate": "Error during activation: {{error}}",
+    "statusErrorArchive": "Error during archiving: {{error}}",
+    "statusNetworkErrorActivate": "Network error: Unable to activate employee.",
+    "statusNetworkErrorArchive": "Network error: Unable to archive employee."
+  }
+}

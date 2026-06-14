@@ -1,31 +1,31 @@
 ---
 name: azure-up
-description: Wznów aplikację Fruit Farm na Azure — startuje serwer PostgreSQL, czeka aż będzie gotowy, rozgrzewa backend (cold start) i wypisuje adresy oraz dane logowania. Użyj, gdy użytkownik chce wznowić / uruchomić / włączyć aplikację na Azure przed demonstracją.
+description: Resume the Fruit Farm app on Azure — starts the PostgreSQL server, waits until it is ready, warms up the backend (cold start) and prints the URLs and login credentials. Use when the user wants to resume / start / bring up the app on Azure before a demo.
 ---
 
-# azure-up — wznowienie aplikacji na Azure
+# azure-up — resuming the app on Azure
 
-Wznawia wdrożenie na Azure (subskrypcja **Azure for Students**, resource group `rg-fruitfarm`, region polandcentral) po wcześniejszym zatrzymaniu skillem `azure-stop`.
+Resumes the Azure deployment (**Azure for Students** subscription, resource group `rg-fruitfarm`, polandcentral region) after it was previously stopped with the `azure-stop` skill.
 
-## Co robi
+## What it does
 
-1. Startuje **PostgreSQL Flexible Server** (jeśli zatrzymany) i czeka aż będzie `Ready`.
-2. Rozgrzewa backend (Container App ze `scale-to-zero` — pierwszy request budzi kontener, ~30-60s).
-3. Wypisuje adresy frontendu/backendu i dane logowania.
+1. Starts the **PostgreSQL Flexible Server** (if stopped) and waits until it is `Ready`.
+2. Warms up the backend (Container App with `scale-to-zero` — the first request wakes the container, ~30-60s).
+3. Prints the frontend/backend URLs and login credentials.
 
-## Uruchomienie
+## Running
 
 ```bash
 bash .claude/skills/azure-up/run.sh
 ```
 
-## Po wznowieniu
+## After resuming
 
-- Frontend i backend dostępne pod adresami `*.polandcentral.azurecontainerapps.io` (skrypt je wypisze).
+- Frontend and backend available at `*.polandcentral.azurecontainerapps.io` (the script prints them).
 - Login: `admin` / `test5432`.
-- **Po skończonym demie zatrzymaj** skillem `azure-stop`, żeby nie zużywać kredytu.
+- **When the demo is done, stop it** with the `azure-stop` skill so you don't burn through credit.
 
-## Uwagi
+## Notes
 
-- Start bazy trwa 1-3 min — to normalne dla Flexible Server.
-- Jeśli backend długo nie odpowiada: sprawdź logi `az containerapp logs show -n ca-backend -g rg-fruitfarm --tail 50`.
+- Starting the database takes 1-3 min — this is normal for Flexible Server.
+- If the backend takes a long time to respond: check the logs with `az containerapp logs show -n ca-backend -g rg-fruitfarm --tail 50`.

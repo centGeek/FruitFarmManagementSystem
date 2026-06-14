@@ -1,0 +1,147 @@
+{
+  "appName": "Panel Sadownika",
+  "adminPanel": "Panel administratora",
+  "farmManagement": "Zarządzanie Sadem",
+  "actions": {
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "add": "Dodaj",
+    "close": "Zamknij",
+    "confirm": "Potwierdź",
+    "submit": "Wyślij",
+    "search": "Szukaj",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "yes": "Tak",
+    "no": "Nie",
+    "ok": "OK",
+    "refresh": "Odśwież",
+    "download": "Pobierz",
+    "logout": "Wyloguj",
+    "login": "Zaloguj się",
+    "register": "Zarejestruj się"
+  },
+  "status": {
+    "loading": "Ładowanie...",
+    "saving": "Zapisywanie...",
+    "noData": "Brak danych",
+    "error": "Wystąpił błąd",
+    "success": "Operacja zakończona sukcesem"
+  },
+  "fields": {
+    "name": "Imię",
+    "surname": "Nazwisko",
+    "nickname": "Nazwa użytkownika",
+    "email": "Email",
+    "phone": "Numer telefonu",
+    "password": "Hasło",
+    "date": "Data",
+    "amount": "Kwota",
+    "description": "Opis",
+    "category": "Kategoria",
+    "status": "Status",
+    "actions": "Akcje",
+    "requiredField": "Pole wymagane"
+  },
+  "language": {
+    "label": "Język",
+    "pl": "Polski",
+    "en": "Angielski",
+    "switchTo": "Zmień język"
+  },
+  "theme": {
+    "label": "Motyw",
+    "toggle": "Przełącz motyw",
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "switchToLight": "Przełącz na jasny motyw",
+    "switchToDark": "Przełącz na ciemny motyw"
+  },
+  "nav": {
+    "home": "Strona główna",
+    "map": "Mapa",
+    "employees": "Pracownicy",
+    "workSchedule": "Ewidencja pracy",
+    "expenses": "Wydatki",
+    "profits": "Przychody",
+    "weather": "Notyfikacje pogodowe",
+    "analyse": "Analiza",
+    "support": "Zgłoś usterkę",
+    "gardenerProfile": "Edytuj profil",
+    "tickets": "Zgłoszenia",
+    "users": "Użytkownicy",
+    "stats": "Statystyki",
+    "openMenu": "Otwórz menu",
+    "closeMenu": "Zamknij menu"
+  },
+  "app": {
+    "checkingAuth": "Sprawdzanie autentyfikacji...",
+    "wakingServer": "Budzenie serwera, to może chwilę potrwać..."
+  },
+  "aria": {
+    "closeAlert": "Zamknij alert"
+  },
+  "cropType": {
+    "JABŁOŃ": "🍎 Jabłonie",
+    "GRUSZA": "🍐 Grusze",
+    "WIŚNIA": "🍒 Wiśnie",
+    "ŚLIWA": "🟣 Śliwy",
+    "CZEREŚNIA": "🍒 Czereśnie",
+    "MALINA": "🍓 Maliny",
+    "TRUSKAWKA": "🍓 Truskawki",
+    "PORZECZKA_CZARNA": "🖤 Porzeczka czarna",
+    "PORZECZKA_CZERWONA": "🔴 Porzeczka czerwona",
+    "AGREST": "🟢 Agrest",
+    "BORÓWKA": "🔵 Borówka",
+    "JEŻYNA": "⚫ Jeżyna",
+    "ARONIA": "🫐 Aronia"
+  },
+  "varietyOther": "Inna odmiana",
+  "notificationType": {
+    "FROST_WARNING": {
+      "label": "🧊 Ostrzeżenie o przymrozku",
+      "description": "Powiadom gdy temperatura spadnie poniżej"
+    },
+    "TEMP_LOW": {
+      "label": "❄️ Niska temperatura",
+      "description": "Powiadom gdy temperatura spadnie poniżej"
+    },
+    "TEMP_HIGH": {
+      "label": "🌡️ Wysoka temperatura",
+      "description": "Powiadom gdy temperatura przekroczy"
+    },
+    "RAIN_FORECAST": {
+      "label": "🌧️ Prognoza opadów",
+      "description": "Powiadom o opadach deszczu powyżej",
+      "unit": "% prawdopodobieństwa"
+    },
+    "STRONG_WIND": {
+      "label": "💨 Silny wiatr",
+      "description": "Powiadom gdy wiatr przekroczy"
+    }
+  },
+  "daysAhead": {
+    "1": "Za 1 dzień",
+    "2": "Za 2 dni",
+    "3": "Za 3 dni",
+    "5": "Za 5 dni",
+    "7": "Za 7 dni"
+  },
+  "monthAll": "Wszystkie miesiące 📅",
+  "month": {
+    "1": "Styczeń",
+    "2": "Luty",
+    "3": "Marzec",
+    "4": "Kwiecień",
+    "5": "Maj",
+    "6": "Czerwiec",
+    "7": "Lipiec",
+    "8": "Sierpień",
+    "9": "Wrzesień",
+    "10": "Październik",
+    "11": "Listopad",
+    "12": "Grudzień"
+  }
+}

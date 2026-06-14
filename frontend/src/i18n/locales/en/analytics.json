@@ -1,0 +1,103 @@
+{
+  "header": {
+    "title": "Farm Financial Analysis",
+    "subtitle": "Detailed analysis of revenue, expenses and profitability"
+  },
+  "stats": {
+    "totalRevenue": "Total Revenue",
+    "totalExpenses": "Total Expenses",
+    "laborSubtitle": "incl. labor: {{amount}} PLN",
+    "profit": "Profit",
+    "profitPositive": "✅ Positive",
+    "profitNegative": "⚠️ Negative",
+    "profitMargin": "Profit Margin"
+  },
+  "controlPanel": {
+    "title": "Control Panel - Choose Analysis Type",
+    "displayType": "Display type",
+    "year": "Year 📅",
+    "allYears": "All years",
+    "month": "Month 📆",
+    "dataType": "Data type"
+  },
+  "chartType": {
+    "pieTypes": "🔖 Pie chart (types)",
+    "pie": "📊 Pie chart (sectors)",
+    "table": "📋 Table with margins",
+    "treemap": "🗺️ Treemap (sectors)",
+    "yearly": "📈 Year-over-year analysis"
+  },
+  "dataTypeOption": {
+    "revenue": "💰 Revenue",
+    "expenses": "💸 Costs"
+  },
+  "titleSuffix": {
+    "year": " - Year {{year}}",
+    "month": " - {{month}}"
+  },
+  "sections": {
+    "pieBySectors": "{{kind}} Distribution by Sector{{suffix}}",
+    "pieByTypes": "{{kind}} Distribution by Type{{suffix}}",
+    "table": "Sector Profitability Table{{suffix}}",
+    "treemap": "Treemap - {{kind}}{{suffix}}",
+    "yearly": "Year-over-Year Analysis",
+    "kindRevenueGenitive": "Revenue",
+    "kindExpensesGenitive": "Cost",
+    "kindRevenue": "Revenue",
+    "kindExpenses": "Costs"
+  },
+  "detailView": {
+    "close": "✖ Close detail view",
+    "hint": "💡 <1>Tip:</1> Click a fruit sales or labor cost segment to see details",
+    "varietyDistribution": "Variety distribution: {{type}}",
+    "laborDistribution": "Labor cost distribution"
+  },
+  "noData": {
+    "noChart": "No Chart",
+    "noTable": "No Table",
+    "noMap": "No Map",
+    "noLaborData": "No data",
+    "noVarietyData": "No variety data for {{type}}",
+    "noAnalysisData": "No data to analyze",
+    "periodHint": "No data for the selected period and filters."
+  },
+  "fallback": {
+    "otherSector": "Other",
+    "noSector": "No sector",
+    "general": "General (outside sectors)",
+    "undefinedType": "Unspecified",
+    "sectorName": "Sector {{id}}",
+    "laborCosts": "Labor costs"
+  },
+  "loading": "Loading analytics data... 📊",
+  "tooltip": {
+    "revenue": "Revenue",
+    "expenses": "Expenses",
+    "profit": "Profit",
+    "revenueSingular": "Revenue",
+    "soldKg": "Sold: {{kilograms}} kg",
+    "pricePerKg": "Price/kg",
+    "totalCost": "Total cost",
+    "paid": "Paid",
+    "toPay": "To be paid",
+    "entriesCount": "Entries: {{count}}"
+  },
+  "yearlyLegend": {
+    "revenue": "Revenue",
+    "expenses": "Expenses",
+    "netProfit": "Net Profit"
+  },
+  "table": {
+    "position": "Position",
+    "sector": "Sector",
+    "revenue": "Revenue",
+    "expenses": "Costs",
+    "laborCosts": "Incl.: Labor costs",
+    "profit": "Profit",
+    "margin": "Margin"
+  },
+  "errors": {
+    "refreshLaborCosts": "Error refreshing labor costs",
+    "loadData": "Error loading data"
+  }
+}

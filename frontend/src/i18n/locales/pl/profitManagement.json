@@ -1,0 +1,139 @@
+{
+  "header": {
+    "title": "Zarządzanie Przychodami",
+    "subtitle": "Monitoruj przychody ze sprzedaży owoców i innych źródeł. 💵"
+  },
+  "stats": {
+    "totalFiltered": "Suma Przefiltrowanych",
+    "total": "Całkowite Przychody",
+    "receivedFiltered": "Otrzymane (Przefiltrowane)",
+    "received": "Przychody Otrzymane",
+    "pendingFiltered": "Oczekujące (Przefiltrowane)",
+    "pending": "Przychody Oczekujące"
+  },
+  "filters": {
+    "activeTitle": "Aktywne Filtry",
+    "type": "Typ: {{value}}",
+    "status": "Status: {{value}}",
+    "sector": "🗺️ Sektor: {{value}}",
+    "year": "📅 Rok: {{value}}",
+    "month": "📆 Miesiąc: {{value}}",
+    "search": "Szukaj: \"{{value}}\"",
+    "clear": "Wyczyść Filtry"
+  },
+  "search": {
+    "label": "🔍 Wyszukiwanie w przychodach",
+    "placeholder": "Wpisz opis, kwotę, datę lub typ przychodu...",
+    "clear": "Wyczyść wyszukiwanie"
+  },
+  "fields": {
+    "type": "Typ przychodu",
+    "paymentStatus": "Status płatności",
+    "sector": "Sektor 🗺️",
+    "year": "Rok 📅",
+    "month": "Miesiąc 📆"
+  },
+  "options": {
+    "allTypes": "🍎 Wszystkie typy",
+    "allSectors": "📋 Wszystkie sektory",
+    "allYears": "📆 Wszystkie lata"
+  },
+  "addNew": "Dodaj Nowy Przychód",
+  "list": {
+    "title": "Lista Przychodów",
+    "shown": "Wyświetlono: {{from}}-{{to}} z {{count}}",
+    "filteredSuffix": " (przefiltrowano)"
+  },
+  "loading": "Ładowanie przychodów... 🔄",
+  "empty": {
+    "searchTitle": "Brak wyników wyszukiwania",
+    "searchMessage": "Spróbuj zmienić kryteria wyszukiwania lub filtry.",
+    "noProfitsTitle": "Brak zarejestrowanych przychodów",
+    "noProfitsMessage": "Dodaj pierwszy przychód, aby rozpocząć monitorowanie dochodów.",
+    "noCriteriaTitle": "Brak przychodów spełniających kryteria",
+    "noCriteriaMessage": "Zmień filtry, aby wyświetlić przychody.",
+    "addFirst": "Dodaj pierwszy przychód"
+  },
+  "modal": {
+    "editTitle": "Edytuj Przychód",
+    "addTitle": "Dodaj Nowy Przychód"
+  },
+  "form": {
+    "date": "Data Przychodu",
+    "amount": "Kwota Przychodu (PLN)",
+    "kilogramsSold": "Sprzedano kilogramów owoców (opcjonalnie)",
+    "type": "Typ Przychodu",
+    "sector": "Przypisz do Sektora (opcjonalnie) 🗺️",
+    "noSector": "Bez przypisania do sektora",
+    "sectorAssignedTo": "📍 Przychód zostanie przypisany do:",
+    "description": "Opis Przychodu",
+    "received": "Otrzymano (Płatność Zrealizowana)",
+    "saveChanges": "Zapisz zmiany",
+    "addProfit": "Dodaj Przychód"
+  },
+  "validation": {
+    "dateRequired": "Data przychodu jest wymagana",
+    "amountPositive": "Kwota musi być dodatnią liczbą",
+    "kilogramsNonNegative": "Ilość musi być liczbą nieujemną",
+    "typeRequired": "Typ przychodu jest wymagany"
+  },
+  "card": {
+    "received": "Otrzymano",
+    "pending": "Oczekujące",
+    "sold": "⚖️ Sprzedano:",
+    "pricePerKg": "💸 Cena/kg:",
+    "waitingForPayment": "⏳ Czekamy na płatność",
+    "sector": "📍 Sektor: {{value}}",
+    "descriptionLabel": "Opis",
+    "noDescription": "Brak opisu.",
+    "editTitle": "Edytuj",
+    "deleteTitle": "Usuń"
+  },
+  "sectorFallback": "Sektor {{id}}",
+  "pagination": {
+    "previous": "← Poprzednia",
+    "next": "Następna →"
+  },
+  "types": {
+    "SPRZEDAZ_JABLEK": "Sprzedaż jabłek",
+    "SPRZEDAZ_GRUSZEK": "Sprzedaż gruszek",
+    "SPRZEDAZ_WISNI": "Sprzedaż wiśni",
+    "SPRZEDAZ_CZERESNI": "Sprzedaż czereśni",
+    "SPRZEDAZ_SLIW": "Sprzedaż śliwek",
+    "SPRZEDAZ_MALIN": "Sprzedaż malin",
+    "SPRZEDAZ_TRUSKAWEK": "Sprzedaż truskawek",
+    "SPRZEDAZ_PORZECZEK_CZARNYCH": "Sprzedaż czarnych porzeczek",
+    "SPRZEDAZ_PORZECZEK_CZERWONYCH": "Sprzedaż czerwonych porzeczek",
+    "SPRZEDAZ_AGRESTU": "Sprzedaż agrestu",
+    "SPRZEDAZ_BOROWEK": "Sprzedaż borówek",
+    "SPRZEDAZ_JEZYN": "Sprzedaż jeżyn",
+    "SPRZEDAZ_ARONII": "Sprzedaż aronii",
+    "SPRZEDAZ_HURTOWA": "Sprzedaż hurtowa",
+    "SPRZEDAZ_DETALICZNA": "Sprzedaż detaliczna",
+    "EKSPORT": "Eksport",
+    "SPRZEDAZ_ONLINE": "Sprzedaż online",
+    "SUBSYDIA": "Dotacje / Dopłaty",
+    "ODSZKODOWANIE": "Odszkodowania / Ubezpieczenia",
+    "SPRZEDAZ_SPRZETU": "Sprzedaż sprzętu",
+    "USLUGI": "Usługi rolnicze dla innych",
+    "CZYNSZ": "Wynajem ziemi/sprzętu",
+    "INNE": "Inne przychody",
+    "UNKNOWN": "Nieznany"
+  },
+  "paymentStatus": {
+    "all": "Wszystkie 📋",
+    "received": "Otrzymane ✅",
+    "pending": "Oczekujące ⏳"
+  },
+  "alerts": {
+    "loadError": "Błąd ładowania przychodów",
+    "savedUpdated": "Przychód został zaktualizowany pomyślnie!",
+    "savedAdded": "Przychód został dodany pomyślnie!",
+    "saveError": "Błąd zapisu: {{error}}",
+    "saveNetworkError": "Błąd sieci: Nie można zapisać przychodu.",
+    "deleteConfirm": "Czy na pewno chcesz usunąć ten przychód? Tej operacji nie można cofnąć!",
+    "deleteSuccess": "Przychód został usunięty pomyślnie.",
+    "deleteError": "Błąd usuwania: {{error}}",
+    "deleteNetworkError": "Błąd sieci: Nie można usunąć przychodu."
+  }
+}

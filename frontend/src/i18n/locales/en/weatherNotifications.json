@@ -1,0 +1,109 @@
+{
+  "page": {
+    "title": "Weather and Notifications",
+    "subtitle": "Current weather and weather alert management"
+  },
+  "weather": {
+    "retry": "Try to fetch the weather again. Check your internet connection",
+    "missingLocationPrefix": "Please set your location in ",
+    "profileSettings": "Profile Settings",
+    "missingLocationSuffix": ".",
+    "fetching": "Fetching weather data for {{location}}...",
+    "current": "Current weather • Open-Meteo",
+    "temperature": "Temperature",
+    "feelsLike": "Feels like",
+    "humidity": "Humidity",
+    "wind": "Wind"
+  },
+  "alerts": {
+    "checking": "Checking weather alerts...",
+    "heading": "Weather warnings ({{count}})",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "dayAfterTomorrow": "In two days",
+    "inDays": "In {{count}} days"
+  },
+  "rules": {
+    "title": "Weather Alerts",
+    "refresh": "Refresh",
+    "addAlert": "Add alert",
+    "howItWorksTitle": "How does it work?",
+    "howItWorksBody": " Configure weather alerts to receive notifications about upcoming weather conditions. The system will check the forecast and notify you in advance.",
+    "loading": "Loading alerts...",
+    "empty": "No alerts configured",
+    "addFirst": "Add your first alert",
+    "active": "Active",
+    "inactive": "Inactive",
+    "thresholdLabel": "Threshold:",
+    "forecastLabel": "Forecast:",
+    "inDays": "In {{count}} days",
+    "edit": "Edit",
+    "enable": "Enable",
+    "disable": "Disable",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this notification?"
+  },
+  "stats": {
+    "all": "All alerts",
+    "active": "Active alerts",
+    "types": "Alert types"
+  },
+  "modal": {
+    "editTitle": "Edit notification",
+    "addTitle": "Add notification",
+    "typeLabel": "Weather warning type *",
+    "typePlaceholder": "Select a warning type...",
+    "thresholdLabel": "Warning threshold ({{unit}}) *",
+    "daysAheadLabel": "Forecast lead time *",
+    "daysAheadHint": "You will receive a notification if the conditions occur within this period",
+    "saving": "Saving...",
+    "saveChanges": "Save changes",
+    "addNotification": "Add notification",
+    "fillAllFields": "Fill in all fields!",
+    "notificationUpdated": "Notification updated!",
+    "notificationAdded": "Notification added!",
+    "saveFailed": "Failed to save the notification"
+  },
+  "location": {
+    "loading": "Loading location...",
+    "fetchingCoordinates": "Fetching coordinates from profile...",
+    "fromProfile": "Location from profile",
+    "noData": "No location data",
+    "serverError": "Server error: Failed to fetch location data.",
+    "coordinatesUndefined": "Coordinates for the gardener are not defined. Set them in the Profile section.",
+    "unknownError": "An unknown error occurred while loading the location."
+  },
+  "forecast": {
+    "weatherFetchFailed": "Failed to fetch weather data from Open-Meteo",
+    "forecastFetchFailed": "Failed to fetch the weather forecast",
+    "frostWarning": "🧊 Frost warning: {{value}}°C (threshold: {{threshold}}°C)",
+    "tempLow": "❄️ Low temperature: {{value}}°C (threshold: {{threshold}}°C)",
+    "tempHigh": "🌡️ High temperature: {{value}}°C (threshold: {{threshold}}°C)",
+    "rainForecast": "🌧️ Rain forecast: {{value}}% (threshold: {{threshold}}%)",
+    "strongWind": "💨 Strong wind: {{value}} km/h (threshold: {{threshold}} km/h)"
+  },
+  "weatherCode": {
+    "0": "Clear sky",
+    "1": "Mainly clear",
+    "2": "Partly cloudy",
+    "3": "Overcast",
+    "45": "Fog",
+    "48": "Depositing rime fog",
+    "51": "Light drizzle",
+    "53": "Moderate drizzle",
+    "55": "Dense drizzle",
+    "61": "Light rain",
+    "63": "Moderate rain",
+    "65": "Heavy rain",
+    "71": "Light snowfall",
+    "73": "Moderate snowfall",
+    "75": "Heavy snowfall",
+    "80": "Light rain showers",
+    "81": "Moderate rain showers",
+    "82": "Heavy rain showers",
+    "95": "Thunderstorm",
+    "96": "Thunderstorm with hail",
+    "99": "Thunderstorm with heavy hail",
+    "unknown": "Unknown"
+  }
+}

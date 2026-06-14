@@ -1,6 +1,7 @@
 package fruit.farm.management.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fruit.farm.management.config.I18nConfig;
 import fruit.farm.management.dto.CoordinateDto;
 import fruit.farm.management.dto.UserDto;
 import fruit.farm.management.entity.CoordinateEntity;
@@ -41,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(GardenerController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, CorsConfig.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, CorsConfig.class, I18nConfig.class})
 @DisplayName("GardenerController security and behaviour")
 class GardenerControllerTest {
 
@@ -308,7 +309,7 @@ class GardenerControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("blocked");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("blocked")).thenReturn(Optional.of(userWithActive(false)));
+        when(userRepository.findActiveByNickname("blocked")).thenReturn(Optional.of(false));
 
         mvc.perform(get("/api/gardener").cookie(new Cookie("accessToken", "token")))
                 .andExpect(status().isForbidden());
@@ -320,7 +321,7 @@ class GardenerControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("active");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("active")).thenReturn(Optional.of(userWithActive(true)));
+        when(userRepository.findActiveByNickname("active")).thenReturn(Optional.of(true));
 
         UserEntity gardener = gardenerEntity(7L);
         when(userService.findUserEntityByNickname("active")).thenReturn(Optional.of(gardener));

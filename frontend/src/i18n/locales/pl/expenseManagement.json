@@ -1,0 +1,140 @@
+{
+  "header": {
+    "title": "Zarządzanie Wydatkami",
+    "subtitle": "Monitoruj koszty paliwa, maszyn i zaopatrzenia. 💸"
+  },
+  "stats": {
+    "totalFiltered": "Suma (Filtrowane: {{sector}})",
+    "totalFilteredNoSector": "Suma (Filtrowane)",
+    "total": "Całkowite Wydatki",
+    "paidFiltered": "Opłacone (Filtrowane)",
+    "paid": "Wydatki Opłacone",
+    "unpaidFiltered": "Nieopłacone (Filtrowane)",
+    "unpaid": "Wydatki Nieopłacone"
+  },
+  "activeFilters": {
+    "title": "Aktywne Filtry",
+    "type": "Typ: {{value}}",
+    "status": "Status: {{value}}",
+    "sector": "🗺️ Sektor: {{value}}",
+    "year": "📅 Rok: {{value}}",
+    "month": "📆 Miesiąc: {{value}}",
+    "search": "Szukaj: \"{{value}}\"",
+    "clear": "Wyczyść Filtry"
+  },
+  "search": {
+    "label": "🔍 Wyszukiwanie w wydatkach",
+    "placeholder": "Wpisz opis, kwotę, datę lub typ wydatku...",
+    "clearTitle": "Wyczyść wyszukiwanie"
+  },
+  "filters": {
+    "typeLabel": "Typ wydatku",
+    "allTypes": "🛠️ Wszystkie typy",
+    "statusLabel": "Status płatności",
+    "sectorLabel": "Sektor 🗺️",
+    "allSectors": "📋 Wszystkie sektory",
+    "yearLabel": "Rok 📅",
+    "allYears": "📆 Wszystkie lata",
+    "monthLabel": "Miesiąc 📆"
+  },
+  "sectorFallback": "Sektor {{id}}",
+  "addExpense": "Dodaj Nowy Wydatek",
+  "list": {
+    "title": "Lista Wydatków",
+    "shown": "Wyświetlono: {{from}}-{{to}}",
+    "filteredSuffix": " (przefiltrowano)"
+  },
+  "modal": {
+    "editTitle": "Edytuj Wydatek",
+    "addTitle": "Dodaj Nowy Wydatek"
+  },
+  "loading": "Ładowanie wydatków... 🔄",
+  "empty": {
+    "noResultsTitle": "Brak wyników wyszukiwania",
+    "noResultsMessage": "Spróbuj zmienić kryteria wyszukiwania lub filtry.",
+    "noExpensesTitle": "Brak zarejestrowanych wydatków",
+    "noExpensesMessage": "Dodaj pierwszy wydatek, aby rozpocząć monitorowanie kosztów.",
+    "noMatchTitle": "Brak wydatków spełniających kryteria",
+    "noMatchMessage": "Zmień filtry, aby wyświetlić wydatki.",
+    "addFirst": "Dodaj pierwszy wydatek"
+  },
+  "form": {
+    "dateLabel": "Data Wydatku",
+    "amountLabel": "Kwota Wydatku (PLN)",
+    "typeLabel": "Typ Wydatku",
+    "sectorLabel": "Przypisz do Sektora (opcjonalnie) 🗺️",
+    "noSector": "Bez przypisania do sektora",
+    "sectorAssignInfo": "📍 Wydatek zostanie przypisany do:",
+    "descriptionLabel": "Opis Wydatku",
+    "paidLabel": "Opłacone (Płatność Zrealizowana)",
+    "saveChanges": "Zapisz zmiany",
+    "addExpense": "Dodaj Wydatek",
+    "cancel": "Anuluj",
+    "errors": {
+      "dateRequired": "Data wydatku jest wymagana",
+      "amountPositive": "Kwota musi być dodatnią liczbą",
+      "typeRequired": "Typ wydatku jest wymagany"
+    }
+  },
+  "card": {
+    "amountWithCurrency": "{{amount}} PLN",
+    "editTitle": "Edytuj",
+    "deleteTitle": "Usuń",
+    "paid": "Opłacony",
+    "unpaid": "Nieopłacony",
+    "sector": "Sektor: {{value}}",
+    "descriptionLabel": "Opis",
+    "noDescription": "Brak opisu."
+  },
+  "pagination": {
+    "previous": "← Poprzednia",
+    "next": "Następna →"
+  },
+  "expenseType": {
+    "ŚRODKI_OCHRONY_ROŚLIN": "Opryski / Środki ochrony roślin",
+    "NAWOZY": "Nawozy",
+    "SADZENIE": "Sadzenie / Nowe drzewka",
+    "NAWADNIANIE": "Nawadnianie / System nawadniania",
+    "ENERGIA_ELEKTRYCZNA": "Prąd",
+    "WODA": "Woda",
+    "MATERIAŁY_POMOCNICZE": "Paliki / Druty / Rusztowania",
+    "SIATKI_OCHRONNE": "Siatki / Folie / Agrowłóknina",
+    "MASZYNY": "Maszyny / Sprzęt",
+    "NAPRAWY": "Naprawy / Części zamienne",
+    "PALIWO": "Paliwo / Oleje / Smary",
+    "UBEZPIECZENIE": "Ubezpieczenia (maszyny, sad)",
+    "PRACA": "Pracownicy sezonowi",
+    "ZAKWATEROWANIE": "Zakwaterowanie / Wyżywienie pracowników",
+    "USŁUGI_ROLNICZE": "Usługi rolnicze / Analizy gleby",
+    "TRANSPORT": "Transport / Logistyka",
+    "SZKOLENIA": "Szkolenia / Doradztwo / Certyfikaty",
+    "OPAKOWANIA": "Opakowania / Skrzynki / Kartony",
+    "CHŁODNIA": "Chłodnia / Przechowalnia",
+    "MARKETING": "Marketing / Sprzedaż / Prowizje",
+    "BIURO": "Materiały biurowe / Telefon / Internet",
+    "REMONTY": "Renowacje / Inwestycje w sadzie",
+    "INFRASTRUKTURA": "Drogi / Ogrodzenia / Budynki",
+    "MODERNIZACJE_TECHNICZNE": "Modernizacje / Nowe technologie",
+    "PODATKI": "Podatki / Opłaty / KRUS",
+    "KSIĘGOWOŚĆ": "Księgowość / Biuro rachunkowe",
+    "INNE_MATERIAŁY": "Inne zaopatrzenie",
+    "INNE": "Inne wydatki",
+    "UNKNOWN": "Nieznany"
+  },
+  "paymentStatus": {
+    "all": "Wszystkie 📋",
+    "paid": "Opłacone ✅",
+    "unpaid": "Nieopłacone ⏳"
+  },
+  "messages": {
+    "fetchError": "Błąd ładowania wydatków",
+    "saveSuccessUpdated": "Wydatek został zaktualizowany pomyślnie!",
+    "saveSuccessAdded": "Wydatek został dodany pomyślnie!",
+    "saveError": "Błąd zapisu ({{status}}): {{error}}",
+    "saveNetworkError": "Błąd sieci: Nie można zapisać wydatku.",
+    "deleteConfirm": "Czy na pewno chcesz usunąć ten wydatek? Tej operacji nie można cofnąć!",
+    "deleteSuccess": "Wydatek został usunięty pomyślnie.",
+    "deleteError": "Błąd usuwania: {{error}}",
+    "deleteNetworkError": "Błąd sieci: Nie można usunąć wydatku."
+  }
+}

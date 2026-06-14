@@ -1,0 +1,139 @@
+{
+  "header": {
+    "title": "Revenue Management",
+    "subtitle": "Track revenue from fruit sales and other sources. 💵"
+  },
+  "stats": {
+    "totalFiltered": "Filtered Total",
+    "total": "Total Revenue",
+    "receivedFiltered": "Received (Filtered)",
+    "received": "Received Revenue",
+    "pendingFiltered": "Pending (Filtered)",
+    "pending": "Pending Revenue"
+  },
+  "filters": {
+    "activeTitle": "Active Filters",
+    "type": "Type: {{value}}",
+    "status": "Status: {{value}}",
+    "sector": "🗺️ Sector: {{value}}",
+    "year": "📅 Year: {{value}}",
+    "month": "📆 Month: {{value}}",
+    "search": "Search: \"{{value}}\"",
+    "clear": "Clear Filters"
+  },
+  "search": {
+    "label": "🔍 Search revenue",
+    "placeholder": "Enter description, amount, date or revenue type...",
+    "clear": "Clear search"
+  },
+  "fields": {
+    "type": "Revenue type",
+    "paymentStatus": "Payment status",
+    "sector": "Sector 🗺️",
+    "year": "Year 📅",
+    "month": "Month 📆"
+  },
+  "options": {
+    "allTypes": "🍎 All types",
+    "allSectors": "📋 All sectors",
+    "allYears": "📆 All years"
+  },
+  "addNew": "Add New Revenue",
+  "list": {
+    "title": "Revenue List",
+    "shown": "Showing: {{from}}-{{to}} of {{count}}",
+    "filteredSuffix": " (filtered)"
+  },
+  "loading": "Loading revenue... 🔄",
+  "empty": {
+    "searchTitle": "No search results",
+    "searchMessage": "Try changing your search criteria or filters.",
+    "noProfitsTitle": "No revenue recorded",
+    "noProfitsMessage": "Add your first revenue entry to start tracking income.",
+    "noCriteriaTitle": "No revenue matching the criteria",
+    "noCriteriaMessage": "Change the filters to display revenue.",
+    "addFirst": "Add first revenue"
+  },
+  "modal": {
+    "editTitle": "Edit Revenue",
+    "addTitle": "Add New Revenue"
+  },
+  "form": {
+    "date": "Revenue Date",
+    "amount": "Revenue Amount (PLN)",
+    "kilogramsSold": "Kilograms of fruit sold (optional)",
+    "type": "Revenue Type",
+    "sector": "Assign to Sector (optional) 🗺️",
+    "noSector": "No sector assignment",
+    "sectorAssignedTo": "📍 Revenue will be assigned to:",
+    "description": "Revenue Description",
+    "received": "Received (Payment Completed)",
+    "saveChanges": "Save changes",
+    "addProfit": "Add Revenue"
+  },
+  "validation": {
+    "dateRequired": "Revenue date is required",
+    "amountPositive": "Amount must be a positive number",
+    "kilogramsNonNegative": "Quantity must be a non-negative number",
+    "typeRequired": "Revenue type is required"
+  },
+  "card": {
+    "received": "Received",
+    "pending": "Pending",
+    "sold": "⚖️ Sold:",
+    "pricePerKg": "💸 Price/kg:",
+    "waitingForPayment": "⏳ Awaiting payment",
+    "sector": "📍 Sector: {{value}}",
+    "descriptionLabel": "Description",
+    "noDescription": "No description.",
+    "editTitle": "Edit",
+    "deleteTitle": "Delete"
+  },
+  "sectorFallback": "Sector {{id}}",
+  "pagination": {
+    "previous": "← Previous",
+    "next": "Next →"
+  },
+  "types": {
+    "SPRZEDAZ_JABLEK": "Apple sales",
+    "SPRZEDAZ_GRUSZEK": "Pear sales",
+    "SPRZEDAZ_WISNI": "Sour cherry sales",
+    "SPRZEDAZ_CZERESNI": "Sweet cherry sales",
+    "SPRZEDAZ_SLIW": "Plum sales",
+    "SPRZEDAZ_MALIN": "Raspberry sales",
+    "SPRZEDAZ_TRUSKAWEK": "Strawberry sales",
+    "SPRZEDAZ_PORZECZEK_CZARNYCH": "Blackcurrant sales",
+    "SPRZEDAZ_PORZECZEK_CZERWONYCH": "Redcurrant sales",
+    "SPRZEDAZ_AGRESTU": "Gooseberry sales",
+    "SPRZEDAZ_BOROWEK": "Blueberry sales",
+    "SPRZEDAZ_JEZYN": "Blackberry sales",
+    "SPRZEDAZ_ARONII": "Chokeberry sales",
+    "SPRZEDAZ_HURTOWA": "Wholesale",
+    "SPRZEDAZ_DETALICZNA": "Retail sales",
+    "EKSPORT": "Export",
+    "SPRZEDAZ_ONLINE": "Online sales",
+    "SUBSYDIA": "Subsidies / Grants",
+    "ODSZKODOWANIE": "Compensation / Insurance",
+    "SPRZEDAZ_SPRZETU": "Equipment sales",
+    "USLUGI": "Agricultural services for others",
+    "CZYNSZ": "Land/equipment rental",
+    "INNE": "Other revenue",
+    "UNKNOWN": "Unknown"
+  },
+  "paymentStatus": {
+    "all": "All 📋",
+    "received": "Received ✅",
+    "pending": "Pending ⏳"
+  },
+  "alerts": {
+    "loadError": "Error loading revenue",
+    "savedUpdated": "Revenue updated successfully!",
+    "savedAdded": "Revenue added successfully!",
+    "saveError": "Save error: {{error}}",
+    "saveNetworkError": "Network error: Could not save revenue.",
+    "deleteConfirm": "Are you sure you want to delete this revenue? This operation cannot be undone!",
+    "deleteSuccess": "Revenue deleted successfully.",
+    "deleteError": "Delete error: {{error}}",
+    "deleteNetworkError": "Network error: Could not delete revenue."
+  }
+}

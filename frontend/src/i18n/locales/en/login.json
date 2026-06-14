@@ -1,0 +1,38 @@
+{
+  "brand": "OrchardManager",
+  "subtitle": "Orchard farm management system",
+  "passwordPlaceholder": "Enter password",
+  "loggingIn": "Signing in...",
+  "noAccount": "Don't have an account?",
+  "about": "About the app",
+  "validation": {
+    "nicknameRequired": "Username is required",
+    "passwordRequired": "Password is required"
+  },
+  "errors": {
+    "loginFailed": "Login failed",
+    "serverUnreachable": "Cannot connect to the server"
+  },
+  "hero": {
+    "title": "Manage your orchard professionally",
+    "subtitle": "A comprehensive system for managing an orchard farm with advanced analysis and optimization tools.",
+    "features": {
+      "mapping": {
+        "title": "Crop mapping",
+        "desc": "Assign employees to specific sectors"
+      },
+      "workLog": {
+        "title": "Work records",
+        "desc": "Scheduling and time tracking"
+      },
+      "analysis": {
+        "title": "Efficiency analysis",
+        "desc": "Monitor finances and optimize resources"
+      },
+      "weather": {
+        "title": "Weather notifications",
+        "desc": "Alerts about anomalies and weather changes"
+      }
+    }
+  }
+}

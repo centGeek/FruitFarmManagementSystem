@@ -15,17 +15,17 @@ public class ExpenseDto {
 
     private Long id;
 
-    @NotNull(message = "Typ produktu/usługi jest wymagany.")
+    @NotNull(message = "{producttype.required}")
     private ProductType type;
 
-    @NotNull(message = "Kwota wydatku jest wymagana.")
-    @DecimalMin(value = "0.01", message = "Kwota musi być większa niż 0.")
+    @NotNull(message = "{amount.required}")
+    @DecimalMin(value = "0.01", message = "{amount.positive}")
     private BigDecimal amount;
 
-    @NotNull(message = "Data wydatku jest wymagana.")
+    @NotNull(message = "{date.required}")
     private LocalDate createdAt;
 
-    @NotNull(message = "Opis wydatku.")
+    @NotNull(message = "{expense.description.required}")
     private String description;
 
     private boolean isPaid;

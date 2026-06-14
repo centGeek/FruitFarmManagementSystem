@@ -305,7 +305,7 @@ class SectorControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("blocked");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("blocked")).thenReturn(Optional.of(userWithActive(false)));
+        when(userRepository.findActiveByNickname("blocked")).thenReturn(Optional.of(false));
 
         mvc.perform(get("/api/sectors").cookie(new Cookie("accessToken", "token")))
                 .andExpect(status().isForbidden());
@@ -317,7 +317,7 @@ class SectorControllerTest {
         when(jwtService.validateToken("token")).thenReturn(true);
         when(jwtService.getNicknameFromToken("token")).thenReturn("active");
         when(jwtService.getRolesFromToken("token")).thenReturn(List.of("Gardener"));
-        when(userRepository.findByNickname("active")).thenReturn(Optional.of(userWithActive(true)));
+        when(userRepository.findActiveByNickname("active")).thenReturn(Optional.of(true));
 
         UserDto logged = new UserDto();
         logged.setId(1L);

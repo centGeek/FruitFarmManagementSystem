@@ -17,17 +17,17 @@ public class SectorDto {
 
     private Long id;
 
-    @NotBlank(message = "Opis sektora jest wymagany")
-    @Size(max = 255, message = "Opis nie może przekraczać 255 znaków")
+    @NotBlank(message = "{sector.description.required}")
+    @Size(max = 255, message = "{sector.description.size}")
     private String description;
 
     private PlantType plantType;
 
     private String variety;
 
-    @NotEmpty(message = "Współrzędne są wymagane")
-    @Size(min = 4, message = "Wymagane co najmniej 4 punkty")
-    @Size(max = 4, message = "Wymagane co najwięcej 4 punkty")
+    @NotEmpty(message = "{sector.coordinates.required}")
+    @Size(min = 4, message = "{sector.coordinates.min}")
+    @Size(max = 4, message = "{sector.coordinates.max}")
     @Valid
     private List<CoordinateDto> coordinates;
 

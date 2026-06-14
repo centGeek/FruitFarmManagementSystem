@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Panel administratora — użytkownicy",
+    "subtitle": "Zarządzaj kontami: blokuj i resetuj hasła."
+  },
+  "stats": {
+    "gardeners": "Sadownicy",
+    "active": "Aktywni",
+    "blocked": "Zablokowani"
+  },
+  "roles": {
+    "Admin": "Administrator",
+    "Gardener": "Sadownik",
+    "Employee": "Pracownik"
+  },
+  "filter": {
+    "all": "Wszyscy",
+    "searchPlaceholder": "Szukaj po imieniu, loginie lub e-mailu..."
+  },
+  "loading": "Ładowanie użytkowników... 🔄",
+  "empty": {
+    "title": "Brak użytkowników",
+    "subtitle": "Żaden użytkownik nie pasuje do wybranego filtra."
+  },
+  "row": {
+    "joined": "Dołączył: {{date}}",
+    "active": "🟢 Aktywne",
+    "blocked": "🔴 Zablokowane",
+    "employeeCount": "👷 Liczba pracowników:",
+    "gardener": "🌱 Sadownik:",
+    "block": "Zablokuj",
+    "unblock": "Odblokuj",
+    "resetPassword": "Reset hasła",
+    "adminLocked": "Konta administratora nie można modyfikować"
+  },
+  "resetModal": {
+    "title": "Reset hasła",
+    "subtitle": "Ustaw nowe hasło dla użytkownika <strong>{{nickname}}</strong>.",
+    "newPassword": "Nowe hasło",
+    "repeatPassword": "Powtórz hasło",
+    "save": "Zapisz hasło",
+    "errorTooShort": "Hasło musi mieć co najmniej 6 znaków.",
+    "errorMismatch": "Hasła nie są identyczne."
+  },
+  "messages": {
+    "fetchUsersError": "Nie udało się pobrać użytkowników.",
+    "fetchUsersNetworkError": "Błąd sieci podczas pobierania użytkowników.",
+    "statusUnblocked": "Konto użytkownika {{nickname}} zostało odblokowane.",
+    "statusBlocked": "Konto użytkownika {{nickname}} zostało zablokowane.",
+    "statusError": "Nie udało się zmienić statusu konta.",
+    "statusNetworkError": "Błąd sieci podczas zmiany statusu konta.",
+    "resetSuccess": "Hasło użytkownika {{nickname}} zostało zresetowane.",
+    "resetError": "Nie udało się zresetować hasła.",
+    "resetNetworkError": "Błąd sieci podczas resetowania hasła."
+  }
+}
