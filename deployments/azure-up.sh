@@ -44,4 +44,4 @@ echo "  Frontend: https://$FE"
 echo "  Backend : https://$BE"
 echo "  Login   : admin / test5432"
 echo
-echo "Pamiętaj zatrzymać po demie (skill 'azure-stop'), żeby oszczędzać kredyt."
+echo "Pamiętaj zatrzymać po demie ('make azure-stop'), żeby oszczędzać kredyt."

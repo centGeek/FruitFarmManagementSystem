@@ -1,12 +1,12 @@
 # Fruit Farm Management System — samodzielne komendy.
-# Cienkie opakowania na skrypty z .claude/skills/*/run.sh — działają BEZ Claude'a.
+# Cienkie opakowania na deterministyczne skrypty z deployments/*.sh — działają BEZ Claude'a.
 # Użycie: `make <cel>` z katalogu repo. Lista celów: `make help`.
 
-SKILLS := .claude/skills
+DEPLOY := deployments
 
 .DEFAULT_GOAL := help
 .PHONY: help dev-up dev-down \
-        azure-up azure-stop \
+        azure-up azure-stop azure-backend-on azure-backend-sleep \
         azure-deploy azure-deploy-backend azure-deploy-frontend
 
 help: ## Pokaż dostępne komendy
@@ -16,7 +16,7 @@ help: ## Pokaż dostępne komendy
 # --- Lokalny stack ---------------------------------------------------------
 
 dev-up: ## Uruchom lokalnie: PostgreSQL + backend (8091) + frontend (5173)
-	bash $(SKILLS)/dev-up/run.sh
+	bash $(DEPLOY)/dev-up.sh
 
 dev-down: ## Zatrzymaj lokalny stack (backend, frontend, kontener DB)
 	@kill $$(cat backend/.dev-logs/backend.pid backend/.dev-logs/frontend.pid 2>/dev/null) 2>/dev/null || true
@@ -26,18 +26,26 @@ dev-down: ## Zatrzymaj lokalny stack (backend, frontend, kontener DB)
 # --- Azure: start / stop ---------------------------------------------------
 
 azure-up: ## Wznów aplikację na Azure (start bazy + rozgrzanie backendu)
-	bash $(SKILLS)/azure-up/run.sh
+	bash $(DEPLOY)/azure-up.sh
 
 azure-stop: ## Zatrzymaj aplikację na Azure (oszczędność kredytu)
-	bash $(SKILLS)/azure-stop/run.sh
+	bash $(DEPLOY)/azure-stop.sh
+
+# --- Azure: tryb backendu (zimny start vs always-on) -----------------------
+
+azure-backend-on: ## Backend always-on (min=1, bez zimnego startu, ~$10-12/mies.)
+	bash $(DEPLOY)/azure-backend-on.sh
+
+azure-backend-sleep: ## Backend scale-to-zero (min=0, tanio, zimny start ~30-60s)
+	bash $(DEPLOY)/azure-backend-sleep.sh
 
 # --- Azure: deploy nowej wersji --------------------------------------------
 
 azure-deploy: ## Zbuduj i wdróż na Azure backend + frontend
-	bash $(SKILLS)/azure-deploy/run.sh
+	bash $(DEPLOY)/azure-deploy.sh
 
 azure-deploy-backend: ## Zbuduj i wdróż na Azure tylko backend
-	bash $(SKILLS)/azure-deploy/run.sh backend
+	bash $(DEPLOY)/azure-deploy.sh backend
 
 azure-deploy-frontend: ## Zbuduj i wdróż na Azure tylko frontend
-	bash $(SKILLS)/azure-deploy/run.sh frontend
+	bash $(DEPLOY)/azure-deploy.sh frontend

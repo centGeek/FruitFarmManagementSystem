@@ -3,9 +3,9 @@
 # i aktualizuje Azure Container Apps na nowy tag (wymusza świeżą rewizję).
 #
 # Użycie:
-#   run.sh            # deploy backendu i frontendu
-#   run.sh backend    # tylko backend
-#   run.sh frontend   # tylko frontend
+#   azure-deploy.sh            # deploy backendu i frontendu
+#   azure-deploy.sh backend    # tylko backend
+#   azure-deploy.sh frontend   # tylko frontend
 set -euo pipefail
 
 SUB="61ad12b2-ac0f-49cb-af8b-049bff4a6d80"   # Azure for Students (Politechnika Łódzka)
@@ -13,9 +13,9 @@ RG="rg-fruitfarm"
 BE_IMG="ghcr.io/centgeek/ff-backend"
 FE_IMG="ghcr.io/centgeek/ff-frontend"
 
-# Katalog repo = 3 poziomy w górę od tego skryptu (.claude/skills/azure-deploy/run.sh)
+# Katalog repo = 1 poziom w górę od tego skryptu (deployments/azure-deploy.sh)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TARGET="${1:-both}"
 case "$TARGET" in
@@ -106,5 +106,5 @@ echo "Deploy zakończony (tag: $TAG):"
 echo "  Frontend: https://$FE_FQDN"
 echo "  Backend : https://$BE_FQDN"
 echo
-echo "Nowa rewizja wstaje ~30-60s. Jeśli baza jest zatrzymana, uruchom skill 'azure-up'."
+echo "Nowa rewizja wstaje ~30-60s. Jeśli baza jest zatrzymana, uruchom 'make azure-up'."
 echo "Logi backendu: az containerapp logs show -n ca-backend -g $RG --tail 50"

@@ -3,9 +3,9 @@
 # Backend i frontend startują w tle; logi trafiają do backend/.dev-logs/.
 set -euo pipefail
 
-# Katalog repo = dwa poziomy nad tym skryptem (.claude/skills/dev-up).
+# Katalog repo = 1 poziom w górę od tego skryptu (deployments/dev-up.sh).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BACKEND="$ROOT/backend"
 FRONTEND="$ROOT/frontend"
 LOGS="$BACKEND/.dev-logs"

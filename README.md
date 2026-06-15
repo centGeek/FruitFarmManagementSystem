@@ -176,8 +176,8 @@ make dev-up            # PostgreSQL + backend (:8091) + frontend (:5173), in the
 make dev-down          # stop the local stack (backend, frontend, DB container)
 ```
 
-These wrap the scripts in `.claude/skills/*/run.sh`; you can also call those scripts
-directly (e.g. `bash .claude/skills/dev-up/run.sh`).
+These wrap the deterministic scripts in `deployments/*.sh`; you can also call those scripts
+directly (e.g. `bash deployments/dev-up.sh`). See `deployments/README.md` for details.
 
 ---
 
@@ -186,9 +186,10 @@ directly (e.g. `bash .claude/skills/dev-up/run.sh`).
 The app is deployed to **Azure for Students** (resource group `rg-fruitfarm`, region
 `polandcentral`):
 
-- **PostgreSQL Flexible Server** — the database (the only resource billed 24/7).
-- **Azure Container Apps** — `ca-backend` and `ca-frontend`, both with `min-replicas 0`
-  (scale-to-zero, so they cost nothing while idle).
+- **PostgreSQL Flexible Server** — the database.
+- **Azure Container Apps** — `ca-backend` and `ca-frontend`, currently pinned **always-on**
+  (`min-replicas 1`) so there is no JVM cold start. Toggle the backend back to scale-to-zero
+  with `make azure-backend-sleep` to save credit (see Cost note below).
 - Docker images live on **GitHub Container Registry**: `ghcr.io/centgeek/ff-backend`
   and `ghcr.io/centgeek/ff-frontend`.
 
@@ -203,7 +204,10 @@ The app is deployed to **Azure for Students** (resource group `rg-fruitfarm`, re
 
 ```bash
 make azure-up                 # resume: start the DB, wait until Ready, warm up the backend
-make azure-stop               # pause: stop the DB (Container Apps scale to zero on their own)
+make azure-stop               # pause: stop the DB (the 24/7 cost driver)
+
+make azure-backend-on         # backend always-on (min=1, no cold start, ~$10-12/mo)
+make azure-backend-sleep      # backend scale-to-zero (min=0, cheap, ~30-60s cold start)
 
 make azure-deploy             # build + push + roll out backend AND frontend on a fresh tag
 make azure-deploy-backend     # backend only
@@ -213,8 +217,8 @@ make azure-deploy-frontend    # frontend only
 How deploy works: it computes an immutable image tag from git (e.g. `1f236ab`, or
 `-dirty-HHMMSS` when there are uncommitted changes), builds and pushes the images, then
 runs `az containerapp update` to the new tag — which forces a fresh revision (pushing
-`:latest` alone would not). The backend FQDN is compiled into the frontend at build time
-via `VITE_BACKEND_URL`.
+`:latest` alone would not). The frontend uses **relative `/api` paths**; the backend address
+is not compiled in — nginx proxies `/api` to `BACKEND_ORIGIN`, set at runtime on `ca-frontend`.
 
 After deploy a new revision comes up in ~30–60s. If the database is stopped, run
 `make azure-up` first (deploy does not start the DB). Backend logs:
@@ -222,9 +226,11 @@ After deploy a new revision comes up in ~30–60s. If the database is stopped, r
 
 ### Cost note
 
-Stopping the DB drops the cost to roughly storage only (~1–2 USD/month). **Azure
+Stopping the DB drops its cost to roughly storage only (~1–2 USD/month). **Azure
 auto-starts a stopped Flexible Server after at most 7 days** — re-run `make azure-stop`
-after such an auto-restart. Full teardown (irreversible): `az group delete -n rg-fruitfarm`.
+after such an auto-restart. Because the backend is now always-on, full savings between demos
+need **both** `make azure-backend-sleep` **and** `make azure-stop` (otherwise the JVM container
+keeps billing). Full teardown (irreversible): `az group delete -n rg-fruitfarm`.
 
 > Production config: set `APP_COOKIE_SECURE=true`, `APP_COOKIE_SAME_SITE=None`, and
 > `CORS_ALLOWED_ORIGINS=https://<frontend-address>` on the backend container (front and

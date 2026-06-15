@@ -28,5 +28,5 @@ else
 fi
 
 echo
-echo "Aplikacja wstrzymana. Wznowienie: skill 'azure-up'."
+echo "Aplikacja wstrzymana. Wznowienie: 'make azure-up'."
 echo "Uwaga: Azure auto-startuje zatrzymaną bazę po max 7 dniach — wtedy zatrzymaj ponownie."
