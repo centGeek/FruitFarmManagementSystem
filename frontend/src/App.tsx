@@ -1,23 +1,38 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import LoginPage from './components/LoginPage'
-import RegisterPage from './components/RegisterPage'
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
-import HomePage from './components/homePage/HomePage'
-import InteractiveMap from './components/interactiveMap/OrchardMapSystem'
-import EmployeeManagement from './components/employeeManagement/EmployeeManagement'
-import ExpenseManagement from './components/expenseManagement/ExpenseManagement'
-import ProfitsManagement from './components/profitManagement/ProfitManagement'
-import WorkSchedule from './components/workSchedule/WorkEntryManagement'
-import WeatherNotifications from './components/weatherNotifications/WeatherNotifications'
-import GardenerProfile from './components/gardenerProfile/GardenerProfile'
-import AnalysisPage from './components/analytics/ProfitAnalysis'
-import Support from './components/support/Support'
-import AdminDashboard from './components/admin/AdminDashboard'
-import AdminUsers from './components/admin/AdminUsers'
-import AdminStats from './components/admin/AdminStats'
 import { BACKEND_URL} from "./utils/apiConfigs";
+
+// Code-splitting: every authenticated/feature page is lazy-loaded so the initial bundle (login
+// screen) no longer ships leaflet, recharts, the calendar and all admin/feature code. Each page
+// becomes its own chunk fetched only when its route opens. LoginPage/Navbar/Footer stay eager
+// because they render on the very first paint. React.lazy needs a default export — all these have one.
+const RegisterPage = lazy(() => import('./components/RegisterPage'))
+const HomePage = lazy(() => import('./components/homePage/HomePage'))
+const InteractiveMap = lazy(() => import('./components/interactiveMap/OrchardMapSystem'))
+const EmployeeManagement = lazy(() => import('./components/employeeManagement/EmployeeManagement'))
+const ExpenseManagement = lazy(() => import('./components/expenseManagement/ExpenseManagement'))
+const ProfitsManagement = lazy(() => import('./components/profitManagement/ProfitManagement'))
+const WorkSchedule = lazy(() => import('./components/workSchedule/WorkEntryManagement'))
+const WeatherNotifications = lazy(() => import('./components/weatherNotifications/WeatherNotifications'))
+const GardenerProfile = lazy(() => import('./components/gardenerProfile/GardenerProfile'))
+const AnalysisPage = lazy(() => import('./components/analytics/ProfitAnalysis'))
+const Support = lazy(() => import('./components/support/Support'))
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'))
+const AdminUsers = lazy(() => import('./components/admin/AdminUsers'))
+const AdminStats = lazy(() => import('./components/admin/AdminStats'))
+
+// Fallback widoczny przez moment, gdy pobierany jest chunk danej strony.
+const PageFallback = () => (
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p className="mt-4 text-gray-600">Ładowanie...</p>
+    </div>
+  </div>
+);
 
 
 function App() {
@@ -99,6 +114,7 @@ useEffect(() => {
       <div className="min-h-screen flex flex-col">
         {isLoggedIn && <Navbar onLogout={handleLogout} userRole={userRole} />}
         <div className="flex-1 flex flex-col">
+      <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route
           path="/"
@@ -233,6 +249,7 @@ useEffect(() => {
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
         </div>
         <Footer />
       </div>

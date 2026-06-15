@@ -2,6 +2,7 @@ package fruit.farm.management.repository.jpa;
 
 import fruit.farm.management.entity.AdvancePayEntity;
 import fruit.farm.management.entity.WorkEntryEntity;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -64,6 +65,12 @@ public interface WorkEntryJpaRepository extends JpaRepository<WorkEntryEntity, L
     int payAllUnpaidEntriesForCurrentMonth(@Param("userId") Long userId);
 
 
+    // Hot path: the WorkSchedule page re-fires this on every week navigation. The EntityGraph
+    // fetch-joins the ManyToOne graph (user, its gardener, sector) in one statement instead of a
+    // lazy-load per row; the remaining collections/one-to-ones are batched via
+    // hibernate.default_batch_fetch_size (application.yml). Coordinates are intentionally NOT in the
+    // graph — fetch-joining a @OneToMany would multiply rows and break the ORDER BY.
+    @EntityGraph(attributePaths = {"user", "user.gardener", "sector"})
     @Query("SELECT we FROM WorkEntryEntity we " +
             "WHERE we.user.gardener.id = :gardenerId " +
             "AND we.workDate >= :startDate " +

@@ -13,6 +13,13 @@ spring:
       ddl-auto: none
     show-sql: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        # Bez tego mapowanie list (np. GET /api/work-entries/week) odpalało lazy-load per wiersz
+        # (user, gardener, credentials, sector, coordinates) → 150-250 zapytań na żądanie, każde
+        # płacące RTT do bazy na Azure. Batch zamienia te N+1 w kilka zapytań IN(...). Globalnie,
+        # bez zmiany zachowania API.
+        default_batch_fetch_size: 50
 
   flyway:
     enabled: true
@@ -28,8 +35,9 @@ server:
 
 logging:
   level:
-    org.flywaydb: DEBUG
-    org.springframework.boot.autoconfigure.flyway: DEBUG
+    # INFO zamiast DEBUG — DEBUG Flyway przy każdym (zimnym) starcie to zbędny szum i I/O w logach.
+    org.flywaydb: INFO
+    org.springframework.boot.autoconfigure.flyway: INFO
 jwt:
   secret:
     key: ${JWT_SECRET_KEY:9683bc6f47cc73bd0dc0fd3738cc59ca1a15637eee20af3dc7b9aa1165716db7ba98e845}

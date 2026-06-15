@@ -12,4 +12,19 @@ export default defineConfig({
       '/api': 'http://localhost:8091',
     },
   },
+  build: {
+    // Route-level React.lazy (App.tsx) already splits each page into its own chunk, so heavy libs
+    // (leaflet, recharts, the calendar) land in their route chunk instead of the initial bundle.
+    // manualChunks additionally isolates the shared React runtime into one long-cached vendor chunk
+    // that survives across deploys (its hash only changes when React itself does).
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        },
+      },
+    },
+    // Fail loud in CI if a chunk balloons again past ~500 kB — keeps the regression visible.
+    chunkSizeWarningLimit: 500,
+  },
 })

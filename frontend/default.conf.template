@@ -46,6 +46,17 @@ server {
     add_header Strict-Transport-Security $hsts_header always;      # tylko gdy X-Forwarded-Proto=https (patrz map wyżej)
     server_tokens off;                                             # nie ujawniaj wersji nginx
 
+    # Compression — the SPA bundle (~1.3MB JS + ~90KB CSS) was shipped UNCOMPRESSED, the dominant
+    # first-load cost. gzip -6 shrinks the JS ~3.6x (1.28MB -> ~360KB) for negligible CPU. Brotli is
+    # deliberately NOT enabled: the stock nginx:alpine image has no ngx_brotli module, so `brotli on;`
+    # would make nginx fail to start.
+    gzip on;
+    gzip_comp_level 6;
+    gzip_min_length 1024;
+    gzip_vary on;            # emit `Vary: Accept-Encoding` so shared caches keep gzip/identity apart
+    gzip_proxied any;        # also compress when the request arrives via the Azure ingress proxy
+    gzip_types text/css application/javascript application/json image/svg+xml application/wasm font/woff2;
+
     # Reverse-proxy API: przeglądarka widzi tylko origin frontendu, nginx serwerowo
     # przekazuje /api do backendu. Dzięki temu front+back to ten sam origin →
     # brak CORS, ciasteczka httpOnly na SameSite=Lax.
@@ -68,7 +79,20 @@ server {
         proxy_read_timeout 120s;           # nie zrywaj połączenia gdy backend zimno startuje
     }
 
-    # SPA: pozostałe ścieżki kierujemy do index.html (routing po stronie React Router)
+    # Hashed, content-addressed bundles (Vite emits /assets/index-<hash>.js itp.). Treść nigdy się
+    # nie zmienia pod tą nazwą, więc cache'ujemy „na zawsze" — powrotne wejścia i twarde odświeżenia
+    # nie pobierają ponownie ~1.3MB. Nowy build = nowe hashe, do których kieruje świeży index.html.
+    # Uwaga: add_header w location KASUJE dziedziczone nagłówki z server{}, więc powielamy nosniff.
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
+        access_log off;
+    }
+
+    # SPA: pozostałe ścieżki kierujemy do index.html (routing po stronie React Router).
+    # index.html zostaje przy domyślnej walidacji ETag/Last-Modified (NIE immutable), żeby po deployu
+    # przeglądarka pobrała świeży plik wskazujący na nowe hashe assetów.
     location / {
         try_files $uri $uri/ /index.html;
     }
