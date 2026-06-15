@@ -186,6 +186,11 @@ export default function LoginPage({ onLogin }: { onLogin: (role: string | null) 
                   Zarejestruj się
                 </a>
               </p>
+              <p className="mt-2 text-sm text-gray-500">
+                <a href="/about" className="text-green-600 hover:text-green-500 font-medium">
+                  O aplikacji
+                </a>
+              </p>
             </div>
           </div>
         </div>

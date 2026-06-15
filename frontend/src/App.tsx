@@ -10,6 +10,7 @@ import { BACKEND_URL} from "./utils/apiConfigs";
 // becomes its own chunk fetched only when its route opens. LoginPage/Navbar/Footer stay eager
 // because they render on the very first paint. React.lazy needs a default export — all these have one.
 const RegisterPage = lazy(() => import('./components/RegisterPage'))
+const AboutPage = lazy(() => import('./components/AboutPage'))
 const HomePage = lazy(() => import('./components/homePage/HomePage'))
 const InteractiveMap = lazy(() => import('./components/interactiveMap/OrchardMapSystem'))
 const EmployeeManagement = lazy(() => import('./components/employeeManagement/EmployeeManagement'))
@@ -140,9 +141,11 @@ useEffect(() => {
             ) : (
               <RegisterPage onLogin={handleLogin} />
             )
-          } 
+          }
         />
-        
+
+        <Route path="/about" element={<AboutPage />} />
+
         <Route
           path="/home"
           element={
